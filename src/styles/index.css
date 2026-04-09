@@ -449,6 +449,105 @@ body {
   border-color: var(--accent);
 }
 
+/* Form field (non-label wrapper) */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-field-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Platform picker */
+.platform-picker-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.platform-chip {
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition);
+}
+
+.platform-chip:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.platform-chip.selected {
+  color: #fff;
+  border-color: transparent;
+}
+
+.platform-add-btn {
+  margin-top: 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.platform-add-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.platform-add-row {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+
+.platform-add-row input {
+  flex: 1;
+  padding: 0.25rem 0.4rem;
+  font-size: 0.7rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  outline: none;
+  font-family: inherit;
+}
+
+.platform-add-row input:focus {
+  border-color: var(--accent);
+}
+
+.platform-add-row button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.platform-add-row button:first-of-type {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .toggle-label {
   display: flex;
   flex-direction: row;
@@ -767,7 +866,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  min-width: 100px;
+  min-width: 180px;
   flex-shrink: 0;
 }
 
@@ -775,6 +874,8 @@ body {
   font-size: 0.75rem;
   color: var(--text-muted);
   font-weight: 600;
+  min-width: 1.75rem;
+  text-align: right;
 }
 
 .stats-bar-track {

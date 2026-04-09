@@ -28,8 +28,8 @@ export default function StatsModal({
             <div key={platform} className="stats-row">
               <div className="stats-row-label">
                 <PlatformBadge platform={platform} />
-                <span className="stats-row-count">{count}</span>
               </div>
+              <span className="stats-row-count">{count}</span>
               <div className="stats-bar-track">
                 <div
                   className="stats-bar-fill"

@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import PlatformPicker from './PlatformPicker';
 
 export default function AddGameForm() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
-  const [platforms, setPlatforms] = useState('');
+  const [platforms, setPlatforms] = useState<string[]>([]);
   const [dlc, setDlc] = useState('');
   const [error, setError] = useState('');
 
@@ -16,14 +17,14 @@ export default function AddGameForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: title.trim(),
-        platforms: platforms.split(',').map((p) => p.trim()).filter(Boolean),
+        platforms,
         dlc: dlc ? dlc.split(',').map((d) => d.trim()).filter(Boolean) : [],
       }),
     });
 
     if (res.ok) {
       setTitle('');
-      setPlatforms('');
+      setPlatforms([]);
       setDlc('');
       setOpen(false);
     } else {
@@ -59,16 +60,10 @@ export default function AddGameForm() {
             autoFocus
           />
         </label>
-        <label>
-          Platforms (comma-separated)
-          <input
-            type="text"
-            value={platforms}
-            onChange={(e) => setPlatforms(e.target.value)}
-            placeholder="PS5, Switch, PC"
-            required
-          />
-        </label>
+        <div className="form-field">
+          <span className="form-field-label">Platforms</span>
+          <PlatformPicker selected={platforms} onChange={setPlatforms} />
+        </div>
         <label>
           DLC (comma-separated, optional)
           <input

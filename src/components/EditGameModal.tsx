@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ExtraContent, GameWithCover } from '../types/game';
+import PlatformPicker from './PlatformPicker';
 
 function serializeExtras(extras: ExtraContent[]): string {
   return extras
@@ -33,7 +34,7 @@ export default function EditGameModal({
 }) {
   const [title, setTitle] = useState(game.title);
   const [subtitle, setSubtitle] = useState(game.subtitle || '');
-  const [platforms, setPlatforms] = useState(game.platforms.join(', '));
+  const [platforms, setPlatforms] = useState<string[]>(game.platforms);
   const [extras, setExtras] = useState(serializeExtras(game.extras));
   const [isGameOfGames, setIsGameOfGames] = useState(!!game.gameOfGames);
   const [gameOfGamesTagline, setGameOfGamesTagline] = useState(game.gameOfGames || '');
@@ -52,7 +53,7 @@ export default function EditGameModal({
         originalTitle: game.title,
         title: title.trim(),
         subtitle: subtitle.trim() || null,
-        platforms: platforms.split(',').map((p) => p.trim()).filter(Boolean),
+        platforms,
         extras: parseExtras(extras),
         gameOfGames: isGameOfGames ? gameOfGamesTagline.trim() || null : null,
       }),
@@ -95,15 +96,10 @@ export default function EditGameModal({
             placeholder="Story Mode, The Subspace Emissary, etc."
           />
         </label>
-        <label>
-          Platforms (comma-separated)
-          <input
-            type="text"
-            value={platforms}
-            onChange={(e) => setPlatforms(e.target.value)}
-            required
-          />
-        </label>
+        <div className="form-field">
+          <span className="form-field-label">Platforms</span>
+          <PlatformPicker selected={platforms} onChange={setPlatforms} />
+        </div>
         <label>
           Extras (one group per line: Label: item1, item2)
           <textarea

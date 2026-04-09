@@ -61,10 +61,18 @@ export function useGames(filter?: string): {
     }));
 
     // Platform stats (computed from full list, not filtered)
+    // Merge regional variants of the same console
+    const PLATFORM_ALIASES: Record<string, string> = {
+      'Famicom': 'NES + Famicom',
+      'NES': 'NES + Famicom',
+      'SNES': 'SNES + Super Famicom',
+      'Super Famicom': 'SNES + Super Famicom',
+    };
     const platMap = new Map<string, number>();
     for (const g of games) {
       for (const p of g.platforms) {
-        platMap.set(p, (platMap.get(p) || 0) + 1);
+        const key = PLATFORM_ALIASES[p] ?? p;
+        platMap.set(key, (platMap.get(key) || 0) + 1);
       }
     }
     const platformStats: PlatformStat[] = Array.from(platMap.entries())
