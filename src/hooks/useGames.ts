@@ -1,11 +1,8 @@
-import { useMemo } from 'react';
-import gamesData from '../data/games.json';
-import coversData from '../data/covers.json';
+import { useMemo, useState, useEffect } from 'react';
 import type { Game, CoverMap, GameWithCover, LetterGroup } from '../types/game';
 import { getCoverUrl } from '../utils/coverUrl';
 
-const games = gamesData as Game[];
-const covers = coversData as CoverMap;
+const base = import.meta.env.BASE_URL;
 
 function getGroupLetter(title: string): string {
   const normalized = title.replace(/^the\s+/i, '');
@@ -22,8 +19,24 @@ export function useGames(filter?: string): {
   groups: LetterGroup[];
   totalCount: number;
   platformStats: PlatformStat[];
+  loading: boolean;
 } {
-  return useMemo(() => {
+  const [games, setGames] = useState<Game[]>([]);
+  const [covers, setCovers] = useState<CoverMap>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch(`${base}data/games.json`).then((r) => r.json()),
+      fetch(`${base}data/covers.json`).then((r) => r.json()),
+    ]).then(([g, c]) => {
+      setGames(g as Game[]);
+      setCovers(c as CoverMap);
+      setLoading(false);
+    });
+  }, []);
+
+  const result = useMemo(() => {
     let filtered = games;
 
     if (filter) {
@@ -80,5 +93,7 @@ export function useGames(filter?: string): {
       .sort((a, b) => b.count - a.count);
 
     return { groups, totalCount: withCovers.length, platformStats };
-  }, [filter]);
+  }, [games, covers, filter]);
+
+  return { ...result, loading };
 }

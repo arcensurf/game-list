@@ -1,6 +1,8 @@
 import type { Plugin } from 'vite';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { resolve, extname } from 'path';
+import { execSync } from 'child_process';
+import { statSync } from 'fs';
 import { config } from 'dotenv';
 
 function slugify(title: string): string {
@@ -37,8 +39,8 @@ function parseBody(req: import('http').IncomingMessage): Promise<string> {
 
 export default function devApiPlugin(): Plugin {
   const root = process.cwd();
-  const gamesPath = resolve(root, 'src/data/games.json');
-  const coversPath = resolve(root, 'src/data/covers.json');
+  const gamesPath = resolve(root, 'public/data/games.json');
+  const coversPath = resolve(root, 'public/data/covers.json');
   const coversDir = resolve(root, 'public/covers');
 
   // Load .env.local for SGDB API key
@@ -342,6 +344,87 @@ export default function devApiPlugin(): Plugin {
             res.end(JSON.stringify({ title, extras: game.extras }));
             return;
           }
+          if (req.url === '/api/publish') {
+            const token = process.env.GITHUB_TOKEN;
+            if (!token) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'GITHUB_TOKEN not set in .env.local' }));
+              return;
+            }
+
+            const repo = 'arcensurf/game-list';
+
+            // 1. Build
+            try {
+              execSync('npx vite build', { cwd: root, stdio: 'pipe' });
+            } catch (e: unknown) {
+              const err = e as { stderr?: Buffer; stdout?: Buffer };
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Build failed:\n' + (err.stderr?.toString() || '') + (err.stdout?.toString() || '') }));
+              return;
+            }
+
+            // 2. Create tar.gz of dist/
+            const distDir = resolve(root, 'dist');
+            const artifactPath = resolve(root, '.dist-artifact.tar.gz');
+            try {
+              execSync(`tar -czf "${artifactPath}" -C "${distDir}" .`, { stdio: 'pipe' });
+            } catch (e) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Tar failed: ' + String(e) }));
+              return;
+            }
+
+            const artifactSize = statSync(artifactPath).size;
+            const artifactBuffer = readFileSync(artifactPath);
+            try { execSync(`rm "${artifactPath}"`, { stdio: 'pipe' }); } catch { /* ignore */ }
+
+            // 3. Create Pages deployment
+            const createResp = await fetch(`https://api.github.com/repos/${repo}/pages/deployments`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ artifact_size: artifactSize }),
+            });
+
+            if (!createResp.ok) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Pages deployment failed: ' + await createResp.text() }));
+              return;
+            }
+
+            const deployment = await createResp.json() as {
+              status_url: string;
+              page_url: string;
+              artifact_url: string;
+            };
+
+            // 4. Upload the artifact
+            const uploadResp = await fetch(deployment.artifact_url, {
+              method: 'PUT',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/zip',
+                'Content-Length': String(artifactSize),
+              },
+              body: artifactBuffer,
+            });
+
+            if (!uploadResp.ok) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Artifact upload failed: ' + await uploadResp.text() }));
+              return;
+            }
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true, pageUrl: deployment.page_url }));
+            return;
+          }
+
         } catch (err) {
           res.writeHead(500, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: String(err) }));

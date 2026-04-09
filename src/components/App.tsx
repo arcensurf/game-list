@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useGames } from '../hooks/useGames';
 import GameGrid from './GameGrid';
 import AddGameForm from './AddGameForm';
+import PublishButton from './PublishButton';
 import StatsModal from './StatsModal';
 
 const ALL_LETTERS = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
@@ -9,7 +10,7 @@ const ALL_LETTERS = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
 export default function App() {
   const [filter, setFilter] = useState('');
   const [statsOpen, setStatsOpen] = useState(false);
-  const { groups, totalCount, platformStats } = useGames(filter || undefined);
+  const { groups, totalCount, platformStats, loading } = useGames(filter || undefined);
   const activeLetters = new Set(groups.map((g) => g.letter));
 
   return (
@@ -32,6 +33,7 @@ export default function App() {
             onChange={(e) => setFilter(e.target.value)}
           />
           {import.meta.env.DEV && <AddGameForm />}
+          {import.meta.env.DEV && <PublishButton />}
         </div>
       </header>
 
@@ -48,7 +50,13 @@ export default function App() {
       </nav>
 
       <main>
-        <GameGrid groups={groups} />
+        {loading ? (
+          <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '4rem 0' }}>
+            Loading...
+          </p>
+        ) : (
+          <GameGrid groups={groups} />
+        )}
       </main>
 
       {statsOpen && (

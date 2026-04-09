@@ -642,6 +642,50 @@ body {
   font-weight: 600;
 }
 
+/* Publish button */
+.publish-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.publish-btn {
+  padding: 0.6rem 1rem;
+  background: #107c10;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background var(--transition);
+}
+
+.publish-btn:hover:not(:disabled) {
+  background: #0e6b0e;
+}
+
+.publish-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.publish-btn.done {
+  background: #059669;
+}
+
+.publish-btn.error {
+  background: #dc2626;
+}
+
+.publish-error {
+  font-size: 0.7rem;
+  color: #ef4444;
+  cursor: help;
+}
+
 /* Dev edit button */
 .dev-edit-btn {
   font-size: 0.55rem;
