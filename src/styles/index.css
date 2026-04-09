@@ -234,6 +234,7 @@ body {
 .game-card {
   display: flex;
   flex-direction: column;
+  height: 100%;
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--bg-card);
