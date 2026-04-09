@@ -2,7 +2,9 @@ import { useMemo, useState, useEffect } from 'react';
 import type { Game, CoverMap, GameWithCover, LetterGroup } from '../types/game';
 import { getCoverUrl } from '../utils/coverUrl';
 
-const base = import.meta.env.BASE_URL;
+const DATA_BASE = import.meta.env.DEV
+  ? import.meta.env.BASE_URL
+  : 'https://raw.githubusercontent.com/arcensurf/game-list/data/public/';
 
 function getGroupLetter(title: string): string {
   const normalized = title.replace(/^the\s+/i, '');
@@ -27,8 +29,8 @@ export function useGames(filter?: string): {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${base}data/games.json`).then((r) => r.json()),
-      fetch(`${base}data/covers.json`).then((r) => r.json()),
+      fetch(`${DATA_BASE}data/games.json`).then((r) => r.json()),
+      fetch(`${DATA_BASE}data/covers.json`).then((r) => r.json()),
     ]).then(([g, c]) => {
       setGames(g as Game[]);
       setCovers(c as CoverMap);

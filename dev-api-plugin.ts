@@ -1,8 +1,13 @@
 import type { Plugin } from 'vite';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { resolve, extname } from 'path';
-import { execSync } from 'child_process';
-import { statSync } from 'fs';
+import { readdirSync } from 'fs';
+import { createHash } from 'crypto';
+
+function gitBlobHash(content: Buffer): string {
+  const header = `blob ${content.length}\0`;
+  return createHash('sha1').update(header).update(content).digest('hex');
+}
 import { config } from 'dotenv';
 
 function slugify(title: string): string {
@@ -353,75 +358,136 @@ export default function devApiPlugin(): Plugin {
             }
 
             const repo = 'arcensurf/game-list';
+            const branch = 'data';
+            const gh = (path: string, opts: RequestInit = {}) =>
+              fetch(`https://api.github.com${path}`, {
+                ...opts,
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+                  ...opts.headers as Record<string, string>,
+                },
+              });
 
-            // 1. Build
-            try {
-              execSync('npx vite build', { cwd: root, stdio: 'pipe' });
-            } catch (e: unknown) {
-              const err = e as { stderr?: Buffer; stdout?: Buffer };
-              res.writeHead(500, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'Build failed:\n' + (err.stderr?.toString() || '') + (err.stdout?.toString() || '') }));
-              return;
+            // Collect files to push
+            const filesToPush: { repoPath: string; localPath: string }[] = [
+              { repoPath: 'public/data/games.json', localPath: gamesPath },
+              { repoPath: 'public/data/covers.json', localPath: coversPath },
+            ];
+            if (existsSync(coversDir)) {
+              for (const file of readdirSync(coversDir)) {
+                filesToPush.push({
+                  repoPath: `public/covers/${file}`,
+                  localPath: resolve(coversDir, file),
+                });
+              }
             }
 
-            // 2. Create tar.gz of dist/
-            const distDir = resolve(root, 'dist');
-            const artifactPath = resolve(root, '.dist-artifact.tar.gz');
-            try {
-              execSync(`tar -czf "${artifactPath}" -C "${distDir}" .`, { stdio: 'pipe' });
-            } catch (e) {
+            // Get current commit SHA of the data branch
+            const refResp = await gh(`/repos/${repo}/git/ref/heads/${branch}`);
+            if (!refResp.ok) {
               res.writeHead(500, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'Tar failed: ' + String(e) }));
+              res.end(JSON.stringify({ error: 'Failed to get data branch: ' + await refResp.text() }));
               return;
             }
+            const refData = await refResp.json() as { object: { sha: string } };
+            const baseSha = refData.object.sha;
 
-            const artifactSize = statSync(artifactPath).size;
-            const artifactBuffer = readFileSync(artifactPath);
-            try { execSync(`rm "${artifactPath}"`, { stdio: 'pipe' }); } catch { /* ignore */ }
+            // Get base tree
+            const commitResp = await gh(`/repos/${repo}/git/commits/${baseSha}`);
+            const commitData = await commitResp.json() as { tree: { sha: string } };
 
-            // 3. Create Pages deployment
-            const createResp = await fetch(`https://api.github.com/repos/${repo}/pages/deployments`, {
-              method: 'POST',
-              headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/vnd.github+json',
-                'X-GitHub-Api-Version': '2022-11-28',
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ artifact_size: artifactSize }),
-            });
-
-            if (!createResp.ok) {
-              res.writeHead(500, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'Pages deployment failed: ' + await createResp.text() }));
-              return;
-            }
-
-            const deployment = await createResp.json() as {
-              status_url: string;
-              page_url: string;
-              artifact_url: string;
+            // Fetch the existing tree recursively to diff against
+            const existingTreeResp = await gh(`/repos/${repo}/git/trees/${commitData.tree.sha}?recursive=1`);
+            const existingTree = await existingTreeResp.json() as {
+              tree: { path: string; sha: string; type: string }[];
             };
+            const remoteShas = new Map<string, string>();
+            for (const item of existingTree.tree) {
+              if (item.type === 'blob') remoteShas.set(item.path, item.sha);
+            }
 
-            // 4. Upload the artifact
-            const uploadResp = await fetch(deployment.artifact_url, {
-              method: 'PUT',
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/zip',
-                'Content-Length': String(artifactSize),
-              },
-              body: artifactBuffer,
+            // Only upload files that have changed
+            const treeItems: { path: string; mode: string; type: string; sha: string }[] = [];
+            let uploaded = 0;
+            for (const file of filesToPush) {
+              if (!existsSync(file.localPath)) continue;
+              const content = readFileSync(file.localPath);
+              const localSha = gitBlobHash(content);
+
+              // Skip if unchanged
+              if (remoteShas.get(file.repoPath) === localSha) continue;
+
+              const blobResp = await gh(`/repos/${repo}/git/blobs`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  content: content.toString('base64'),
+                  encoding: 'base64',
+                }),
+              });
+              if (!blobResp.ok) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: `Blob failed for ${file.repoPath}: ` + await blobResp.text() }));
+                return;
+              }
+              const blobData = await blobResp.json() as { sha: string };
+              treeItems.push({ path: file.repoPath, mode: '100644', type: 'blob', sha: blobData.sha });
+              uploaded++;
+            }
+
+            // Nothing changed
+            if (treeItems.length === 0) {
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ ok: true, message: 'No changes to publish' }));
+              return;
+            }
+
+            // Create tree
+            const treeResp = await gh(`/repos/${repo}/git/trees`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ base_tree: commitData.tree.sha, tree: treeItems }),
             });
-
-            if (!uploadResp.ok) {
+            if (!treeResp.ok) {
               res.writeHead(500, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'Artifact upload failed: ' + await uploadResp.text() }));
+              res.end(JSON.stringify({ error: 'Tree failed: ' + await treeResp.text() }));
+              return;
+            }
+            const treeData = await treeResp.json() as { sha: string };
+
+            // Create commit on data branch
+            const newCommitResp = await gh(`/repos/${repo}/git/commits`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                message: 'Update game data',
+                tree: treeData.sha,
+                parents: [baseSha],
+              }),
+            });
+            if (!newCommitResp.ok) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Commit failed: ' + await newCommitResp.text() }));
+              return;
+            }
+            const newCommit = await newCommitResp.json() as { sha: string };
+
+            // Update data branch ref
+            const updateResp = await gh(`/repos/${repo}/git/refs/heads/${branch}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sha: newCommit.sha }),
+            });
+            if (!updateResp.ok) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Ref update failed: ' + await updateResp.text() }));
               return;
             }
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ ok: true, pageUrl: deployment.page_url }));
+            res.end(JSON.stringify({ ok: true, sha: newCommit.sha }));
             return;
           }
 

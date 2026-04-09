@@ -11,6 +11,11 @@ node_modules
 dist
 dist-ssr
 *.local
+dist-artifact.tar.gz
+
+# Data files live on the 'data' branch, not main
+public/data/
+public/covers/
 
 # Editor directories and files
 .vscode/*

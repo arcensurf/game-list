@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A personal game completion tracker — a static React app displaying a grid of beaten games with cover art, organized alphabetically. Deployed to GitHub Pages at `/game-list/`.
+A personal game completion tracker — a React app displaying a grid of beaten games with cover art, organized alphabetically. Deployed to GitHub Pages at `/game-list/`.
 
 ## Commands
 
@@ -22,19 +22,42 @@ React + TypeScript + Vite. No router — single-page app with one view.
 
 ### Data flow
 
-Game data lives in `src/data/games.json` and cover mappings in `src/data/covers.json`. These are imported statically at build time (no runtime API calls in production). The `gamelist.md` file is the original source of truth, converted via `scripts/parse-markdown.mjs`.
+Game data lives in `public/data/games.json` and cover mappings in `public/data/covers.json`. These are **fetched at runtime** (not bundled at build time), so data-only changes can be deployed without rebuilding the app. Cover images are in `public/covers/`, named by slugified game title.
+
+Each game has an `order` field that controls display order within its alphabetical letter group. New games are auto-inserted alphabetically; manual reordering (drag-and-drop in dev) updates order numbers without rearranging the JSON array.
 
 ### Dev-only features
 
-`dev-api-plugin.ts` is a Vite plugin that adds POST endpoints (`/api/add-game`, `/api/edit-game`, `/api/upload-cover`, `/api/browse-covers`, `/api/select-cover`, `/api/add-extra`) only during `vite serve`. Components conditionally render dev-only UI (add game form, cover picker, edit button) behind `import.meta.env.DEV` checks.
+`dev-api-plugin.ts` is a Vite plugin that adds POST endpoints only during `vite serve`:
+
+- `/api/add-game`, `/api/edit-game`, `/api/add-extra` — game CRUD
+- `/api/upload-cover`, `/api/browse-covers`, `/api/select-cover` — cover management via SteamGridDB
+- `/api/reorder-games` — drag-and-drop reorder (updates `order` fields)
+- `/api/publish` — builds and deploys to GitHub Pages via the Pages deployment API (no git commit)
+
+Components conditionally render dev-only UI behind `import.meta.env.DEV` checks: add game form, cover picker, edit modal, drag-and-drop reordering, and publish button.
+
+### Game of Games
+
+Games can be marked as "Game of Games" (a best-of designation) via the `gameOfGames` field — a tagline string or null. These get a gold gradient border and banner on their card. Toggled via the edit modal.
+
+### Platform system
+
+Platforms are selected from a predefined chip picker (`PlatformPicker.tsx`), not free-text. Colors are defined in `PLATFORM_COLORS` in `PlatformBadge.tsx` (PlayStation=blue, Nintendo=red, Xbox=green, PC/Other=gray). The stats modal merges regional variants: NES + Famicom and SNES + Super Famicom are counted together.
 
 ### Key conventions
 
-- Games are sorted ignoring leading "The " (e.g., "The Legend of Zelda" sorts under L)
-- Cover images stored in `public/covers/`, named by slugified game title
-- Platform colors are grouped by family in `PlatformBadge.tsx` (PlayStation=blue, Nintendo=red, Xbox=green, PC/Other=gray)
-- `base: '/game-list/'` in vite.config.ts — all asset URLs must account for this base path
+- Games are grouped by first letter (ignoring leading "The "), sorted within groups by `order` field
+- `base: '/game-list/'` in vite.config.ts — all asset/fetch URLs must account for this base path
+- Dev API responses return paths without the base prefix; the client prepends `import.meta.env.BASE_URL`
+- Edit modal triggers `window.location.reload()` after save to pick up the changed JSON
 
 ### Deployment
 
-Pushes to `main` trigger GitHub Actions (`.github/workflows/deploy.yml`) which builds and deploys to GitHub Pages.
+- **Code changes:** Push to `main` triggers GitHub Actions (`.github/workflows/deploy.yml`) which builds and deploys to GitHub Pages
+- **Data changes:** The dev UI "Publish" button deploys directly via the GitHub Pages deployment API — no commit to `main`. Requires `GITHUB_TOKEN` in `.env.local` with Pages write permission.
+
+### Environment variables (`.env.local`)
+
+- `SGDB_API_KEY` — SteamGridDB API key for cover browsing
+- `GITHUB_TOKEN` — GitHub fine-grained PAT with Pages write permission for the publish button
