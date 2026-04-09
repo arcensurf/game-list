@@ -38,6 +38,9 @@ export default function EditGameModal({
   const [extras, setExtras] = useState(serializeExtras(game.extras));
   const [isGameOfGames, setIsGameOfGames] = useState(!!game.gameOfGames);
   const [gameOfGamesTagline, setGameOfGamesTagline] = useState(game.gameOfGames || '');
+  const [steamAppId, setSteamAppId] = useState(game.steamAppId?.toString() || '');
+  const [psnNpCommId, setPsnNpCommId] = useState(game.psnNpCommId || '');
+  const [xboxTitleId, setXboxTitleId] = useState(game.xboxTitleId || '');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -56,6 +59,9 @@ export default function EditGameModal({
         platforms,
         extras: parseExtras(extras),
         gameOfGames: isGameOfGames ? gameOfGamesTagline.trim() || null : null,
+        steamAppId: steamAppId ? Number(steamAppId) : null,
+        psnNpCommId: psnNpCommId.trim() || null,
+        xboxTitleId: xboxTitleId.trim() || null,
       }),
     });
 
@@ -109,6 +115,39 @@ export default function EditGameModal({
             placeholder={"DLC: Expansion 1, Expansion 2\nPaths: Route A, Route B"}
           />
         </label>
+        {platforms.includes('PC') && (
+          <label>
+            Steam App ID (override)
+            <input
+              type="text"
+              value={steamAppId}
+              onChange={(e) => setSteamAppId(e.target.value)}
+              placeholder="e.g. 400 for Portal"
+            />
+          </label>
+        )}
+        {platforms.some((p) => ['PS3', 'PS4', 'PS5', 'PS Vita', 'PSX'].includes(p)) && (
+          <label>
+            PSN NPCOMMID (override)
+            <input
+              type="text"
+              value={psnNpCommId}
+              onChange={(e) => setPsnNpCommId(e.target.value)}
+              placeholder="e.g. NPWR01537_00"
+            />
+          </label>
+        )}
+        {platforms.some((p) => ['Xbox 360'].includes(p)) && (
+          <label>
+            Xbox Title ID (override)
+            <input
+              type="text"
+              value={xboxTitleId}
+              onChange={(e) => setXboxTitleId(e.target.value)}
+              placeholder="Xbox title ID"
+            />
+          </label>
+        )}
         <label className="toggle-label">
           <input
             type="checkbox"

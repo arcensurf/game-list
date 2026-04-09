@@ -1,0 +1,39 @@
+name: Fetch Achievements
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # Daily at 6am UTC
+  workflow_dispatch: {} # Manual trigger
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install psn-api @xboxreplay/xboxlive-auth dotenv
+
+      - name: Fetch achievement data
+        run: node scripts/fetch-achievements.mjs
+        env:
+          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+          STEAM_USER_ID: ${{ secrets.STEAM_USER_ID }}
+          PSN_NPSSO_TOKEN: ${{ secrets.PSN_NPSSO_TOKEN }}
+          XBOX_REFRESH_TOKEN: ${{ secrets.XBOX_REFRESH_TOKEN }}
+          XBOX_EMAIL: ${{ secrets.XBOX_EMAIL }}
+          XBOX_PASSWORD: ${{ secrets.XBOX_PASSWORD }}
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/achievements.json public/data/.psn-refresh-token public/data/.xbox-refresh-token
+          git diff --cached --quiet || git commit -m "Update achievement data"
+          git push
