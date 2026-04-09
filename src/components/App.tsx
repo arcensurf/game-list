@@ -9,8 +9,9 @@ const ALL_LETTERS = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
 
 export default function App() {
   const [filter, setFilter] = useState('');
+  const [gogOnly, setGogOnly] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
-  const { groups, totalCount, platformStats, loading } = useGames(filter || undefined);
+  const { groups, totalCount, platformStats, loading } = useGames(filter || undefined, gogOnly);
   const activeLetters = new Set(groups.map((g) => g.letter));
 
   return (
@@ -22,6 +23,12 @@ export default function App() {
           {' '}
           <button className="stats-btn" onClick={() => setStatsOpen(true)}>
             Stats
+          </button>
+          <button
+            className={`stats-btn${gogOnly ? ' gog-active' : ''}`}
+            onClick={() => setGogOnly(!gogOnly)}
+          >
+            Games of Games
           </button>
         </p>
         <div className="header-controls">
@@ -37,17 +44,19 @@ export default function App() {
         </div>
       </header>
 
-      <nav className="alphabet-nav">
-        {ALL_LETTERS.map((letter) => (
-          <a
-            key={letter}
-            href={`#section-${letter}`}
-            className={activeLetters.has(letter) ? 'active' : 'inactive'}
-          >
-            {letter}
-          </a>
-        ))}
-      </nav>
+      {!gogOnly && (
+        <nav className="alphabet-nav">
+          {ALL_LETTERS.map((letter) => (
+            <a
+              key={letter}
+              href={`#section-${letter}`}
+              className={activeLetters.has(letter) ? 'active' : 'inactive'}
+            >
+              {letter}
+            </a>
+          ))}
+        </nav>
+      )}
 
       <main>
         {loading ? (
@@ -55,7 +64,7 @@ export default function App() {
             Loading...
           </p>
         ) : (
-          <GameGrid groups={groups} />
+          <GameGrid groups={groups} gogOnly={gogOnly} />
         )}
       </main>
 

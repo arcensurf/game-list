@@ -79,6 +79,13 @@ body {
   color: var(--text);
 }
 
+.stats-btn.gog-active {
+  background: linear-gradient(135deg, #d4a017, #f5d060);
+  color: #1a1a2e;
+  border-color: transparent;
+  font-weight: 700;
+}
+
 .search-input {
   margin-top: 1rem;
   padding: 0.6rem 1rem;

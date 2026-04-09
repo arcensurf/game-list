@@ -17,7 +17,7 @@ function getGroupLetter(title: string): string {
 
 export type PlatformStat = { platform: string; count: number };
 
-export function useGames(filter?: string): {
+export function useGames(filter?: string, gogOnly?: boolean): {
   groups: LetterGroup[];
   totalCount: number;
   platformStats: PlatformStat[];
@@ -41,9 +41,13 @@ export function useGames(filter?: string): {
   const result = useMemo(() => {
     let filtered = games;
 
+    if (gogOnly) {
+      filtered = filtered.filter((g) => g.gameOfGames);
+    }
+
     if (filter) {
       const q = filter.toLowerCase();
-      filtered = games.filter(
+      filtered = filtered.filter(
         (g) =>
           g.title.toLowerCase().includes(q) ||
           g.platforms.some((p) => p.toLowerCase().includes(q)),
@@ -95,7 +99,7 @@ export function useGames(filter?: string): {
       .sort((a, b) => b.count - a.count);
 
     return { groups, totalCount: withCovers.length, platformStats };
-  }, [games, covers, filter]);
+  }, [games, covers, filter, gogOnly]);
 
   return { ...result, loading };
 }
