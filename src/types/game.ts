@@ -10,6 +10,7 @@ export interface Game {
   extras: ExtraContent[];
   sgdbId: number | null;
   coverOverride: string | null;
+  gameOfGames: string | null;
 }
 
 export interface CoverEntry {

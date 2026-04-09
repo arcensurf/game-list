@@ -10,17 +10,26 @@ export default function GameCard({ game }: { game: GameWithCover }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [localCoverUrl, setLocalCoverUrl] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
-  const coverUrl = localCoverUrl ?? game.coverUrl;
+  const baseCoverUrl = localCoverUrl ?? game.coverUrl;
+  const coverUrl = baseCoverUrl && retryCount > 0
+    ? baseCoverUrl.split('?')[0] + '?retry=' + retryCount
+    : baseCoverUrl;
 
   const handleCoverChanged = (newUrl: string) => {
-    setLocalCoverUrl(newUrl + '?t=' + Date.now());
+    const stripped = newUrl.split('?')[0];
+    const baseUrl = import.meta.env.BASE_URL;
+    // API returns paths without the base prefix — add it if missing
+    const prefixed = stripped.startsWith(baseUrl) ? stripped : baseUrl + stripped.replace(/^\//, '');
+    setLocalCoverUrl(prefixed + '?t=' + Date.now());
     setImgError(false);
+    setRetryCount(0);
     setPickerOpen(false);
   };
 
   return (
-    <div className="game-card">
+    <div className={`game-card${game.gameOfGames ? ' game-of-games' : ''}`}>
       <div
         className="game-card-cover"
         onClick={import.meta.env.DEV ? () => setPickerOpen(true) : undefined}
@@ -31,7 +40,15 @@ export default function GameCard({ game }: { game: GameWithCover }) {
             src={coverUrl}
             alt={game.title}
             loading="lazy"
-            onError={() => setImgError(true)}
+            onError={() => {
+              if (import.meta.env.DEV && retryCount < 3) {
+                setTimeout(() => {
+                  setRetryCount((c) => c + 1);
+                  setImgError(false);
+                }, 500);
+              }
+              setImgError(true);
+            }}
           />
         ) : (
           <div className="game-card-placeholder">
@@ -70,6 +87,12 @@ export default function GameCard({ game }: { game: GameWithCover }) {
           )}
         </div>
       </div>
+      {game.gameOfGames && (
+        <div className="game-of-games-label">
+          <span className="game-of-games-title">A Game of Games</span>
+          <span className="game-of-games-tagline">{game.gameOfGames}</span>
+        </div>
+      )}
       {pickerOpen && (
         <CoverPicker
           title={game.title}

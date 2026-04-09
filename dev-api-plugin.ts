@@ -72,7 +72,7 @@ export default function devApiPlugin(): Plugin {
             writeJson(coversPath, covers);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ coverUrl: `/covers/${outName}` }));
+            res.end(JSON.stringify({ coverUrl: `/covers/${outName}?t=${Date.now()}` }));
             return;
           }
 
@@ -100,6 +100,7 @@ export default function devApiPlugin(): Plugin {
               extras: [],
               sgdbId: null,
               coverOverride: null,
+              gameOfGames: null,
             });
 
             // Sort alphabetically, ignoring leading "The "
@@ -200,18 +201,19 @@ export default function devApiPlugin(): Plugin {
             writeJson(coversPath, covers);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ coverUrl: `/covers/${outName}` }));
+            res.end(JSON.stringify({ coverUrl: `/covers/${outName}?t=${Date.now()}` }));
             return;
           }
 
           if (req.url === '/api/edit-game') {
             const body = JSON.parse(await parseBody(req));
-            const { originalTitle, title, subtitle, platforms, extras } = body as {
+            const { originalTitle, title, subtitle, platforms, extras, gameOfGames } = body as {
               originalTitle: string;
               title: string;
               subtitle: string | null;
               platforms: string[];
               extras: { label: string; items: string[] }[];
+              gameOfGames: string | null;
             };
 
             const games = readJson(gamesPath);
@@ -242,6 +244,7 @@ export default function devApiPlugin(): Plugin {
             game.subtitle = subtitle;
             game.platforms = platforms;
             game.extras = extras;
+            game.gameOfGames = gameOfGames;
 
             // Re-sort
             games.sort((a: { title: string }, b: { title: string }) => {

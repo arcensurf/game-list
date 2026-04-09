@@ -35,6 +35,8 @@ export default function EditGameModal({
   const [subtitle, setSubtitle] = useState(game.subtitle || '');
   const [platforms, setPlatforms] = useState(game.platforms.join(', '));
   const [extras, setExtras] = useState(serializeExtras(game.extras));
+  const [isGameOfGames, setIsGameOfGames] = useState(!!game.gameOfGames);
+  const [gameOfGamesTagline, setGameOfGamesTagline] = useState(game.gameOfGames || '');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -52,6 +54,7 @@ export default function EditGameModal({
         subtitle: subtitle.trim() || null,
         platforms: platforms.split(',').map((p) => p.trim()).filter(Boolean),
         extras: parseExtras(extras),
+        gameOfGames: isGameOfGames ? gameOfGamesTagline.trim() || null : null,
       }),
     });
 
@@ -110,6 +113,25 @@ export default function EditGameModal({
             placeholder={"DLC: Expansion 1, Expansion 2\nPaths: Route A, Route B"}
           />
         </label>
+        <label className="toggle-label">
+          <input
+            type="checkbox"
+            checked={isGameOfGames}
+            onChange={(e) => setIsGameOfGames(e.target.checked)}
+          />
+          Game of Games
+        </label>
+        {isGameOfGames && (
+          <label>
+            Tagline
+            <input
+              type="text"
+              value={gameOfGamesTagline}
+              onChange={(e) => setGameOfGamesTagline(e.target.value)}
+              placeholder='The "memorable quote" game'
+            />
+          </label>
+        )}
         <div className="add-game-actions">
           <button type="button" onClick={onClose}>
             Cancel
