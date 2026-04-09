@@ -573,17 +573,6 @@
     "gameOfGames": null
   },
   {
-    "title": "Final Fantasy Adventure",
-    "subtitle": null,
-    "platforms": [
-      "GB"
-    ],
-    "extras": [],
-    "sgdbId": null,
-    "coverOverride": null,
-    "gameOfGames": null
-  },
-  {
     "title": "Final Fantasy II",
     "subtitle": null,
     "platforms": [
@@ -616,40 +605,6 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null
-  },
-  {
-    "title": "Final Fantasy IX",
-    "subtitle": null,
-    "platforms": [
-      "Switch"
-    ],
-    "extras": [],
-    "sgdbId": null,
-    "coverOverride": null,
-    "gameOfGames": null
-  },
-  {
-    "title": "Final Fantasy Mystic Quest",
-    "subtitle": null,
-    "platforms": [
-      "SNES"
-    ],
-    "extras": [],
-    "sgdbId": null,
-    "coverOverride": null,
-    "gameOfGames": null
-  },
-  {
-    "title": "Final Fantasy Tactics",
-    "subtitle": null,
-    "platforms": [
-      "PSX",
-      "PSP"
-    ],
-    "extras": [],
-    "sgdbId": null,
-    "coverOverride": null,
-    "gameOfGames": "The \"The will to resist is in your hands\" game"
   },
   {
     "title": "Final Fantasy V Pixel Remaster",
@@ -685,17 +640,6 @@
     "gameOfGames": null
   },
   {
-    "title": "Final Fantasy VII Rebirth",
-    "subtitle": null,
-    "platforms": [
-      "PS5"
-    ],
-    "extras": [],
-    "sgdbId": null,
-    "coverOverride": null,
-    "gameOfGames": "The second time around?"
-  },
-  {
     "title": "Final Fantasy VII Remake",
     "subtitle": null,
     "platforms": [
@@ -715,7 +659,29 @@
     "gameOfGames": "The \"I'm not some princess who needs to be coddled...shit\" game"
   },
   {
+    "title": "Final Fantasy VII Rebirth",
+    "subtitle": null,
+    "platforms": [
+      "PS5"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The second time around?"
+  },
+  {
     "title": "Final Fantasy VIII Remastered",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null
+  },
+  {
+    "title": "Final Fantasy IX",
     "subtitle": null,
     "platforms": [
       "Switch"
@@ -824,6 +790,40 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null
+  },
+  {
+    "title": "Final Fantasy Adventure",
+    "subtitle": null,
+    "platforms": [
+      "GB"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null
+  },
+  {
+    "title": "Final Fantasy Mystic Quest",
+    "subtitle": null,
+    "platforms": [
+      "SNES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null
+  },
+  {
+    "title": "Final Fantasy Tactics",
+    "subtitle": null,
+    "platforms": [
+      "PSX",
+      "PSP"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"The will to resist is in your hands\" game"
   },
   {
     "title": "Fire Emblem Awakening",
@@ -975,17 +975,6 @@
     "gameOfGames": null
   },
   {
-    "title": "The Great Ace Attorney 2: Resolve",
-    "subtitle": null,
-    "platforms": [
-      "Switch"
-    ],
-    "extras": [],
-    "sgdbId": null,
-    "coverOverride": null,
-    "gameOfGames": "The \"Why can't we have a normal, straightforward killing once in a while\" game"
-  },
-  {
     "title": "The Great Ace Attorney: Adventures",
     "subtitle": null,
     "platforms": [
@@ -995,6 +984,17 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"You think I won't be able to get you off\" game"
+  },
+  {
+    "title": "The Great Ace Attorney 2: Resolve",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"Why can't we have a normal, straightforward killing once in a while\" game"
   },
   {
     "title": "Grid",
@@ -1184,7 +1184,7 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The City Trial game"
+    "gameOfGames": null
   },
   {
     "title": "Kirby Super Star",
@@ -2316,7 +2316,7 @@
     "gameOfGames": null
   },
   {
-    "title": "Uncharted 2: Among Thieves",
+    "title": "Uncharted: Drake's Fortune",
     "subtitle": null,
     "platforms": [
       "PS3"
@@ -2327,7 +2327,7 @@
     "gameOfGames": null
   },
   {
-    "title": "Uncharted: Drake's Fortune",
+    "title": "Uncharted 2: Among Thieves",
     "subtitle": null,
     "platforms": [
       "PS3"
