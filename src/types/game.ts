@@ -11,6 +11,7 @@ export interface Game {
   sgdbId: number | null;
   coverOverride: string | null;
   gameOfGames: string | null;
+  order: number;
 }
 
 export interface CoverEntry {

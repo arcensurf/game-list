@@ -15,7 +15,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>The Game List</h1>
+        <h1>The Games List</h1>
         <p className="game-count">
           {totalCount} games completed
           {' '}

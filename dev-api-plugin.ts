@@ -18,6 +18,14 @@ function writeJson(path: string, data: unknown) {
   writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
 }
 
+type GameEntry = { title: string; order: number; [key: string]: unknown };
+
+function renumberOrders(games: GameEntry[]) {
+  games
+    .sort((a, b) => a.order - b.order)
+    .forEach((g, i) => { g.order = i; });
+}
+
 function parseBody(req: import('http').IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     let body = '';
@@ -93,6 +101,39 @@ export default function devApiPlugin(): Plugin {
               return;
             }
 
+            // Find alphabetical insert position among same-letter games
+            const norm = (t: string) => t.replace(/^the\s+/i, '').toLowerCase();
+            const newNorm = norm(title);
+            const newLetter = newNorm.charAt(0).toUpperCase();
+
+            const sameLetterGames = games
+              .filter((g: GameEntry) => {
+                const gl = norm(g.title).charAt(0).toUpperCase();
+                return gl === newLetter;
+              })
+              .sort((a: GameEntry, b: GameEntry) => a.order - b.order);
+
+            // Find the game it should go before
+            let insertOrder: number;
+            const insertBefore = sameLetterGames.find(
+              (g: GameEntry) => norm(g.title) > newNorm
+            );
+            if (insertBefore) {
+              insertOrder = insertBefore.order;
+              // Bump everything at or after this order
+              for (const g of games) {
+                if ((g as GameEntry).order >= insertOrder) (g as GameEntry).order++;
+              }
+            } else if (sameLetterGames.length > 0) {
+              insertOrder = sameLetterGames[sameLetterGames.length - 1].order + 1;
+              // Bump everything after
+              for (const g of games) {
+                if ((g as GameEntry).order >= insertOrder) (g as GameEntry).order++;
+              }
+            } else {
+              insertOrder = games.length;
+            }
+
             games.push({
               title,
               subtitle: subtitle || null,
@@ -101,14 +142,10 @@ export default function devApiPlugin(): Plugin {
               sgdbId: null,
               coverOverride: null,
               gameOfGames: null,
+              order: insertOrder,
             });
 
-            // Sort alphabetically, ignoring leading "The "
-            games.sort((a: { title: string }, b: { title: string }) => {
-              const norm = (t: string) => t.replace(/^the\s+/i, '').toLowerCase();
-              return norm(a.title).localeCompare(norm(b.title));
-            });
-
+            renumberOrders(games);
             writeJson(gamesPath, games);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -257,26 +294,18 @@ export default function devApiPlugin(): Plugin {
             const body = JSON.parse(await parseBody(req));
             const { titles } = body as { titles: string[] };
 
-            const games = readJson(gamesPath);
-            const titleSet = new Set(titles);
-            // Pull out the games being reordered
-            const toReorder = titles.map((t: string) =>
-              games.find((g: { title: string }) => g.title === t)
-            ).filter(Boolean);
-            // Remove them from the array
-            const remaining = games.filter((g: { title: string }) => !titleSet.has(g.title));
-            // Find where the first game in this group sat originally
-            const firstOrigIdx = games.findIndex((g: { title: string }) => g.title === titles[0]);
-            // Find insert position in remaining array
-            let insertIdx = remaining.length;
-            for (let i = 0; i < remaining.length; i++) {
-              if (games.indexOf(remaining[i]) >= firstOrigIdx) {
-                insertIdx = i;
-                break;
-              }
-            }
-            remaining.splice(insertIdx, 0, ...toReorder);
-            writeJson(gamesPath, remaining);
+            const games = readJson(gamesPath) as GameEntry[];
+            // Get the current order values for this group, sorted
+            const groupGames = titles.map(t => games.find(g => g.title === t)!).filter(Boolean);
+            const orders = groupGames.map(g => g.order).sort((a, b) => a - b);
+
+            // Assign the sorted order slots to the new title sequence
+            titles.forEach((t, i) => {
+              const game = games.find(g => g.title === t);
+              if (game && i < orders.length) game.order = orders[i];
+            });
+
+            writeJson(gamesPath, games);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ ok: true }));

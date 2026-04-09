@@ -57,7 +57,7 @@ export function useGames(filter?: string): {
 
     const groups: LetterGroup[] = letters.map((letter) => ({
       letter,
-      games: groupMap.get(letter)!,
+      games: groupMap.get(letter)!.sort((a, b) => a.order - b.order),
     }));
 
     // Platform stats (computed from full list, not filtered)

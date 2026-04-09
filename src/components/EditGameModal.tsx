@@ -60,7 +60,7 @@ export default function EditGameModal({
     });
 
     if (res.ok) {
-      onClose();
+      window.location.reload();
     } else {
       const data = await res.json();
       setError(data.error || 'Failed to save');

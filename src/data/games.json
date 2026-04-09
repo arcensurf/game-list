@@ -8,7 +8,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 0
   },
   {
     "title": ".hack//MUTATION",
@@ -19,7 +20,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 1
   },
   {
     "title": "Advance Wars",
@@ -30,7 +32,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 2
   },
   {
     "title": "Art of Rally",
@@ -41,7 +44,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The Das Uberspeedvan game"
+    "gameOfGames": "The Das Uberspeedvan game",
+    "order": 3
   },
   {
     "title": "Assassin's Creed",
@@ -53,7 +57,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 4
   },
   {
     "title": "Assassin's Creed II",
@@ -66,46 +71,14 @@
         "label": "DLC",
         "items": [
           "Sequence 12",
-          "13"
+          "Sequence 13"
         ]
       }
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
-  },
-  {
-    "title": "Assassin's Creed III",
-    "subtitle": null,
-    "platforms": [
-      "Xbox 360"
-    ],
-    "extras": [],
-    "sgdbId": null,
-    "coverOverride": null,
-    "gameOfGames": null
-  },
-  {
-    "title": "Assassin's Creed IV: Black Flag",
-    "subtitle": null,
-    "platforms": [
-      "PS4"
-    ],
-    "extras": [],
-    "sgdbId": null,
-    "coverOverride": null,
-    "gameOfGames": null
-  },
-  {
-    "title": "Assassin's Creed Unity",
-    "subtitle": null,
-    "platforms": [
-      "PS4"
-    ],
-    "extras": [],
-    "sgdbId": null,
-    "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 5
   },
   {
     "title": "Assassin's Creed: Brotherhood",
@@ -123,7 +96,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 6
   },
   {
     "title": "Assassin's Creed: Revelations",
@@ -134,7 +108,44 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 7
+  },
+  {
+    "title": "Assassin's Creed III",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 8
+  },
+  {
+    "title": "Assassin's Creed IV: Black Flag",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 9
+  },
+  {
+    "title": "Assassin's Creed Unity",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 10
   },
   {
     "title": "Astral Chain",
@@ -145,7 +156,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 11
   },
   {
     "title": "Astro Bot",
@@ -156,7 +168,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 12
   },
   {
     "title": "Astro's Playroom",
@@ -167,7 +180,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 13
   },
   {
     "title": "Bastion",
@@ -178,7 +192,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 14
   },
   {
     "title": "Baten Kaitos: Eternal Wings and the Lost Ocean",
@@ -189,7 +204,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 15
   },
   {
     "title": "Bioshock Infinite",
@@ -200,7 +216,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 16
   },
   {
     "title": "Borderlands",
@@ -218,7 +235,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 17
   },
   {
     "title": "Borderlands 2",
@@ -239,25 +257,20 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 18
   },
   {
     "title": "BS Zelda no Densetsu",
-    "subtitle": null,
+    "subtitle": "Maps I and II",
     "platforms": [
       "Super Famicom"
     ],
-    "extras": [
-      {
-        "label": "Maps",
-        "items": [
-          "I and II"
-        ]
-      }
-    ],
+    "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 19
   },
   {
     "title": "BS Zelda no Densetsu: Inishie no Sekiban",
@@ -268,7 +281,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 20
   },
   {
     "title": "Burnout 3: Takedown",
@@ -279,7 +293,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 21
   },
   {
     "title": "Burnout Paradise",
@@ -290,7 +305,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 22
   },
   {
     "title": "Cadence of Hyrule",
@@ -309,7 +325,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 23
   },
   {
     "title": "Castle Crashers",
@@ -320,7 +337,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 24
   },
   {
     "title": "Castlevania: Symphony of the Night",
@@ -331,7 +349,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 25
   },
   {
     "title": "Child of Light",
@@ -342,7 +361,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 26
   },
   {
     "title": "Chrono Cross",
@@ -353,7 +373,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 27
   },
   {
     "title": "Chrono Trigger",
@@ -364,7 +385,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 28
   },
   {
     "title": "Cocoon",
@@ -375,7 +397,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 29
   },
   {
     "title": "Colin McRae Rally 05",
@@ -386,7 +409,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 30
   },
   {
     "title": "Crisis Core -Final Fantasy VII-",
@@ -398,7 +422,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 31
   },
   {
     "title": "Dirge of Cerebus: Final Fantasy VII",
@@ -409,7 +434,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 32
   },
   {
     "title": "Dirt",
@@ -420,7 +446,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 33
   },
   {
     "title": "Dirt 2",
@@ -432,7 +459,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"Hey, Watch It!\" game"
+    "gameOfGames": "The \"Hey, Watch It!\" game",
+    "order": 34
   },
   {
     "title": "Dirt 3",
@@ -451,7 +479,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The chill Swedish music game"
+    "gameOfGames": "The chill Swedish music game",
+    "order": 35
   },
   {
     "title": "Dirt 5",
@@ -472,7 +501,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 36
   },
   {
     "title": "Dirt Showdown",
@@ -483,7 +513,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 37
   },
   {
     "title": "Dispatch",
@@ -494,7 +525,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"I'm a bitch, my name's Robert, such a bitch whose name is Robert\" game"
+    "gameOfGames": "The \"I'm a bitch, my name's Robert, such a bitch whose name is Robert\" game",
+    "order": 38
   },
   {
     "title": "Dragon Age Inquisition",
@@ -513,7 +545,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 39
   },
   {
     "title": "Dragon Quest",
@@ -525,7 +558,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 40
   },
   {
     "title": "Dragon Warrior II",
@@ -536,7 +570,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 41
   },
   {
     "title": "Earthbound",
@@ -547,7 +582,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 42
   },
   {
     "title": "Fantasian (Part I)",
@@ -558,7 +594,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 43
   },
   {
     "title": "Final Fantasy",
@@ -570,7 +607,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 44
   },
   {
     "title": "Final Fantasy II",
@@ -582,7 +620,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 45
   },
   {
     "title": "Final Fantasy III Pixel Remaster",
@@ -593,7 +632,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 46
   },
   {
     "title": "Final Fantasy IV",
@@ -604,7 +644,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 47
   },
   {
     "title": "Final Fantasy V Pixel Remaster",
@@ -615,7 +656,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 48
   },
   {
     "title": "Final Fantasy VI",
@@ -626,7 +668,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"Son of a Submariner\" game"
+    "gameOfGames": "The \"Son of a Submariner\" game",
+    "order": 49
   },
   {
     "title": "Final Fantasy VII",
@@ -637,7 +680,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 50
   },
   {
     "title": "Final Fantasy VII Remake",
@@ -656,7 +700,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"I'm not some princess who needs to be coddled...shit\" game"
+    "gameOfGames": "The \"I'm not some princess who needs to be coddled...shit\" game",
+    "order": 51
   },
   {
     "title": "Final Fantasy VII Rebirth",
@@ -667,7 +712,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The second time around?"
+    "gameOfGames": "The second time around?",
+    "order": 52
   },
   {
     "title": "Final Fantasy VIII Remastered",
@@ -678,7 +724,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 53
   },
   {
     "title": "Final Fantasy IX",
@@ -689,7 +736,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 54
   },
   {
     "title": "Final Fantasy X HD Remaster",
@@ -700,7 +748,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 55
   },
   {
     "title": "Final Fantasy XII",
@@ -712,7 +761,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 56
   },
   {
     "title": "Final Fantasy XIII",
@@ -724,7 +774,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"This dampness is damp\" game"
+    "gameOfGames": "The \"This dampness is damp\" game",
+    "order": 57
   },
   {
     "title": "Final Fantasy XIII-2",
@@ -735,7 +786,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 58
   },
   {
     "title": "Final Fantasy XIV: A Realm Reborn",
@@ -759,7 +811,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"La Hee\" game"
+    "gameOfGames": "The \"La Hee\" game",
+    "order": 59
   },
   {
     "title": "Final Fantasy XV",
@@ -778,7 +831,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 60
   },
   {
     "title": "Final Fantasy XVI",
@@ -789,7 +843,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 61
   },
   {
     "title": "Final Fantasy Adventure",
@@ -800,7 +855,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 62
   },
   {
     "title": "Final Fantasy Mystic Quest",
@@ -811,7 +867,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 63
   },
   {
     "title": "Final Fantasy Tactics",
@@ -823,7 +880,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"The will to resist is in your hands\" game"
+    "gameOfGames": "The \"The will to resist is in your hands\" game",
+    "order": 64
   },
   {
     "title": "Fire Emblem Awakening",
@@ -834,7 +892,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 65
   },
   {
     "title": "Fire Emblem Engage",
@@ -852,7 +911,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 66
   },
   {
     "title": "Fire Emblem Warriors",
@@ -863,25 +923,20 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 67
   },
   {
     "title": "Fire Emblem Warriors: Three Hopes",
-    "subtitle": null,
+    "subtitle": "Blue Lions Route",
     "platforms": [
       "Switch"
     ],
-    "extras": [
-      {
-        "label": "Path",
-        "items": [
-          "Blue Lions"
-        ]
-      }
-    ],
+    "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 68
   },
   {
     "title": "Fire Emblem: Shadow Dragon and the Blade of Light",
@@ -892,22 +947,16 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 69
   },
   {
     "title": "Fire Emblem: Three Houses",
-    "subtitle": null,
+    "subtitle": "Blue Lions, Golden Deer Routes",
     "platforms": [
       "Switch"
     ],
     "extras": [
-      {
-        "label": "Paths",
-        "items": [
-          "Blue Lions",
-          "Golden Deer"
-        ]
-      },
       {
         "label": "DLC",
         "items": [
@@ -917,7 +966,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"So what, we're all supposed to take turns saying we'll do our best till the very end?\" game"
+    "gameOfGames": "The \"So what, we're all supposed to take turns saying we'll do our best till the very end?\" game",
+    "order": 70
   },
   {
     "title": "Forza Horizon",
@@ -928,7 +978,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 71
   },
   {
     "title": "Golden Sun",
@@ -939,7 +990,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 72
   },
   {
     "title": "Golden Sun: The Lost Age",
@@ -950,7 +1002,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 73
   },
   {
     "title": "Grandia II",
@@ -961,7 +1014,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 74
   },
   {
     "title": "Grandia III",
@@ -972,7 +1026,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 75
   },
   {
     "title": "The Great Ace Attorney: Adventures",
@@ -983,7 +1038,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"You think I won't be able to get you off\" game"
+    "gameOfGames": "The \"You think I won't be able to get you off\" game",
+    "order": 76
   },
   {
     "title": "The Great Ace Attorney 2: Resolve",
@@ -994,7 +1050,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"Why can't we have a normal, straightforward killing once in a while\" game"
+    "gameOfGames": "The \"Why can't we have a normal, straightforward killing once in a while\" game",
+    "order": 77
   },
   {
     "title": "Grid",
@@ -1005,7 +1062,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 78
   },
   {
     "title": "Grid 2",
@@ -1016,7 +1074,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The Ravenwest game"
+    "gameOfGames": "The Ravenwest game",
+    "order": 79
   },
   {
     "title": "Guild Wars",
@@ -1034,7 +1093,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 80
   },
   {
     "title": "Halo 3",
@@ -1045,7 +1105,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 81
   },
   {
     "title": "Halo 3: ODST",
@@ -1056,7 +1117,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 82
   },
   {
     "title": "Harm's Way",
@@ -1067,7 +1129,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 83
   },
   {
     "title": "Hob",
@@ -1078,7 +1141,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 84
   },
   {
     "title": "Hyper Light Drifter",
@@ -1089,7 +1153,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 85
   },
   {
     "title": "Hyrule Warriors",
@@ -1100,7 +1165,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 86
   },
   {
     "title": "Hyrule Warriors: Age of Calamity",
@@ -1118,7 +1184,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 87
   },
   {
     "title": "Hyrule Warriors: Age of Imprisonment",
@@ -1129,7 +1196,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 88
   },
   {
     "title": "Infamous Second Son",
@@ -1140,7 +1208,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 89
   },
   {
     "title": "Jak and Daxter: The Precursor Legacy",
@@ -1151,7 +1220,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 90
   },
   {
     "title": "Journey to the Savage Planet",
@@ -1162,7 +1232,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 91
   },
   {
     "title": "Kamiko",
@@ -1173,7 +1244,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 92
   },
   {
     "title": "Kirby Air Riders",
@@ -1184,7 +1256,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 93
   },
   {
     "title": "Kirby Super Star",
@@ -1195,7 +1268,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 94
   },
   {
     "title": "Kirby's Dream Land",
@@ -1206,7 +1280,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 95
   },
   {
     "title": "Koudelka",
@@ -1217,7 +1292,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 96
   },
   {
     "title": "The Legend of Doom",
@@ -1228,7 +1304,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 97
   },
   {
     "title": "The Legend of Zelda",
@@ -1239,7 +1316,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 98
   },
   {
     "title": "The Legend of Zelda: A Link Between Worlds",
@@ -1250,7 +1328,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 99
   },
   {
     "title": "The Legend of Zelda: A Link to the Past",
@@ -1261,7 +1340,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 100
   },
   {
     "title": "The Legend of Zelda: Breath of the Wild",
@@ -1272,7 +1352,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 101
   },
   {
     "title": "The Legend of Zelda: Echoes of Wisdom",
@@ -1283,7 +1364,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 102
   },
   {
     "title": "The Legend of Zelda: Four Swords Adventures",
@@ -1294,7 +1376,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 103
   },
   {
     "title": "The Legend of Zelda: Four Swords Anniversary Edition",
@@ -1305,7 +1388,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 104
   },
   {
     "title": "The Legend of Zelda: Link's Awakening",
@@ -1318,7 +1402,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 105
   },
   {
     "title": "The Legend of Zelda: Majora's Mask",
@@ -1329,7 +1414,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"I shall consume\" game"
+    "gameOfGames": "The \"I shall consume\" game",
+    "order": 106
   },
   {
     "title": "The Legend of Zelda: Ocarina of Time",
@@ -1340,7 +1426,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 107
   },
   {
     "title": "The Legend of Zelda: Oracle of Ages",
@@ -1351,7 +1438,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 108
   },
   {
     "title": "The Legend of Zelda: Oracle of Seasons",
@@ -1362,7 +1450,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 109
   },
   {
     "title": "The Legend of Zelda: Phantom Hourglass",
@@ -1373,7 +1462,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 110
   },
   {
     "title": "The Legend of Zelda: Skyward Sword",
@@ -1384,7 +1474,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 111
   },
   {
     "title": "The Legend of Zelda: Spirit Tracks",
@@ -1395,7 +1486,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 112
   },
   {
     "title": "The Legend of Zelda: Tears of the Kingdom",
@@ -1406,7 +1498,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 113
   },
   {
     "title": "The Legend of Zelda: The Minish Cap",
@@ -1417,7 +1510,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 114
   },
   {
     "title": "The Legend of Zelda: Tri Force Heroes",
@@ -1428,7 +1522,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 115
   },
   {
     "title": "The Legend of Zelda: Twilight Princess HD",
@@ -1439,7 +1534,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 116
   },
   {
     "title": "The Legend of Zelda: Wind Waker HD",
@@ -1450,7 +1546,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 117
   },
   {
     "title": "Link: Faces of Evil",
@@ -1461,7 +1558,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 118
   },
   {
     "title": "Link's Crossbow Training",
@@ -1472,7 +1570,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 119
   },
   {
     "title": "The Little Mermaid",
@@ -1483,7 +1582,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 120
   },
   {
     "title": "Lufia 2: Rise of the Sinstrials",
@@ -1494,7 +1594,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"My love is my sword\" game"
+    "gameOfGames": "The \"My love is my sword\" game",
+    "order": 121
   },
   {
     "title": "Mario Kart World",
@@ -1505,7 +1606,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 122
   },
   {
     "title": "Mario Tennis",
@@ -1516,7 +1618,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The Island Open game"
+    "gameOfGames": "The Island Open game",
+    "order": 123
   },
   {
     "title": "Mario Tennis: Power Tour",
@@ -1527,7 +1630,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 124
   },
   {
     "title": "Mass Effect",
@@ -1546,7 +1650,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 125
   },
   {
     "title": "Mass Effect 2",
@@ -1570,7 +1675,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 126
   },
   {
     "title": "The Messenger",
@@ -1581,7 +1687,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"Please don't touch the cabinet\" game"
+    "gameOfGames": "The \"Please don't touch the cabinet\" game",
+    "order": 127
   },
   {
     "title": "Metroid Dread",
@@ -1592,7 +1699,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"Accept your helplessness\" game"
+    "gameOfGames": "The \"Accept your helplessness\" game",
+    "order": 128
   },
   {
     "title": "Metroid Fusion",
@@ -1603,7 +1711,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 129
   },
   {
     "title": "Metroid II: Return of Samus",
@@ -1615,7 +1724,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 130
   },
   {
     "title": "Metroid Other M",
@@ -1626,7 +1736,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 131
   },
   {
     "title": "Metroid Prime",
@@ -1638,7 +1749,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"Science Team wisely decided to move on afterward\" game"
+    "gameOfGames": "The \"Science Team wisely decided to move on afterward\" game",
+    "order": 132
   },
   {
     "title": "Metroid Prime 2: Echoes",
@@ -1649,7 +1761,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 133
   },
   {
     "title": "Metroid Prime 3: Corruption",
@@ -1660,7 +1773,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 134
   },
   {
     "title": "Metroid Prime 4: Beyond",
@@ -1671,7 +1785,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 135
   },
   {
     "title": "Metroid: Zero Mission",
@@ -1682,7 +1797,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 136
   },
   {
     "title": "Monument Valley",
@@ -1693,7 +1809,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 137
   },
   {
     "title": "New Super Mario Bros.",
@@ -1704,7 +1821,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 138
   },
   {
     "title": "New Super Mario Bros. U",
@@ -1715,7 +1833,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 139
   },
   {
     "title": "New Super Mario Bros. Wii",
@@ -1726,7 +1845,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 140
   },
   {
     "title": "Pac-Man Championship Edition DX",
@@ -1737,7 +1857,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 141
   },
   {
     "title": "Parking Garage Rally Circuit",
@@ -1748,7 +1869,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The drift game"
+    "gameOfGames": "The drift game",
+    "order": 142
   },
   {
     "title": "Peggle",
@@ -1759,7 +1881,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 143
   },
   {
     "title": "Persona 3 FES",
@@ -1777,7 +1900,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 144
   },
   {
     "title": "Persona 3: Dancing in Moonlight",
@@ -1788,7 +1912,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 145
   },
   {
     "title": "Persona 4 Arena",
@@ -1799,7 +1924,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 146
   },
   {
     "title": "Persona 4 Arena Ultimax",
@@ -1810,7 +1936,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 147
   },
   {
     "title": "Persona 4 Golden",
@@ -1821,7 +1948,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"I-I'm ready to be born, dammit\" game"
+    "gameOfGames": "The \"I-I'm ready to be born, dammit\" game",
+    "order": 148
   },
   {
     "title": "Persona 4: Dancing All Night",
@@ -1833,7 +1961,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 149
   },
   {
     "title": "Persona 5 Royal",
@@ -1844,7 +1973,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 150
   },
   {
     "title": "Persona 5 Strikers",
@@ -1855,7 +1985,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"Beep Boop\" game"
+    "gameOfGames": "The \"Beep Boop\" game",
+    "order": 151
   },
   {
     "title": "Persona 5: Dancing in Starlight",
@@ -1866,7 +1997,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 152
   },
   {
     "title": "Please Touch the Artwork 2",
@@ -1877,7 +2009,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 153
   },
   {
     "title": "Pokemon: Blue Version",
@@ -1888,7 +2021,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 154
   },
   {
     "title": "Portal",
@@ -1899,7 +2033,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 155
   },
   {
     "title": "Portal 2",
@@ -1910,7 +2045,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 156
   },
   {
     "title": "Rogue Legacy",
@@ -1921,7 +2057,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 157
   },
   {
     "title": "The Stanley Parable",
@@ -1932,7 +2069,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 158
   },
   {
     "title": "Star Ocean",
@@ -1945,7 +2083,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 159
   },
   {
     "title": "Star Ocean Integrity and Faithlessness",
@@ -1956,26 +2095,20 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 160
   },
   {
     "title": "Star Ocean The Divine Force",
-    "subtitle": null,
+    "subtitle": "Raymond & Laeticia Routes",
     "platforms": [
       "PS5"
     ],
-    "extras": [
-      {
-        "label": "Paths",
-        "items": [
-          "Raymond",
-          "Laeticia"
-        ]
-      }
-    ],
+    "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The Special Delivery, Coming In Hot! game"
+    "gameOfGames": "The Special Delivery, Coming In Hot! game",
+    "order": 161
   },
   {
     "title": "Star Ocean The Last Hope",
@@ -1986,26 +2119,21 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 162
   },
   {
     "title": "Star Ocean The Second Story",
-    "subtitle": null,
+    "subtitle": "Claude Route",
     "platforms": [
       "PSX",
       "PS5"
     ],
-    "extras": [
-      {
-        "label": "Path",
-        "items": [
-          "Claude"
-        ]
-      }
-    ],
+    "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 163
   },
   {
     "title": "Star Ocean Till the End of Time",
@@ -2016,7 +2144,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"The whips on this planet hurt, too\" game"
+    "gameOfGames": "The \"The whips on this planet hurt, too\" game",
+    "order": 164
   },
   {
     "title": "Star Wars: The Force Unleashed",
@@ -2027,7 +2156,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 165
   },
   {
     "title": "Strangers of Paradise: Final Fantasy Origin",
@@ -2038,7 +2168,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 166
   },
   {
     "title": "Super Mario 3D Land",
@@ -2049,7 +2180,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 167
   },
   {
     "title": "Super Mario 3D World",
@@ -2060,7 +2192,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 168
   },
   {
     "title": "Super Mario 64",
@@ -2071,7 +2204,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 169
   },
   {
     "title": "Super Mario Bros. 3",
@@ -2082,7 +2216,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 170
   },
   {
     "title": "Super Mario Land",
@@ -2093,7 +2228,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 171
   },
   {
     "title": "Super Mario Land 2: 6 Golden Coins",
@@ -2104,7 +2240,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 172
   },
   {
     "title": "Super Mario Maker 2",
@@ -2115,7 +2252,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 173
   },
   {
     "title": "Super Mario Odyssey",
@@ -2126,7 +2264,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 174
   },
   {
     "title": "Super Mario RPG",
@@ -2137,7 +2276,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 175
   },
   {
     "title": "Super Mario Run",
@@ -2148,7 +2288,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 176
   },
   {
     "title": "Super Mario Wonder",
@@ -2159,7 +2300,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 177
   },
   {
     "title": "Super Mario World",
@@ -2170,7 +2312,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 178
   },
   {
     "title": "Super Metroid",
@@ -2181,7 +2324,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 179
   },
   {
     "title": "Super Smash Bros. Brawl",
@@ -2192,7 +2336,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 180
   },
   {
     "title": "Super Smash Bros. Ultimate",
@@ -2203,7 +2348,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 181
   },
   {
     "title": "Super Woden: Rally Edge",
@@ -2214,7 +2360,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The (other) drift game"
+    "gameOfGames": "The (other) drift game",
+    "order": 182
   },
   {
     "title": "Tales of Arise",
@@ -2225,7 +2372,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 183
   },
   {
     "title": "Tales of Vesperia",
@@ -2236,7 +2384,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 184
   },
   {
     "title": "Teenage Mutant Ninja Turtles: Shredder's Revenge",
@@ -2247,7 +2396,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 185
   },
   {
     "title": "Terranigma",
@@ -2258,7 +2408,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 186
   },
   {
     "title": "Tetris Effect: Connected",
@@ -2269,7 +2420,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 187
   },
   {
     "title": "Theathrhythm Final Fantasy Final Bar Line",
@@ -2280,7 +2432,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 188
   },
   {
     "title": "Thomas was Alone",
@@ -2291,7 +2444,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 189
   },
   {
     "title": "Tiny Toon Adventures: Babs' Big Break",
@@ -2302,7 +2456,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 190
   },
   {
     "title": "Turnip Boy does Tax Evasion",
@@ -2313,7 +2468,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 191
   },
   {
     "title": "Uncharted: Drake's Fortune",
@@ -2324,7 +2480,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 192
   },
   {
     "title": "Uncharted 2: Among Thieves",
@@ -2335,7 +2492,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 193
   },
   {
     "title": "Vampire Survivors",
@@ -2346,7 +2504,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 194
   },
   {
     "title": "VVVVVV",
@@ -2357,7 +2516,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 195
   },
   {
     "title": "Warriors Abyss",
@@ -2368,7 +2528,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 196
   },
   {
     "title": "Xenoblade Chronicles",
@@ -2387,7 +2548,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 197
   },
   {
     "title": "Xenoblade Chronicles 2",
@@ -2405,7 +2567,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"Think you can take me?\" game"
+    "gameOfGames": "The \"Think you can take me?\" game",
+    "order": 198
   },
   {
     "title": "Xenoblade Chronicles 3",
@@ -2423,7 +2586,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"...and I was the MVP. You were all thinking it\" game"
+    "gameOfGames": "The \"...and I was the MVP. You were all thinking it\" game",
+    "order": 199
   },
   {
     "title": "Xenoblade Chronicles X",
@@ -2442,7 +2606,8 @@
     ],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 200
   },
   {
     "title": "Xenogears",
@@ -2453,7 +2618,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 201
   },
   {
     "title": "Xenosaga Episode I: Der Wille zur Macht",
@@ -2464,7 +2630,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 202
   },
   {
     "title": "Xenosaga Episode II: Jenseits von Gut und Bose",
@@ -2475,7 +2642,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 203
   },
   {
     "title": "Xenosaga Episode III: Also sprach Zarathustra",
@@ -2486,7 +2654,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 204
   },
   {
     "title": "Zelda",
@@ -2497,7 +2666,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 205
   },
   {
     "title": "Zelda II: The Adventure of Link",
@@ -2508,7 +2678,8 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": "The \"I am Error\" game"
+    "gameOfGames": "The \"I am Error\" game",
+    "order": 206
   },
   {
     "title": "Zelda: The Wand of Gamelon",
@@ -2519,6 +2690,7 @@
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
-    "gameOfGames": null
+    "gameOfGames": null,
+    "order": 207
   }
 ]

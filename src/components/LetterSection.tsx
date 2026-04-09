@@ -2,10 +2,12 @@ import { useState, useRef, useCallback } from 'react';
 import type { LetterGroup, GameWithCover } from '../types/game';
 import GameCard from './GameCard';
 
+type DropSide = 'before' | 'after';
+
 export default function LetterSection({ group }: { group: LetterGroup }) {
   const [games, setGames] = useState(group.games);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
-  const [dropIndex, setDropIndex] = useState<number | null>(null);
+  const [dropTarget, setDropTarget] = useState<{ index: number; side: DropSide } | null>(null);
   const dragItem = useRef<number | null>(null);
 
   // Sync if parent data changes (e.g. after filter)
@@ -27,25 +29,36 @@ export default function LetterSection({ group }: { group: LetterGroup }) {
   const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    setDropIndex(index);
+    const rect = e.currentTarget.getBoundingClientRect();
+    const midX = rect.left + rect.width / 2;
+    const side: DropSide = e.clientX < midX ? 'before' : 'after';
+    setDropTarget({ index, side });
   }, []);
 
   const handleDragEnd = useCallback(() => {
     setDragIndex(null);
-    setDropIndex(null);
+    setDropTarget(null);
     dragItem.current = null;
   }, []);
 
-  const handleDrop = useCallback(async (index: number) => {
+  const handleDrop = useCallback(async () => {
     const from = dragItem.current;
-    if (from === null || from === index) {
+    if (from === null || !dropTarget) {
+      handleDragEnd();
+      return;
+    }
+
+    let toIndex = dropTarget.side === 'after' ? dropTarget.index + 1 : dropTarget.index;
+    // Adjust for the removal of the dragged item
+    if (from < toIndex) toIndex--;
+    if (from === toIndex) {
       handleDragEnd();
       return;
     }
 
     const reordered = [...games];
     const [moved] = reordered.splice(from, 1);
-    reordered.splice(index, 0, moved);
+    reordered.splice(toIndex, 0, moved);
 
     setGames(reordered);
     handleDragEnd();
@@ -57,14 +70,14 @@ export default function LetterSection({ group }: { group: LetterGroup }) {
         titles: reordered.map((g: GameWithCover) => g.title),
       }),
     });
-  }, [games, handleDragEnd]);
+  }, [games, dropTarget, handleDragEnd]);
 
   const getCardClass = (index: number) => {
     if (!isDev) return undefined;
     const classes = ['draggable-card'];
     if (dragIndex === index) classes.push('dragging');
-    if (dropIndex === index && dragIndex !== null && dragIndex !== index) {
-      classes.push(dragIndex < index ? 'drop-after' : 'drop-before');
+    if (dropTarget && dragIndex !== null && dropTarget.index === index && dragIndex !== index) {
+      classes.push(dropTarget.side === 'before' ? 'drop-before' : 'drop-after');
     }
     return classes.join(' ');
   };
@@ -79,7 +92,7 @@ export default function LetterSection({ group }: { group: LetterGroup }) {
             draggable={isDev}
             onDragStart={isDev ? (e) => handleDragStart(e, index) : undefined}
             onDragOver={isDev ? (e) => handleDragOver(e, index) : undefined}
-            onDrop={isDev ? () => handleDrop(index) : undefined}
+            onDrop={isDev ? handleDrop : undefined}
             onDragEnd={isDev ? handleDragEnd : undefined}
             className={getCardClass(index)}
           >
