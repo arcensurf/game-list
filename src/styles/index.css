@@ -186,6 +186,50 @@ body {
   }
 }
 
+/* Draggable card wrapper (dev only) */
+.draggable-card {
+  cursor: grab;
+  display: flex;
+  position: relative;
+  transition: opacity var(--transition);
+}
+
+.draggable-card:active {
+  cursor: grabbing;
+}
+
+.draggable-card > .game-card {
+  flex: 1;
+}
+
+.draggable-card.dragging {
+  opacity: 0.3;
+}
+
+.draggable-card.drop-before::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent);
+  border-radius: 2px;
+  z-index: 10;
+}
+
+.draggable-card.drop-after::after {
+  content: '';
+  position: absolute;
+  right: -3px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent);
+  border-radius: 2px;
+  z-index: 10;
+}
+
 /* Game card */
 .game-card {
   display: flex;

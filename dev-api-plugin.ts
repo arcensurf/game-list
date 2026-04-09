@@ -246,16 +246,40 @@ export default function devApiPlugin(): Plugin {
             game.extras = extras;
             game.gameOfGames = gameOfGames;
 
-            // Re-sort
-            games.sort((a: { title: string }, b: { title: string }) => {
-              const norm = (t: string) => t.replace(/^the\s+/i, '').toLowerCase();
-              return norm(a.title).localeCompare(norm(b.title));
-            });
-
             writeJson(gamesPath, games);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ title, platforms, extras }));
+            return;
+          }
+
+          if (req.url === '/api/reorder-games') {
+            const body = JSON.parse(await parseBody(req));
+            const { titles } = body as { titles: string[] };
+
+            const games = readJson(gamesPath);
+            const titleSet = new Set(titles);
+            // Pull out the games being reordered
+            const toReorder = titles.map((t: string) =>
+              games.find((g: { title: string }) => g.title === t)
+            ).filter(Boolean);
+            // Remove them from the array
+            const remaining = games.filter((g: { title: string }) => !titleSet.has(g.title));
+            // Find where the first game in this group sat originally
+            const firstOrigIdx = games.findIndex((g: { title: string }) => g.title === titles[0]);
+            // Find insert position in remaining array
+            let insertIdx = remaining.length;
+            for (let i = 0; i < remaining.length; i++) {
+              if (games.indexOf(remaining[i]) >= firstOrigIdx) {
+                insertIdx = i;
+                break;
+              }
+            }
+            remaining.splice(insertIdx, 0, ...toReorder);
+            writeJson(gamesPath, remaining);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true }));
             return;
           }
 
