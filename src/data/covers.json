@@ -1,0 +1,1072 @@
+{
+  ".hack//INFECTION": {
+    "sgdbId": 229340,
+    "file": "hack-infection.png",
+    "fetchedAt": "2026-04-09T17:12:15.232Z"
+  },
+  ".hack//MUTATION": {
+    "sgdbId": 229342,
+    "file": "hack-mutation.png",
+    "fetchedAt": "2026-04-09T17:12:24.025Z"
+  },
+  "Advance Wars": {
+    "sgdbId": 34640,
+    "file": "advance-wars.png",
+    "fetchedAt": "2026-04-09T16:19:59.897Z"
+  },
+  "Art of Rally": {
+    "sgdbId": 643497,
+    "file": "art-of-rally.png",
+    "fetchedAt": "2026-04-09T17:10:55.997Z"
+  },
+  "Assassin's Creed": {
+    "sgdbId": 1451,
+    "file": "assassin-s-creed.png",
+    "fetchedAt": "2026-04-09T16:20:01.741Z"
+  },
+  "Assassin's Creed II": {
+    "sgdbId": 5820,
+    "file": "assassin-s-creed-ii.png",
+    "fetchedAt": "2026-04-09T16:20:02.853Z"
+  },
+  "Assassin's Creed III": {
+    "sgdbId": 1937,
+    "file": "assassin-s-creed-iii.png",
+    "fetchedAt": "2026-04-09T16:20:03.829Z"
+  },
+  "Assassin's Creed IV: Black Flag": {
+    "sgdbId": 81689,
+    "file": "assassin-s-creed-iv-black-flag.png",
+    "fetchedAt": "2026-04-09T16:54:35.676Z"
+  },
+  "Assassin's Creed Unity": {
+    "sgdbId": 137345,
+    "file": "assassin-s-creed-unity.jpg",
+    "fetchedAt": "2026-04-09T16:54:33.486Z"
+  },
+  "Assassin's Creed: Brotherhood": {
+    "sgdbId": 108257,
+    "file": "assassin-s-creed-brotherhood.png",
+    "fetchedAt": "2026-04-09T17:10:44.944Z"
+  },
+  "Assassin's Creed: Revelations": {
+    "sgdbId": 1760,
+    "file": "assassin-s-creed-revelations.png",
+    "fetchedAt": "2026-04-09T16:20:08.518Z"
+  },
+  "Astral Chain": {
+    "sgdbId": 5249585,
+    "file": "astral-chain.png",
+    "fetchedAt": "2026-04-09T16:20:09.370Z"
+  },
+  "Astro Bot": {
+    "sgdbId": 5454475,
+    "file": "astro-bot.png",
+    "fetchedAt": "2026-04-09T16:20:10.429Z"
+  },
+  "Astro's Playroom": {
+    "sgdbId": 5270665,
+    "file": "astro-s-playroom.png",
+    "fetchedAt": "2026-04-09T16:20:11.903Z"
+  },
+  "Bastion": {
+    "sgdbId": 1240,
+    "file": "bastion.png",
+    "fetchedAt": "2026-04-09T16:20:12.865Z"
+  },
+  "Baten Kaitos: Eternal Wings and the Lost Ocean": {
+    "sgdbId": 34847,
+    "file": "baten-kaitos-eternal-wings-and-the-lost-ocean.png",
+    "fetchedAt": "2026-04-09T16:20:13.800Z"
+  },
+  "Bioshock Infinite": {
+    "sgdbId": 29288,
+    "file": "bioshock-infinite.png",
+    "fetchedAt": "2026-04-09T16:20:14.853Z"
+  },
+  "Borderlands": {
+    "sgdbId": 29618,
+    "file": "borderlands.png",
+    "fetchedAt": "2026-04-09T16:20:15.678Z"
+  },
+  "Borderlands 2": {
+    "sgdbId": 12627,
+    "file": "borderlands-2.png",
+    "fetchedAt": "2026-04-09T16:20:16.563Z"
+  },
+  "BS Zelda no Densetsu": {
+    "sgdbId": 21169,
+    "file": "bs-zelda-no-densetsu.png",
+    "fetchedAt": "2026-04-09T16:20:17.474Z"
+  },
+  "BS Zelda no Densetsu: Inishie no Sekiban": {
+    "sgdbId": 21169,
+    "file": "bs-zelda-no-densetsu-inishie-no-sekiban.jpg",
+    "fetchedAt": "2026-04-09T16:39:27.691Z"
+  },
+  "Burnout 3: Takedown": {
+    "sgdbId": 37348,
+    "file": "burnout-3-takedown.png",
+    "fetchedAt": "2026-04-09T16:20:19.373Z"
+  },
+  "Burnout Paradise": {
+    "sgdbId": 37894,
+    "file": "burnout-paradise.png",
+    "fetchedAt": "2026-04-09T16:20:20.875Z"
+  },
+  "Cadence of Hyrule": {
+    "sgdbId": 5249586,
+    "file": "cadence-of-hyrule.png",
+    "fetchedAt": "2026-04-09T16:20:21.779Z"
+  },
+  "Castle Crashers": {
+    "sgdbId": 1815,
+    "file": "castle-crashers.png",
+    "fetchedAt": "2026-04-09T16:20:22.723Z"
+  },
+  "Castlevania: Symphony of the Night": {
+    "sgdbId": 37654,
+    "file": "castlevania-symphony-of-the-night.png",
+    "fetchedAt": "2026-04-09T16:20:23.590Z"
+  },
+  "Child of Light": {
+    "sgdbId": 3204,
+    "file": "child-of-light.png",
+    "fetchedAt": "2026-04-09T16:20:24.428Z"
+  },
+  "Chrono Cross": {
+    "sgdbId": 36466,
+    "file": "chrono-cross.png",
+    "fetchedAt": "2026-04-09T16:20:25.547Z"
+  },
+  "Chrono Trigger": {
+    "sgdbId": 17593,
+    "file": "chrono-trigger.png",
+    "fetchedAt": "2026-04-09T16:20:26.403Z"
+  },
+  "Cocoon": {
+    "sgdbId": 5335230,
+    "file": "cocoon.png",
+    "fetchedAt": "2026-04-09T16:20:29.732Z"
+  },
+  "Colin McRae Rally 05": {
+    "sgdbId": 4099,
+    "file": "colin-mcrae-rally-05.jpg",
+    "fetchedAt": "2026-04-09T16:20:30.664Z"
+  },
+  "Crisis Core -Final Fantasy VII-": {
+    "sgdbId": 25600,
+    "file": "crisis-core-final-fantasy-vii.png",
+    "fetchedAt": "2026-04-09T16:20:31.633Z"
+  },
+  "Dirge of Cerebus: Final Fantasy VII": {
+    "sgdbId": null,
+    "file": "dirge-of-cerebus-final-fantasy-vii.jpg",
+    "fetchedAt": "2026-04-09T16:39:13.171Z"
+  },
+  "Dirt": {
+    "sgdbId": 1318,
+    "file": "dirt.png",
+    "fetchedAt": "2026-04-09T16:20:33.734Z"
+  },
+  "Dirt 2": {
+    "sgdbId": 1413,
+    "file": "dirt-2.png",
+    "fetchedAt": "2026-04-09T16:20:35.812Z"
+  },
+  "Dirt 3": {
+    "sgdbId": 10697,
+    "file": "dirt-3.jpg",
+    "fetchedAt": "2026-04-09T16:20:36.870Z"
+  },
+  "Dirt 5": {
+    "sgdbId": 5260194,
+    "file": "dirt-5.png",
+    "fetchedAt": "2026-04-09T16:20:38.573Z"
+  },
+  "Dirt Showdown": {
+    "sgdbId": 1755,
+    "file": "dirt-showdown.png",
+    "fetchedAt": "2026-04-09T16:20:39.649Z"
+  },
+  "Dispatch": {
+    "sgdbId": null,
+    "file": "dispatch.jpg",
+    "fetchedAt": "2026-04-09T16:39:07.338Z"
+  },
+  "Dragon Age Inquisition": {
+    "sgdbId": 36775,
+    "file": "dragon-age-inquisition.png",
+    "fetchedAt": "2026-04-09T16:20:41.601Z"
+  },
+  "Dragon Quest": {
+    "sgdbId": 34155,
+    "file": "dragon-quest.png",
+    "fetchedAt": "2026-04-09T16:20:42.597Z"
+  },
+  "Dragon Warrior II": {
+    "sgdbId": 38074,
+    "file": "dragon-warrior-ii.png",
+    "fetchedAt": "2026-04-09T16:20:43.445Z"
+  },
+  "Earthbound": {
+    "sgdbId": 4601,
+    "file": "earthbound.png",
+    "fetchedAt": "2026-04-09T16:20:44.338Z"
+  },
+  "Fantasian (Part I)": {
+    "sgdbId": 5455448,
+    "file": "fantasian-part-i.jpg",
+    "fetchedAt": "2026-04-09T16:20:45.255Z"
+  },
+  "Final Fantasy": {
+    "sgdbId": 33565,
+    "file": "final-fantasy.png",
+    "fetchedAt": "2026-04-09T16:20:46.073Z"
+  },
+  "Final Fantasy Adventure": {
+    "sgdbId": 35087,
+    "file": "final-fantasy-adventure.png",
+    "fetchedAt": "2026-04-09T16:20:46.951Z"
+  },
+  "Final Fantasy II": {
+    "sgdbId": 36395,
+    "file": "final-fantasy-ii.png",
+    "fetchedAt": "2026-04-09T16:20:47.843Z"
+  },
+  "Final Fantasy III Pixel Remaster": {
+    "sgdbId": 5288929,
+    "file": "final-fantasy-iii-pixel-remaster.png",
+    "fetchedAt": "2026-04-09T16:20:48.877Z"
+  },
+  "Final Fantasy IV": {
+    "sgdbId": 175144,
+    "file": "final-fantasy-iv.png",
+    "fetchedAt": "2026-04-09T16:36:04.997Z"
+  },
+  "Final Fantasy IX": {
+    "sgdbId": 8025,
+    "file": "final-fantasy-ix.png",
+    "fetchedAt": "2026-04-09T16:20:50.506Z"
+  },
+  "Final Fantasy Mystic Quest": {
+    "sgdbId": 361230,
+    "file": "final-fantasy-mystic-quest.jpg",
+    "fetchedAt": "2026-04-09T16:36:17.775Z"
+  },
+  "Final Fantasy Tactics": {
+    "sgdbId": 35500,
+    "file": "final-fantasy-tactics.png",
+    "fetchedAt": "2026-04-09T16:20:53.139Z"
+  },
+  "Final Fantasy V Pixel Remaster": {
+    "sgdbId": 8235,
+    "file": "final-fantasy-v-pixel-remaster.png",
+    "fetchedAt": "2026-04-09T16:20:54.185Z"
+  },
+  "Final Fantasy VI": {
+    "sgdbId": 8236,
+    "file": "final-fantasy-vi.png",
+    "fetchedAt": "2026-04-09T16:20:55.074Z"
+  },
+  "Final Fantasy VII": {
+    "sgdbId": 8631,
+    "file": "final-fantasy-vii.png",
+    "fetchedAt": "2026-04-09T16:20:55.876Z"
+  },
+  "Final Fantasy VII Rebirth": {
+    "sgdbId": 5336387,
+    "file": "final-fantasy-vii-rebirth.png",
+    "fetchedAt": "2026-04-09T16:20:56.925Z"
+  },
+  "Final Fantasy VII Remake": {
+    "sgdbId": 5250296,
+    "file": "final-fantasy-vii-remake.png",
+    "fetchedAt": "2026-04-09T16:21:00.564Z"
+  },
+  "Final Fantasy VIII Remastered": {
+    "sgdbId": 5247726,
+    "file": "final-fantasy-viii-remastered.jpg",
+    "fetchedAt": "2026-04-09T16:21:01.497Z"
+  },
+  "Final Fantasy X HD Remaster": {
+    "sgdbId": 7167,
+    "file": "final-fantasy-x-hd-remaster.jpg",
+    "fetchedAt": "2026-04-09T16:21:02.567Z"
+  },
+  "Final Fantasy XII": {
+    "sgdbId": 37820,
+    "file": "final-fantasy-xii.png",
+    "fetchedAt": "2026-04-09T16:21:04.767Z"
+  },
+  "Final Fantasy XIII": {
+    "sgdbId": 4268,
+    "file": "final-fantasy-xiii.png",
+    "fetchedAt": "2026-04-09T16:21:05.721Z"
+  },
+  "Final Fantasy XIII-2": {
+    "sgdbId": 4269,
+    "file": "final-fantasy-xiii-2.png",
+    "fetchedAt": "2026-04-09T16:21:06.527Z"
+  },
+  "Final Fantasy XIV: A Realm Reborn": {
+    "sgdbId": 104831,
+    "file": "final-fantasy-xiv-a-realm-reborn.png",
+    "fetchedAt": "2026-04-09T16:38:49.483Z"
+  },
+  "Final Fantasy XV": {
+    "sgdbId": 38048,
+    "file": "final-fantasy-xv.png",
+    "fetchedAt": "2026-04-09T16:21:08.994Z"
+  },
+  "Final Fantasy XVI": {
+    "sgdbId": 5267223,
+    "file": "final-fantasy-xvi.png",
+    "fetchedAt": "2026-04-09T16:21:09.920Z"
+  },
+  "Fire Emblem Awakening": {
+    "sgdbId": 5246426,
+    "file": "fire-emblem-awakening.png",
+    "fetchedAt": "2026-04-09T16:21:10.920Z"
+  },
+  "Fire Emblem Engage": {
+    "sgdbId": 5355791,
+    "file": "fire-emblem-engage.png",
+    "fetchedAt": "2026-04-09T16:21:11.772Z"
+  },
+  "Fire Emblem Warriors": {
+    "sgdbId": 454312,
+    "file": "fire-emblem-warriors.png",
+    "fetchedAt": "2026-04-09T16:36:27.016Z"
+  },
+  "Fire Emblem Warriors: Three Hopes": {
+    "sgdbId": 5319974,
+    "file": "fire-emblem-warriors-three-hopes.png",
+    "fetchedAt": "2026-04-09T16:21:13.611Z"
+  },
+  "Fire Emblem: Shadow Dragon and the Blade of Light": {
+    "sgdbId": 5256411,
+    "file": "fire-emblem-shadow-dragon-and-the-blade-of-light.png",
+    "fetchedAt": "2026-04-09T16:21:14.810Z"
+  },
+  "Fire Emblem: Three Houses": {
+    "sgdbId": 5246430,
+    "file": "fire-emblem-three-houses.png",
+    "fetchedAt": "2026-04-09T16:21:15.672Z"
+  },
+  "Forza Horizon": {
+    "sgdbId": 19719,
+    "file": "forza-horizon.png",
+    "fetchedAt": "2026-04-09T16:21:17.900Z"
+  },
+  "Golden Sun": {
+    "sgdbId": 37072,
+    "file": "golden-sun.png",
+    "fetchedAt": "2026-04-09T16:21:18.832Z"
+  },
+  "Golden Sun: The Lost Age": {
+    "sgdbId": 39020,
+    "file": "golden-sun-the-lost-age.png",
+    "fetchedAt": "2026-04-09T16:21:19.917Z"
+  },
+  "Grandia II": {
+    "sgdbId": 36113,
+    "file": "grandia-ii.png",
+    "fetchedAt": "2026-04-09T16:21:20.974Z"
+  },
+  "Grandia III": {
+    "sgdbId": 58,
+    "file": "grandia-iii.png",
+    "fetchedAt": "2026-04-09T16:21:22.156Z"
+  },
+  "The Great Ace Attorney 2: Resolve": {
+    "sgdbId": 5261596,
+    "file": "the-great-ace-attorney-2-resolve.png",
+    "fetchedAt": "2026-04-09T16:21:24.006Z"
+  },
+  "The Great Ace Attorney: Adventures": {
+    "sgdbId": 164035,
+    "file": "the-great-ace-attorney-adventures.png",
+    "fetchedAt": "2026-04-09T16:39:52.465Z"
+  },
+  "Grid": {
+    "sgdbId": 1406,
+    "file": "grid.jpg",
+    "fetchedAt": "2026-04-09T16:21:27.176Z"
+  },
+  "Grid 2": {
+    "sgdbId": 10708,
+    "file": "grid-2.png",
+    "fetchedAt": "2026-04-09T16:21:28.209Z"
+  },
+  "Guild Wars": {
+    "sgdbId": 4456,
+    "file": "guild-wars.png",
+    "fetchedAt": "2026-04-09T16:21:29.862Z"
+  },
+  "Halo 3": {
+    "sgdbId": 37017,
+    "file": "halo-3.png",
+    "fetchedAt": "2026-04-09T16:21:31.684Z"
+  },
+  "Halo 3: ODST": {
+    "sgdbId": 37792,
+    "file": "halo-3-odst.png",
+    "fetchedAt": "2026-04-09T16:21:33.246Z"
+  },
+  "Harm's Way": {
+    "sgdbId": 5446424,
+    "file": "harm-s-way.png",
+    "fetchedAt": "2026-04-09T16:21:34.158Z"
+  },
+  "Hob": {
+    "sgdbId": 9220,
+    "file": "hob.png",
+    "fetchedAt": "2026-04-09T16:21:35.648Z"
+  },
+  "Hyper Light Drifter": {
+    "sgdbId": 3234,
+    "file": "hyper-light-drifter.png",
+    "fetchedAt": "2026-04-09T16:21:37.633Z"
+  },
+  "Hyrule Warriors": {
+    "sgdbId": 36550,
+    "file": "hyrule-warriors.png",
+    "fetchedAt": "2026-04-09T16:21:38.442Z"
+  },
+  "Hyrule Warriors: Age of Calamity": {
+    "sgdbId": 5267007,
+    "file": "hyrule-warriors-age-of-calamity.png",
+    "fetchedAt": "2026-04-09T16:21:39.286Z"
+  },
+  "Hyrule Warriors: Age of Imprisonment": {
+    "sgdbId": 650166,
+    "file": "hyrule-warriors-age-of-imprisonment.jpg",
+    "fetchedAt": "2026-04-09T16:36:47.498Z"
+  },
+  "Infamous Second Son": {
+    "sgdbId": 5246744,
+    "file": "infamous-second-son.png",
+    "fetchedAt": "2026-04-09T16:21:42.702Z"
+  },
+  "Jak and Daxter: The Precursor Legacy": {
+    "sgdbId": 37452,
+    "file": "jak-and-daxter-the-precursor-legacy.jpg",
+    "fetchedAt": "2026-04-09T16:21:43.546Z"
+  },
+  "Journey to the Savage Planet": {
+    "sgdbId": 4963028,
+    "file": "journey-to-the-savage-planet.png",
+    "fetchedAt": "2026-04-09T16:21:44.551Z"
+  },
+  "Kamiko": {
+    "sgdbId": 4993053,
+    "file": "kamiko.png",
+    "fetchedAt": "2026-04-09T16:21:46.090Z"
+  },
+  "Kirby Air Riders": {
+    "sgdbId": 5483963,
+    "file": "kirby-air-riders.png",
+    "fetchedAt": "2026-04-09T16:21:47.196Z"
+  },
+  "Kirby Super Star": {
+    "sgdbId": 37158,
+    "file": "kirby-super-star.png",
+    "fetchedAt": "2026-04-09T16:21:48.170Z"
+  },
+  "Kirby's Dream Land": {
+    "sgdbId": 36494,
+    "file": "kirby-s-dream-land.png",
+    "fetchedAt": "2026-04-09T16:21:48.981Z"
+  },
+  "Koudelka": {
+    "sgdbId": 36270,
+    "file": "koudelka.png",
+    "fetchedAt": "2026-04-09T16:21:49.838Z"
+  },
+  "The Legend of Doom (DOOM II WAD)": {
+    "sgdbId": 1673,
+    "file": "the-legend-of-doom-doom-ii-wad.jpg",
+    "fetchedAt": "2026-04-09T16:38:17.138Z"
+  },
+  "The Legend of Zelda": {
+    "sgdbId": 314262,
+    "file": "the-legend-of-zelda.png",
+    "fetchedAt": "2026-04-09T16:58:25.152Z"
+  },
+  "The Legend of Zelda: A Link Between Worlds": {
+    "sgdbId": 5209446,
+    "file": "the-legend-of-zelda-a-link-between-worlds.png",
+    "fetchedAt": "2026-04-09T16:21:52.376Z"
+  },
+  "The Legend of Zelda: A Link to the Past": {
+    "sgdbId": 38124,
+    "file": "the-legend-of-zelda-a-link-to-the-past.jpg",
+    "fetchedAt": "2026-04-09T16:21:53.359Z"
+  },
+  "The Legend of Zelda: Breath of the Wild": {
+    "sgdbId": 35744,
+    "file": "the-legend-of-zelda-breath-of-the-wild.png",
+    "fetchedAt": "2026-04-09T16:21:54.177Z"
+  },
+  "The Legend of Zelda: Echoes of Wisdom": {
+    "sgdbId": 5455462,
+    "file": "the-legend-of-zelda-echoes-of-wisdom.png",
+    "fetchedAt": "2026-04-09T16:21:54.993Z"
+  },
+  "The Legend of Zelda: Four Swords Adventures": {
+    "sgdbId": 1673,
+    "file": "the-legend-of-zelda-four-swords-adventures.png",
+    "fetchedAt": "2026-04-09T16:21:55.748Z"
+  },
+  "The Legend of Zelda: Four Swords Anniversary Edition": {
+    "sgdbId": 5275821,
+    "file": "the-legend-of-zelda-four-swords-anniversary-edition.png",
+    "fetchedAt": "2026-04-09T16:21:56.584Z"
+  },
+  "The Legend of Zelda: Link's Awakening": {
+    "sgdbId": 34336,
+    "file": "the-legend-of-zelda-link-s-awakening.png",
+    "fetchedAt": "2026-04-09T16:21:57.413Z"
+  },
+  "The Legend of Zelda: Majora's Mask": {
+    "sgdbId": 34302,
+    "file": "the-legend-of-zelda-majora-s-mask.png",
+    "fetchedAt": "2026-04-09T16:21:58.168Z"
+  },
+  "The Legend of Zelda: Ocarina of Time": {
+    "sgdbId": 21202,
+    "file": "the-legend-of-zelda-ocarina-of-time.png",
+    "fetchedAt": "2026-04-09T16:21:59.001Z"
+  },
+  "The Legend of Zelda: Oracle of Ages": {
+    "sgdbId": 35190,
+    "file": "the-legend-of-zelda-oracle-of-ages.png",
+    "fetchedAt": "2026-04-09T16:21:59.838Z"
+  },
+  "The Legend of Zelda: Oracle of Seasons": {
+    "sgdbId": 38450,
+    "file": "the-legend-of-zelda-oracle-of-seasons.png",
+    "fetchedAt": "2026-04-09T16:22:00.748Z"
+  },
+  "The Legend of Zelda: Phantom Hourglass": {
+    "sgdbId": 38076,
+    "file": "the-legend-of-zelda-phantom-hourglass.png",
+    "fetchedAt": "2026-04-09T16:22:01.556Z"
+  },
+  "The Legend of Zelda: Skyward Sword": {
+    "sgdbId": 37512,
+    "file": "the-legend-of-zelda-skyward-sword.jpg",
+    "fetchedAt": "2026-04-09T16:22:03.345Z"
+  },
+  "The Legend of Zelda: Spirit Tracks": {
+    "sgdbId": 37859,
+    "file": "the-legend-of-zelda-spirit-tracks.png",
+    "fetchedAt": "2026-04-09T16:22:04.211Z"
+  },
+  "The Legend of Zelda: Tears of the Kingdom": {
+    "sgdbId": 5303117,
+    "file": "the-legend-of-zelda-tears-of-the-kingdom.png",
+    "fetchedAt": "2026-04-09T16:22:05.064Z"
+  },
+  "The Legend of Zelda: The Minish Cap": {
+    "sgdbId": 34539,
+    "file": "the-legend-of-zelda-the-minish-cap.png",
+    "fetchedAt": "2026-04-09T16:22:06.670Z"
+  },
+  "The Legend of Zelda: Tri Force Heroes": {
+    "sgdbId": 5250216,
+    "file": "the-legend-of-zelda-tri-force-heroes.png",
+    "fetchedAt": "2026-04-09T16:22:07.574Z"
+  },
+  "The Legend of Zelda: Twilight Princess HD": {
+    "sgdbId": 36804,
+    "file": "the-legend-of-zelda-twilight-princess-hd.png",
+    "fetchedAt": "2026-04-09T16:22:08.391Z"
+  },
+  "The Legend of Zelda: Wind Waker HD": {
+    "sgdbId": 35048,
+    "file": "the-legend-of-zelda-wind-waker-hd.png",
+    "fetchedAt": "2026-04-09T16:22:09.293Z"
+  },
+  "Link: Faces of Evil": {
+    "sgdbId": 5260424,
+    "file": "link-faces-of-evil.png",
+    "fetchedAt": "2026-04-09T16:22:10.208Z"
+  },
+  "Link's Crossbow Training": {
+    "sgdbId": 5247899,
+    "file": "link-s-crossbow-training.png",
+    "fetchedAt": "2026-04-09T16:22:11.032Z"
+  },
+  "The Little Mermaid": {
+    "sgdbId": 253080,
+    "file": "the-little-mermaid.png",
+    "fetchedAt": "2026-04-09T16:41:50.871Z"
+  },
+  "Lufia 2: Rise of the Sinstrials": {
+    "sgdbId": 36473,
+    "file": "lufia-2-rise-of-the-sinstrials.png",
+    "fetchedAt": "2026-04-09T16:22:13.426Z"
+  },
+  "Mario Kart World": {
+    "sgdbId": 5483943,
+    "file": "mario-kart-world.png",
+    "fetchedAt": "2026-04-09T16:22:14.436Z"
+  },
+  "Mario Tennis": {
+    "sgdbId": 25642,
+    "file": "mario-tennis.png",
+    "fetchedAt": "2026-04-09T16:22:17.812Z"
+  },
+  "Mario Tennis: Power Tour": {
+    "sgdbId": 34786,
+    "file": "mario-tennis-power-tour.png",
+    "fetchedAt": "2026-04-09T16:22:18.611Z"
+  },
+  "Mass Effect": {
+    "sgdbId": 1558,
+    "file": "mass-effect.png",
+    "fetchedAt": "2026-04-09T16:22:19.589Z"
+  },
+  "Mass Effect 2": {
+    "sgdbId": 2993,
+    "file": "mass-effect-2.png",
+    "fetchedAt": "2026-04-09T16:22:20.697Z"
+  },
+  "The Messenger": {
+    "sgdbId": 24014,
+    "file": "the-messenger.jpg",
+    "fetchedAt": "2026-04-09T16:22:21.710Z"
+  },
+  "Metroid Dread": {
+    "sgdbId": 5257930,
+    "file": "metroid-dread.png",
+    "fetchedAt": "2026-04-09T16:22:22.454Z"
+  },
+  "Metroid Fusion": {
+    "sgdbId": 37371,
+    "file": "metroid-fusion.png",
+    "fetchedAt": "2026-04-09T16:22:23.298Z"
+  },
+  "Metroid II: Return of Samus": {
+    "sgdbId": 33587,
+    "file": "metroid-ii-return-of-samus.png",
+    "fetchedAt": "2026-04-09T16:22:24.104Z"
+  },
+  "Metroid Other M": {
+    "sgdbId": 37462,
+    "file": "metroid-other-m.png",
+    "fetchedAt": "2026-04-09T16:22:25.010Z"
+  },
+  "Metroid Prime": {
+    "sgdbId": 37640,
+    "file": "metroid-prime.png",
+    "fetchedAt": "2026-04-09T16:22:25.910Z"
+  },
+  "Metroid Prime 2: Echoes": {
+    "sgdbId": 634978,
+    "file": "metroid-prime-2-echoes.png",
+    "fetchedAt": "2026-04-09T17:02:15.226Z"
+  },
+  "Metroid Prime 3: Corruption": {
+    "sgdbId": 37532,
+    "file": "metroid-prime-3-corruption.png",
+    "fetchedAt": "2026-04-09T16:22:27.498Z"
+  },
+  "Metroid Prime 4: Beyond": {
+    "sgdbId": 626620,
+    "file": "metroid-prime-4-beyond.png",
+    "fetchedAt": "2026-04-09T17:02:06.277Z"
+  },
+  "Metroid: Zero Mission": {
+    "sgdbId": 85,
+    "file": "metroid-zero-mission.png",
+    "fetchedAt": "2026-04-09T16:22:29.766Z"
+  },
+  "Monument Valley": {
+    "sgdbId": 5255137,
+    "file": "monument-valley.png",
+    "fetchedAt": "2026-04-09T16:22:31.135Z"
+  },
+  "New Super Mario Bros.": {
+    "sgdbId": 37981,
+    "file": "new-super-mario-bros.png",
+    "fetchedAt": "2026-04-09T16:22:31.954Z"
+  },
+  "New Super Mario Bros. U": {
+    "sgdbId": 36219,
+    "file": "new-super-mario-bros-u.png",
+    "fetchedAt": "2026-04-09T16:22:32.869Z"
+  },
+  "New Super Mario Bros. Wii": {
+    "sgdbId": 37961,
+    "file": "new-super-mario-bros-wii.png",
+    "fetchedAt": "2026-04-09T16:22:33.778Z"
+  },
+  "Pac-Man Championship Edition DX": {
+    "sgdbId": 2653,
+    "file": "pac-man-championship-edition-dx.png",
+    "fetchedAt": "2026-04-09T16:22:35.507Z"
+  },
+  "Parking Garage Rally Circuit": {
+    "sgdbId": 5443652,
+    "file": "parking-garage-rally-circuit.png",
+    "fetchedAt": "2026-04-09T16:22:36.993Z"
+  },
+  "Peggle": {
+    "sgdbId": 37312,
+    "file": "peggle.png",
+    "fetchedAt": "2026-04-09T16:22:38.617Z"
+  },
+  "Persona 3 FES": {
+    "sgdbId": 35402,
+    "file": "persona-3-fes.png",
+    "fetchedAt": "2026-04-09T16:22:39.594Z"
+  },
+  "Persona 3: Dancing in Moonlight": {
+    "sgdbId": 5252716,
+    "file": "persona-3-dancing-in-moonlight.png",
+    "fetchedAt": "2026-04-09T16:22:41.221Z"
+  },
+  "Persona 4 Golden": {
+    "sgdbId": 37347,
+    "file": "persona-4-golden.png",
+    "fetchedAt": "2026-04-09T16:22:44.884Z"
+  },
+  "Persona 4: Dancing All Night": {
+    "sgdbId": 5253456,
+    "file": "persona-4-dancing-all-night.png",
+    "fetchedAt": "2026-04-09T16:22:45.938Z"
+  },
+  "Persona 5 Royal": {
+    "sgdbId": 5352446,
+    "file": "persona-5-royal.png",
+    "fetchedAt": "2026-04-09T16:22:46.973Z"
+  },
+  "Persona 5 Strikers": {
+    "sgdbId": 5255577,
+    "file": "persona-5-strikers.jpg",
+    "fetchedAt": "2026-04-09T16:22:48.554Z"
+  },
+  "Persona 5: Dancing in Starlight": {
+    "sgdbId": 5252715,
+    "file": "persona-5-dancing-in-starlight.png",
+    "fetchedAt": "2026-04-09T16:22:50.116Z"
+  },
+  "Please Touch the Artwork 2": {
+    "sgdbId": 5435209,
+    "file": "please-touch-the-artwork-2.png",
+    "fetchedAt": "2026-04-09T16:22:55.247Z"
+  },
+  "Pokemon: Blue Version": {
+    "sgdbId": 35291,
+    "file": "pokemon-blue-version.png",
+    "fetchedAt": "2026-04-09T16:22:57.599Z"
+  },
+  "Portal": {
+    "sgdbId": 9022,
+    "file": "portal.png",
+    "fetchedAt": "2026-04-09T16:22:59.211Z"
+  },
+  "Portal 2": {
+    "sgdbId": 17830,
+    "file": "portal-2.png",
+    "fetchedAt": "2026-04-09T16:23:00.067Z"
+  },
+  "Rogue Legacy": {
+    "sgdbId": 2766,
+    "file": "rogue-legacy.jpg",
+    "fetchedAt": "2026-04-09T16:23:01.916Z"
+  },
+  "The Stanley Parable": {
+    "sgdbId": 157436,
+    "file": "the-stanley-parable.jpg",
+    "fetchedAt": "2026-04-09T16:55:49.700Z"
+  },
+  "Star Ocean": {
+    "sgdbId": 38690,
+    "file": "star-ocean.png",
+    "fetchedAt": "2026-04-09T16:23:03.679Z"
+  },
+  "Star Ocean Integrity and Faithlessness": {
+    "sgdbId": 5300220,
+    "file": "star-ocean-integrity-and-faithlessness.png",
+    "fetchedAt": "2026-04-09T16:23:05.505Z"
+  },
+  "Star Ocean The Divine Force": {
+    "sgdbId": 5338385,
+    "file": "star-ocean-the-divine-force.png",
+    "fetchedAt": "2026-04-09T16:23:07.317Z"
+  },
+  "Star Ocean The Last Hope": {
+    "sgdbId": 5504721,
+    "file": "star-ocean-the-last-hope.png",
+    "fetchedAt": "2026-04-09T16:23:08.867Z"
+  },
+  "Star Ocean The Second Story": {
+    "sgdbId": 572337,
+    "file": "star-ocean-the-second-story.png",
+    "fetchedAt": "2026-04-09T16:44:06.858Z"
+  },
+  "Star Ocean Till the End of Time": {
+    "sgdbId": 35530,
+    "file": "star-ocean-till-the-end-of-time.png",
+    "fetchedAt": "2026-04-09T16:23:11.025Z"
+  },
+  "Star Wars: The Force Unleashed": {
+    "sgdbId": 5513,
+    "file": "star-wars-the-force-unleashed.png",
+    "fetchedAt": "2026-04-09T16:23:12.025Z"
+  },
+  "Strangers of Paradise: Final Fantasy Origin": {
+    "sgdbId": 5310834,
+    "file": "strangers-of-paradise-final-fantasy-origin.png",
+    "fetchedAt": "2026-04-09T16:23:13.063Z"
+  },
+  "Super Mario 3D Land": {
+    "sgdbId": 36776,
+    "file": "super-mario-3d-land.png",
+    "fetchedAt": "2026-04-09T16:23:16.361Z"
+  },
+  "Super Mario 3D World": {
+    "sgdbId": 408388,
+    "file": "super-mario-3d-world.jpg",
+    "fetchedAt": "2026-04-09T16:44:14.900Z"
+  },
+  "Super Mario 64": {
+    "sgdbId": 37177,
+    "file": "super-mario-64.png",
+    "fetchedAt": "2026-04-09T16:23:18.075Z"
+  },
+  "Super Mario Bros. 3": {
+    "sgdbId": 36658,
+    "file": "super-mario-bros-3.png",
+    "fetchedAt": "2026-04-09T16:23:19.868Z"
+  },
+  "Super Mario Land": {
+    "sgdbId": 19720,
+    "file": "super-mario-land.png",
+    "fetchedAt": "2026-04-09T16:23:20.745Z"
+  },
+  "Super Mario Land 2: 6 Golden Coins": {
+    "sgdbId": 37773,
+    "file": "super-mario-land-2-6-golden-coins.png",
+    "fetchedAt": "2026-04-09T16:23:22.236Z"
+  },
+  "Super Mario Maker 2 (Story Mode)": {
+    "sgdbId": 5249544,
+    "file": "super-mario-maker-2-story-mode.png",
+    "fetchedAt": "2026-04-09T16:23:24.096Z"
+  },
+  "Super Mario Odyssey": {
+    "sgdbId": 5245268,
+    "file": "super-mario-odyssey.png",
+    "fetchedAt": "2026-04-09T16:23:24.928Z"
+  },
+  "Super Mario RPG": {
+    "sgdbId": 5409908,
+    "file": "super-mario-rpg.png",
+    "fetchedAt": "2026-04-09T16:23:25.840Z"
+  },
+  "Super Mario Run": {
+    "sgdbId": 5252860,
+    "file": "super-mario-run.png",
+    "fetchedAt": "2026-04-09T16:23:26.850Z"
+  },
+  "Super Mario Wonder": {
+    "sgdbId": 5409928,
+    "file": "super-mario-wonder.png",
+    "fetchedAt": "2026-04-09T16:23:27.823Z"
+  },
+  "Super Mario World": {
+    "sgdbId": 36886,
+    "file": "super-mario-world.png",
+    "fetchedAt": "2026-04-09T16:23:28.868Z"
+  },
+  "Super Metroid": {
+    "sgdbId": 38157,
+    "file": "super-metroid.jpg",
+    "fetchedAt": "2026-04-09T16:23:30.581Z"
+  },
+  "Super Smash Bros. Brawl (The Subspace Emissary)": {
+    "sgdbId": 38763,
+    "file": "super-smash-bros-brawl-the-subspace-emissary.png",
+    "fetchedAt": "2026-04-09T16:56:39.665Z"
+  },
+  "Super Smash Bros. Ultimate (World of Light)": {
+    "sgdbId": 5245293,
+    "file": "super-smash-bros-ultimate-world-of-light.png",
+    "fetchedAt": "2026-04-09T16:23:32.474Z"
+  },
+  "Super Woden: Rally Edge": {
+    "sgdbId": 5488102,
+    "file": "super-woden-rally-edge.jpg",
+    "fetchedAt": "2026-04-09T16:23:34.423Z"
+  },
+  "Tales of Arise": {
+    "sgdbId": 5283093,
+    "file": "tales-of-arise.png",
+    "fetchedAt": "2026-04-09T16:23:35.374Z"
+  },
+  "Tales of Vesperia": {
+    "sgdbId": 38257,
+    "file": "tales-of-vesperia.png",
+    "fetchedAt": "2026-04-09T16:23:37.186Z"
+  },
+  "Teenage Mutant Ninja Turtles: Shredder's Revenge": {
+    "sgdbId": 5279557,
+    "file": "teenage-mutant-ninja-turtles-shredder-s-revenge.png",
+    "fetchedAt": "2026-04-09T16:23:38.095Z"
+  },
+  "Terranigma": {
+    "sgdbId": 110965,
+    "file": "terranigma.png",
+    "fetchedAt": "2026-04-09T16:45:50.530Z"
+  },
+  "Tetris Effect: Connected": {
+    "sgdbId": 198310,
+    "file": "tetris-effect-connected.png",
+    "fetchedAt": "2026-04-09T17:07:20.075Z"
+  },
+  "Theathrhythm Final Fantasy Final Bar Line": {
+    "sgdbId": 5252168,
+    "file": "theathrhythm-final-fantasy-final-bar-line.png",
+    "fetchedAt": "2026-04-09T16:23:41.579Z"
+  },
+  "Thomas was Alone": {
+    "sgdbId": 55973,
+    "file": "thomas-was-alone.png",
+    "fetchedAt": "2026-04-09T16:44:42.657Z"
+  },
+  "Tiny Toon Adventures: Babs' Big Break": {
+    "sgdbId": 488145,
+    "file": "tiny-toon-adventures-babs-big-break.png",
+    "fetchedAt": "2026-04-09T16:44:45.984Z"
+  },
+  "Turnip Boy does Tax Evasion": {
+    "sgdbId": 5254331,
+    "file": "turnip-boy-does-tax-evasion.png",
+    "fetchedAt": "2026-04-09T16:23:45.274Z"
+  },
+  "Uncharted 2: Among Thieves": {
+    "sgdbId": 5245365,
+    "file": "uncharted-2-among-thieves.png",
+    "fetchedAt": "2026-04-09T16:23:46.139Z"
+  },
+  "Uncharted: Drake's Fortune": {
+    "sgdbId": 5209428,
+    "file": "uncharted-drake-s-fortune.png",
+    "fetchedAt": "2026-04-09T16:23:47.194Z"
+  },
+  "Vampire Survivors": {
+    "sgdbId": 367991,
+    "file": "vampire-survivors.jpg",
+    "fetchedAt": "2026-04-09T16:59:52.669Z"
+  },
+  "VVVVVV": {
+    "sgdbId": 21335,
+    "file": "vvvvvv.png",
+    "fetchedAt": "2026-04-09T16:23:50.435Z"
+  },
+  "Xenoblade Chronicles": {
+    "sgdbId": 38853,
+    "file": "xenoblade-chronicles.png",
+    "fetchedAt": "2026-04-09T16:23:53.127Z"
+  },
+  "Xenoblade Chronicles 2": {
+    "sgdbId": 5248288,
+    "file": "xenoblade-chronicles-2.png",
+    "fetchedAt": "2026-04-09T16:23:57.170Z"
+  },
+  "Xenoblade Chronicles 3": {
+    "sgdbId": 5319975,
+    "file": "xenoblade-chronicles-3.jpg",
+    "fetchedAt": "2026-04-09T16:23:57.997Z"
+  },
+  "Xenoblade Chronicles X": {
+    "sgdbId": 37791,
+    "file": "xenoblade-chronicles-x.png",
+    "fetchedAt": "2026-04-09T16:23:59.706Z"
+  },
+  "Xenogears": {
+    "sgdbId": 65128,
+    "file": "xenogears.png",
+    "fetchedAt": "2026-04-09T16:44:56.967Z"
+  },
+  "Xenosaga Episode I: Der Wille zur Macht": {
+    "sgdbId": 36749,
+    "file": "xenosaga-episode-i-der-wille-zur-macht.png",
+    "fetchedAt": "2026-04-09T16:24:01.368Z"
+  },
+  "Xenosaga Episode II: Jenseits von Gut und Bose": {
+    "sgdbId": 33884,
+    "file": "xenosaga-episode-ii-jenseits-von-gut-und-bose.png",
+    "fetchedAt": "2026-04-09T16:24:02.550Z"
+  },
+  "Xenosaga Episode III: Also sprach Zarathustra": {
+    "sgdbId": 35365,
+    "file": "xenosaga-episode-iii-also-sprach-zarathustra.png",
+    "fetchedAt": "2026-04-09T16:24:03.469Z"
+  },
+  "Zelda": {
+    "sgdbId": 25608,
+    "file": "zelda.png",
+    "fetchedAt": "2026-04-09T16:45:34.191Z"
+  },
+  "Zelda II: The Adventure of Link": {
+    "sgdbId": 25608,
+    "file": "zelda-ii-the-adventure-of-link.png",
+    "fetchedAt": "2026-04-09T16:24:05.227Z"
+  },
+  "Zelda: The Wand of Gamelon": {
+    "sgdbId": 5260425,
+    "file": "zelda-the-wand-of-gamelon.png",
+    "fetchedAt": "2026-04-09T16:24:06.104Z"
+  },
+  "Persona 4 Arena": {
+    "sgdbId": 36094,
+    "file": "persona-4-arena-story-mode.png",
+    "fetchedAt": "2026-04-09T16:22:42.308Z"
+  },
+  "Persona 4 Arena Ultimax": {
+    "sgdbId": 34618,
+    "file": "persona-4-arena-ultimax-story-mode.png",
+    "fetchedAt": "2026-04-09T16:22:43.990Z"
+  },
+  "Persona 4 Arena (Story Mode)": {
+    "sgdbId": 87185,
+    "file": "persona-4-arena-story-mode.png",
+    "fetchedAt": "2026-04-09T16:55:30.062Z"
+  },
+  "Persona 4 Arena Ultimax (Story Mode)": {
+    "sgdbId": 87184,
+    "file": "persona-4-arena-ultimax-story-mode.png",
+    "fetchedAt": "2026-04-09T16:55:32.194Z"
+  },
+  "Super Mario Maker 2": {
+    "sgdbId": 401564,
+    "file": "super-mario-maker-2.png",
+    "fetchedAt": "2026-04-09T16:57:48.583Z"
+  },
+  "Super Smash Bros. Brawl": {
+    "sgdbId": 38763,
+    "file": "super-smash-bros-brawl.png",
+    "fetchedAt": "2026-04-09T16:57:53.644Z"
+  },
+  "Super Smash Bros. Ultimate": {
+    "sgdbId": 90008,
+    "file": "super-smash-bros-ultimate.png",
+    "fetchedAt": "2026-04-09T16:57:56.123Z"
+  },
+  "The Legend of Doom": {
+    "sgdbId": null,
+    "file": "the-legend-of-doom.jpg",
+    "fetchedAt": "2026-04-09T16:58:20.862Z"
+  },
+  "Warriors Abyss": {
+    "sgdbId": 5479057,
+    "file": "warriors-abyss.png",
+    "fetchedAt": "2026-04-09T16:23:51.419Z"
+  }
+}
