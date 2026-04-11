@@ -366,8 +366,6 @@ async function main() {
     ? JSON.parse(readFileSync(achievementsPath, 'utf-8'))
     : {};
 
-  const achievements = { ...existing };
-
   // Initialize platform auth
   await initPsn();
   await initXbox();
@@ -380,6 +378,34 @@ async function main() {
     fetchXboxLibrary(),
   ]);
   console.log(`Steam: ${steamLib.length} games, PSN: ${psnLib.length} games, Xbox: ${xboxLib.length} games`);
+
+  // Rebuild from scratch for any platform that successfully fetched.
+  //
+  // The script used to do `{ ...existing }` then merge in new matches on
+  // top, which meant a game matched in a *previous* run but not the
+  // current run kept its old entries forever. After a matcher fix, old
+  // false-positive entries (e.g. Bastion's stale Steam record from when
+  // platform-family gating wasn't applied) would persist.
+  //
+  // The guard is: only strip platforms that actually returned data. If
+  // Xbox's API has a transient failure and xboxLib is empty, we preserve
+  // the existing Xbox entries rather than wiping the whole Xbox dataset.
+  const fetchedPlatforms = new Set();
+  if (steamLib.length > 0) fetchedPlatforms.add('steam');
+  if (psnLib.length > 0) fetchedPlatforms.add('psn');
+  if (xboxLib.length > 0) fetchedPlatforms.add('xbox');
+
+  const achievements = {};
+  for (const [title, data] of Object.entries(existing)) {
+    const kept = data.platforms.filter((p) => !fetchedPlatforms.has(p.platform));
+    if (kept.length === 0) continue; // no preserved platforms → drop entry
+    const best = kept.reduce((a, b) => {
+      const pctA = a.total > 0 ? a.earned / a.total : 0;
+      const pctB = b.total > 0 ? b.earned / b.total : 0;
+      return pctB > pctA ? b : a;
+    });
+    achievements[title] = { platforms: kept, best, updatedAt: data.updatedAt };
+  }
 
   // Build a map of game title -> matched platform entries
   const matchResults = new Map();
@@ -428,15 +454,21 @@ async function main() {
     }
 
     if (platforms.length > 0) {
+      // Merge with any platforms preserved from existing (i.e. platforms
+      // whose APIs didn't fetch this run). The preservation step already
+      // stripped out everything we're rebuilding, so there's no overlap.
+      const preserved = achievements[title]?.platforms ?? [];
+      const combined = [...preserved, ...platforms];
+
       // Pick best platform (highest completion %)
-      const best = platforms.reduce((a, b) => {
+      const best = combined.reduce((a, b) => {
         const pctA = a.total > 0 ? a.earned / a.total : 0;
         const pctB = b.total > 0 ? b.earned / b.total : 0;
         return pctB > pctA ? b : a;
       });
 
       achievements[title] = {
-        platforms,
+        platforms: combined,
         best,
         updatedAt: new Date().toISOString(),
       };
