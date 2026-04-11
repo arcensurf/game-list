@@ -5,6 +5,11 @@
         "earned": 0,
         "total": 15,
         "platform": "steam"
+      },
+      {
+        "earned": 0,
+        "total": 12,
+        "platform": "xbox"
       }
     ],
     "best": {
@@ -12,7 +17,7 @@
       "total": 15,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:09.005Z"
+    "updatedAt": "2026-04-11T17:41:56.050Z"
   },
   "Portal 2": {
     "platforms": [
@@ -20,14 +25,19 @@
         "earned": 5,
         "total": 51,
         "platform": "steam"
+      },
+      {
+        "earned": 29,
+        "total": 50,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 5,
-      "total": 51,
-      "platform": "steam"
+      "earned": 29,
+      "total": 50,
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:09.326Z"
+    "updatedAt": "2026-04-11T17:41:56.419Z"
   },
   "Borderlands": {
     "platforms": [
@@ -60,14 +70,19 @@
         "earned": 0,
         "total": 26,
         "platform": "steam"
+      },
+      {
+        "earned": 58,
+        "total": 80,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 12,
-      "total": 81,
-      "platform": "steam"
+      "earned": 58,
+      "total": 80,
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:11.306Z"
+    "updatedAt": "2026-04-11T17:41:58.729Z"
   },
   "Grid": {
     "platforms": [
@@ -95,14 +110,29 @@
         "earned": 4,
         "total": 39,
         "platform": "psn"
+      },
+      {
+        "earned": 11,
+        "total": 60,
+        "platform": "xbox"
+      },
+      {
+        "earned": 25,
+        "total": 54,
+        "platform": "xbox"
+      },
+      {
+        "earned": 7,
+        "total": 22,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 27,
-      "total": 87,
-      "platform": "steam"
+      "earned": 25,
+      "total": 54,
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:13.064Z"
+    "updatedAt": "2026-04-11T17:42:00.591Z"
   },
   "Assassin's Creed": {
     "platforms": [
@@ -150,14 +180,19 @@
         "earned": 1,
         "total": 94,
         "platform": "psn"
+      },
+      {
+        "earned": 44,
+        "total": 44,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 4,
-      "total": 68,
-      "platform": "psn"
+      "earned": 44,
+      "total": 44,
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:16.665Z"
+    "updatedAt": "2026-04-11T17:42:03.943Z"
   },
   "Burnout Paradise": {
     "platforms": [
@@ -170,14 +205,19 @@
         "earned": 12,
         "total": 95,
         "platform": "psn"
+      },
+      {
+        "earned": 30,
+        "total": 60,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 12,
-      "total": 95,
-      "platform": "psn"
+      "earned": 30,
+      "total": 60,
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:17.473Z"
+    "updatedAt": "2026-04-11T17:42:04.691Z"
   },
   "Assassin's Creed II": {
     "platforms": [
@@ -185,14 +225,19 @@
         "earned": 15,
         "total": 51,
         "platform": "psn"
+      },
+      {
+        "earned": 50,
+        "total": 50,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 15,
-      "total": 51,
-      "platform": "psn"
+      "earned": 50,
+      "total": 50,
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:17.872Z"
+    "updatedAt": "2026-04-11T17:42:05.064Z"
   },
   "Final Fantasy": {
     "platforms": [
@@ -312,7 +357,7 @@
       "total": 24,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:25.712Z"
+    "updatedAt": "2026-04-11T17:42:12.344Z"
   },
   "Grid 2": {
     "platforms": [
@@ -320,14 +365,19 @@
         "earned": 23,
         "total": 60,
         "platform": "steam"
+      },
+      {
+        "earned": 52,
+        "total": 60,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 23,
+      "earned": 52,
       "total": 60,
-      "platform": "steam"
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:26.513Z"
+    "updatedAt": "2026-04-11T17:42:13.093Z"
   },
   "Borderlands 2": {
     "platforms": [
@@ -335,14 +385,19 @@
         "earned": 0,
         "total": 75,
         "platform": "steam"
+      },
+      {
+        "earned": 54,
+        "total": 69,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 0,
-      "total": 75,
-      "platform": "steam"
+      "earned": 54,
+      "total": 69,
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:27.318Z"
+    "updatedAt": "2026-04-11T17:42:13.868Z"
   },
   "VVVVVV": {
     "platforms": [
@@ -357,7 +412,7 @@
       "total": 19,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:27.768Z"
+    "updatedAt": "2026-04-11T17:42:14.242Z"
   },
   "Bastion": {
     "platforms": [
@@ -372,7 +427,7 @@
       "total": 24,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:28.219Z"
+    "updatedAt": "2026-04-11T17:42:14.616Z"
   },
   "Dirt Showdown": {
     "platforms": [
@@ -380,14 +435,19 @@
         "earned": 1,
         "total": 49,
         "platform": "steam"
+      },
+      {
+        "earned": 33,
+        "total": 49,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 1,
+      "earned": 33,
       "total": 49,
-      "platform": "steam"
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:28.622Z"
+    "updatedAt": "2026-04-11T17:42:14.983Z"
   },
   "Assassin's Creed: Revelations": {
     "platforms": [
@@ -395,14 +455,19 @@
         "earned": 0,
         "total": 48,
         "platform": "steam"
+      },
+      {
+        "earned": 28,
+        "total": 69,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 0,
-      "total": 48,
-      "platform": "steam"
+      "earned": 28,
+      "total": 69,
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:29.020Z"
+    "updatedAt": "2026-04-11T17:42:15.366Z"
   },
   "Castle Crashers": {
     "platforms": [
@@ -410,14 +475,19 @@
         "earned": 0,
         "total": 12,
         "platform": "steam"
+      },
+      {
+        "earned": 6,
+        "total": 12,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 0,
+      "earned": 6,
       "total": 12,
-      "platform": "steam"
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:29.443Z"
+    "updatedAt": "2026-04-11T17:42:15.739Z"
   },
   "Thomas was Alone": {
     "platforms": [
@@ -432,7 +502,7 @@
       "total": 35,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:29.852Z"
+    "updatedAt": "2026-04-11T17:42:16.100Z"
   },
   "The Stanley Parable": {
     "platforms": [
@@ -452,7 +522,7 @@
       "total": 10,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:30.644Z"
+    "updatedAt": "2026-04-11T17:42:16.900Z"
   },
   "Assassin's Creed IV: Black Flag": {
     "platforms": [
@@ -467,7 +537,7 @@
       "total": 60,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:31.034Z"
+    "updatedAt": "2026-04-11T17:42:17.384Z"
   },
   "Colin McRae Rally 05": {
     "platforms": [
@@ -482,7 +552,7 @@
       "total": 16,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:31.425Z"
+    "updatedAt": "2026-04-11T17:42:17.762Z"
   },
   "Assassin's Creed Unity": {
     "platforms": [
@@ -497,7 +567,7 @@
       "total": 57,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:31.865Z"
+    "updatedAt": "2026-04-11T17:42:18.127Z"
   },
   "Final Fantasy XIII": {
     "platforms": [
@@ -505,14 +575,19 @@
         "earned": 21,
         "total": 35,
         "platform": "steam"
+      },
+      {
+        "earned": 22,
+        "total": 35,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 21,
+      "earned": 22,
       "total": 35,
-      "platform": "steam"
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:32.266Z"
+    "updatedAt": "2026-04-11T17:42:18.526Z"
   },
   "Final Fantasy XIII-2": {
     "platforms": [
@@ -520,6 +595,11 @@
         "earned": 14,
         "total": 31,
         "platform": "steam"
+      },
+      {
+        "earned": 12,
+        "total": 31,
+        "platform": "xbox"
       }
     ],
     "best": {
@@ -527,7 +607,7 @@
       "total": 31,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:34.242Z"
+    "updatedAt": "2026-04-11T17:42:18.891Z"
   },
   "Dirt": {
     "platforms": [
@@ -567,8 +647,8 @@
         "platform": "psn"
       },
       {
-        "earned": 11,
-        "total": 48,
+        "earned": 46,
+        "total": 49,
         "platform": "xbox"
       }
     ],
@@ -577,7 +657,7 @@
       "total": 41,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:35.883Z"
+    "updatedAt": "2026-04-11T17:42:20.507Z"
   },
   "Final Fantasy IX": {
     "platforms": [
@@ -597,7 +677,7 @@
       "total": 52,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:36.285Z"
+    "updatedAt": "2026-04-11T17:42:20.893Z"
   },
   "Crisis Core -Final Fantasy VII-": {
     "platforms": [
@@ -627,7 +707,7 @@
       "total": 51,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:38.431Z"
+    "updatedAt": "2026-04-11T17:42:22.035Z"
   },
   "Final Fantasy VI": {
     "platforms": [
@@ -647,7 +727,7 @@
       "total": 28,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:39.254Z"
+    "updatedAt": "2026-04-11T17:42:22.771Z"
   },
   "Art of Rally": {
     "platforms": [
@@ -667,7 +747,7 @@
       "total": 43,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:39.681Z"
+    "updatedAt": "2026-04-11T17:42:23.169Z"
   },
   "Star Ocean": {
     "platforms": [
@@ -712,7 +792,7 @@
       "total": 37,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:40.544Z"
+    "updatedAt": "2026-04-11T17:42:24.132Z"
   },
   "Chrono Trigger": {
     "platforms": [
@@ -727,7 +807,7 @@
       "total": 13,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:40.943Z"
+    "updatedAt": "2026-04-11T17:42:24.673Z"
   },
   "Tales of Vesperia": {
     "platforms": [
@@ -735,14 +815,19 @@
         "earned": 1,
         "total": 53,
         "platform": "steam"
+      },
+      {
+        "earned": 32,
+        "total": 50,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 1,
-      "total": 53,
-      "platform": "steam"
+      "earned": 32,
+      "total": 50,
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:41.355Z"
+    "updatedAt": "2026-04-11T17:42:25.057Z"
   },
   "Dragon Quest": {
     "platforms": [
@@ -757,7 +842,7 @@
       "total": 58,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:41.978Z"
+    "updatedAt": "2026-04-11T17:42:25.491Z"
   },
   "The Messenger": {
     "platforms": [
@@ -772,7 +857,7 @@
       "total": 48,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:42.344Z"
+    "updatedAt": "2026-04-11T17:42:25.856Z"
   },
   "Tetris Effect: Connected": {
     "platforms": [
@@ -787,7 +872,7 @@
       "total": 43,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:42.754Z"
+    "updatedAt": "2026-04-11T17:42:26.247Z"
   },
   "Final Fantasy VIII Remastered": {
     "platforms": [
@@ -802,7 +887,7 @@
       "total": 34,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:43.157Z"
+    "updatedAt": "2026-04-11T17:42:26.648Z"
   },
   "Dirt 5": {
     "platforms": [
@@ -817,7 +902,7 @@
       "total": 40,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:43.571Z"
+    "updatedAt": "2026-04-11T17:42:27.009Z"
   },
   "Persona 4 Golden": {
     "platforms": [
@@ -837,7 +922,7 @@
       "total": 50,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:43.985Z"
+    "updatedAt": "2026-04-11T17:42:27.446Z"
   },
   "Chrono Cross": {
     "platforms": [
@@ -852,7 +937,7 @@
       "total": 37,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:44.382Z"
+    "updatedAt": "2026-04-11T17:42:27.860Z"
   },
   "Final Fantasy II": {
     "platforms": [
@@ -867,7 +952,7 @@
       "total": 28,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:44.791Z"
+    "updatedAt": "2026-04-11T17:42:28.286Z"
   },
   "Final Fantasy IV": {
     "platforms": [
@@ -882,7 +967,7 @@
       "total": 30,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:45.225Z"
+    "updatedAt": "2026-04-11T17:42:28.671Z"
   },
   "Dragon Age Inquisition": {
     "platforms": [
@@ -897,7 +982,7 @@
       "total": 69,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:45.634Z"
+    "updatedAt": "2026-04-11T17:42:29.053Z"
   },
   "Mass Effect": {
     "platforms": [
@@ -930,14 +1015,24 @@
         "earned": 1,
         "total": 11,
         "platform": "psn"
+      },
+      {
+        "earned": 21,
+        "total": 68,
+        "platform": "xbox"
+      },
+      {
+        "earned": 28,
+        "total": 49,
+        "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 12,
-      "total": 35,
-      "platform": "psn"
+      "earned": 28,
+      "total": 49,
+      "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:46.572Z"
+    "updatedAt": "2026-04-11T17:42:29.791Z"
   },
   "Grid Legends": {
     "platforms": [
@@ -957,7 +1052,7 @@
       "total": 90,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:46.977Z"
+    "updatedAt": "2026-04-11T17:42:30.172Z"
   },
   "Persona 5 Strikers": {
     "platforms": [
@@ -977,7 +1072,7 @@
       "total": 47,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:47.401Z"
+    "updatedAt": "2026-04-11T17:42:30.543Z"
   },
   "Persona 4 Arena Ultimax": {
     "platforms": [
@@ -992,7 +1087,7 @@
       "total": 51,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:47.800Z"
+    "updatedAt": "2026-04-11T17:42:30.930Z"
   },
   "Persona 5 Royal": {
     "platforms": [
@@ -1022,7 +1117,7 @@
       "total": 53,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:48.203Z"
+    "updatedAt": "2026-04-11T17:42:31.361Z"
   },
   "Star Ocean The Divine Force": {
     "platforms": [
@@ -1042,7 +1137,7 @@
       "total": 54,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:48.742Z"
+    "updatedAt": "2026-04-11T17:42:31.735Z"
   },
   "Vampire Survivors": {
     "platforms": [
@@ -1062,7 +1157,7 @@
       "total": 243,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:49.155Z"
+    "updatedAt": "2026-04-11T17:42:32.102Z"
   },
   "Final Fantasy XVI": {
     "platforms": [
@@ -1082,7 +1177,7 @@
       "total": 69,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:49.565Z"
+    "updatedAt": "2026-04-11T17:42:32.550Z"
   },
   "Dispatch": {
     "platforms": [
@@ -1097,7 +1192,7 @@
       "total": 36,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:50.137Z"
+    "updatedAt": "2026-04-11T17:42:32.975Z"
   },
   "Parking Garage Rally Circuit": {
     "platforms": [
@@ -1112,7 +1207,7 @@
       "total": 15,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:50.572Z"
+    "updatedAt": "2026-04-11T17:42:33.384Z"
   },
   "Final Fantasy VII Rebirth": {
     "platforms": [
@@ -1132,7 +1227,7 @@
       "total": 61,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:50.974Z"
+    "updatedAt": "2026-04-11T17:42:33.771Z"
   },
   "Warriors Abyss": {
     "platforms": [
@@ -1147,7 +1242,7 @@
       "total": 35,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:51.369Z"
+    "updatedAt": "2026-04-11T17:42:34.269Z"
   },
   "Super Woden: Rally Edge": {
     "platforms": [
@@ -1162,7 +1257,7 @@
       "total": 26,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:51.797Z"
+    "updatedAt": "2026-04-11T17:42:34.634Z"
   },
   "Final Fantasy VII": {
     "platforms": [
@@ -1177,7 +1272,7 @@
       "total": 31,
       "platform": "steam"
     },
-    "updatedAt": "2026-04-11T17:35:52.200Z"
+    "updatedAt": "2026-04-11T17:42:34.997Z"
   },
   "Jak and Daxter: The Precursor Legacy": {
     "platforms": [
@@ -1192,7 +1287,7 @@
       "total": 39,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:52.200Z"
+    "updatedAt": "2026-04-11T17:42:34.997Z"
   },
   "Astro Bot": {
     "platforms": [
@@ -1207,7 +1302,7 @@
       "total": 63,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:52.200Z"
+    "updatedAt": "2026-04-11T17:42:34.997Z"
   },
   "Final Fantasy VII Remake": {
     "platforms": [
@@ -1227,7 +1322,7 @@
       "total": 63,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:52.200Z"
+    "updatedAt": "2026-04-11T17:42:34.997Z"
   },
   "Final Fantasy XV": {
     "platforms": [
@@ -1242,7 +1337,7 @@
       "total": 98,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:52.200Z"
+    "updatedAt": "2026-04-11T17:42:34.997Z"
   },
   "Persona 4 Arena": {
     "platforms": [
@@ -1267,7 +1362,7 @@
       "total": 51,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:52.200Z"
+    "updatedAt": "2026-04-11T17:42:34.997Z"
   },
   "Persona 4: Dancing All Night": {
     "platforms": [
@@ -1287,7 +1382,7 @@
       "total": 40,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:52.200Z"
+    "updatedAt": "2026-04-11T17:42:34.997Z"
   },
   "Tales of Arise": {
     "platforms": [
@@ -1302,7 +1397,7 @@
       "total": 59,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:52.200Z"
+    "updatedAt": "2026-04-11T17:42:34.997Z"
   },
   "Persona 3: Dancing in Moonlight": {
     "platforms": [
@@ -1317,7 +1412,7 @@
       "total": 42,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:52.200Z"
+    "updatedAt": "2026-04-11T17:42:34.997Z"
   },
   "Persona 5: Dancing in Starlight": {
     "platforms": [
@@ -1332,7 +1427,7 @@
       "total": 42,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:52.200Z"
+    "updatedAt": "2026-04-11T17:42:34.997Z"
   },
   "Final Fantasy XIV: A Realm Reborn": {
     "platforms": [
@@ -1347,31 +1442,221 @@
       "total": 39,
       "platform": "psn"
     },
-    "updatedAt": "2026-04-11T17:35:52.200Z"
+    "updatedAt": "2026-04-11T17:42:34.997Z"
   },
   "Forza Horizon": {
     "platforms": [
       {
-        "earned": 4,
-        "total": 88,
-        "platform": "xbox"
-      },
-      {
-        "earned": 27,
-        "total": 141,
-        "platform": "xbox"
-      },
-      {
-        "earned": 7,
-        "total": 178,
+        "earned": 44,
+        "total": 70,
         "platform": "xbox"
       }
     ],
     "best": {
-      "earned": 27,
-      "total": 141,
+      "earned": 44,
+      "total": 70,
       "platform": "xbox"
     },
-    "updatedAt": "2026-04-11T17:35:52.200Z"
+    "updatedAt": "2026-04-11T17:42:34.997Z"
+  },
+  "Dirt 2": {
+    "platforms": [
+      {
+        "earned": 30,
+        "total": 47,
+        "platform": "xbox"
+      },
+      {
+        "earned": 47,
+        "total": 47,
+        "platform": "xbox"
+      }
+    ],
+    "best": {
+      "earned": 47,
+      "total": 47,
+      "platform": "xbox"
+    },
+    "updatedAt": "2026-04-11T17:42:00.955Z"
+  },
+  "Dirt 3": {
+    "platforms": [
+      {
+        "earned": 60,
+        "total": 60,
+        "platform": "xbox"
+      },
+      {
+        "earned": 0,
+        "total": 60,
+        "platform": "xbox"
+      }
+    ],
+    "best": {
+      "earned": 60,
+      "total": 60,
+      "platform": "xbox"
+    },
+    "updatedAt": "2026-04-11T17:42:12.724Z"
+  },
+  "Assassin's Creed: Brotherhood": {
+    "platforms": [
+      {
+        "earned": 54,
+        "total": 60,
+        "platform": "xbox"
+      }
+    ],
+    "best": {
+      "earned": 54,
+      "total": 60,
+      "platform": "xbox"
+    },
+    "updatedAt": "2026-04-11T17:42:13.509Z"
+  },
+  "Star Ocean The Last Hope": {
+    "platforms": [
+      {
+        "earned": 6,
+        "total": 50,
+        "platform": "xbox"
+      }
+    ],
+    "best": {
+      "earned": 6,
+      "total": 50,
+      "platform": "xbox"
+    },
+    "updatedAt": "2026-04-11T17:42:34.997Z"
+  },
+  "Mass Effect 2": {
+    "platforms": [
+      {
+        "earned": 56,
+        "total": 62,
+        "platform": "xbox"
+      }
+    ],
+    "best": {
+      "earned": 56,
+      "total": 62,
+      "platform": "xbox"
+    },
+    "updatedAt": "2026-04-11T17:42:34.997Z"
+  },
+  "Assassin's Creed III": {
+    "platforms": [
+      {
+        "earned": 33,
+        "total": 64,
+        "platform": "xbox"
+      }
+    ],
+    "best": {
+      "earned": 33,
+      "total": 64,
+      "platform": "xbox"
+    },
+    "updatedAt": "2026-04-11T17:42:34.997Z"
+  },
+  "Harm's Way": {
+    "platforms": [
+      {
+        "earned": 12,
+        "total": 12,
+        "platform": "xbox"
+      }
+    ],
+    "best": {
+      "earned": 12,
+      "total": 12,
+      "platform": "xbox"
+    },
+    "updatedAt": "2026-04-11T17:42:34.997Z"
+  },
+  "Peggle": {
+    "platforms": [
+      {
+        "earned": 6,
+        "total": 15,
+        "platform": "xbox"
+      }
+    ],
+    "best": {
+      "earned": 6,
+      "total": 15,
+      "platform": "xbox"
+    },
+    "updatedAt": "2026-04-11T17:42:34.997Z"
+  },
+  "Star Wars: The Force Unleashed": {
+    "platforms": [
+      {
+        "earned": 19,
+        "total": 58,
+        "platform": "xbox"
+      },
+      {
+        "earned": 24,
+        "total": 59,
+        "platform": "xbox"
+      }
+    ],
+    "best": {
+      "earned": 24,
+      "total": 59,
+      "platform": "xbox"
+    },
+    "updatedAt": "2026-04-11T17:42:34.997Z"
+  },
+  "Halo 3": {
+    "platforms": [
+      {
+        "earned": 18,
+        "total": 79,
+        "platform": "xbox"
+      },
+      {
+        "earned": 19,
+        "total": 47,
+        "platform": "xbox"
+      }
+    ],
+    "best": {
+      "earned": 19,
+      "total": 47,
+      "platform": "xbox"
+    },
+    "updatedAt": "2026-04-11T17:42:34.997Z"
+  },
+  "The Legend of Doom": {
+    "platforms": [
+      {
+        "earned": 1,
+        "total": 12,
+        "platform": "xbox"
+      }
+    ],
+    "best": {
+      "earned": 1,
+      "total": 12,
+      "platform": "xbox"
+    },
+    "updatedAt": "2026-04-11T17:42:34.997Z"
+  },
+  "Bioshock Infinite": {
+    "platforms": [
+      {
+        "earned": 7,
+        "total": 51,
+        "platform": "xbox"
+      }
+    ],
+    "best": {
+      "earned": 7,
+      "total": 51,
+      "platform": "xbox"
+    },
+    "updatedAt": "2026-04-11T17:42:34.997Z"
   }
 }
