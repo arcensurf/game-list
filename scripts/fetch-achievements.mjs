@@ -274,58 +274,40 @@ async function fetchXboxLibrary() {
   if (!xboxAuth) return [];
 
   try {
-    // Fetch all achievements for the user (paginated)
-    const allAchievements = [];
-    let url = `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements?maxItems=100`;
+    // titleHub is Microsoft's unified title history service — it returns
+    // Xbox 360, One, and Series X|S titles in a single response, each with
+    // a precomputed achievement block. The older
+    // achievements.xboxlive.com/users/xuid(X)/achievements endpoint only
+    // covers the 2017+ achievement format and silently drops legacy 360
+    // titles, which is why a previous version of this script was only
+    // seeing a handful of modern Xbox games.
+    const url = `https://titlehub.xboxlive.com/users/xuid(${xboxAuth.xuid})/titles/titleHistory/decoration/achievement`;
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
+        'x-xbl-contract-version': '2',
+        'Accept-Language': 'en-US',
+      },
+    });
 
-    while (url) {
-      const res = await fetch(url, {
-        headers: {
-          Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
-          'x-xbl-contract-version': '2',
-          'Accept-Language': 'en-US',
-        },
-      });
-
-      if (!res.ok) {
-        console.error('Xbox: failed to fetch achievements', res.status);
-        break;
-      }
-
-      const data = await res.json();
-      allAchievements.push(...(data.achievements ?? []));
-
-      // Handle pagination
-      if (data.pagingInfo?.continuationToken) {
-        url = `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements?maxItems=100&continuationToken=${data.pagingInfo.continuationToken}`;
-      } else {
-        url = null;
-      }
-      await delay(300);
+    if (!res.ok) {
+      console.error('Xbox: failed to fetch title history', res.status, await res.text());
+      return [];
     }
 
-    // Group achievements by titleId
-    const byTitle = new Map();
-    for (const a of allAchievements) {
-      const titleId = a.titleAssociations?.[0]?.id;
-      const titleName = a.titleAssociations?.[0]?.name;
-      if (!titleId || !titleName) continue;
+    const data = await res.json();
+    const titles = data.titles ?? [];
 
-      if (!byTitle.has(titleId)) {
-        byTitle.set(titleId, { titleName, titleId, total: 0, earned: 0 });
-      }
-      const entry = byTitle.get(titleId);
-      entry.total++;
-      if (a.progressState === 'Achieved') entry.earned++;
-    }
-
-    return Array.from(byTitle.values()).map((g) => ({
-      platformTitle: g.titleName,
-      platformId: g.titleId,
-      platform: 'xbox',
-      earned: g.earned,
-      total: g.total,
-    }));
+    return titles
+      // Drop apps/system tiles and anything that doesn't have achievements.
+      .filter((t) => t.achievement && (t.achievement.totalAchievements ?? 0) > 0)
+      .map((t) => ({
+        platformTitle: t.name,
+        platformId: t.titleId,
+        platform: 'xbox',
+        earned: t.achievement.currentAchievements ?? 0,
+        total: t.achievement.totalAchievements ?? 0,
+      }));
   } catch (err) {
     console.error('Xbox: failed to fetch library', err.message);
     return [];
