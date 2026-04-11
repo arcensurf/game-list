@@ -18,7 +18,11 @@ function getGroupLetter(title: string): string {
 
 export type PlatformStat = { platform: string; count: number };
 
-export function useGames(filter?: string, gogOnly?: boolean): {
+export function useGames(
+  filter?: string,
+  gogOnly?: boolean,
+  perfectOnly?: boolean,
+): {
   groups: LetterGroup[];
   totalCount: number;
   platformStats: PlatformStat[];
@@ -63,11 +67,22 @@ export function useGames(filter?: string, gogOnly?: boolean): {
       );
     }
 
-    const withCovers: GameWithCover[] = filtered.map((g) => ({
+    let withCovers: GameWithCover[] = filtered.map((g) => ({
       ...g,
       coverUrl: getCoverUrl(g, covers),
       achievements: resolveGameAchievements(g, achievementData, titleIndex),
     }));
+
+    // Perfect-game filter runs after achievement resolution because it
+    // reads the resolved `best` entry rather than any raw field. "Best"
+    // already picks the highest-completion platform, so a game that's
+    // 100% on PSN and 50% on Steam counts as a perfect game.
+    if (perfectOnly) {
+      withCovers = withCovers.filter((g) => {
+        const best = g.achievements?.best;
+        return best != null && best.total > 0 && best.earned === best.total;
+      });
+    }
 
     const groupMap = new Map<string, GameWithCover[]>();
     for (const game of withCovers) {
@@ -109,7 +124,7 @@ export function useGames(filter?: string, gogOnly?: boolean): {
       .sort((a, b) => b.count - a.count);
 
     return { groups, totalCount: withCovers.length, platformStats };
-  }, [games, covers, achievementData, titleIndex, filter, gogOnly]);
+  }, [games, covers, achievementData, titleIndex, filter, gogOnly, perfectOnly]);
 
   return { ...result, loading };
 }

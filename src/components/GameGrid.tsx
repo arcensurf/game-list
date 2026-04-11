@@ -2,8 +2,8 @@ import type { LetterGroup } from '../types/game';
 import LetterSection from './LetterSection';
 import GameCard from './GameCard';
 
-export default function GameGrid({ groups, gogOnly }: { groups: LetterGroup[]; gogOnly?: boolean }) {
-  if (gogOnly) {
+export default function GameGrid({ groups, flat }: { groups: LetterGroup[]; flat?: boolean }) {
+  if (flat) {
     const allGames = groups.flatMap((g) => g.games);
     return (
       <div className="game-grid-container">

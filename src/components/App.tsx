@@ -10,9 +10,15 @@ const ALL_LETTERS = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
 export default function App() {
   const [filter, setFilter] = useState('');
   const [gogOnly, setGogOnly] = useState(false);
+  const [perfectOnly, setPerfectOnly] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
-  const { groups, totalCount, platformStats, loading } = useGames(filter || undefined, gogOnly);
+  const { groups, totalCount, platformStats, loading } = useGames(
+    filter || undefined,
+    gogOnly,
+    perfectOnly,
+  );
   const activeLetters = new Set(groups.map((g) => g.letter));
+  const flatLayout = gogOnly || perfectOnly;
 
   return (
     <div className="app">
@@ -30,6 +36,12 @@ export default function App() {
           >
             Games of Games
           </button>
+          <button
+            className={`stats-btn${perfectOnly ? ' gog-active' : ''}`}
+            onClick={() => setPerfectOnly(!perfectOnly)}
+          >
+            Perfect Games
+          </button>
         </p>
         <div className="header-controls">
           <input
@@ -44,7 +56,7 @@ export default function App() {
         </div>
       </header>
 
-      {!gogOnly && (
+      {!flatLayout && (
         <nav className="alphabet-nav">
           {ALL_LETTERS.map((letter) => (
             <a
@@ -64,7 +76,7 @@ export default function App() {
             Loading...
           </p>
         ) : (
-          <GameGrid groups={groups} gogOnly={gogOnly} />
+          <GameGrid groups={groups} flat={flatLayout} />
         )}
       </main>
 
