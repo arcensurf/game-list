@@ -55,15 +55,16 @@ jobs:
           XBOX_EMAIL: ${{ secrets.XBOX_EMAIL }}
           XBOX_PASSWORD: ${{ secrets.XBOX_PASSWORD }}
 
-      - name: Commit achievements.json to data branch
+      - name: Commit achievement data to data branch
         working-directory: data-branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Only commit the achievement JSON — never the refresh tokens.
-          git add public/data/achievements.json
+          # Explicit file list — never stage refresh tokens or anything
+          # else that might end up in the work tree.
+          git add public/data/achievements.json public/data/platform-libraries.json
           if git diff --cached --quiet; then
-            echo "No changes to achievements.json"
+            echo "No changes to achievement data"
           else
             git commit -m "Update achievement data"
             git push

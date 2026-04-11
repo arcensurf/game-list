@@ -502,6 +502,17 @@ body {
   border-color: var(--accent);
 }
 
+/* Platform-library match hint under an override input. Rendered as
+   part of the same <label> as the input, so it inherits the label's
+   muted color and block layout. */
+.field-hint {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 0.25rem;
+  line-height: 1.3;
+}
+
 /* Form field (non-label wrapper) */
 .form-field {
   display: flex;
@@ -906,13 +917,36 @@ body {
   line-height: 1.3;
 }
 
+/* Card wrapper — always applied (dev and prod). Provides the flex
+   column layout that makes game cards stretch to uniform row height
+   while the achievement-slot below reserves a fixed area for the
+   progress bar. */
+.card-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-wrapper > .game-card {
+  flex: 1;
+}
+
+/* Always-present slot below each card. A fixed min-height reserves
+   the same space for every card whether or not it has an
+   achievement bar, so cards in a row can all stretch to the same
+   height without the bar's presence/absence skewing the layout. */
+.achievement-slot {
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+}
+
 /* Achievement bar */
 .achievement-bar {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  margin-top: 4px;
-  padding: 0 2px;
+  width: 100%;
 }
 
 .achievement-bar-track {

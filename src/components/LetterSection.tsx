@@ -74,11 +74,16 @@ export default function LetterSection({ group }: { group: LetterGroup }) {
   }, [games, dropTarget, handleDragEnd]);
 
   const getCardClass = (index: number) => {
-    if (!isDev) return undefined;
-    const classes = ['draggable-card'];
-    if (dragIndex === index) classes.push('dragging');
-    if (dropTarget && dragIndex !== null && dropTarget.index === index && dragIndex !== index) {
-      classes.push(dropTarget.side === 'before' ? 'drop-before' : 'drop-after');
+    // card-wrapper is always applied so layout (flex column + bar slot)
+    // works in both dev and prod. draggable-card + drag-state classes
+    // are dev-only.
+    const classes = ['card-wrapper'];
+    if (isDev) {
+      classes.push('draggable-card');
+      if (dragIndex === index) classes.push('dragging');
+      if (dropTarget && dragIndex !== null && dropTarget.index === index && dragIndex !== index) {
+        classes.push(dropTarget.side === 'before' ? 'drop-before' : 'drop-after');
+      }
     }
     return classes.join(' ');
   };
@@ -98,7 +103,9 @@ export default function LetterSection({ group }: { group: LetterGroup }) {
             className={getCardClass(index)}
           >
             <GameCard game={game} />
-            <AchievementBar achievements={game.achievements} />
+            <div className="achievement-slot">
+              <AchievementBar achievements={game.achievements} />
+            </div>
           </div>
         ))}
       </div>

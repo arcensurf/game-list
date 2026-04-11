@@ -10,6 +10,7 @@ const dataDir = process.env.DATA_DIR
   : resolve(__dirname, '..', 'public', 'data');
 const gamesPath = resolve(dataDir, 'games.json');
 const achievementsPath = resolve(dataDir, 'achievements.json');
+const librariesPath = resolve(dataDir, 'platform-libraries.json');
 
 // Refresh tokens must NOT live in `dataDir` — that directory is served as
 // static assets and committed to a public branch. TOKEN_DIR defaults to
@@ -111,6 +112,10 @@ async function fetchSteamLibrary() {
     platformTitle: g.name,
     platformId: g.appid,
     platform: 'steam',
+    // playtime_forever comes free from GetOwnedGames and is the best
+    // "which copy of this game is which" signal for the reference list
+    // — achievement counts would need a per-game GetSchemaForGame call.
+    playtimeMinutes: g.playtime_forever ?? 0,
   }));
 }
 
@@ -394,6 +399,41 @@ async function main() {
   if (steamLib.length > 0) fetchedPlatforms.add('steam');
   if (psnLib.length > 0) fetchedPlatforms.add('psn');
   if (xboxLib.length > 0) fetchedPlatforms.add('xbox');
+
+  // Write a platform-libraries.json reference so the dev edit modal can
+  // suggest `steamAppId` / `psnNpCommId` / `xboxTitleId` overrides.
+  // Same preservation rule as achievements.json: only rewrite a
+  // platform's library if we actually fetched it this run.
+  const existingLibs = existsSync(librariesPath)
+    ? JSON.parse(readFileSync(librariesPath, 'utf-8'))
+    : { steam: [], psn: [], xbox: [] };
+  const libraries = {
+    steam: fetchedPlatforms.has('steam')
+      ? steamLib.map((e) => ({
+          id: e.platformId,
+          title: e.platformTitle,
+          playtimeMinutes: e.playtimeMinutes ?? 0,
+        }))
+      : (existingLibs.steam ?? []),
+    psn: fetchedPlatforms.has('psn')
+      ? psnLib.map((e) => ({
+          id: e.platformId,
+          title: e.platformTitle,
+          earned: e.earned,
+          total: e.total,
+        }))
+      : (existingLibs.psn ?? []),
+    xbox: fetchedPlatforms.has('xbox')
+      ? xboxLib.map((e) => ({
+          id: e.platformId,
+          title: e.platformTitle,
+          earned: e.earned,
+          total: e.total,
+        }))
+      : (existingLibs.xbox ?? []),
+    updatedAt: new Date().toISOString(),
+  };
+  writeFileSync(librariesPath, JSON.stringify(libraries, null, 2) + '\n');
 
   const achievements = {};
   for (const [title, data] of Object.entries(existing)) {
