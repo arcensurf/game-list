@@ -36,32 +36,58 @@ const XBOX_REFRESH_TOKEN = process.env.XBOX_REFRESH_TOKEN;
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ── Title normalization for fuzzy matching ──
+//
+// Strict exact-match only after normalization. Substring matching was
+// previously used as a fallback but caused a bunch of false positives:
+//   - "Borderlands" matching "Borderlands 2", "Borderlands 3", GOTY, etc.
+//   - "Dirt 2" matching "Dirt 2 Demo"
+//   - "Halo 3" matching "Halo 3: ODST"
+//   - "Persona 5" matching "Persona 5 Royal" (different games — a user
+//     who beat both would want them as separate game-list entries anyway)
+// Any legitimate edge case that doesn't survive exact-match (e.g. a
+// regional title difference) is handled via explicit
+// steamAppId / psnNpCommId / xboxTitleId overrides on the game entry.
 
 function normalize(title) {
   return title
     .toLowerCase()
+    // Drop leading "the " so "The Elder Scrolls V" matches "Elder Scrolls V".
+    .replace(/^the\s+/, '')
+    // Strip trademarks first so the symbol between "DiRT" and "5" doesn't
+    // leave a ghost character that splits the word weirdly.
     .replace(/[®™©]/g, '')
-    .replace(/['':;,.!?\-–—]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+    // Drop everything except letters and digits — no whitespace, no
+    // punctuation, no brackets, no slashes, no ampersands. Stripping
+    // spaces too is the key move that lets "DiRT®5" (no space, stylized
+    // PSN title) match "Dirt 5" from games.json: both collapse to "dirt5".
+    // "Dirt 5" vs "Dirt" still differ (dirt5 ≠ dirt), so no false positive.
+    .replace(/[^a-z0-9]/g, '');
 }
 
-function fuzzyMatch(needle, haystack) {
-  const n = normalize(needle);
-  const h = normalize(haystack);
-  return n === h;
+// ── Platform-family eligibility ──
+//
+// Each achievement-bearing platform only matches games marked as beaten
+// on a platform in its family. Stops Bastion-on-Steam from attaching
+// Steam achievements to a game that was only beaten on PS4, etc.
+
+const PLATFORM_FAMILIES = {
+  steam: new Set(['PC']),
+  psn: new Set(['PS3', 'PS4', 'PS5', 'PS Vita']),
+  xbox: new Set(['Xbox 360', 'Xbox One', 'Xbox Series X|S', 'Xbox Series X', 'Xbox Series S']),
+};
+
+function gameIsOnPlatformFamily(game, platform) {
+  const family = PLATFORM_FAMILIES[platform];
+  if (!family) return true; // unknown family: don't filter
+  return game.platforms.some((p) => family.has(p));
 }
 
-function findMatch(platformTitle, games) {
-  // Exact normalized match
-  for (const g of games) {
-    if (fuzzyMatch(platformTitle, g.title)) return g;
-  }
-  // Substring match (platform title contains game title or vice versa)
+function findMatch(platformTitle, platform, games) {
   const normPlatform = normalize(platformTitle);
   for (const g of games) {
-    const normGame = normalize(g.title);
-    if (normPlatform.includes(normGame) || normGame.includes(normPlatform)) return g;
+    if (normalize(g.title) !== normPlatform) continue;
+    if (!gameIsOnPlatformFamily(g, platform)) continue;
+    return g;
   }
   return null;
 }
@@ -149,11 +175,29 @@ async function fetchPsnLibrary() {
 
   try {
     const psn = await import('psn-api');
-    const { trophyTitles } = await psn.getUserTitles(
-      { accessToken: psnAuth.accessToken },
-      'me'
-    );
-    return (trophyTitles ?? []).map((t) => ({
+
+    // psn-api's getUserTitles is paginated — defaulting to ~100 per page.
+    // We walk nextOffset until exhausted so the full trophy library comes
+    // back, not just the first page. Without this, PS5+ games near the
+    // tail of your library (e.g. a title you beat recently that sits at
+    // index 120) get silently dropped.
+    const all = [];
+    let offset = 0;
+    const pageSize = 100;
+    while (true) {
+      const page = await psn.getUserTitles(
+        { accessToken: psnAuth.accessToken },
+        'me',
+        { limit: pageSize, offset },
+      );
+      const titles = page.trophyTitles ?? [];
+      all.push(...titles);
+      // `nextOffset` is null / undefined when there are no more pages.
+      if (page.nextOffset == null || titles.length === 0) break;
+      offset = page.nextOffset;
+    }
+
+    return all.map((t) => ({
       platformTitle: t.trophyTitleName,
       platformId: t.npCommunicationId,
       platform: 'psn',
@@ -351,7 +395,7 @@ async function main() {
         return false;
       });
 
-      const match = override || findMatch(entry.platformTitle, games);
+      const match = override || findMatch(entry.platformTitle, entry.platform, games);
       if (match) {
         if (!matchResults.has(match.title)) matchResults.set(match.title, []);
         matchResults.get(match.title).push(entry);
