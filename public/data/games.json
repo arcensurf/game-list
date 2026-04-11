@@ -834,7 +834,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"La Hee\" game",
-    "order": 59
+    "order": 59,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR23141_00",
+    "xboxTitleId": null
   },
   {
     "title": "Final Fantasy XV",
