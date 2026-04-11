@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import type { Game, CoverMap, GameWithCover, LetterGroup } from '../types/game';
+import type { Game, CoverMap, AchievementMap, GameWithCover, LetterGroup } from '../types/game';
 import { getCoverUrl } from '../utils/coverUrl';
 
 const DATA_BASE = import.meta.env.DEV
@@ -25,15 +25,18 @@ export function useGames(filter?: string, gogOnly?: boolean): {
 } {
   const [games, setGames] = useState<Game[]>([]);
   const [covers, setCovers] = useState<CoverMap>({});
+  const [achievements, setAchievements] = useState<AchievementMap>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       fetch(`${DATA_BASE}data/games.json`).then((r) => r.json()),
       fetch(`${DATA_BASE}data/covers.json`).then((r) => r.json()),
-    ]).then(([g, c]) => {
+      fetch(`${DATA_BASE}data/achievements.json`).then((r) => r.json()).catch(() => ({})),
+    ]).then(([g, c, a]) => {
       setGames(g as Game[]);
       setCovers(c as CoverMap);
+      setAchievements(a as AchievementMap);
       setLoading(false);
     });
   }, []);
@@ -57,6 +60,7 @@ export function useGames(filter?: string, gogOnly?: boolean): {
     const withCovers: GameWithCover[] = filtered.map((g) => ({
       ...g,
       coverUrl: getCoverUrl(g, covers),
+      achievements: achievements[g.title] ?? null,
     }));
 
     const groupMap = new Map<string, GameWithCover[]>();
@@ -99,7 +103,7 @@ export function useGames(filter?: string, gogOnly?: boolean): {
       .sort((a, b) => b.count - a.count);
 
     return { groups, totalCount: withCovers.length, platformStats };
-  }, [games, covers, filter, gogOnly]);
+  }, [games, covers, achievements, filter, gogOnly]);
 
   return { ...result, loading };
 }

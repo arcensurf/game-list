@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import type { LetterGroup, GameWithCover } from '../types/game';
 import GameCard from './GameCard';
+import AchievementBar from './AchievementBar';
 
 type DropSide = 'before' | 'after';
 
@@ -97,6 +98,7 @@ export default function LetterSection({ group }: { group: LetterGroup }) {
             className={getCardClass(index)}
           >
             <GameCard game={game} />
+            <AchievementBar achievements={game.achievements} />
           </div>
         ))}
       </div>

@@ -251,13 +251,17 @@ export default function devApiPlugin(): Plugin {
 
           if (req.url === '/api/edit-game') {
             const body = JSON.parse(await parseBody(req));
-            const { originalTitle, title, subtitle, platforms, extras, gameOfGames } = body as {
+            const { originalTitle, title, subtitle, platforms, extras, gameOfGames,
+                    steamAppId, psnNpCommId, xboxTitleId } = body as {
               originalTitle: string;
               title: string;
               subtitle: string | null;
               platforms: string[];
               extras: { label: string; items: string[] }[];
               gameOfGames: string | null;
+              steamAppId: number | null;
+              psnNpCommId: string | null;
+              xboxTitleId: string | null;
             };
 
             const games = readJson(gamesPath);
@@ -289,6 +293,9 @@ export default function devApiPlugin(): Plugin {
             game.platforms = platforms;
             game.extras = extras;
             game.gameOfGames = gameOfGames;
+            game.steamAppId = steamAppId ?? null;
+            game.psnNpCommId = psnNpCommId ?? null;
+            game.xboxTitleId = xboxTitleId ?? null;
 
             writeJson(gamesPath, games);
 

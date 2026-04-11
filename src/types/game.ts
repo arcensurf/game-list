@@ -12,6 +12,9 @@ export interface Game {
   coverOverride: string | null;
   gameOfGames: string | null;
   order: number;
+  steamAppId?: number | null;
+  psnNpCommId?: string | null;
+  xboxTitleId?: string | null;
 }
 
 export interface CoverEntry {
@@ -22,8 +25,23 @@ export interface CoverEntry {
 
 export type CoverMap = Record<string, CoverEntry | null>;
 
+export interface PlatformAchievementData {
+  earned: number;
+  total: number;
+  platform: 'steam' | 'psn' | 'xbox';
+}
+
+export interface GameAchievements {
+  platforms: PlatformAchievementData[];
+  best: PlatformAchievementData;
+  updatedAt: string;
+}
+
+export type AchievementMap = Record<string, GameAchievements>;
+
 export interface GameWithCover extends Game {
   coverUrl: string | null;
+  achievements: GameAchievements | null;
 }
 
 export interface LetterGroup {
