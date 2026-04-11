@@ -608,7 +608,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 44
+    "order": 44,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR21820_00",
+    "xboxTitleId": null
   },
   {
     "title": "Final Fantasy II",
@@ -2133,7 +2136,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 163
+    "order": 163,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR14334_00",
+    "xboxTitleId": "1397819357"
   },
   {
     "title": "Star Ocean The Second Story",
@@ -2146,19 +2152,26 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 164
+    "order": 164,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR35698_00",
+    "xboxTitleId": null
   },
   {
     "title": "Star Ocean Till the End of Time",
     "subtitle": null,
     "platforms": [
-      "PS2"
+      "PS2",
+      "PS4"
     ],
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"The whips on this planet hurt, too\" game",
-    "order": 165
+    "order": 165,
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null
   },
   {
     "title": "Star Wars: The Force Unleashed",
