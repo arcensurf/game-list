@@ -1,55 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { ExtraContent, GameWithCover } from '../types/game';
+import type { AchievementData, ExtraContent, GameWithCover, PlatformLibraryEntry } from '../types/game';
+import { buildTitleIndex, normalizeTitle } from '../utils/achievementMatch';
 import PlatformPicker from './PlatformPicker';
 
-// ── Platform-library lookup ──
-//
-// platform-libraries.json is written by scripts/fetch-achievements.mjs
-// and committed to the `data` branch. We fetch it here so the modal can
-// (a) auto-fill empty ID override fields with a matching library entry
-// on open, and (b) show a live "matches X library" hint as the user
-// edits the title. The normalizer must stay in sync with the one in
-// fetch-achievements.mjs (exact-match, alphanumerics only, leading
-// "the" stripped) or lookups will silently miss.
-
-type SteamLibEntry = { id: number; title: string; playtimeMinutes: number };
-type PsnLibEntry = { id: string; title: string; earned: number; total: number };
-type XboxLibEntry = { id: string; title: string; earned: number; total: number };
-type PlatformLibraries = {
-  steam: SteamLibEntry[];
-  psn: PsnLibEntry[];
-  xbox: XboxLibEntry[];
-};
-
-function normalizeTitle(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/^the\s+/, '')
-    .replace(/[®™©]/g, '')
-    .replace(/[^a-z0-9]/g, '');
-}
-
-// Build a normalized-title → best-entry map. When multiple library
-// entries collide on the same normalized title (e.g. Xbox's full-game
-// DiRT 3 titleId vs a demo titleId that both normalize to "dirt3"),
-// `rank` picks which to keep. Higher rank wins.
-function buildBestMap<T extends { title: string }>(
-  entries: T[],
-  rank: (e: T) => number,
-): Map<string, T> {
-  const m = new Map<string, T>();
-  for (const e of entries) {
-    const k = normalizeTitle(e.title);
-    const prev = m.get(k);
-    if (!prev || rank(e) > rank(prev)) m.set(k, e);
-  }
-  return m;
-}
-
-const steamRank = (e: SteamLibEntry) => e.playtimeMinutes;
-const psnRank = (e: PsnLibEntry) => (e.total > 0 ? e.earned / e.total : 0);
-const xboxRank = (e: XboxLibEntry) => (e.total > 0 ? e.earned / e.total : 0);
+// The modal reads achievements.json — the same runtime source of truth
+// the render path uses — so pre-fill / hint lookups stay in lockstep
+// with what's actually being displayed. achievements.json is keyed by
+// platform ID, which is exactly what the override fields store, so
+// lookup by ID is a direct map access. Title lookup goes through the
+// shared buildTitleIndex + normalizeTitle helpers so there's one
+// matching implementation shared with useGames.
 
 const DATA_BASE = import.meta.env.DEV
   ? import.meta.env.BASE_URL
@@ -93,47 +54,63 @@ export default function EditGameModal({
   const [steamAppId, setSteamAppId] = useState(game.steamAppId?.toString() || '');
   const [psnNpCommId, setPsnNpCommId] = useState(game.psnNpCommId || '');
   const [xboxTitleId, setXboxTitleId] = useState(game.xboxTitleId || '');
-  const [libraries, setLibraries] = useState<PlatformLibraries | null>(null);
+  const [data, setData] = useState<AchievementData | null>(null);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Normalized-title maps for O(1) lookup on every keystroke. Uses
-  // the best-entry selection helper so a collision (two DiRT 3
-  // titleIds that both normalize to "dirt3" — one full game at
-  // 60/60, one demo at 0/60) picks the one the user actually played.
-  const steamByTitle = useMemo(
-    () => buildBestMap(libraries?.steam ?? [], steamRank),
-    [libraries],
-  );
-  const psnByTitle = useMemo(
-    () => buildBestMap(libraries?.psn ?? [], psnRank),
-    [libraries],
-  );
-  const xboxByTitle = useMemo(
-    () => buildBestMap(libraries?.xbox ?? [], xboxRank),
-    [libraries],
-  );
+  // Precomputed normalized-title → best-entry index. Rebuilt only when
+  // data reloads, queried O(1) on every keystroke as the user edits
+  // the title field. Collisions (two DiRT 3 titleIds normalizing to
+  // "dirt3" — one full game, one demo) resolve to the higher-ranked
+  // entry (completion % for PSN/Xbox, playtime for Steam) via the
+  // shared buildTitleIndex helper.
+  const index = useMemo(() => buildTitleIndex(data), [data]);
 
-  // Fetch platform libraries once on mount, and auto-fill any empty
-  // override fields whose title matches a library entry. Uses the
-  // same best-entry selection as the live lookup maps above.
+  // Helpers to recover the platform-ID of a title-matched entry.
+  // buildTitleIndex returns the entry without its key, but the hint
+  // text needs to show the id alongside the title. Fall back to a
+  // direct scan of the raw map to find which id points at the entry
+  // we matched — iteration is cheap since the map is a few hundred
+  // entries and this only runs when a match is found.
+  const findIdForEntry = (
+    map: Record<string, PlatformLibraryEntry> | undefined,
+    entry: PlatformLibraryEntry,
+  ): string | null => {
+    if (!map) return null;
+    for (const [id, e] of Object.entries(map)) if (e === entry) return id;
+    return null;
+  };
+
+  // Fetch achievements.json once on mount, and auto-fill any empty
+  // override fields whose title matches. The same index drives the
+  // live hints below, so pre-fill and hint pick the same entry.
   useEffect(() => {
-    fetch(`${DATA_BASE}data/platform-libraries.json`)
+    fetch(`${DATA_BASE}data/achievements.json`)
       .then((r) => r.json())
-      .then((libs: PlatformLibraries) => {
-        setLibraries(libs);
+      .then((d: AchievementData) => {
+        setData(d);
         const norm = normalizeTitle(game.title);
+        const idx = buildTitleIndex(d);
         if (!game.steamAppId) {
-          const m = buildBestMap(libs.steam ?? [], steamRank).get(norm);
-          if (m) setSteamAppId(String(m.id));
+          const m = idx.steam.get(norm);
+          if (m) {
+            const id = findIdForEntry(d.steam, m);
+            if (id) setSteamAppId(id);
+          }
         }
         if (!game.psnNpCommId) {
-          const m = buildBestMap(libs.psn ?? [], psnRank).get(norm);
-          if (m) setPsnNpCommId(m.id);
+          const m = idx.psn.get(norm);
+          if (m) {
+            const id = findIdForEntry(d.psn, m);
+            if (id) setPsnNpCommId(id);
+          }
         }
         if (!game.xboxTitleId) {
-          const m = buildBestMap(libs.xbox ?? [], xboxRank).get(norm);
-          if (m) setXboxTitleId(m.id);
+          const m = idx.xbox.get(norm);
+          if (m) {
+            const id = findIdForEntry(d.xbox, m);
+            if (id) setXboxTitleId(id);
+          }
         }
       })
       .catch(() => { /* file may not be published yet — silently degrade */ });
@@ -142,9 +119,18 @@ export default function EditGameModal({
   }, []);
 
   const normalizedTitle = normalizeTitle(title);
-  const steamMatch = steamByTitle.get(normalizedTitle) ?? null;
-  const psnMatch = psnByTitle.get(normalizedTitle) ?? null;
-  const xboxMatch = xboxByTitle.get(normalizedTitle) ?? null;
+  const steamMatchEntry = index.steam.get(normalizedTitle) ?? null;
+  const psnMatchEntry = index.psn.get(normalizedTitle) ?? null;
+  const xboxMatchEntry = index.xbox.get(normalizedTitle) ?? null;
+  const steamMatch = steamMatchEntry
+    ? { entry: steamMatchEntry, id: findIdForEntry(data?.steam, steamMatchEntry) }
+    : null;
+  const psnMatch = psnMatchEntry
+    ? { entry: psnMatchEntry, id: findIdForEntry(data?.psn, psnMatchEntry) }
+    : null;
+  const xboxMatch = xboxMatchEntry
+    ? { entry: xboxMatchEntry, id: findIdForEntry(data?.xbox, xboxMatchEntry) }
+    : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,9 +214,11 @@ export default function EditGameModal({
             />
             {steamMatch && (
               <span className="field-hint">
-                Steam library: {steamMatch.title} · id {steamMatch.id}
-                {steamMatch.playtimeMinutes > 0 &&
-                  ` · ${Math.round(steamMatch.playtimeMinutes / 60)}h played`}
+                Steam library: {steamMatch.entry.title} · id {steamMatch.id}
+                {(steamMatch.entry.playtimeMinutes ?? 0) >= 60 &&
+                  ` · ${Math.round((steamMatch.entry.playtimeMinutes ?? 0) / 60)}h played`}
+                {steamMatch.entry.total > 0 &&
+                  ` · ${steamMatch.entry.earned}/${steamMatch.entry.total} achievements`}
               </span>
             )}
           </label>
@@ -246,8 +234,8 @@ export default function EditGameModal({
             />
             {psnMatch && (
               <span className="field-hint">
-                PSN library: {psnMatch.title} · {psnMatch.id} ·{' '}
-                {psnMatch.earned}/{psnMatch.total} trophies
+                PSN library: {psnMatch.entry.title} · {psnMatch.id} ·{' '}
+                {psnMatch.entry.earned}/{psnMatch.entry.total} trophies
               </span>
             )}
           </label>
@@ -263,8 +251,8 @@ export default function EditGameModal({
             />
             {xboxMatch && (
               <span className="field-hint">
-                Xbox library: {xboxMatch.title} · {xboxMatch.id} ·{' '}
-                {xboxMatch.earned}/{xboxMatch.total} achievements
+                Xbox library: {xboxMatch.entry.title} · {xboxMatch.id} ·{' '}
+                {xboxMatch.entry.earned}/{xboxMatch.entry.total} achievements
               </span>
             )}
           </label>

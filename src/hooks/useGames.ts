@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
-import type { Game, CoverMap, AchievementMap, GameWithCover, LetterGroup } from '../types/game';
+import type { Game, CoverMap, AchievementData, GameWithCover, LetterGroup } from '../types/game';
 import { getCoverUrl } from '../utils/coverUrl';
+import { buildTitleIndex, resolveGameAchievements } from '../utils/achievementMatch';
 
 const DATA_BASE = import.meta.env.DEV
   ? import.meta.env.BASE_URL
@@ -25,21 +26,26 @@ export function useGames(filter?: string, gogOnly?: boolean): {
 } {
   const [games, setGames] = useState<Game[]>([]);
   const [covers, setCovers] = useState<CoverMap>({});
-  const [achievements, setAchievements] = useState<AchievementMap>({});
+  const [achievementData, setAchievementData] = useState<AchievementData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       fetch(`${DATA_BASE}data/games.json`).then((r) => r.json()),
       fetch(`${DATA_BASE}data/covers.json`).then((r) => r.json()),
-      fetch(`${DATA_BASE}data/achievements.json`).then((r) => r.json()).catch(() => ({})),
+      fetch(`${DATA_BASE}data/achievements.json`).then((r) => r.json()).catch(() => null),
     ]).then(([g, c, a]) => {
       setGames(g as Game[]);
       setCovers(c as CoverMap);
-      setAchievements(a as AchievementMap);
+      setAchievementData(a as AchievementData | null);
       setLoading(false);
     });
   }, []);
+
+  // Precomputed title indexes — rebuilt only when achievement data
+  // reloads, not on every render. resolveGameAchievements queries these
+  // O(1), so iterating ~700 games stays cheap.
+  const titleIndex = useMemo(() => buildTitleIndex(achievementData), [achievementData]);
 
   const result = useMemo(() => {
     let filtered = games;
@@ -60,7 +66,7 @@ export function useGames(filter?: string, gogOnly?: boolean): {
     const withCovers: GameWithCover[] = filtered.map((g) => ({
       ...g,
       coverUrl: getCoverUrl(g, covers),
-      achievements: achievements[g.title] ?? null,
+      achievements: resolveGameAchievements(g, achievementData, titleIndex),
     }));
 
     const groupMap = new Map<string, GameWithCover[]>();
@@ -103,7 +109,7 @@ export function useGames(filter?: string, gogOnly?: boolean): {
       .sort((a, b) => b.count - a.count);
 
     return { groups, totalCount: withCovers.length, platformStats };
-  }, [games, covers, achievements, filter, gogOnly]);
+  }, [games, covers, achievementData, titleIndex, filter, gogOnly]);
 
   return { ...result, loading };
 }

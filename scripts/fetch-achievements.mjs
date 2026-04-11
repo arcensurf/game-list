@@ -8,7 +8,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataDir = process.env.DATA_DIR
   ? resolve(process.env.DATA_DIR)
   : resolve(__dirname, '..', 'public', 'data');
-const gamesPath = resolve(dataDir, 'games.json');
 const achievementsPath = resolve(dataDir, 'achievements.json');
 const librariesPath = resolve(dataDir, 'platform-libraries.json');
 
@@ -36,62 +35,11 @@ const XBOX_REFRESH_TOKEN = process.env.XBOX_REFRESH_TOKEN;
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// ── Title normalization for fuzzy matching ──
-//
-// Strict exact-match only after normalization. Substring matching was
-// previously used as a fallback but caused a bunch of false positives:
-//   - "Borderlands" matching "Borderlands 2", "Borderlands 3", GOTY, etc.
-//   - "Dirt 2" matching "Dirt 2 Demo"
-//   - "Halo 3" matching "Halo 3: ODST"
-//   - "Persona 5" matching "Persona 5 Royal" (different games — a user
-//     who beat both would want them as separate game-list entries anyway)
-// Any legitimate edge case that doesn't survive exact-match (e.g. a
-// regional title difference) is handled via explicit
-// steamAppId / psnNpCommId / xboxTitleId overrides on the game entry.
-
-function normalize(title) {
-  return title
-    .toLowerCase()
-    // Drop leading "the " so "The Elder Scrolls V" matches "Elder Scrolls V".
-    .replace(/^the\s+/, '')
-    // Strip trademarks first so the symbol between "DiRT" and "5" doesn't
-    // leave a ghost character that splits the word weirdly.
-    .replace(/[®™©]/g, '')
-    // Drop everything except letters and digits — no whitespace, no
-    // punctuation, no brackets, no slashes, no ampersands. Stripping
-    // spaces too is the key move that lets "DiRT®5" (no space, stylized
-    // PSN title) match "Dirt 5" from games.json: both collapse to "dirt5".
-    // "Dirt 5" vs "Dirt" still differ (dirt5 ≠ dirt), so no false positive.
-    .replace(/[^a-z0-9]/g, '');
-}
-
-// ── Platform-family eligibility ──
-//
-// Each achievement-bearing platform only matches games marked as beaten
-// on a platform in its family. Stops Bastion-on-Steam from attaching
-// Steam achievements to a game that was only beaten on PS4, etc.
-
-const PLATFORM_FAMILIES = {
-  steam: new Set(['PC']),
-  psn: new Set(['PS3', 'PS4', 'PS5', 'PS Vita']),
-  xbox: new Set(['Xbox 360', 'Xbox One', 'Xbox Series X|S', 'Xbox Series X', 'Xbox Series S']),
-};
-
-function gameIsOnPlatformFamily(game, platform) {
-  const family = PLATFORM_FAMILIES[platform];
-  if (!family) return true; // unknown family: don't filter
-  return game.platforms.some((p) => family.has(p));
-}
-
-function findMatch(platformTitle, platform, games) {
-  const normPlatform = normalize(platformTitle);
-  for (const g of games) {
-    if (normalize(g.title) !== normPlatform) continue;
-    if (!gameIsOnPlatformFamily(g, platform)) continue;
-    return g;
-  }
-  return null;
-}
+// This script no longer does any game-list matching. It dumps each
+// platform's library (keyed by the platform's own ID) into
+// achievements.json, and the app resolves game → entry at render time
+// via src/utils/achievementMatch.ts. That means a manual override ID
+// change takes effect on the next reload without re-running CI.
 
 // ── Steam ──
 
@@ -366,16 +314,22 @@ async function fetchXboxLibrary() {
 // ── Main ──
 
 async function main() {
-  const games = JSON.parse(readFileSync(gamesPath, 'utf-8'));
+  // achievements.json stores full per-platform libraries keyed by the
+  // platform's own ID. Shape:
+  //   { steam: { [appid]: { title, earned, total, playtimeMinutes } },
+  //     psn:   { [npId]:  { title, earned, total } },
+  //     xbox:  { [titleId]: { title, earned, total } },
+  //     updatedAt }
+  // The app resolves game → entry at render time (see
+  // src/utils/achievementMatch.ts), so a manual override change takes
+  // effect on the next page load without re-running this script.
   const existing = existsSync(achievementsPath)
     ? JSON.parse(readFileSync(achievementsPath, 'utf-8'))
-    : {};
+    : { steam: {}, psn: {}, xbox: {} };
 
-  // Initialize platform auth
   await initPsn();
   await initXbox();
 
-  // Fetch platform libraries
   console.log('\nFetching platform libraries...');
   const [steamLib, psnLib, xboxLib] = await Promise.all([
     fetchSteamLibrary(),
@@ -384,26 +338,16 @@ async function main() {
   ]);
   console.log(`Steam: ${steamLib.length} games, PSN: ${psnLib.length} games, Xbox: ${xboxLib.length} games`);
 
-  // Rebuild from scratch for any platform that successfully fetched.
-  //
-  // The script used to do `{ ...existing }` then merge in new matches on
-  // top, which meant a game matched in a *previous* run but not the
-  // current run kept its old entries forever. After a matcher fix, old
-  // false-positive entries (e.g. Bastion's stale Steam record from when
-  // platform-family gating wasn't applied) would persist.
-  //
-  // The guard is: only strip platforms that actually returned data. If
-  // Xbox's API has a transient failure and xboxLib is empty, we preserve
-  // the existing Xbox entries rather than wiping the whole Xbox dataset.
+  // Only replace a platform's slice if we actually fetched it this run.
+  // A transient API failure (empty list) preserves the previous data
+  // rather than wiping every override for that platform.
   const fetchedPlatforms = new Set();
   if (steamLib.length > 0) fetchedPlatforms.add('steam');
   if (psnLib.length > 0) fetchedPlatforms.add('psn');
   if (xboxLib.length > 0) fetchedPlatforms.add('xbox');
 
-  // Write a platform-libraries.json reference so the dev edit modal can
-  // suggest `steamAppId` / `psnNpCommId` / `xboxTitleId` overrides.
-  // Same preservation rule as achievements.json: only rewrite a
-  // platform's library if we actually fetched it this run.
+  // platform-libraries.json is a simplified human-readable reference
+  // for manually finding override IDs. Not consumed by the app.
   const existingLibs = existsSync(librariesPath)
     ? JSON.parse(readFileSync(librariesPath, 'utf-8'))
     : { steam: [], psn: [], xbox: [] };
@@ -435,100 +379,58 @@ async function main() {
   };
   writeFileSync(librariesPath, JSON.stringify(libraries, null, 2) + '\n');
 
-  const achievements = {};
-  for (const [title, data] of Object.entries(existing)) {
-    const kept = data.platforms.filter((p) => !fetchedPlatforms.has(p.platform));
-    if (kept.length === 0) continue; // no preserved platforms → drop entry
-    const best = kept.reduce((a, b) => {
-      const pctA = a.total > 0 ? a.earned / a.total : 0;
-      const pctB = b.total > 0 ? b.earned / b.total : 0;
-      return pctB > pctA ? b : a;
-    });
-    achievements[title] = { platforms: kept, best, updatedAt: data.updatedAt };
-  }
-
-  // Build a map of game title -> matched platform entries
-  const matchResults = new Map();
-  const unmatched = { steam: [], psn: [], xbox: [] };
-
-  for (const lib of [steamLib, psnLib, xboxLib]) {
-    for (const entry of lib) {
-      // Check for manual override first
-      const override = games.find((g) => {
-        if (entry.platform === 'steam' && g.steamAppId === entry.platformId) return true;
-        if (entry.platform === 'psn' && g.psnNpCommId === entry.platformId) return true;
-        if (entry.platform === 'xbox' && g.xboxTitleId === entry.platformId) return true;
-        return false;
-      });
-
-      const match = override || findMatch(entry.platformTitle, entry.platform, games);
-      if (match) {
-        if (!matchResults.has(match.title)) matchResults.set(match.title, []);
-        matchResults.get(match.title).push(entry);
-      } else {
-        unmatched[entry.platform].push(entry.platformTitle);
-      }
-    }
-  }
-
-  // Fetch detailed achievement data for matched games
-  let fetched = 0;
-  for (const [title, entries] of matchResults) {
-    const platforms = [];
-
-    for (const entry of entries) {
-      if (entry.platform === 'steam') {
-        // Steam needs a separate API call for achievements
-        const result = await fetchSteamAchievements(entry.platformId);
-        if (result) platforms.push(result);
-        await delay(300);
-      } else if (entry.platform === 'psn') {
-        // PSN already has trophy counts from the library call
-        platforms.push({ earned: entry.earned, total: entry.total, platform: 'psn' });
-      } else if (entry.platform === 'xbox') {
-        // TODO: fetch Xbox achievements
-        if (entry.earned !== undefined) {
-          platforms.push({ earned: entry.earned, total: entry.total, platform: 'xbox' });
-        }
-      }
-    }
-
-    if (platforms.length > 0) {
-      // Merge with any platforms preserved from existing (i.e. platforms
-      // whose APIs didn't fetch this run). The preservation step already
-      // stripped out everything we're rebuilding, so there's no overlap.
-      const preserved = achievements[title]?.platforms ?? [];
-      const combined = [...preserved, ...platforms];
-
-      // Pick best platform (highest completion %)
-      const best = combined.reduce((a, b) => {
-        const pctA = a.total > 0 ? a.earned / a.total : 0;
-        const pctB = b.total > 0 ? b.earned / b.total : 0;
-        return pctB > pctA ? b : a;
-      });
-
-      achievements[title] = {
-        platforms: combined,
-        best,
-        updatedAt: new Date().toISOString(),
+  // Steam needs a per-appid call for achievement counts (GetOwnedGames
+  // only returns playtime). PSN and Xbox already include earned/total
+  // in their library responses, so those are in-memory transforms.
+  const steamMap = {};
+  if (fetchedPlatforms.has('steam')) {
+    console.log(`\nFetching Steam achievements for ${steamLib.length} games...`);
+    let done = 0;
+    for (const e of steamLib) {
+      const ach = await fetchSteamAchievements(e.platformId);
+      steamMap[String(e.platformId)] = {
+        title: e.platformTitle,
+        earned: ach?.earned ?? 0,
+        total: ach?.total ?? 0,
+        playtimeMinutes: e.playtimeMinutes ?? 0,
       };
-      fetched++;
+      await delay(300);
+      done++;
+      if (done % 50 === 0) console.log(`  Steam: ${done}/${steamLib.length}`);
     }
   }
 
-  // Write results
+  const psnMap = {};
+  if (fetchedPlatforms.has('psn')) {
+    for (const e of psnLib) {
+      psnMap[e.platformId] = {
+        title: e.platformTitle,
+        earned: e.earned,
+        total: e.total,
+      };
+    }
+  }
+
+  const xboxMap = {};
+  if (fetchedPlatforms.has('xbox')) {
+    for (const e of xboxLib) {
+      xboxMap[e.platformId] = {
+        title: e.platformTitle,
+        earned: e.earned,
+        total: e.total,
+      };
+    }
+  }
+
+  const achievements = {
+    steam: fetchedPlatforms.has('steam') ? steamMap : (existing.steam ?? {}),
+    psn: fetchedPlatforms.has('psn') ? psnMap : (existing.psn ?? {}),
+    xbox: fetchedPlatforms.has('xbox') ? xboxMap : (existing.xbox ?? {}),
+    updatedAt: new Date().toISOString(),
+  };
+
   writeFileSync(achievementsPath, JSON.stringify(achievements, null, 2) + '\n');
-  console.log(`\nUpdated ${fetched} games with achievement data`);
-  console.log(`Total games with achievements: ${Object.keys(achievements).length}`);
-
-  // Log unmatched
-  for (const [platform, titles] of Object.entries(unmatched)) {
-    if (titles.length > 0) {
-      console.log(`\nUnmatched ${platform} games (${titles.length}):`);
-      titles.slice(0, 20).forEach((t) => console.log(`  - ${t}`));
-      if (titles.length > 20) console.log(`  ... and ${titles.length - 20} more`);
-    }
-  }
+  console.log(`\nWrote achievements.json — steam: ${Object.keys(achievements.steam).length}, psn: ${Object.keys(achievements.psn).length}, xbox: ${Object.keys(achievements.xbox).length}`);
 }
 
 main().catch((err) => {
