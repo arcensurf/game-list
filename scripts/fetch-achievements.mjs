@@ -164,11 +164,18 @@ async function fetchPsnLibrary() {
     // the response does NOT include DLC trophy groups living under the
     // same npCommunicationId. For any title with hasTrophyGroups=true
     // (e.g. The Witcher 3 + Hearts of Stone + Blood and Wine, all on
-    // NPWR10477 but under groups "001" and "002"), we call
-    // getUserTrophyGroupEarningsForTitle and sum across every group to
-    // get the true totals. Standalone DLC with its own npCommunicationId
-    // (some PS5 expansions) stays as a separate entry — user treats it
-    // as a distinct game-list entry, not DLC to merge.
+    // NPWR10477 but under groups "001" and "002"), we fetch both:
+    //   - getUserTrophyGroupEarningsForTitle → per-group earned counts
+    //     (user-scoped). Top-level earnedTrophies on the response is
+    //     the full cross-group sum.
+    //   - getTitleTrophyGroups → title metadata. Top-level
+    //     definedTrophies is the full cross-group sum.
+    // We need BOTH because the user-earnings endpoint doesn't report
+    // definedTrophies per-group (it's user-scoped, not metadata), and
+    // the title-metadata endpoint doesn't know about the user.
+    // Standalone DLC with its own npCommunicationId (some PS5
+    // expansions) stays as a separate entry — user treats it as a
+    // distinct game-list entry, not DLC to merge.
     const needsGroups = all.filter((t) => t.hasTrophyGroups);
     console.log(
       `PSN: fetching DLC trophy groups for ${needsGroups.length}/${all.length} titles`,
@@ -176,18 +183,24 @@ async function fetchPsnLibrary() {
     const groupTotals = new Map();
     for (const t of needsGroups) {
       try {
-        const res = await psn.getUserTrophyGroupEarningsForTitle(
-          { accessToken: psnAuth.accessToken },
-          'me',
-          t.npCommunicationId,
-          { npServiceName: t.npServiceName },
-        );
+        const [earnings, defined] = await Promise.all([
+          psn.getUserTrophyGroupEarningsForTitle(
+            { accessToken: psnAuth.accessToken },
+            'me',
+            t.npCommunicationId,
+            { npServiceName: t.npServiceName },
+          ),
+          psn.getTitleTrophyGroups(
+            { accessToken: psnAuth.accessToken },
+            t.npCommunicationId,
+            { npServiceName: t.npServiceName },
+          ),
+        ]);
         let earned = 0;
-        let total = 0;
-        for (const g of res.trophyGroups ?? []) {
+        for (const g of earnings.trophyGroups ?? []) {
           earned += sumTrophyCounts(g.earnedTrophies);
-          total += sumTrophyCounts(g.definedTrophies);
         }
+        const total = sumTrophyCounts(defined.definedTrophies);
         groupTotals.set(t.npCommunicationId, { earned, total });
       } catch (err) {
         // On per-title failure, fall back to the base-only aggregate
