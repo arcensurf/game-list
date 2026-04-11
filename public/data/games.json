@@ -211,13 +211,16 @@
     "title": "Bioshock Infinite",
     "subtitle": null,
     "platforms": [
-      "Xbox 360"
+      "PS3"
     ],
     "extras": [],
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 16
+    "order": 16,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR01478_00",
+    "xboxTitleId": null
   },
   {
     "title": "Borderlands",
@@ -423,7 +426,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 31
+    "order": 31,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR29622_00",
+    "xboxTitleId": null
   },
   {
     "title": "Dirge of Cerebus: Final Fantasy VII",
@@ -532,7 +538,7 @@
     "title": "Dragon Age Inquisition",
     "subtitle": null,
     "platforms": [
-      "Xbox 360"
+      "PS3"
     ],
     "extras": [
       {
@@ -546,7 +552,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 39
+    "order": 39,
+    "steamAppId": 1222690,
+    "psnNpCommId": "NPWR05671_00",
+    "xboxTitleId": null
   },
   {
     "title": "Dragon Quest",
@@ -636,7 +645,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 46
+    "order": 46,
+    "steamAppId": 1173790,
+    "psnNpCommId": null,
+    "xboxTitleId": null
   },
   {
     "title": "Final Fantasy IV",
@@ -660,7 +672,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 48
+    "order": 48,
+    "steamAppId": 1173810,
+    "psnNpCommId": null,
+    "xboxTitleId": null
   },
   {
     "title": "Final Fantasy VI",
@@ -766,7 +781,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 56
+    "order": 56,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR11367_00",
+    "xboxTitleId": null
   },
   {
     "title": "Final Fantasy XIII",
@@ -1134,7 +1152,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 83
+    "order": 83,
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": "1297287287"
   },
   {
     "title": "Harm's Way",
@@ -1941,7 +1962,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 147
+    "order": 147,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR02915_00",
+    "xboxTitleId": null
   },
   {
     "title": "Persona 4 Arena Ultimax",
@@ -1953,7 +1977,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 148
+    "order": 148,
+    "steamAppId": 1602010,
+    "psnNpCommId": "NPWR06200_00",
+    "xboxTitleId": null
   },
   {
     "title": "Persona 4 Golden",
@@ -2100,7 +2127,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 160
+    "order": 160,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR19233_00",
+    "xboxTitleId": null
   },
   {
     "title": "Star Ocean Integrity and Faithlessness",
@@ -2112,7 +2142,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 161
+    "order": 161,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR09715_00",
+    "xboxTitleId": null
   },
   {
     "title": "Star Ocean The Divine Force",
@@ -2195,7 +2228,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 167
+    "order": 167,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR24550_00",
+    "xboxTitleId": null
   },
   {
     "title": "Super Mario 3D Land",
