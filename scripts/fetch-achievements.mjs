@@ -123,16 +123,6 @@ async function initPsn() {
   }
 }
 
-function sumTrophyCounts(counts) {
-  if (!counts) return 0;
-  return (
-    (counts.bronze ?? 0) +
-    (counts.silver ?? 0) +
-    (counts.gold ?? 0) +
-    (counts.platinum ?? 0)
-  );
-}
-
 async function fetchPsnLibrary() {
   if (!psnAuth) return [];
 
@@ -144,6 +134,14 @@ async function fetchPsnLibrary() {
     // back, not just the first page. Without this, PS5+ games near the
     // tail of your library (e.g. a title you beat recently that sits at
     // index 120) get silently dropped.
+    //
+    // The earnedTrophies / definedTrophies counts on each returned title
+    // are already cross-group aggregates (verified empirically: Dirt 5
+    // reports 41/41 = 20 base + 20 DLC + 1 platinum), so no per-title
+    // group fetch is needed to pick up DLC trophies that live under the
+    // same npCommunicationId. Standalone DLC with its own npCommId
+    // (some PS5 expansions) stays as a separate entry; the user treats
+    // those as distinct game-list entries, not DLC to merge.
     const all = [];
     let offset = 0;
     const pageSize = 100;
@@ -160,69 +158,16 @@ async function fetchPsnLibrary() {
       offset = page.nextOffset;
     }
 
-    // getUserTitles returns base-group counts only — the aggregate in
-    // the response does NOT include DLC trophy groups living under the
-    // same npCommunicationId. For any title with hasTrophyGroups=true
-    // (e.g. The Witcher 3 + Hearts of Stone + Blood and Wine, all on
-    // NPWR10477 but under groups "001" and "002"), we fetch both:
-    //   - getUserTrophyGroupEarningsForTitle → per-group earned counts
-    //     (user-scoped). Top-level earnedTrophies on the response is
-    //     the full cross-group sum.
-    //   - getTitleTrophyGroups → title metadata. Top-level
-    //     definedTrophies is the full cross-group sum.
-    // We need BOTH because the user-earnings endpoint doesn't report
-    // definedTrophies per-group (it's user-scoped, not metadata), and
-    // the title-metadata endpoint doesn't know about the user.
-    // Standalone DLC with its own npCommunicationId (some PS5
-    // expansions) stays as a separate entry — user treats it as a
-    // distinct game-list entry, not DLC to merge.
-    const needsGroups = all.filter((t) => t.hasTrophyGroups);
-    console.log(
-      `PSN: fetching DLC trophy groups for ${needsGroups.length}/${all.length} titles`,
-    );
-    const groupTotals = new Map();
-    for (const t of needsGroups) {
-      try {
-        const [earnings, defined] = await Promise.all([
-          psn.getUserTrophyGroupEarningsForTitle(
-            { accessToken: psnAuth.accessToken },
-            'me',
-            t.npCommunicationId,
-            { npServiceName: t.npServiceName },
-          ),
-          psn.getTitleTrophyGroups(
-            { accessToken: psnAuth.accessToken },
-            t.npCommunicationId,
-            { npServiceName: t.npServiceName },
-          ),
-        ]);
-        let earned = 0;
-        for (const g of earnings.trophyGroups ?? []) {
-          earned += sumTrophyCounts(g.earnedTrophies);
-        }
-        const total = sumTrophyCounts(defined.definedTrophies);
-        groupTotals.set(t.npCommunicationId, { earned, total });
-      } catch (err) {
-        // On per-title failure, fall back to the base-only aggregate
-        // from getUserTitles. Better a slight undercount for one game
-        // than dropping the whole run over a transient error.
-        console.error(
-          `PSN: group fetch failed for ${t.trophyTitleName} (${t.npCommunicationId}): ${err.message}`,
-        );
-      }
-      await delay(200);
-    }
+    const sumCounts = (c) =>
+      (c?.bronze ?? 0) + (c?.silver ?? 0) + (c?.gold ?? 0) + (c?.platinum ?? 0);
 
-    return all.map((t) => {
-      const groups = groupTotals.get(t.npCommunicationId);
-      return {
-        platformTitle: t.trophyTitleName,
-        platformId: t.npCommunicationId,
-        platform: 'psn',
-        earned: groups ? groups.earned : sumTrophyCounts(t.earnedTrophies),
-        total: groups ? groups.total : sumTrophyCounts(t.definedTrophies),
-      };
-    });
+    return all.map((t) => ({
+      platformTitle: t.trophyTitleName,
+      platformId: t.npCommunicationId,
+      platform: 'psn',
+      earned: sumCounts(t.earnedTrophies),
+      total: sumCounts(t.definedTrophies),
+    }));
   } catch (err) {
     console.error('PSN: failed to fetch library', err.message);
     return [];
