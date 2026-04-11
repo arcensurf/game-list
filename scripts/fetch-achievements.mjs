@@ -222,11 +222,16 @@ async function refreshXboxTokens(refreshToken) {
 }
 
 async function initXbox() {
-  // Prefer env var (CI); fall back to cached file (local dev convenience).
-  const refreshToken = XBOX_REFRESH_TOKEN ||
+  // Refresh tokens rotate on every use, so the cached file (persisted
+  // between runs via actions/cache) holds the latest valid token after
+  // the first run. The env-var secret is only the initial seed. If we
+  // let env win, we'd send the original rotated-away token on every
+  // subsequent run and fail after the first. Cache wins, env is the
+  // fallback for the very first run (or after a cache wipe).
+  const refreshToken =
     (existsSync(XBOX_REFRESH_TOKEN_FILE)
       ? readFileSync(XBOX_REFRESH_TOKEN_FILE, 'utf-8').trim()
-      : null);
+      : null) || XBOX_REFRESH_TOKEN;
 
   if (!refreshToken) {
     console.log('Xbox: skipping (no refresh token — run `npm run xbox-get-refresh-token` to mint one)');
@@ -239,10 +244,12 @@ async function initXbox() {
     const fresh = await refreshXboxTokens(refreshToken);
 
     const userToken = await xnet.exchangeRpsTicketForUserToken(fresh.access_token, 't');
-    const xstsToken = await xnet.exchangeTokensForXSTSToken(
-      { userToken: userToken.Token },
-      { RelyingParty: 'http://xboxlive.com', sandboxId: 'RETAIL' }
-    );
+    // Use the singular form — it wraps the token into { userTokens: [token] }
+    // internally, which is the shape the XSTS endpoint actually requires.
+    // The plural form had been called with { userToken: ... } (wrong key)
+    // since the original commit, sending userTokens: undefined and 400-ing
+    // every run. That bug predates this rewrite; Xbox never worked before.
+    const xstsToken = await xnet.exchangeTokenForXSTSToken(userToken.Token);
 
     xboxAuth = {
       xuid: xstsToken.DisplayClaims.xui[0].xid,
