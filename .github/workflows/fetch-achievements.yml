@@ -5,24 +5,49 @@ on:
     - cron: '0 6 * * *' # Daily at 6am UTC
   workflow_dispatch: {} # Manual trigger
 
+permissions:
+  contents: write
+  issues: write
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # main has the script; data has games.json / achievements.json
+      - name: Checkout main (scripts)
+        uses: actions/checkout@v4
+
+      - name: Checkout data branch
+        uses: actions/checkout@v4
         with:
           ref: data
+          path: data-branch
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install psn-api @xboxreplay/xboxlive-auth dotenv
+        run: npm ci
+
+      # Persist PSN / Xbox refresh tokens between runs so NPSSO / password
+      # auth only needs to happen rarely. The cache key rotates weekly so
+      # a stale token doesn't wedge runs forever.
+      - name: Restore auth token cache
+        id: token-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.game-list
+          key: achievement-tokens-${{ github.run_number }}
+          restore-keys: |
+            achievement-tokens-
 
       - name: Fetch achievement data
         run: node scripts/fetch-achievements.mjs
         env:
+          DATA_DIR: ${{ github.workspace }}/data-branch/public/data
+          TOKEN_DIR: /home/runner/.game-list
           STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
           STEAM_USER_ID: ${{ secrets.STEAM_USER_ID }}
           PSN_NPSSO_TOKEN: ${{ secrets.PSN_NPSSO_TOKEN }}
@@ -30,10 +55,182 @@ jobs:
           XBOX_EMAIL: ${{ secrets.XBOX_EMAIL }}
           XBOX_PASSWORD: ${{ secrets.XBOX_PASSWORD }}
 
-      - name: Commit if changed
+      - name: Commit achievements.json to data branch
+        working-directory: data-branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/achievements.json public/data/.psn-refresh-token public/data/.xbox-refresh-token
-          git diff --cached --quiet || git commit -m "Update achievement data"
-          git push
+          # Only commit the achievement JSON — never the refresh tokens.
+          git add public/data/achievements.json
+          if git diff --cached --quiet; then
+            echo "No changes to achievements.json"
+          else
+            git commit -m "Update achievement data"
+            git push
+          fi
+
+      # ── PSN NPSSO renewal alert ──
+      # The fetch script writes ~/.game-list/psn-status=expired when PSN auth
+      # fails (usually because the NPSSO token hit its ~60-day lifetime). We
+      # open a GitHub issue with renewal instructions so the owner gets an
+      # email via standard notifications — no SMTP setup required.
+      - name: Check PSN auth status
+        id: psn-status
+        run: |
+          if [ -f ~/.game-list/psn-status ] && [ "$(cat ~/.game-list/psn-status)" = "expired" ]; then
+            echo "expired=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open issue if PSN NPSSO expired
+        if: steps.psn-status.outputs.expired == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Ensure the label exists (idempotent).
+          gh label create psn-token-expired \
+            --color B60205 \
+            --description "PSN NPSSO needs refresh" \
+            2>/dev/null || true
+
+          # Skip if an open issue already exists — avoids daily spam until
+          # the owner acts on the first one.
+          existing=$(gh issue list \
+            --label psn-token-expired \
+            --state open \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$existing" ]; then
+            echo "Issue #$existing already open, skipping"
+            exit 0
+          fi
+
+          # Heredoc body: quoted EOF → no expansion, backticks are literal.
+          # YAML block scalar strips 10 leading spaces from each line below.
+          body=$(cat <<'EOF'
+          The daily achievement fetch hit a PSN auth failure. This usually
+          means the **NPSSO token** stored in the `PSN_NPSSO_TOKEN` repo
+          secret has hit its ~60-day lifetime and needs to be refreshed.
+
+          ## How to refresh it
+
+          1. Open a browser and log in to <https://www.playstation.com> with
+             your PSN account.
+          2. In the **same session**, visit
+             <https://ca.account.sony.com/api/v1/ssocookie>
+          3. Copy the `npsso` value from the JSON response — just the
+             ~64-character string, not the whole blob.
+          4. Update the repo secret:
+             **Settings → Secrets and variables → Actions →
+             `PSN_NPSSO_TOKEN` → Update secret**
+          5. Re-run the failing workflow from the **Actions** tab
+             (or wait for tomorrow's cron to pick it up).
+          6. Close this issue once the next run succeeds.
+
+          ## Gotchas
+
+          - Must be a logged-in browser session — incognito only works if
+            you log in there first.
+          - `{"npsso":null}` in the JSON response means you're not logged
+            in; go back to step 1.
+          - The workflow's refresh-token cache extends the token's useful
+            life between runs but can't survive an NPSSO expiration.
+          EOF
+          )
+
+          gh issue create \
+            --label psn-token-expired \
+            --title "PSN NPSSO token expired — renewal needed" \
+            --body "$body"
+
+      # ── Xbox refresh-token renewal alert ──
+      # Xbox tokens don't expire on a clock — as long as something uses
+      # them inside any 90-day window they keep auto-rotating — but they
+      # can still break (MS account password change, Microsoft-side
+      # security revocation, suspicious-activity lockout). When that
+      # happens the script writes ~/.game-list/xbox-status=expired and
+      # we open an issue pointing at the device-code helper.
+      - name: Check Xbox auth status
+        id: xbox-status
+        run: |
+          if [ -f ~/.game-list/xbox-status ] && [ "$(cat ~/.game-list/xbox-status)" = "expired" ]; then
+            echo "expired=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open issue if Xbox refresh token invalidated
+        if: steps.xbox-status.outputs.expired == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create xbox-token-expired \
+            --color B60205 \
+            --description "Xbox refresh token needs re-minting" \
+            2>/dev/null || true
+
+          existing=$(gh issue list \
+            --label xbox-token-expired \
+            --state open \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$existing" ]; then
+            echo "Issue #$existing already open, skipping"
+            exit 0
+          fi
+
+          body=$(cat <<'EOF'
+          The daily achievement fetch hit an Xbox Live auth failure. Unlike
+          PSN, Xbox refresh tokens don't expire on a clock — as long as the
+          workflow runs at least once every 90 days, the token auto-rotates
+          indefinitely. So this failure probably means one of:
+
+          - The Microsoft account password was changed (invalidates all
+            existing refresh tokens).
+          - Microsoft's security system revoked the token (new-device
+            login, unusual activity, policy change, etc.).
+          - The account was manually signed out from the Microsoft account
+            security page.
+
+          ## How to re-mint
+
+          Run the helper script locally:
+
+              npm run xbox-get-refresh-token
+
+          It will:
+
+          1. Print a short code and a URL (`https://www.microsoft.com/link`).
+          2. You go to the URL in any browser, enter the code, sign in
+             with the Microsoft account tied to your Xbox, and approve.
+             2FA works normally — it's the real Microsoft login page.
+          3. The script writes the new refresh token to
+             `~/.game-list/xbox-refresh-token` (mode 600) and copies it
+             to your clipboard via `pbcopy` — it never prints the value
+             to stdout.
+
+          Then:
+
+          1. Update the repo secret:
+             **Settings → Secrets and variables → Actions →
+             `XBOX_REFRESH_TOKEN` → Update secret** → ⌘V.
+          2. Re-run the failing workflow from the **Actions** tab (or
+             wait for tomorrow's cron).
+          3. Close this issue once the next run succeeds.
+
+          ## Background
+
+          The helper uses Microsoft's v1 Live Connect limited-input-device
+          flow with the Minecraft launcher's public client ID — the same
+          path `prismarine-auth` and most open-source Xbox Live tooling
+          uses. The old redirect flow is blocked by Microsoft's
+          anti-phishing page, and the v2.0 Microsoft Identity Platform
+          device-code endpoint rejects both first-party and legacy public
+          clients for Xbox Live scopes, so v1 is the only path that
+          currently works without registering a custom Azure app.
+          EOF
+          )
+
+          gh issue create \
+            --label xbox-token-expired \
+            --title "Xbox refresh token invalidated — renewal needed" \
+            --body "$body"

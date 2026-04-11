@@ -1,11 +1,24 @@
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { homedir } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const dataDir = resolve(__dirname, '..', 'public', 'data');
+// DATA_DIR lets the workflow point at a separate `data` branch checkout.
+const dataDir = process.env.DATA_DIR
+  ? resolve(process.env.DATA_DIR)
+  : resolve(__dirname, '..', 'public', 'data');
 const gamesPath = resolve(dataDir, 'games.json');
 const achievementsPath = resolve(dataDir, 'achievements.json');
+
+// Refresh tokens must NOT live in `dataDir` — that directory is served as
+// static assets and committed to a public branch. TOKEN_DIR defaults to
+// ~/.game-list so local runs keep them private; CI sets TOKEN_DIR to a
+// cache-backed path.
+const tokenDir = process.env.TOKEN_DIR
+  ? resolve(process.env.TOKEN_DIR)
+  : resolve(homedir(), '.game-list');
+if (!existsSync(tokenDir)) mkdirSync(tokenDir, { recursive: true });
 
 // Load env vars from .env.local in dev
 try {
@@ -16,7 +29,8 @@ try {
 const STEAM_API_KEY = process.env.STEAM_API_KEY;
 const STEAM_USER_ID = process.env.STEAM_USER_ID;
 const PSN_NPSSO_TOKEN = process.env.PSN_NPSSO_TOKEN;
-const PSN_REFRESH_TOKEN_FILE = resolve(dataDir, '.psn-refresh-token');
+const PSN_REFRESH_TOKEN_FILE = resolve(tokenDir, 'psn-refresh-token');
+const PSN_STATUS_FILE = resolve(tokenDir, 'psn-status');
 const XBOX_REFRESH_TOKEN = process.env.XBOX_REFRESH_TOKEN;
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -106,6 +120,7 @@ async function initPsn() {
         psnAuth = await psn.exchangeRefreshTokenForAuthTokens(refreshToken);
         // Save new refresh token
         writeFileSync(PSN_REFRESH_TOKEN_FILE, psnAuth.refreshToken);
+        writeFileSync(PSN_STATUS_FILE, 'ok');
         console.log('PSN: authenticated via refresh token');
         return true;
       } catch {
@@ -118,10 +133,13 @@ async function initPsn() {
     psnAuth = await psn.exchangeAccessCodeForAuthTokens(accessCode);
     // Save refresh token for next run
     writeFileSync(PSN_REFRESH_TOKEN_FILE, psnAuth.refreshToken);
+    writeFileSync(PSN_STATUS_FILE, 'ok');
     console.log('PSN: authenticated via NPSSO');
     return true;
   } catch (err) {
     console.error('PSN: authentication failed', err.message);
+    // Flag for the workflow so it can open an issue with renewal instructions.
+    writeFileSync(PSN_STATUS_FILE, 'expired');
     return false;
   }
 }
@@ -158,64 +176,89 @@ async function fetchPsnLibrary() {
 }
 
 // ── Xbox ──
+//
+// Auth flow (see scripts/xbox-get-refresh-token.mjs for how the initial
+// refresh token is minted):
+//   1. Exchange refresh_token → new access_token + refresh_token via
+//      Microsoft's v1 Live Connect token endpoint.
+//   2. Exchange that access_token for an Xbox user token (XASU) via
+//      xnet.exchangeRpsTicketForUserToken(..., 't') — the 't' prefix
+//      marks the token as a v1 Live Connect RPS ticket.
+//   3. Exchange the user token for an XSTS token scoped to xboxlive.com.
+//
+// We use the v1 endpoints + Minecraft launcher public client because:
+//   - The old login.live.com redirect flow is killed by Microsoft's
+//     anti-phishing page.
+//   - The v2.0 Microsoft Identity consumers endpoint rejects both
+//     first-party Microsoft clients (Azure CLI) and legacy public
+//     clients (Minecraft launcher) for Xbox Live scopes.
+//   - The v1 Live Connect device-code + refresh endpoints still honor
+//     the Minecraft client, which is what prismarine-auth and the
+//     broader Minecraft/Xbox auth ecosystem rely on.
 
 let xboxAuth = null;
-const XBOX_EMAIL = process.env.XBOX_EMAIL;
-const XBOX_PASSWORD = process.env.XBOX_PASSWORD;
-const XBOX_REFRESH_TOKEN_FILE = resolve(dataDir, '.xbox-refresh-token');
+const XBOX_REFRESH_TOKEN_FILE = resolve(tokenDir, 'xbox-refresh-token');
+const XBOX_STATUS_FILE = resolve(tokenDir, 'xbox-status');
+const XBOX_CLIENT_ID = '00000000402b5328'; // Minecraft launcher public client
+const XBOX_SCOPE = 'service::user.auth.xboxlive.com::MBI_SSL';
+const XBOX_TOKEN_URL = 'https://login.live.com/oauth20_token.srf';
+
+async function refreshXboxTokens(refreshToken) {
+  const res = await fetch(XBOX_TOKEN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      client_id: XBOX_CLIENT_ID,
+      refresh_token: refreshToken,
+      scope: XBOX_SCOPE,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok || data.error) {
+    throw new Error(data.error_description || data.error || `HTTP ${res.status}`);
+  }
+  return data; // { access_token, refresh_token, expires_in, ... }
+}
 
 async function initXbox() {
-  if (!XBOX_REFRESH_TOKEN && !XBOX_EMAIL) {
-    console.log('Xbox: skipping (no credentials)');
+  // Prefer env var (CI); fall back to cached file (local dev convenience).
+  const refreshToken = XBOX_REFRESH_TOKEN ||
+    (existsSync(XBOX_REFRESH_TOKEN_FILE)
+      ? readFileSync(XBOX_REFRESH_TOKEN_FILE, 'utf-8').trim()
+      : null);
+
+  if (!refreshToken) {
+    console.log('Xbox: skipping (no refresh token — run `npm run xbox-get-refresh-token` to mint one)');
     return false;
   }
 
   try {
-    const { live, xnet } = await import('@xboxreplay/xboxlive-auth');
+    const { xnet } = await import('@xboxreplay/xboxlive-auth');
 
-    // Try refresh token first
-    const refreshToken = XBOX_REFRESH_TOKEN ||
-      (existsSync(XBOX_REFRESH_TOKEN_FILE) ? readFileSync(XBOX_REFRESH_TOKEN_FILE, 'utf-8').trim() : null);
+    const fresh = await refreshXboxTokens(refreshToken);
 
-    if (refreshToken) {
-      try {
-        const freshTokens = await live.refreshAccessToken(refreshToken);
-        const userToken = await xnet.exchangeRpsTicketForUserToken(freshTokens.access_token, 'd');
-        const xstsToken = await xnet.exchangeTokensForXSTSToken(
-          { userToken: userToken.Token },
-          { RelyingParty: 'http://xboxlive.com', sandboxId: 'RETAIL' }
-        );
-        xboxAuth = {
-          xuid: xstsToken.DisplayClaims.xui[0].xid,
-          userHash: xstsToken.DisplayClaims.xui[0].uhs,
-          xstsToken: xstsToken.Token,
-        };
-        // Save new refresh token
-        writeFileSync(XBOX_REFRESH_TOKEN_FILE, freshTokens.refresh_token);
-        console.log('Xbox: authenticated via refresh token');
-        return true;
-      } catch (err) {
-        console.log('Xbox: refresh token failed, trying credentials...', err.message);
-      }
-    }
+    const userToken = await xnet.exchangeRpsTicketForUserToken(fresh.access_token, 't');
+    const xstsToken = await xnet.exchangeTokensForXSTSToken(
+      { userToken: userToken.Token },
+      { RelyingParty: 'http://xboxlive.com', sandboxId: 'RETAIL' }
+    );
 
-    // Fall back to email/password
-    if (XBOX_EMAIL && XBOX_PASSWORD) {
-      const { authenticate } = await import('@xboxreplay/xboxlive-auth');
-      const result = await authenticate(XBOX_EMAIL, XBOX_PASSWORD);
-      xboxAuth = {
-        xuid: result.xuid,
-        userHash: result.user_hash,
-        xstsToken: result.xsts_token,
-      };
-      console.log('Xbox: authenticated via credentials');
-      return true;
-    }
+    xboxAuth = {
+      xuid: xstsToken.DisplayClaims.xui[0].xid,
+      userHash: xstsToken.DisplayClaims.xui[0].uhs,
+      xstsToken: xstsToken.Token,
+    };
 
-    console.error('Xbox: no valid auth method available');
-    return false;
+    // Persist the rotated refresh token for the next run.
+    writeFileSync(XBOX_REFRESH_TOKEN_FILE, fresh.refresh_token);
+    writeFileSync(XBOX_STATUS_FILE, 'ok');
+    console.log('Xbox: authenticated via refresh token');
+    return true;
   } catch (err) {
     console.error('Xbox: authentication failed', err.message);
+    // Flag for the workflow so it can open an issue with renewal steps.
+    writeFileSync(XBOX_STATUS_FILE, 'expired');
     return false;
   }
 }

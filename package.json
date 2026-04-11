@@ -9,6 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "fetch-covers": "NODE_TLS_REJECT_UNAUTHORIZED=0 node scripts/fetch-covers.mjs",
+    "fetch-achievements": "node scripts/fetch-achievements.mjs",
+    "xbox-get-refresh-token": "node scripts/xbox-get-refresh-token.mjs",
     "parse-markdown": "node scripts/parse-markdown.mjs"
   },
   "dependencies": {
@@ -23,10 +25,12 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "@xboxreplay/xboxlive-auth": "^5.1.0",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "psn-api": "^2.18.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.0",
     "vite": "^8.0.4"
