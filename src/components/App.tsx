@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGames } from '../hooks/useGames';
 import GameGrid from './GameGrid';
 import AddGameForm from './AddGameForm';
@@ -7,13 +7,67 @@ import StatsModal from './StatsModal';
 
 const ALL_LETTERS = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
 
+function AlphabetNav({ letters, activeLetters }: { letters: string[]; activeLetters: Set<string> }) {
+  const scrollRef = useRef<HTMLElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateArrows = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 2);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    updateArrows();
+    el.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    return () => {
+      el.removeEventListener('scroll', updateArrows);
+      window.removeEventListener('resize', updateArrows);
+    };
+  }, [updateArrows]);
+
+  const scroll = (dir: number) => {
+    scrollRef.current?.scrollBy({ left: dir * 150, behavior: 'smooth' });
+  };
+
+  return (
+    <div className="alphabet-nav-wrapper">
+      {canScrollLeft && (
+        <button className="alphabet-arrow alphabet-arrow--left" onClick={() => scroll(-1)} aria-label="Scroll left">
+          ‹
+        </button>
+      )}
+      <nav className="alphabet-nav" ref={scrollRef}>
+        {letters.map((letter) => (
+          <a
+            key={letter}
+            href={`#section-${letter}`}
+            className={activeLetters.has(letter) ? 'active' : 'inactive'}
+          >
+            {letter}
+          </a>
+        ))}
+      </nav>
+      {canScrollRight && (
+        <button className="alphabet-arrow alphabet-arrow--right" onClick={() => scroll(1)} aria-label="Scroll right">
+          ›
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function App() {
-  const [filter, setFilter] = useState('');
   const [gogOnly, setGogOnly] = useState(false);
   const [perfectOnly, setPerfectOnly] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const { groups, totalCount, platformStats, loading } = useGames(
-    filter || undefined,
+    undefined,
     gogOnly,
     perfectOnly,
   );
@@ -24,50 +78,34 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <h1>The Games List</h1>
-        <p className="game-count">
-          {totalCount} games completed
-          {' '}
-          <button className="stats-btn" onClick={() => setStatsOpen(true)}>
+        <p className="game-count">{totalCount} games completed</p>
+        <div className="header-toolbar">
+          <button className="filter-chip" onClick={() => setStatsOpen(true)}>
             Stats
           </button>
           <button
-            className={`stats-btn${gogOnly ? ' gog-active' : ''}`}
+            className={`filter-chip${gogOnly ? ' filter-chip--active-gold' : ''}`}
             onClick={() => setGogOnly(!gogOnly)}
           >
             Games of Games
           </button>
           <button
-            className={`stats-btn${perfectOnly ? ' gog-active' : ''}`}
+            className={`filter-chip${perfectOnly ? ' filter-chip--active' : ''}`}
             onClick={() => setPerfectOnly(!perfectOnly)}
           >
             Perfect Games
           </button>
-        </p>
-        <div className="header-controls">
-          <input
-            type="search"
-            className="search-input"
-            placeholder="Filter by title or platform..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
-          {import.meta.env.DEV && <AddGameForm />}
-          {import.meta.env.DEV && <PublishButton />}
         </div>
+        {import.meta.env.DEV && (
+          <div className="header-controls">
+            <AddGameForm />
+            <PublishButton />
+          </div>
+        )}
       </header>
 
       {!flatLayout && (
-        <nav className="alphabet-nav">
-          {ALL_LETTERS.map((letter) => (
-            <a
-              key={letter}
-              href={`#section-${letter}`}
-              className={activeLetters.has(letter) ? 'active' : 'inactive'}
-            >
-              {letter}
-            </a>
-          ))}
-        </nav>
+        <AlphabetNav letters={ALL_LETTERS} activeLetters={activeLetters} />
       )}
 
       <main>
