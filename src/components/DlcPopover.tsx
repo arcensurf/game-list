@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { ExtraContent } from '../types/game';
 
 function badgeText(extras: ExtraContent[]): string {
@@ -14,25 +14,47 @@ export default function ExtrasPopover({
 }: {
   extras: ExtraContent[];
 }) {
-  const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const close = useCallback(() => {
+    setClosing(true);
+    panelRef.current?.addEventListener(
+      'animationend',
+      () => {
+        setClosing(false);
+        setVisible(false);
+      },
+      { once: true },
+    );
+  }, []);
+
+  const showOverlay = visible || closing;
 
   return (
-    <div className="dlc-popover-wrapper">
-      <button
-        className="dlc-badge"
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen(!open);
-        }}
-      >
-        {badgeText(extras)}
-      </button>
-      {open && (
+    <>
+      {!showOverlay && (
+        <button
+          className="dlc-badge"
+          onClick={(e) => {
+            e.stopPropagation();
+            setVisible(true);
+          }}
+        >
+          {badgeText(extras)}
+        </button>
+      )}
+      {showOverlay && (
         <>
-          <div className="dlc-popover-backdrop" onClick={() => setOpen(false)} />
+          <div className="dlc-popover-backdrop" onClick={close} />
           <div
-            className="dlc-popover"
-            onClick={(e) => e.stopPropagation()}
+            ref={panelRef}
+            className={`dlc-popover${closing ? ' closing' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              close();
+            }}
           >
             {extras.map((group) => (
               <div key={group.label} className="extras-group">
@@ -47,6 +69,6 @@ export default function ExtrasPopover({
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }
