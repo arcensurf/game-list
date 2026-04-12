@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { GameWithCover } from '../types/game';
 import PlatformBadge from './PlatformBadge';
-import ExtrasPopover from './DlcPopover';
+import ExtrasList from './DlcPopover';
 import CoverPicker from './CoverPicker';
 import EditGameModal from './EditGameModal';
 
@@ -28,8 +28,19 @@ export default function GameCard({ game }: { game: GameWithCover }) {
     setPickerOpen(false);
   };
 
+  const [infoOpen, setInfoOpen] = useState(false);
+
+  const cardClasses = [
+    'game-card',
+    game.gameOfGames ? 'game-of-games' : '',
+    infoOpen ? 'info-open' : '',
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className={`game-card${game.gameOfGames ? ' game-of-games' : ''}`}>
+    <div
+      className={cardClasses}
+      onClick={import.meta.env.DEV ? undefined : () => setInfoOpen((v) => !v)}
+    >
       <div
         className="game-card-cover"
         onClick={import.meta.env.DEV ? () => setPickerOpen(true) : undefined}
@@ -60,11 +71,7 @@ export default function GameCard({ game }: { game: GameWithCover }) {
             <span>Change Image</span>
           </div>
         )}
-        {game.extras.length > 0 && (
-          <ExtrasPopover extras={game.extras} />
-        )}
-      </div>
-      <div className="game-card-info">
+        <div className="game-card-info">
         <h3 className="game-card-title">{game.title}</h3>
         {game.subtitle && (
           <p className="game-card-subtitle">{game.subtitle}</p>
@@ -85,6 +92,10 @@ export default function GameCard({ game }: { game: GameWithCover }) {
               Edit
             </button>
           )}
+        </div>
+        {game.extras.length > 0 && (
+          <ExtrasList extras={game.extras} />
+        )}
         </div>
       </div>
       {game.gameOfGames && (
