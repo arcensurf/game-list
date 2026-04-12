@@ -78,20 +78,28 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <h1>The Games List</h1>
-        <p className="game-count">{totalCount} games completed</p>
+        <p className="game-count">
+          {totalCount} {gogOnly ? 'Games of Games' : perfectOnly ? 'Perfect Games' : 'games completed'}
+        </p>
         <div className="header-toolbar">
           <button className="filter-chip" onClick={() => setStatsOpen(true)}>
             Stats
           </button>
           <button
             className={`filter-chip${gogOnly ? ' filter-chip--active-gold' : ''}`}
-            onClick={() => setGogOnly(!gogOnly)}
+            onClick={() => {
+              setGogOnly(!gogOnly);
+              setPerfectOnly(false);
+            }}
           >
             Games of Games
           </button>
           <button
             className={`filter-chip${perfectOnly ? ' filter-chip--active' : ''}`}
-            onClick={() => setPerfectOnly(!perfectOnly)}
+            onClick={() => {
+              setPerfectOnly(!perfectOnly);
+              setGogOnly(false);
+            }}
           >
             Perfect Games
           </button>

@@ -5,4 +5,7 @@ import devApiPlugin from './dev-api-plugin'
 export default defineConfig({
   base: '/game-list/',
   plugins: [react(), devApiPlugin()],
+  build: {
+    assetsInlineLimit: 0,
+  },
 })

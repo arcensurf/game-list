@@ -1,3 +1,4 @@
+import { useCallback, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { PlatformStat } from '../hooks/useGames';
 import PlatformBadge from './PlatformBadge';
@@ -12,17 +13,34 @@ export default function StatsModal({
   onClose: () => void;
 }) {
   const maxCount = stats[0]?.count || 1;
+  const [closing, setClosing] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const close = useCallback(() => {
+    setClosing(true);
+    panelRef.current?.addEventListener(
+      'animationend',
+      () => onClose(),
+      { once: true },
+    );
+  }, [onClose]);
 
   return createPortal(
-    <div className="stats-backdrop" onClick={onClose}>
-      <div className="stats-modal" onClick={(e) => e.stopPropagation()}>
+    <div className={`stats-backdrop${closing ? ' closing' : ''}`} onClick={close}>
+      <div
+        ref={panelRef}
+        className={`stats-panel${closing ? ' closing' : ''}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="stats-header">
-          <h2>Games Per Platform</h2>
-          <button className="cover-picker-close" onClick={onClose}>
-            X
+          <div>
+            <h2>Games Per Platform</h2>
+            <p className="stats-total">{totalCount} games across {stats.length} platforms</p>
+          </div>
+          <button className="stats-close" onClick={close} aria-label="Close">
+            ✕
           </button>
         </div>
-        <p className="stats-total">{totalCount} games across {stats.length} platforms</p>
         <div className="stats-list">
           {stats.map(({ platform, count }) => (
             <div key={platform} className="stats-row">

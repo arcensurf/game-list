@@ -861,9 +861,9 @@ body {
 /* Card info — slides up on hover / tap */
 .game-card-info {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: -1px;
+  left: -1px;
+  right: -1px;
   z-index: 10;
   padding: 1.5rem 0.75rem 0.6rem;
   background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.85) 40%);
@@ -898,18 +898,45 @@ body {
 .game-card-platforms {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 0.3rem;
 }
 
 /* Platform badge */
 .platform-badge {
-  display: inline-block;
-  font-size: 0.6rem;
-  font-weight: 600;
-  padding: 0.1rem 0.35rem;
-  border-radius: 3px;
-  color: #fff;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.8rem;
+  padding: 0.15rem 0.4rem 0.15rem 1.5rem;
+  overflow: hidden;
   white-space: nowrap;
+}
+
+.platform-badge-icon {
+  position: absolute;
+  left: -0.2rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  opacity: 0.85;
+  pointer-events: none;
+  transform: rotate(-10deg);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: left center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: left center;
+}
+
+
+.platform-badge-name {
+  position: relative;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'Share Tech', sans-serif;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5);
 }
 
 /* Game of Games */
@@ -1049,50 +1076,104 @@ body {
 }
 
 /* Stats modal */
+/* Stats panel — slides in from right */
+@keyframes stats-slide-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes stats-slide-out {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+
+@keyframes stats-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes stats-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
 .stats-backdrop {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  background: rgba(0, 0, 0, 0.6);
+  animation: stats-fade-in 0.3s ease both;
 }
 
-.stats-modal {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.5rem;
+.stats-backdrop.closing {
+  animation: stats-fade-out 0.25s ease both;
+}
+
+.stats-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 201;
   width: 100%;
   max-width: 480px;
-  max-height: 80vh;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border);
+  padding: 2rem 1.5rem;
   overflow-y: auto;
+  animation: stats-slide-in 0.3s ease both;
+}
+
+.stats-panel.closing {
+  animation: stats-slide-out 0.25s ease both;
 }
 
 .stats-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
 }
 
 .stats-header h2 {
-  font-size: 1.1rem;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--text);
 }
 
 .stats-total {
   font-size: 0.8rem;
   color: var(--text-muted);
-  margin-bottom: 1rem;
+  margin-top: 0.25rem;
+}
+
+.stats-close {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.stats-close:hover {
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 .stats-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .stats-row {
@@ -1110,7 +1191,8 @@ body {
 }
 
 .stats-row-count {
-  font-size: 0.75rem;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.85rem;
   color: var(--text-muted);
   font-weight: 600;
   min-width: 1.75rem;
