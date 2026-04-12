@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GameWithCover } from '../types/game';
 import PlatformBadge from './PlatformBadge';
 import ExtrasList from './DlcPopover';
@@ -29,6 +29,41 @@ export default function GameCard({ game }: { game: GameWithCover }) {
   };
 
   const [infoOpen, setInfoOpen] = useState(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const dismissTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const openInfo = useCallback(() => {
+    setInfoOpen(true);
+    clearTimeout(dismissTimer.current);
+    dismissTimer.current = setTimeout(() => setInfoOpen(false), 3000);
+  }, []);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStartRef.current = { x: t.clientX, y: t.clientY };
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const start = touchStartRef.current;
+    if (!start) return;
+    const t = e.changedTouches[0];
+    const dx = Math.abs(t.clientX - start.x);
+    const dy = Math.abs(t.clientY - start.y);
+    // Only toggle if finger didn't move much (not a scroll)
+    if (dx < 10 && dy < 10) {
+      if (infoOpen) {
+        clearTimeout(dismissTimer.current);
+        setInfoOpen(false);
+      } else {
+        openInfo();
+      }
+    }
+    touchStartRef.current = null;
+  }, [infoOpen, openInfo]);
+
+  useEffect(() => {
+    return () => clearTimeout(dismissTimer.current);
+  }, []);
 
   const cardClasses = [
     'game-card',
@@ -39,7 +74,8 @@ export default function GameCard({ game }: { game: GameWithCover }) {
   return (
     <div
       className={cardClasses}
-      onClick={import.meta.env.DEV ? undefined : () => setInfoOpen((v) => !v)}
+      onTouchStart={import.meta.env.DEV ? undefined : handleTouchStart}
+      onTouchEnd={import.meta.env.DEV ? undefined : handleTouchEnd}
     >
       <div
         className="game-card-cover"
