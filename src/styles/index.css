@@ -979,23 +979,23 @@ body {
 
 /* Gold-themed info panel for GoG cards */
 .game-card.game-of-games .game-card-info {
-  background: linear-gradient(to bottom, transparent, rgba(212, 160, 23, 0.92) 40%);
+  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.85) 40%);
 }
 
 .game-card.game-of-games .game-card-title {
-  color: #fff8e1;
+  color: var(--gold-bright);
 }
 
 .game-card.game-of-games .game-card-subtitle {
-  color: rgba(255, 248, 225, 0.75);
+  color: rgba(245, 208, 96, 0.7);
 }
 
 .game-card.game-of-games .extras-group-label {
-  color: #fff8e1;
+  color: var(--gold-bright);
 }
 
 .game-card.game-of-games .extras-list {
-  border-top-color: rgba(255, 248, 225, 0.25);
+  border-top-color: rgba(245, 208, 96, 0.2);
 }
 
 .game-of-games-label {
