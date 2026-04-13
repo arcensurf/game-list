@@ -5,6 +5,23 @@ import ExtrasList from './DlcPopover';
 import CoverPicker from './CoverPicker';
 import EditGameModal from './EditGameModal';
 
+// Shared batch counter: cards revealed in the same animation frame get
+// sequential stagger indexes starting at 0. The counter resets on the next
+// frame, so a fresh batch of newly-visible cards always staggers from the top.
+let batchCounter = 0;
+let batchResetScheduled = false;
+function nextBatchIndex() {
+  const i = batchCounter++;
+  if (!batchResetScheduled) {
+    batchResetScheduled = true;
+    requestAnimationFrame(() => {
+      batchCounter = 0;
+      batchResetScheduled = false;
+    });
+  }
+  return i;
+}
+
 export default function GameCard({ game }: { game: GameWithCover }) {
   const [imgError, setImgError] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -65,15 +82,40 @@ export default function GameCard({ game }: { game: GameWithCover }) {
     return () => clearTimeout(dismissTimer.current);
   }, []);
 
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [revealIndex, setRevealIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setRevealIndex(nextBatchIndex());
+            observer.disconnect();
+            break;
+          }
+        }
+      },
+      { rootMargin: '100px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const cardClasses = [
     'game-card',
     game.gameOfGames ? 'game-of-games' : '',
     infoOpen ? 'info-open' : '',
+    revealIndex !== null ? 'revealed' : '',
   ].filter(Boolean).join(' ');
 
   return (
     <div
+      ref={cardRef}
       className={cardClasses}
+      style={{ ['--card-index' as string]: revealIndex ?? 0 } as React.CSSProperties}
       onTouchStart={import.meta.env.DEV ? undefined : handleTouchStart}
       onTouchEnd={import.meta.env.DEV ? undefined : handleTouchEnd}
     >
