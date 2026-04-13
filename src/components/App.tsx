@@ -4,7 +4,9 @@ import { useCardSpotlight } from '../hooks/useCardSpotlight';
 import GameGrid from './GameGrid';
 import AddGameForm from './AddGameForm';
 import PublishButton from './PublishButton';
-import StatsModal from './StatsModal';
+import StatsView from './StatsView';
+import BottomNav, { VIEW_ORDER } from './BottomNav';
+import type { View } from './BottomNav';
 
 const ALL_LETTERS = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
 
@@ -80,71 +82,132 @@ function AlphabetNav({ letters, activeLetters }: { letters: string[]; activeLett
 }
 
 export default function App() {
-  const [gogOnly, setGogOnly] = useState(false);
-  const [perfectOnly, setPerfectOnly] = useState(false);
-  const [statsOpen, setStatsOpen] = useState(false);
+  const [view, setView] = useState<View>('list');
   const [lightsOn, setLightsOn] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  const gogOnly = view === 'gog';
+  const perfectOnly = view === 'perfect';
+  const statsView = view === 'stats';
+  const flatLayout = gogOnly || perfectOnly;
+
   const { groups, totalCount, platformStats, loading } = useGames(
     undefined,
     gogOnly,
     perfectOnly,
   );
   const activeLetters = new Set(groups.map((g) => g.letter));
-  const flatLayout = gogOnly || perfectOnly;
-  // Filter views force lights on — the spotlight doesn't add much when
-  // you're already looking at a curated subset.
-  const effectiveLightsOn = lightsOn || flatLayout;
+  const effectiveLightsOn = lightsOn || flatLayout || statsView;
 
   useEffect(() => {
     document.body.classList.toggle('lights-on', effectiveLightsOn);
   }, [effectiveLightsOn]);
 
+  // Flip the masthead from title to letter nav once the user has
+  // scrolled past the header's nominal height.
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 80);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   useCardSpotlight(!effectiveLightsOn);
 
-  return (
-    <div className="app">
-      <header className="app-header">
-        <h1>The Games List</h1>
-        <p className="game-count">
-          {totalCount} {gogOnly ? 'Games of Games' : perfectOnly ? 'Perfect Games' : 'games completed'}
-        </p>
-        <div className="header-toolbar">
-          <button className="filter-chip" onClick={() => setStatsOpen(true)}>
-            Stats
-          </button>
-          <button
-            className={`filter-chip${gogOnly ? ' filter-chip--active-gold' : ''}`}
-            onClick={() => {
-              setGogOnly(!gogOnly);
-              setPerfectOnly(false);
-            }}
-          >
-            Games of Games
-          </button>
-          <button
-            className={`filter-chip${perfectOnly ? ' filter-chip--active' : ''}`}
-            onClick={() => {
-              setPerfectOnly(!perfectOnly);
-              setGogOnly(false);
-            }}
-          >
-            Perfect Games
-          </button>
-        </div>
-        {import.meta.env.DEV && (
-          <div className="header-controls">
-            <AddGameForm />
-            <PublishButton />
-          </div>
-        )}
-      </header>
+  // Defer scroll-snap until the user first scrolls — otherwise the
+  // browser snaps the first row into alignment on load, producing a
+  // jarring auto-scroll nudge. Reset whenever the view changes, since
+  // each view starts fresh at the top.
+  useEffect(() => {
+    const html = document.documentElement;
+    html.style.scrollSnapType = 'none';
+    const enable = () => {
+      html.style.scrollSnapType = '';
+    };
+    window.addEventListener('scroll', enable, { passive: true, once: true });
+    return () => {
+      html.style.scrollSnapType = '';
+      window.removeEventListener('scroll', enable);
+    };
+  }, [view]);
 
-      {!flatLayout && (
-        <AlphabetNav letters={ALL_LETTERS} activeLetters={activeLetters} />
+  // Swipe between views on touch devices. The bottom nav drives the
+  // same state for click/keyboard users.
+  const swipeStart = useRef<{ x: number; y: number; t: number } | null>(null);
+  const handleSwipeStart = useCallback((e: React.TouchEvent) => {
+    // Don't capture swipes that start inside a horizontally-scrollable
+    // element (the alphabet nav), or the user's sideways scroll on
+    // that element becomes a view change instead.
+    const target = e.target as HTMLElement | null;
+    if (target?.closest('.alphabet-nav')) {
+      swipeStart.current = null;
+      return;
+    }
+    const t = e.touches[0];
+    swipeStart.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+  }, []);
+  const handleSwipeEnd = useCallback(
+    (e: React.TouchEvent) => {
+      const start = swipeStart.current;
+      swipeStart.current = null;
+      if (!start) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - start.x;
+      const dy = Math.abs(t.clientY - start.y);
+      const dt = Date.now() - start.t;
+      // Horizontal swipe: distance > 60px, clearly horizontal, under half a second.
+      if (Math.abs(dx) < 60 || Math.abs(dx) < dy * 1.4 || dt > 500) return;
+      const idx = VIEW_ORDER.indexOf(view);
+      if (dx < 0 && idx < VIEW_ORDER.length - 1) {
+        setView(VIEW_ORDER[idx + 1]);
+      } else if (dx > 0 && idx > 0) {
+        setView(VIEW_ORDER[idx - 1]);
+      }
+    },
+    [view],
+  );
+
+  const showMastheadFlip = !statsView;
+
+  return (
+    <div className="app" onTouchStart={handleSwipeStart} onTouchEnd={handleSwipeEnd}>
+      <div
+        className={`masthead${showMastheadFlip && scrolled ? ' masthead--flipped' : ''}`}
+      >
+        <div className="masthead-inner">
+          <div className="masthead-face masthead-face--title">
+            <h1>The Games List</h1>
+            <p className="game-count">
+              {totalCount}{' '}
+              {gogOnly
+                ? 'Games of Games'
+                : perfectOnly
+                  ? 'Perfect Games'
+                  : statsView
+                    ? 'games across your platforms'
+                    : 'games completed'}
+            </p>
+          </div>
+          <div className="masthead-face masthead-face--letters">
+            {showMastheadFlip && (
+              <AlphabetNav letters={ALL_LETTERS} activeLetters={activeLetters} />
+            )}
+          </div>
+        </div>
+      </div>
+      {import.meta.env.DEV && (
+        <div className="header-controls">
+          <AddGameForm />
+          <PublishButton />
+        </div>
       )}
 
       <main>
-        {loading ? (
+        {statsView ? (
+          <StatsView stats={platformStats} totalCount={totalCount} />
+        ) : loading ? (
           <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '4rem 0' }}>
             Loading...
           </p>
@@ -153,28 +216,24 @@ export default function App() {
         )}
       </main>
 
-      {statsOpen && (
-        <StatsModal
-          stats={platformStats}
-          totalCount={totalCount}
-          onClose={() => setStatsOpen(false)}
-        />
+      {!statsView && (
+        <button
+          className={`lights-toggle${effectiveLightsOn ? ' lights-toggle--on' : ''}`}
+          onClick={() => setLightsOn(!lightsOn)}
+          disabled={flatLayout}
+          title={
+            flatLayout
+              ? 'Lights stay on while a filter is active'
+              : effectiveLightsOn
+                ? 'Re-enable the spotlight effect'
+                : 'Turn all the lights on'
+          }
+        >
+          {effectiveLightsOn ? 'Lights On' : 'Lights Off'}
+        </button>
       )}
 
-      <button
-        className={`lights-toggle${effectiveLightsOn ? ' lights-toggle--on' : ''}`}
-        onClick={() => setLightsOn(!lightsOn)}
-        disabled={flatLayout}
-        title={
-          flatLayout
-            ? 'Lights stay on while a filter is active'
-            : effectiveLightsOn
-              ? 'Re-enable the spotlight effect'
-              : 'Turn all the lights on'
-        }
-      >
-        {effectiveLightsOn ? 'Lights On' : 'Lights Off'}
-      </button>
+      <BottomNav view={view} onChange={setView} />
     </div>
   );
 }

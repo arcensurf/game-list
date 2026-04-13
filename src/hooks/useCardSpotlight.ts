@@ -13,7 +13,11 @@ export function useCardSpotlight(enabled: boolean = true) {
       });
       return;
     }
-    // Fully-lit band around viewport center, as a fraction of viewport height.
+    // Vertical position of the spotlight center, as a fraction of viewport
+    // height. Eyes naturally look toward the upper third, so biasing the
+    // "live" band upward leaves a peek of the row behind it visible.
+    const CENTER_Y = 0.35;
+    // Fully-lit band around the center, as a fraction of viewport height.
     const PLATEAU = 0.2;
     // Width of the transition band between lit and dim. Small = sharper switch.
     const FALLOFF = 0.06;
@@ -24,7 +28,7 @@ export function useCardSpotlight(enabled: boolean = true) {
     const update = () => {
       rafId = null;
       const viewportH = window.innerHeight;
-      const center = viewportH / 2;
+      const center = viewportH * CENTER_Y;
       const plateauPx = viewportH * PLATEAU;
       const falloffPx = viewportH * FALLOFF;
       const cards = document.querySelectorAll<HTMLElement>('.game-card');
