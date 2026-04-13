@@ -46,7 +46,7 @@ export default function GameCard({ game }: { game: GameWithCover }) {
   };
 
   const [infoOpen, setInfoOpen] = useState(false);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const openInfo = useCallback(() => {
@@ -57,25 +57,27 @@ export default function GameCard({ game }: { game: GameWithCover }) {
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     const t = e.touches[0];
-    touchStartRef.current = { x: t.clientX, y: t.clientY };
+    touchStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
   }, []);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     const start = touchStartRef.current;
+    touchStartRef.current = null;
     if (!start) return;
     const t = e.changedTouches[0];
     const dx = Math.abs(t.clientX - start.x);
     const dy = Math.abs(t.clientY - start.y);
-    // Only toggle if finger didn't move much (not a scroll)
-    if (dx < 10 && dy < 10) {
-      if (infoOpen) {
-        clearTimeout(dismissTimer.current);
-        setInfoOpen(false);
-      } else {
-        openInfo();
-      }
+    const dt = Date.now() - start.t;
+    // Treat as a tap only if the finger barely moved AND the gesture
+    // was quick. Scroll gestures can start slow, so a generous time
+    // cap catches drags that paused before moving.
+    if (dx > 12 || dy > 12 || dt > 400) return;
+    if (infoOpen) {
+      clearTimeout(dismissTimer.current);
+      setInfoOpen(false);
+    } else {
+      openInfo();
     }
-    touchStartRef.current = null;
   }, [infoOpen, openInfo]);
 
   useEffect(() => {

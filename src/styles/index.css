@@ -338,7 +338,9 @@ html {
   background: var(--bg-card);
   opacity: 0;
   transform: translateY(6px);
-  --card-dim: 0;
+  /* Default to dim so cards entering the viewport never flash lit
+     before the spotlight hook computes their real position. */
+  --card-dim: 1;
   filter:
     brightness(calc(1 - var(--card-dim) * 0.75))
     saturate(calc(1 - var(--card-dim) * 0.6));
@@ -380,8 +382,14 @@ html {
 
 /* Hover and info-open override the spotlight dim so the popover stays
    readable. !important is needed because the spotlight hook sets
-   --card-dim via inline style. */
-.game-card:hover,
+   --card-dim via inline style. Hover is gated to real-hover devices
+   because touch devices emulate sticky :hover on tap, which leaves the
+   card lit long after the info-open timer dismisses. */
+@media (hover: hover) {
+  .game-card:hover {
+    --card-dim: 0 !important;
+  }
+}
 .game-card.info-open {
   --card-dim: 0 !important;
 }
@@ -1001,9 +1009,14 @@ body.lights-on .game-card {
   transition: transform 0.25s ease-out;
 }
 
-.game-card:hover .game-card-info,
 .game-card.info-open .game-card-info {
   transform: translateY(0);
+}
+
+@media (hover: hover) {
+  .game-card:hover .game-card-info {
+    transform: translateY(0);
+  }
 }
 
 .game-card-title {

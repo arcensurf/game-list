@@ -49,6 +49,22 @@ function AlphabetNav({ letters, activeLetters }: { letters: string[]; activeLett
             key={letter}
             href={`#section-${letter}`}
             className={activeLetters.has(letter) ? 'active' : 'inactive'}
+            onClick={(e) => {
+              if (!activeLetters.has(letter)) return;
+              // iOS Safari fights anchor jumps when scroll-snap is active —
+              // the target scrolls in then the snap yanks it back. Handle
+              // it ourselves: disable snap for the duration of the scroll.
+              e.preventDefault();
+              const target = document.getElementById(`section-${letter}`);
+              if (!target) return;
+              const html = document.documentElement;
+              const prevSnap = html.style.scrollSnapType;
+              html.style.scrollSnapType = 'none';
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              window.setTimeout(() => {
+                html.style.scrollSnapType = prevSnap;
+              }, 800);
+            }}
           >
             {letter}
           </a>
