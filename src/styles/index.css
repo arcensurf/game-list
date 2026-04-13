@@ -54,10 +54,10 @@ body {
    scroll. Each card in a row shares the same vertical center, so
    snapping to card centers effectively snaps to rows. scroll-padding
    shifts the effective snap center upward to match the spotlight's
-   35% vertical position. Proximity (not mandatory) lets users still
-   rest the page between snap points. */
+   35% vertical position. Mandatory snap so every rest lands on a row —
+   proximity was easy to miss, especially when scrolling upward. */
 html {
-  scroll-snap-type: y proximity;
+  scroll-snap-type: y mandatory;
   scroll-padding-bottom: 30vh;
 }
 

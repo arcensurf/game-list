@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useGames } from '../hooks/useGames';
 import { useCardSpotlight } from '../hooks/useCardSpotlight';
 import GameGrid from './GameGrid';
@@ -85,6 +86,8 @@ export default function App() {
   const [view, setView] = useState<View>('list');
   const [lightsOn, setLightsOn] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [dwelled, setDwelled] = useState(false);
+  const [inTransition, setInTransition] = useState(false);
 
   const gogOnly = view === 'gog';
   const perfectOnly = view === 'perfect';
@@ -98,6 +101,23 @@ export default function App() {
   );
   const activeLetters = new Set(groups.map((g) => g.letter));
   const effectiveLightsOn = lightsOn || flatLayout || statsView;
+
+  // The trickiest scroll behavior to beat is browser scroll preservation
+  // when content shrinks. The most reliable workaround is to unmount
+  // the main content entirely for a frame so the page collapses to
+  // just the masthead — the browser is then forced to clamp scroll to
+  // 0 before the new content mounts.
+  const changeView = useCallback((next: View) => {
+    flushSync(() => {
+      setInTransition(true);
+      setView(next);
+    });
+    // After the empty frame has committed, restore the content.
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+      setInTransition(false);
+    });
+  }, []);
 
   useEffect(() => {
     document.body.classList.toggle('lights-on', effectiveLightsOn);
@@ -114,20 +134,45 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Also flip after 3s of dwell time so the letter selector surfaces
+  // itself even for users who haven't started scrolling yet. Resets
+  // on view change, so returning to the list re-shows the title and
+  // then flips again after 3 more seconds of dwell.
+  useEffect(() => {
+    setDwelled(false);
+    if (view !== 'list') return;
+    const t = window.setTimeout(() => setDwelled(true), 3000);
+    return () => window.clearTimeout(t);
+  }, [view]);
+
   useCardSpotlight(!effectiveLightsOn);
 
-  // Defer scroll-snap until the user first scrolls — otherwise the
-  // browser snaps the first row into alignment on load, producing a
-  // jarring auto-scroll nudge. Reset whenever the view changes, since
-  // each view starts fresh at the top.
-  useEffect(() => {
+  // On each view change: disable scroll-snap, scroll to the top, then
+  // re-enable snap once the user scrolls. useLayoutEffect + scrollTop
+  // runs before paint so the user never sees the stale scroll
+  // position. Multiple retries catch browser-side scroll-clamping
+  // that happens post-render when content shrinks (Firefox, notably,
+  // clamps back after our initial reset).
+  useLayoutEffect(() => {
     const html = document.documentElement;
     html.style.scrollSnapType = 'none';
+    const scroll = () => {
+      html.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    };
+    scroll();
+    const timers = [0, 16, 50, 150, 300].map((ms) =>
+      window.setTimeout(scroll, ms),
+    );
     const enable = () => {
       html.style.scrollSnapType = '';
     };
-    window.addEventListener('scroll', enable, { passive: true, once: true });
+    const readyId = window.setTimeout(() => {
+      window.addEventListener('scroll', enable, { passive: true, once: true });
+    }, 400);
     return () => {
+      timers.forEach((id) => window.clearTimeout(id));
+      window.clearTimeout(readyId);
       html.style.scrollSnapType = '';
       window.removeEventListener('scroll', enable);
     };
@@ -161,20 +206,23 @@ export default function App() {
       if (Math.abs(dx) < 60 || Math.abs(dx) < dy * 1.4 || dt > 500) return;
       const idx = VIEW_ORDER.indexOf(view);
       if (dx < 0 && idx < VIEW_ORDER.length - 1) {
-        setView(VIEW_ORDER[idx + 1]);
+        changeView(VIEW_ORDER[idx + 1]);
       } else if (dx > 0 && idx > 0) {
-        setView(VIEW_ORDER[idx - 1]);
+        changeView(VIEW_ORDER[idx - 1]);
       }
     },
-    [view],
+    [view, changeView],
   );
 
-  const showMastheadFlip = !statsView;
+  // Only flip to the letter selector in the main list view — the
+  // curated subset views (GoG/Perfect/Stats) keep the title sticky.
+  const showMastheadFlip = view === 'list';
+  const mastheadFlipped = showMastheadFlip && (scrolled || dwelled);
 
   return (
     <div className="app" onTouchStart={handleSwipeStart} onTouchEnd={handleSwipeEnd}>
       <div
-        className={`masthead${showMastheadFlip && scrolled ? ' masthead--flipped' : ''}`}
+        className={`masthead${mastheadFlipped ? ' masthead--flipped' : ''}`}
       >
         <div className="masthead-inner">
           <div className="masthead-face masthead-face--title">
@@ -185,9 +233,7 @@ export default function App() {
                 ? 'Games of Games'
                 : perfectOnly
                   ? 'Perfect Games'
-                  : statsView
-                    ? 'games across your platforms'
-                    : 'games completed'}
+                  : 'games completed'}
             </p>
           </div>
           <div className="masthead-face masthead-face--letters">
@@ -205,7 +251,7 @@ export default function App() {
       )}
 
       <main>
-        {statsView ? (
+        {inTransition ? null : statsView ? (
           <StatsView stats={platformStats} totalCount={totalCount} />
         ) : loading ? (
           <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '4rem 0' }}>
@@ -233,7 +279,7 @@ export default function App() {
         </button>
       )}
 
-      <BottomNav view={view} onChange={setView} />
+      <BottomNav view={view} onChange={changeView} />
     </div>
   );
 }
