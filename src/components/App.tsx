@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGames } from '../hooks/useGames';
+import { useCardSpotlight } from '../hooks/useCardSpotlight';
 import GameGrid from './GameGrid';
 import AddGameForm from './AddGameForm';
 import PublishButton from './PublishButton';
@@ -66,6 +67,7 @@ export default function App() {
   const [gogOnly, setGogOnly] = useState(false);
   const [perfectOnly, setPerfectOnly] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
+  const [lightsOn, setLightsOn] = useState(false);
   const { groups, totalCount, platformStats, loading } = useGames(
     undefined,
     gogOnly,
@@ -73,6 +75,15 @@ export default function App() {
   );
   const activeLetters = new Set(groups.map((g) => g.letter));
   const flatLayout = gogOnly || perfectOnly;
+  // Filter views force lights on — the spotlight doesn't add much when
+  // you're already looking at a curated subset.
+  const effectiveLightsOn = lightsOn || flatLayout;
+
+  useEffect(() => {
+    document.body.classList.toggle('lights-on', effectiveLightsOn);
+  }, [effectiveLightsOn]);
+
+  useCardSpotlight(!effectiveLightsOn);
 
   return (
     <div className="app">
@@ -133,6 +144,21 @@ export default function App() {
           onClose={() => setStatsOpen(false)}
         />
       )}
+
+      <button
+        className={`lights-toggle${effectiveLightsOn ? ' lights-toggle--on' : ''}`}
+        onClick={() => setLightsOn(!lightsOn)}
+        disabled={flatLayout}
+        title={
+          flatLayout
+            ? 'Lights stay on while a filter is active'
+            : effectiveLightsOn
+              ? 'Re-enable the spotlight effect'
+              : 'Turn all the lights on'
+        }
+      >
+        {effectiveLightsOn ? 'Lights On' : 'Lights Off'}
+      </button>
     </div>
   );
 }

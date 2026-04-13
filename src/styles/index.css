@@ -50,6 +50,23 @@ body {
   line-height: 1.5;
 }
 
+/* Snap rows of cards to viewport center as you scroll. Each card in a
+   row shares the same vertical center, so snapping to card centers
+   effectively snaps to rows. Proximity (not mandatory) lets users
+   still rest the page between snap points if they're not scrolling
+   actively. */
+html {
+  scroll-snap-type: y proximity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-snap-type: none; }
+}
+
+/* Per-card spotlight — a scroll listener in App.tsx sets --card-dim on
+   each card based on distance from viewport center (0 = lit, 1 = dim).
+   Done in JS rather than CSS view-timeline for cross-browser support. */
+
 /* App layout */
 .app {
   max-width: 1200px;
@@ -321,6 +338,107 @@ body {
   background: var(--bg-card);
   opacity: 0;
   transform: translateY(6px);
+  --card-dim: 0;
+  filter:
+    brightness(calc(1 - var(--card-dim) * 0.75))
+    saturate(calc(1 - var(--card-dim) * 0.6));
+  transition: filter 0.12s linear;
+  scroll-snap-align: center;
+}
+
+/* Grain overlay on dim cards — makes the "off" state feel like a tuned-out
+   TV channel so the pop on as they enter the spotlight is more satisfying.
+   feComponentTransfer stretches the noise to stark black/white so the
+   texture reads clearly without a blend mode. */
+.game-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  opacity: calc(var(--card-dim, 0) * 0.75);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 1 0'/><feComponentTransfer><feFuncR type='discrete' tableValues='0 0 0 1 1'/><feFuncG type='discrete' tableValues='0 0 0 1 1'/><feFuncB type='discrete' tableValues='0 0 0 1 1'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  transition: opacity 0.12s linear;
+  animation: grain-static 0.6s steps(5) infinite;
+}
+
+/* Hops the grain tile to discrete offsets each frame so it reads as
+   analog TV static rather than smooth motion. steps() ensures the
+   position snaps rather than interpolates. */
+@keyframes grain-static {
+  0%   { background-position: 0 0; }
+  20%  { background-position: -43px 29px; }
+  40%  { background-position: 31px -51px; }
+  60%  { background-position: -17px 67px; }
+  80%  { background-position: 55px 13px; }
+  100% { background-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-card::after { animation: none; }
+}
+
+/* Hover and info-open override the spotlight dim so the popover stays
+   readable. !important is needed because the spotlight hook sets
+   --card-dim via inline style. */
+.game-card:hover,
+.game-card.info-open {
+  --card-dim: 0 !important;
+}
+
+/* "Lights On" toggle — forces every card to full brightness. */
+body.lights-on .game-card {
+  --card-dim: 0 !important;
+}
+
+.lights-toggle {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  z-index: 150;
+  padding: 0.5rem 0.9rem;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: rgba(28, 25, 23, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.lights-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent-light);
+}
+
+.lights-toggle--on {
+  background: var(--accent);
+  color: var(--text-on-dark);
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(var(--accent-glow), 0.4);
+}
+
+.lights-toggle--on:hover {
+  background: var(--accent-light);
+  color: var(--text-on-dark);
+}
+
+.lights-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.lights-toggle:disabled:hover {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--text-on-dark);
 }
 
 .game-card.revealed {
