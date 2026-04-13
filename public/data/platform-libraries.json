@@ -938,7 +938,7 @@
     {
       "id": 550320,
       "title": "art of rally",
-      "playtimeMinutes": 2010
+      "playtimeMinutes": 2049
     },
     {
       "id": 552700,
@@ -1569,6 +1569,11 @@
       "id": 3463050,
       "title": "Dreams of Aether",
       "playtimeMinutes": 0
+    },
+    {
+      "id": 3472040,
+      "title": "NBA 2K26",
+      "playtimeMinutes": 48
     },
     {
       "id": 3837340,
@@ -4112,5 +4117,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-04-12T07:07:05.678Z"
+  "updatedAt": "2026-04-13T07:54:04.349Z"
 }

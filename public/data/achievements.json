@@ -1126,7 +1126,7 @@
       "title": "art of rally",
       "earned": 42,
       "total": 43,
-      "playtimeMinutes": 2010
+      "playtimeMinutes": 2049
     },
     "552700": {
       "title": "WORLD OF FINAL FANTASY",
@@ -1883,6 +1883,12 @@
       "earned": 0,
       "total": 15,
       "playtimeMinutes": 0
+    },
+    "3472040": {
+      "title": "NBA 2K26",
+      "earned": 0,
+      "total": 48,
+      "playtimeMinutes": 48
     },
     "3837340": {
       "title": "FINAL FANTASY VII",
@@ -4005,5 +4011,5 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-04-12T07:09:57.149Z"
+  "updatedAt": "2026-04-13T07:56:48.261Z"
 }
