@@ -1513,3 +1513,25 @@ body.lights-on .card-wrapper {
   border-radius: 3px;
   transition: width 0.3s ease;
 }
+
+.stats-rest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.stats-rest-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.stats-rest-count {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}

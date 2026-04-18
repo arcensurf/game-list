@@ -1,12 +1,17 @@
 import type { PlatformStat } from '../hooks/useGames';
 import PlatformBadge from './PlatformBadge';
 
+const TOP_COUNT = 10;
+
 export default function StatsView({
   stats,
 }: {
   stats: PlatformStat[];
 }) {
-  const maxCount = stats[0]?.count || 1;
+  const top = stats.slice(0, TOP_COUNT);
+  const rest = stats.slice(TOP_COUNT);
+  const maxCount = top[0]?.count || 1;
+
   return (
     <div className="stats-view">
       <div className="stats-header">
@@ -15,7 +20,7 @@ export default function StatsView({
         </div>
       </div>
       <div className="stats-list">
-        {stats.map(({ platform, count }) => (
+        {top.map(({ platform, count }) => (
           <div key={platform} className="stats-row">
             <div className="stats-row-label">
               <PlatformBadge platform={platform} />
@@ -30,6 +35,16 @@ export default function StatsView({
           </div>
         ))}
       </div>
+      {rest.length > 0 && (
+        <div className="stats-rest">
+          {rest.map(({ platform, count }) => (
+            <span key={platform} className="stats-rest-item">
+              <PlatformBadge platform={platform} />
+              <span className="stats-rest-count">{count}</span>
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
