@@ -1217,7 +1217,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 87
+    "order": 87,
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": "1480657520"
   },
   {
     "title": "Hob",
