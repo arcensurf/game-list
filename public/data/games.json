@@ -1040,8 +1040,8 @@
       {
         "label": "Campaigns",
         "items": [
-          "Main",
-          "Coop"
+          "Single Player",
+          "Co-op"
         ]
       }
     ],
