@@ -64,7 +64,6 @@ These scripts manage the data files that live in `public/data/`.
 ```bash
 npm run fetch-covers       # Download cover art from SteamGridDB
 npm run fetch-achievements  # Sync achievement data from Steam, PSN, Xbox
-npm run parse-markdown      # Convert gamelist.md to games.json
 ```
 
 ## Architecture
