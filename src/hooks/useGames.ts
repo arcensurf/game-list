@@ -32,18 +32,27 @@ export function useGames(
   const [covers, setCovers] = useState<CoverMap>({});
   const [achievementData, setAchievementData] = useState<AchievementData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
+    const bust = refreshKey ? `?t=${Date.now()}` : '';
     Promise.all([
-      fetch(`${DATA_BASE}data/games.json`).then((r) => r.json()),
-      fetch(`${DATA_BASE}data/covers.json`).then((r) => r.json()),
-      fetch(`${DATA_BASE}data/achievements.json`).then((r) => r.json()).catch(() => null),
+      fetch(`${DATA_BASE}data/games.json${bust}`).then((r) => r.json()),
+      fetch(`${DATA_BASE}data/covers.json${bust}`).then((r) => r.json()),
+      fetch(`${DATA_BASE}data/achievements.json${bust}`).then((r) => r.json()).catch(() => null),
     ]).then(([g, c, a]) => {
       setGames(g as Game[]);
       setCovers(c as CoverMap);
       setAchievementData(a as AchievementData | null);
       setLoading(false);
     });
+  }, [refreshKey]);
+
+  // Re-fetch when dev API calls signal a data change.
+  useEffect(() => {
+    const handler = () => setRefreshKey((k) => k + 1);
+    window.addEventListener('games-updated', handler);
+    return () => window.removeEventListener('games-updated', handler);
   }, []);
 
   // Precomputed title indexes — rebuilt only when achievement data

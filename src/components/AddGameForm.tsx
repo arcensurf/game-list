@@ -27,6 +27,7 @@ export default function AddGameForm() {
       setPlatforms([]);
       setDlc('');
       setOpen(false);
+      window.dispatchEvent(new Event('games-updated'));
     } else {
       const data = await res.json();
       setError(data.error || 'Failed to add game');

@@ -145,7 +145,8 @@ export default function EditGameModal({
       body: JSON.stringify({ title: game.title }),
     });
     if (res.ok) {
-      window.location.reload();
+      window.dispatchEvent(new Event('games-updated'));
+      onClose();
     } else {
       const data = await res.json();
       setError(data.error || 'Failed to delete');
@@ -176,7 +177,8 @@ export default function EditGameModal({
     });
 
     if (res.ok) {
-      window.location.reload();
+      window.dispatchEvent(new Event('games-updated'));
+      onClose();
     } else {
       const data = await res.json();
       setError(data.error || 'Failed to save');
