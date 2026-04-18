@@ -6,17 +6,18 @@ import AchievementBar from './AchievementBar';
 type DropSide = 'before' | 'after';
 
 export default function LetterSection({ group }: { group: LetterGroup }) {
+  // Local state only exists for optimistic drag reorder. We track which
+  // prop reference we last synced from so that ANY upstream change
+  // (extras, order, title, deletion…) is picked up immediately.
   const [games, setGames] = useState(group.games);
+  const [syncedFrom, setSyncedFrom] = useState(group.games);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dropTarget, setDropTarget] = useState<{ index: number; side: DropSide } | null>(null);
   const dragItem = useRef<number | null>(null);
 
-  // Sync if parent data changes (e.g. after filter)
-  if (
-    games.length !== group.games.length ||
-    games.some((g, i) => g.title !== group.games[i]?.title)
-  ) {
+  if (syncedFrom !== group.games) {
     setGames(group.games);
+    setSyncedFrom(group.games);
   }
 
   const isDev = import.meta.env.DEV;
@@ -64,13 +65,16 @@ export default function LetterSection({ group }: { group: LetterGroup }) {
     setGames(reordered);
     handleDragEnd();
 
-    await fetch('/api/reorder-games', {
+    const res = await fetch('/api/reorder-games', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         titles: reordered.map((g: GameWithCover) => g.title),
       }),
     });
+    if (res.ok) {
+      window.dispatchEvent(new Event('games-updated'));
+    }
   }, [games, dropTarget, handleDragEnd]);
 
   const getCardClass = (index: number) => {
