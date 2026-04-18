@@ -195,9 +195,9 @@
     "fetchedAt": "2026-04-09T16:39:07.338Z"
   },
   "Dragon Age Inquisition": {
-    "sgdbId": 36775,
+    "sgdbId": 36202,
     "file": "dragon-age-inquisition.png",
-    "fetchedAt": "2026-04-09T16:20:41.601Z"
+    "fetchedAt": "2026-04-12T13:58:34.918Z"
   },
   "Dragon Quest": {
     "sgdbId": 481947,
@@ -350,9 +350,9 @@
     "fetchedAt": "2026-04-09T16:21:14.810Z"
   },
   "Fire Emblem: Three Houses": {
-    "sgdbId": 5246430,
+    "sgdbId": 70754,
     "file": "fire-emblem-three-houses.png",
-    "fetchedAt": "2026-04-09T16:21:15.672Z"
+    "fetchedAt": "2026-04-12T14:03:50.196Z"
   },
   "Forza Horizon": {
     "sgdbId": 19719,
@@ -1073,5 +1073,10 @@
     "sgdbId": 398052,
     "file": "grid-legends.png",
     "fetchedAt": "2026-04-11T01:58:00.284Z"
+  },
+  "Gears of War": {
+    "sgdbId": 116498,
+    "file": "gears-of-war.png",
+    "fetchedAt": "2026-04-18T14:50:16.265Z"
   }
 }
