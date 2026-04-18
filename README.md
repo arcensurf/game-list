@@ -33,6 +33,21 @@ GITHUB_TOKEN=your_github_pat
 | `SGDB_API_KEY` | [SteamGridDB](https://www.steamgriddb.com/) API key for browsing and fetching cover art | For cover management |
 | `GITHUB_TOKEN` | GitHub fine-grained PAT with Pages write permission | For the dev publish button |
 
+### GitHub Actions Secrets
+
+Achievement syncing runs automatically via a daily GitHub Actions workflow. The credentials live in **repo secrets** (Settings > Secrets and variables > Actions), not in `.env.local`:
+
+| Secret | Purpose | How to get it |
+|--------|---------|---------------|
+| `STEAM_API_KEY` | Steam Web API key | [steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey) |
+| `STEAM_USER_ID` | Your Steam64 ID | [steamid.io](https://steamid.io) |
+| `PSN_NPSSO_TOKEN` | PSN authentication token (~60-day lifetime) | Log in at [playstation.com](https://www.playstation.com), then visit [ca.account.sony.com/api/v1/ssocookie](https://ca.account.sony.com/api/v1/ssocookie) and copy the `npsso` value |
+| `XBOX_REFRESH_TOKEN` | Xbox Live refresh token (auto-rotates) | Run `npm run xbox-get-refresh-token` locally and follow the prompts |
+| `XBOX_EMAIL` | Xbox/Microsoft account email | Used as fallback for Xbox auth |
+| `XBOX_PASSWORD` | Xbox/Microsoft account password | Used as fallback for Xbox auth |
+
+The PSN token expires roughly every 60 days. When it does, the workflow automatically opens a GitHub issue with renewal instructions. Xbox tokens auto-rotate as long as the workflow runs at least once every 90 days.
+
 ## Running
 
 ### Dev Server
@@ -62,9 +77,12 @@ npm run lint
 These scripts manage the data files that live in `public/data/`.
 
 ```bash
-npm run fetch-covers       # Download cover art from SteamGridDB
-npm run fetch-achievements  # Sync achievement data from Steam, PSN, Xbox
+npm run fetch-covers        # Download cover art from SteamGridDB (requires SGDB_API_KEY in .env.local)
+npm run fetch-achievements   # Sync achievement data from Steam, PSN, Xbox (requires secrets in .env.local for local runs)
+npm run xbox-get-refresh-token  # Interactive helper to mint a new Xbox refresh token
 ```
+
+Achievement syncing normally runs automatically via the daily GitHub Actions cron (`fetch-achievements.yml`). You only need to run it locally for debugging. The `xbox-get-refresh-token` helper uses Microsoft's device-code flow — it gives you a URL and code to enter in a browser, then saves the token to `~/.game-list/`.
 
 ## Architecture
 
