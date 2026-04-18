@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "fetch-covers": "NODE_TLS_REJECT_UNAUTHORIZED=0 node scripts/fetch-covers.mjs",
     "fetch-achievements": "node scripts/fetch-achievements.mjs",
-    "xbox-get-refresh-token": "node scripts/xbox-get-refresh-token.mjs"
+    "xbox-get-refresh-token": "node scripts/xbox-get-refresh-token.mjs",
+    "psn-get-npsso-token": "node scripts/psn-get-npsso-token.mjs"
   },
   "dependencies": {
     "dotenv": "^17.4.1",

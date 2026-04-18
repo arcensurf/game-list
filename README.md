@@ -41,7 +41,7 @@ Achievement syncing runs automatically via a daily GitHub Actions workflow. The 
 |--------|---------|---------------|
 | `STEAM_API_KEY` | Steam Web API key | [steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey) |
 | `STEAM_USER_ID` | Your Steam64 ID | [steamid.io](https://steamid.io) |
-| `PSN_NPSSO_TOKEN` | PSN authentication token (~60-day lifetime) | Log in at [playstation.com](https://www.playstation.com), then visit [ca.account.sony.com/api/v1/ssocookie](https://ca.account.sony.com/api/v1/ssocookie) and copy the `npsso` value |
+| `PSN_NPSSO_TOKEN` | PSN authentication token (~60-day lifetime) | Run `npm run psn-get-npsso-token` locally and follow the prompts |
 | `XBOX_REFRESH_TOKEN` | Xbox Live refresh token (auto-rotates) | Run `npm run xbox-get-refresh-token` locally and follow the prompts |
 | `XBOX_EMAIL` | Xbox/Microsoft account email | Used as fallback for Xbox auth |
 | `XBOX_PASSWORD` | Xbox/Microsoft account password | Used as fallback for Xbox auth |
@@ -77,12 +77,13 @@ npm run lint
 These scripts manage the data files that live in `public/data/`.
 
 ```bash
-npm run fetch-covers        # Download cover art from SteamGridDB (requires SGDB_API_KEY in .env.local)
-npm run fetch-achievements   # Sync achievement data from Steam, PSN, Xbox (requires secrets in .env.local for local runs)
-npm run xbox-get-refresh-token  # Interactive helper to mint a new Xbox refresh token
+npm run fetch-covers             # Download cover art from SteamGridDB (requires SGDB_API_KEY in .env.local)
+npm run fetch-achievements       # Sync achievement data from Steam, PSN, Xbox
+npm run psn-get-npsso-token      # Interactive helper to get a PSN authentication token
+npm run xbox-get-refresh-token   # Interactive helper to mint an Xbox refresh token
 ```
 
-Achievement syncing normally runs automatically via the daily GitHub Actions cron (`fetch-achievements.yml`). You only need to run it locally for debugging. The `xbox-get-refresh-token` helper uses Microsoft's device-code flow — it gives you a URL and code to enter in a browser, then saves the token to `~/.game-list/`.
+Achievement syncing normally runs automatically via the daily GitHub Actions cron (`fetch-achievements.yml`). You only need to run it locally for debugging. The token helper scripts walk you through authentication interactively and save tokens to `~/.game-list/` for local use — they also copy the token to your clipboard for pasting into GitHub secrets.
 
 ## Architecture
 

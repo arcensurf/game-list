@@ -28,7 +28,9 @@ try {
 
 const STEAM_API_KEY = process.env.STEAM_API_KEY;
 const STEAM_USER_ID = process.env.STEAM_USER_ID;
-const PSN_NPSSO_TOKEN = process.env.PSN_NPSSO_TOKEN;
+const PSN_NPSSO_TOKEN_FILE = resolve(tokenDir, 'psn-npsso-token');
+const PSN_NPSSO_TOKEN = process.env.PSN_NPSSO_TOKEN
+  || (existsSync(PSN_NPSSO_TOKEN_FILE) ? readFileSync(PSN_NPSSO_TOKEN_FILE, 'utf-8').trim() : undefined);
 const PSN_REFRESH_TOKEN_FILE = resolve(tokenDir, 'psn-refresh-token');
 const PSN_STATUS_FILE = resolve(tokenDir, 'psn-status');
 const XBOX_REFRESH_TOKEN = process.env.XBOX_REFRESH_TOKEN;
