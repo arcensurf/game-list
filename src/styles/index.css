@@ -409,9 +409,6 @@ html {
   background: var(--bg-card);
   opacity: 0;
   transform: translateY(6px);
-  /* Default to dim so cards entering the viewport never flash lit
-     before the spotlight hook computes their real position. */
-  --card-dim: 1;
   filter:
     brightness(calc(1 - var(--card-dim) * 0.75))
     saturate(calc(1 - var(--card-dim) * 0.6));
@@ -457,16 +454,16 @@ html {
    because touch devices emulate sticky :hover on tap, which leaves the
    card lit long after the info-open timer dismisses. */
 @media (hover: hover) {
-  .game-card:hover {
+  .card-wrapper:hover {
     --card-dim: 0 !important;
   }
 }
-.game-card.info-open {
+.card-wrapper:has(.game-card.info-open) {
   --card-dim: 0 !important;
 }
 
 /* "Lights On" toggle — forces every card to full brightness. */
-body.lights-on .game-card {
+body.lights-on .card-wrapper {
   --card-dim: 0 !important;
 }
 
@@ -928,7 +925,13 @@ body.lights-on .game-card {
 
 .add-game-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.add-game-actions-right {
+  display: flex;
   gap: 0.5rem;
 }
 
@@ -951,6 +954,17 @@ body.lights-on .game-card {
   border: none;
   color: #fff;
   font-weight: 600;
+}
+
+.add-game-actions .delete-btn {
+  background: transparent;
+  border: 1px solid #b91c1c;
+  color: #b91c1c;
+}
+
+.add-game-actions .delete-btn:hover {
+  background: #b91c1c;
+  color: #fff;
 }
 
 /* Publish button */
@@ -1311,6 +1325,7 @@ body.lights-on .game-card {
 .card-wrapper {
   display: flex;
   flex-direction: column;
+  --card-dim: 1;
 }
 
 .card-wrapper > .game-card {
@@ -1347,7 +1362,8 @@ body.lights-on .game-card {
 .achievement-bar-fill {
   height: 100%;
   border-radius: 2px;
-  transition: width 0.3s ease;
+  width: calc(var(--bar-pct, 0%) * (1 - var(--card-dim, 0)));
+  transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .achievement-bar-label {
@@ -1355,6 +1371,8 @@ body.lights-on .game-card {
   color: var(--text-muted);
   white-space: nowrap;
   font-weight: 600;
+  opacity: calc(1 - var(--card-dim, 0));
+  transition: opacity 0.4s ease;
 }
 
 /* Stats modal */

@@ -21,7 +21,7 @@ export default function AchievementBar({ achievements }: { achievements: GameAch
       <div className="achievement-bar-track">
         <div
           className="achievement-bar-fill"
-          style={{ width: `${pct}%`, backgroundColor: color }}
+          style={{ ['--bar-pct' as string]: `${pct}%`, backgroundColor: color } as React.CSSProperties}
         />
       </div>
       <span className="achievement-bar-label">

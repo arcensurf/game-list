@@ -57,6 +57,7 @@ export default function EditGameModal({
   const [data, setData] = useState<AchievementData | null>(null);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Precomputed normalized-title → best-entry index. Rebuilt only when
   // data reloads, queried O(1) on every keystroke as the user edits
@@ -131,6 +132,27 @@ export default function EditGameModal({
   const xboxMatch = xboxMatchEntry
     ? { entry: xboxMatchEntry, id: findIdForEntry(data?.xbox, xboxMatchEntry) }
     : null;
+
+  const handleDelete = async () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+    setSaving(true);
+    const res = await fetch('/api/delete-game', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: game.title }),
+    });
+    if (res.ok) {
+      window.location.reload();
+    } else {
+      const data = await res.json();
+      setError(data.error || 'Failed to delete');
+      setSaving(false);
+      setConfirmDelete(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -277,12 +299,22 @@ export default function EditGameModal({
           </label>
         )}
         <div className="add-game-actions">
-          <button type="button" onClick={onClose}>
-            Cancel
+          <button
+            type="button"
+            className="delete-btn"
+            onClick={handleDelete}
+            disabled={saving}
+          >
+            {confirmDelete ? 'Confirm Delete' : 'Delete'}
           </button>
-          <button type="submit" disabled={saving}>
-            {saving ? 'Saving...' : 'Save'}
-          </button>
+          <div className="add-game-actions-right">
+            <button type="button" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" disabled={saving}>
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
         </div>
       </form>
     </div>,

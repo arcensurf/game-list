@@ -304,6 +304,36 @@ export default function devApiPlugin(): Plugin {
             return;
           }
 
+          if (req.url === '/api/delete-game') {
+            const body = JSON.parse(await parseBody(req));
+            const { title } = body as { title: string };
+
+            const games = readJson(gamesPath) as GameEntry[];
+            const index = games.findIndex((g) => g.title === title);
+            if (index === -1) {
+              res.writeHead(404, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: `Game "${title}" not found` }));
+              return;
+            }
+
+            games.splice(index, 1);
+            renumberOrders(games);
+            writeJson(gamesPath, games);
+
+            // Remove cover entry if present
+            if (existsSync(coversPath)) {
+              const covers = readJson(coversPath);
+              if (covers[title] !== undefined) {
+                delete covers[title];
+                writeJson(coversPath, covers);
+              }
+            }
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true, deleted: title }));
+            return;
+          }
+
           if (req.url === '/api/reorder-games') {
             const body = JSON.parse(await parseBody(req));
             const { titles } = body as { titles: string[] };

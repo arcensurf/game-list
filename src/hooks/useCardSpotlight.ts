@@ -9,7 +9,8 @@ export function useCardSpotlight(enabled: boolean = true) {
   useEffect(() => {
     if (!enabled) {
       document.querySelectorAll<HTMLElement>('.game-card').forEach((c) => {
-        c.style.removeProperty('--card-dim');
+        const wrapper = c.closest('.card-wrapper') as HTMLElement | null;
+        (wrapper ?? c).style.removeProperty('--card-dim');
       });
       return;
     }
@@ -51,7 +52,10 @@ export function useCardSpotlight(enabled: boolean = true) {
         } else {
           t = (dist - plateauPx) / falloffPx;
         }
-        card.style.setProperty('--card-dim', t.toFixed(3));
+        // Set on the wrapper (.card-wrapper) so sibling elements like
+        // .achievement-slot can also inherit the value.
+        const target = card.closest('.card-wrapper') as HTMLElement | null;
+        (target ?? card).style.setProperty('--card-dim', t.toFixed(3));
       });
     };
 
