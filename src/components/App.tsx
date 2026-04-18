@@ -252,7 +252,7 @@ export default function App() {
 
       <main>
         {inTransition ? null : statsView ? (
-          <StatsView stats={platformStats} totalCount={totalCount} />
+          <StatsView stats={platformStats} />
         ) : loading ? (
           <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '4rem 0' }}>
             Loading...
