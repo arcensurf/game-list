@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PLATFORM_COLORS } from './PlatformBadge';
+import { PLATFORM_COLORS } from '../utils/platformColors';
 
 const KNOWN_PLATFORMS = Object.keys(PLATFORM_COLORS);
 

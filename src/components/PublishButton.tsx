@@ -1,10 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function PublishButton() {
   const [state, setState] = useState<'idle' | 'publishing' | 'done' | 'error'>('idle');
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (resetTimer.current) clearTimeout(resetTimer.current);
+    };
+  }, []);
 
   const handlePublish = async () => {
     if (!confirm('Build and publish to GitHub Pages?')) return;
+
+    if (resetTimer.current) {
+      clearTimeout(resetTimer.current);
+      resetTimer.current = null;
+    }
 
     setState('publishing');
 
@@ -14,11 +26,10 @@ export default function PublishButton() {
 
       if (res.ok) {
         setState('done');
-        setTimeout(() => { setState('idle'); }, 3000);
+        resetTimer.current = setTimeout(() => { setState('idle'); }, 3000);
       } else {
         console.error('Publish failed:', data.error || data);
         setState('error');
-        // error state set above
       }
     } catch (err) {
       console.error('Publish failed:', err);

@@ -20,7 +20,7 @@ import type {
 
 export const PLATFORM_FAMILIES: Record<'steam' | 'psn' | 'xbox', Set<string>> = {
   steam: new Set(['PC']),
-  psn: new Set(['PS3', 'PS4', 'PS5', 'PS Vita']),
+  psn: new Set(['PSX', 'PS3', 'PS4', 'PS5', 'PS Vita']),
   xbox: new Set([
     'Xbox 360',
     'Xbox One',

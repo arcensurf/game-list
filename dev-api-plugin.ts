@@ -25,7 +25,8 @@ function writeJson(path: string, data: unknown) {
   writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
 }
 
-type GameEntry = { title: string; order: number; [key: string]: unknown };
+type ExtraGroup = { label: string; items: string[] };
+type GameEntry = { title: string; order: number; extras: ExtraGroup[]; [key: string]: unknown };
 
 function renumberOrders(games: GameEntry[]) {
   games
@@ -51,6 +52,20 @@ export default function devApiPlugin(): Plugin {
   // Load .env.local for SGDB API key
   config({ path: resolve(root, '.env.local') });
 
+  function ensureCoversDir() {
+    if (!existsSync(coversDir)) mkdirSync(coversDir, { recursive: true });
+  }
+
+  function updateCoverEntry(title: string, sgdbId: number | null, fileName: string) {
+    const covers = existsSync(coversPath) ? readJson(coversPath) : {};
+    covers[title] = {
+      sgdbId,
+      file: fileName,
+      fetchedAt: new Date().toISOString(),
+    };
+    writeJson(coversPath, covers);
+  }
+
   return {
     name: 'dev-api',
     apply: 'serve',
@@ -67,7 +82,7 @@ export default function devApiPlugin(): Plugin {
               filename: string;
             };
 
-            if (!existsSync(coversDir)) mkdirSync(coversDir, { recursive: true });
+            ensureCoversDir();
 
             // Decode base64 and write file
             const ext = extname(filename) || '.png';
@@ -77,14 +92,8 @@ export default function devApiPlugin(): Plugin {
             const buffer = Buffer.from(imageData, 'base64');
             writeFileSync(outPath, buffer);
 
-            // Update covers.json
-            const covers = existsSync(coversPath) ? readJson(coversPath) : {};
-            covers[title] = {
-              sgdbId: covers[title]?.sgdbId ?? null,
-              file: outName,
-              fetchedAt: new Date().toISOString(),
-            };
-            writeJson(coversPath, covers);
+            const existingCovers = existsSync(coversPath) ? readJson(coversPath) : {};
+            updateCoverEntry(title, existingCovers[title]?.sgdbId ?? null, outName);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ coverUrl: `/covers/${outName}?t=${Date.now()}` }));
@@ -99,7 +108,7 @@ export default function devApiPlugin(): Plugin {
               platforms: string[];
             };
 
-            const games = readJson(gamesPath);
+            const games = readJson(gamesPath) as GameEntry[];
 
             // Check for duplicate
             if (games.some((g: { title: string }) => g.title === title)) {
@@ -221,7 +230,7 @@ export default function devApiPlugin(): Plugin {
               sgdbId: number;
             };
 
-            if (!existsSync(coversDir)) mkdirSync(coversDir, { recursive: true });
+            ensureCoversDir();
 
             // Download the selected image
             const response = await fetch(imageUrl, { redirect: 'follow' });
@@ -235,14 +244,7 @@ export default function devApiPlugin(): Plugin {
             const outName = `${slugify(title)}${ext}`;
             writeFileSync(resolve(coversDir, outName), buffer);
 
-            // Update covers.json
-            const covers = existsSync(coversPath) ? readJson(coversPath) : {};
-            covers[title] = {
-              sgdbId,
-              file: outName,
-              fetchedAt: new Date().toISOString(),
-            };
-            writeJson(coversPath, covers);
+            updateCoverEntry(title, sgdbId, outName);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ coverUrl: `/covers/${outName}?t=${Date.now()}` }));
@@ -264,7 +266,7 @@ export default function devApiPlugin(): Plugin {
               xboxTitleId: string | null;
             };
 
-            const games = readJson(gamesPath);
+            const games = readJson(gamesPath) as GameEntry[];
             const game = games.find((g: { title: string }) => g.title === originalTitle);
             if (!game) {
               res.writeHead(404, { 'Content-Type': 'application/json' });
@@ -364,7 +366,7 @@ export default function devApiPlugin(): Plugin {
               item: string;
             };
 
-            const games = readJson(gamesPath);
+            const games = readJson(gamesPath) as GameEntry[];
             const game = games.find((g: { title: string }) => g.title === title);
             if (!game) {
               res.writeHead(404, { 'Content-Type': 'application/json' });
@@ -447,7 +449,7 @@ export default function devApiPlugin(): Plugin {
 
             // Only upload files that have changed
             const treeItems: { path: string; mode: string; type: string; sha: string }[] = [];
-            let uploaded = 0;
+
             for (const file of filesToPush) {
               if (!existsSync(file.localPath)) continue;
               const content = readFileSync(file.localPath);
@@ -471,7 +473,6 @@ export default function devApiPlugin(): Plugin {
               }
               const blobData = await blobResp.json() as { sha: string };
               treeItems.push({ path: file.repoPath, mode: '100644', type: 'blob', sha: blobData.sha });
-              uploaded++;
             }
 
             // Nothing changed

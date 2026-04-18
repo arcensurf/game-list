@@ -1,0 +1,83 @@
+/* Alphabet slider */
+.alphabet-nav-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  background: rgba(17, 16, 16, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.alphabet-arrow {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin-top: -2px;
+  transition: color var(--transition);
+}
+
+.alphabet-arrow:hover {
+  color: var(--accent-light);
+}
+
+.alphabet-arrow--left {
+  background: linear-gradient(to right, rgba(17, 16, 16, 0.9), transparent);
+}
+
+.alphabet-arrow--right {
+  background: linear-gradient(to left, rgba(17, 16, 16, 0.9), transparent);
+}
+
+.alphabet-nav {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.4rem 2rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.alphabet-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.alphabet-nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 2.2rem;
+  height: 2rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition);
+}
+
+.alphabet-nav a.active {
+  color: var(--text);
+}
+
+.alphabet-nav a.active:hover {
+  background: rgba(var(--accent-glow), 0.2);
+  color: #fff;
+}
+
+.alphabet-nav a.inactive {
+  color: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}

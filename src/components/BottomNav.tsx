@@ -1,6 +1,5 @@
-export type View = 'list' | 'gog' | 'perfect' | 'stats';
-
-export const VIEW_ORDER: View[] = ['list', 'gog', 'perfect', 'stats'];
+import { VIEW_ORDER } from '../types/view';
+import type { View } from '../types/view';
 
 const LABELS: Record<View, string> = {
   list: 'All Games',

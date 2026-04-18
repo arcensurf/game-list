@@ -58,6 +58,7 @@ export default function LetterSection({ group }: { group: LetterGroup }) {
       return;
     }
 
+    const previous = games;
     const reordered = [...games];
     const [moved] = reordered.splice(from, 1);
     reordered.splice(toIndex, 0, moved);
@@ -65,15 +66,21 @@ export default function LetterSection({ group }: { group: LetterGroup }) {
     setGames(reordered);
     handleDragEnd();
 
-    const res = await fetch('/api/reorder-games', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        titles: reordered.map((g: GameWithCover) => g.title),
-      }),
-    });
-    if (res.ok) {
-      window.dispatchEvent(new Event('games-updated'));
+    try {
+      const res = await fetch('/api/reorder-games', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titles: reordered.map((g: GameWithCover) => g.title),
+        }),
+      });
+      if (res.ok) {
+        window.dispatchEvent(new Event('games-updated'));
+      } else {
+        setGames(previous);
+      }
+    } catch {
+      setGames(previous);
     }
   }, [games, dropTarget, handleDragEnd]);
 

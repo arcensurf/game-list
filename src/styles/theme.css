@@ -1,0 +1,70 @@
+/* Theme: Warm Amber */
+:root {
+  /* Backgrounds */
+  --bg: #111010;
+  --bg-surface: #1c1917;
+  --bg-card: #1e1a16;
+
+  /* Text */
+  --text: #e7e0d8;
+  --text-muted: #9a8e82;
+
+  /* Accent */
+  --accent: #f59e0b;
+  --accent-dim: #d97706;
+  --accent-light: #fbbf24;
+  --accent-glow: 245, 158, 11;  /* rgb components for rgba() usage */
+
+  /* Surfaces */
+  --border: #2e2924;
+  --text-on-dark: #1c1917;
+
+  /* Gold (Game of Games — independent of theme) */
+  --gold: #d4a017;
+  --gold-bright: #f5d060;
+  --gold-dim: #b8880f;
+
+  /* Shared */
+  --radius: 8px;
+  --transition: 0.2s ease;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 120px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* Snap rows of cards toward the upper third of the viewport as you
+   scroll. Each card in a row shares the same vertical center, so
+   snapping to card centers effectively snaps to rows. scroll-padding
+   shifts the effective snap center upward to match the spotlight's
+   35% vertical position. Mandatory snap so every rest lands on a row —
+   proximity was easy to miss, especially when scrolling upward. */
+html {
+  scroll-snap-type: y mandatory;
+  scroll-padding-bottom: 30vh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-snap-type: none; }
+}
+
+/* Per-card spotlight — a scroll listener in App.tsx sets --card-dim on
+   each card based on distance from viewport center (0 = lit, 1 = dim).
+   Done in JS rather than CSS view-timeline for cross-browser support. */

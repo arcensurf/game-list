@@ -1,0 +1,251 @@
+/* App layout */
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  /* Tall bottom padding so the last row can still scroll up to the
+     35% snap target, plus extra clearance for the fixed bottom nav. */
+  padding: 0 1.5rem calc(65vh + 80px);
+}
+
+/* Header */
+.app-header {
+  padding: 0;
+}
+
+/* Sticky masthead that flips between the title (resting) and the
+   alphabet nav (scrolled) via a 3D rotateX. Fixed height so the two
+   faces (stacked with backface-visibility: hidden) share the same
+   visual slot. */
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 56px;
+  margin: 0 -1.5rem;
+  padding: 0 1.5rem;
+  background: rgba(17, 16, 16, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  perspective: 900px;
+  /* Contain the alphabet nav's horizontal scroll so it doesn't
+     expand the page width. */
+  overflow: hidden;
+}
+
+.masthead-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.masthead--flipped .masthead-inner {
+  transform: rotateX(180deg);
+}
+
+.masthead-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.masthead-face--title {
+  gap: 0.75rem;
+  transform: rotateX(0deg);
+}
+
+.masthead-face--title .game-count {
+  margin: 0;
+}
+
+.masthead-face--letters {
+  transform: rotateX(180deg);
+}
+
+/* When rendered inside the masthead, the alphabet nav drops its
+   sticky/backdrop styles — the masthead container provides those. */
+.masthead .alphabet-nav-wrapper {
+  position: static;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  width: 100%;
+  min-width: 0;
+}
+
+.masthead .alphabet-nav {
+  min-width: 0;
+}
+
+.masthead h1 {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 1.35rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+  background: linear-gradient(
+    180deg,
+    var(--accent-light) 0%,
+    var(--accent) 50%,
+    var(--accent-dim) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 12px rgba(var(--accent-glow), 0.3));
+}
+
+.game-count {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Letter sections */
+.letter-section {
+  position: relative;
+  margin-top: 2rem;
+}
+
+.letter-heading {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 10rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.15;
+  pointer-events: none;
+  user-select: none;
+  transform: rotate(12deg);
+  transform-origin: left top;
+  margin-bottom: -5rem;
+}
+
+/* Game grid */
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 500px) {
+  .game-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Lights toggle */
+.lights-toggle {
+  position: fixed;
+  /* Sits above the bottom nav (nav is ~52px + safe area). */
+  bottom: calc(60px + 1rem + env(safe-area-inset-bottom, 0));
+  left: 1.25rem;
+  z-index: 170;
+  padding: 0.5rem 0.9rem;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: rgba(28, 25, 23, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.lights-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent-light);
+}
+
+.lights-toggle--on {
+  background: var(--accent);
+  color: var(--text-on-dark);
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(var(--accent-glow), 0.4);
+}
+
+.lights-toggle--on:hover {
+  background: var(--accent-light);
+  color: var(--text-on-dark);
+}
+
+.lights-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.lights-toggle:disabled:hover {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--text-on-dark);
+}
+
+/* Bottom view-switcher nav. On mobile, swipe left/right between views;
+   on desktop, click a tab. Active tab highlights with the accent. */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 180;
+  display: flex;
+  background: rgba(17, 16, 16, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.bottom-nav-tab {
+  flex: 1;
+  position: relative;
+  padding: 0.85rem 0.25rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--transition);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bottom-nav-tab:hover {
+  color: var(--text);
+}
+
+.bottom-nav-tab--active {
+  color: var(--accent);
+}
+
+.bottom-nav-tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  right: 25%;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px 2px 0 0;
+  box-shadow: 0 0 8px rgba(var(--accent-glow), 0.6);
+}

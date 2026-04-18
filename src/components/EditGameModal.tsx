@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { AchievementData, ExtraContent, GameWithCover, PlatformLibraryEntry } from '../types/game';
-import { buildTitleIndex, normalizeTitle } from '../utils/achievementMatch';
+import { buildTitleIndex, normalizeTitle, PLATFORM_FAMILIES } from '../utils/achievementMatch';
 import PlatformPicker from './PlatformPicker';
 
 // The modal reads achievements.json — the same runtime source of truth
@@ -227,7 +227,7 @@ export default function EditGameModal({
             placeholder={"DLC: Expansion 1, Expansion 2\nPaths: Route A, Route B"}
           />
         </label>
-        {platforms.includes('PC') && (
+        {platforms.some((p) => PLATFORM_FAMILIES.steam.has(p)) && (
           <label>
             Steam App ID (override)
             <input
@@ -247,7 +247,7 @@ export default function EditGameModal({
             )}
           </label>
         )}
-        {platforms.some((p) => ['PS3', 'PS4', 'PS5', 'PS Vita', 'PSX'].includes(p)) && (
+        {platforms.some((p) => PLATFORM_FAMILIES.psn.has(p)) && (
           <label>
             PSN NPCOMMID (override)
             <input
@@ -264,7 +264,7 @@ export default function EditGameModal({
             )}
           </label>
         )}
-        {platforms.some((p) => ['Xbox 360', 'Xbox One', 'Xbox Series X|S', 'Xbox Series X', 'Xbox Series S'].includes(p)) && (
+        {platforms.some((p) => PLATFORM_FAMILIES.xbox.has(p)) && (
           <label>
             Xbox Title ID (override)
             <input

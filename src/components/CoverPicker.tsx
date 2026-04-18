@@ -24,7 +24,7 @@ export default function CoverPicker({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     fetch('/api/browse-covers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -32,11 +32,13 @@ export default function CoverPicker({
     })
       .then((r) => r.json())
       .then((data) => {
+        if (cancelled) return;
         setImages(data.images || []);
         setGameName(data.gameName || title);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [title, sgdbId]);
 
   const handleSelect = async (img: SgdbImage) => {
@@ -52,6 +54,7 @@ export default function CoverPicker({
     });
     if (res.ok) {
       const data = await res.json();
+      window.dispatchEvent(new Event('games-updated'));
       onClose(data.coverUrl);
     } else {
       setSelecting(null);
@@ -76,6 +79,7 @@ export default function CoverPicker({
       });
       if (res.ok) {
         const data = await res.json();
+        window.dispatchEvent(new Event('games-updated'));
         onClose(data.coverUrl);
       }
     };

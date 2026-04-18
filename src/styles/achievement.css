@@ -1,0 +1,42 @@
+/* Always-present slot below each card. A fixed min-height reserves
+   the same space for every card whether or not it has an
+   achievement bar, so cards in a row can all stretch to the same
+   height without the bar's presence/absence skewing the layout. */
+.achievement-slot {
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+}
+
+/* Achievement bar */
+.achievement-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.achievement-bar-track {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-surface);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.achievement-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  width: calc(var(--bar-pct, 0%) * (1 - var(--card-dim, 0)));
+  transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.achievement-bar-label {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-weight: 600;
+  opacity: calc(1 - var(--card-dim, 0));
+  transition: opacity 0.4s ease;
+}
