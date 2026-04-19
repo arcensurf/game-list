@@ -3,13 +3,17 @@
    achievement bar, so cards in a row can all stretch to the same
    height without the bar's presence/absence skewing the layout. */
 .achievement-slot {
-  min-height: 20px;
+  min-height: 22px;
   display: flex;
   align-items: center;
   padding: 0 2px;
 }
 
-/* Achievement bar */
+/* Achievement bar: a segmented LED-style track. Each achievement
+   gets its own small block — lit for earned, dim for unearned. Ties
+   into the arcade-HUD aesthetic (segmented stamina/progress bars
+   were the norm in old arcade games and handheld consoles) and
+   communicates "how many total" at a glance, not just percentage. */
 .achievement-bar {
   display: flex;
   align-items: center;
@@ -17,26 +21,80 @@
   width: 100%;
 }
 
-.achievement-bar-track {
+.achievement-blocks {
   flex: 1;
-  height: 4px;
-  background: var(--bg-surface);
-  border-radius: 2px;
-  overflow: hidden;
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  /* Slight recessed feel via inner shadow on the container. */
+  background: rgba(0, 0, 0, 0.35);
+  padding: 1px;
+  border-radius: 1px;
 }
 
-.achievement-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  width: calc(var(--bar-pct, 0%) * (1 - var(--card-dim, 0)));
-  transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+.achievement-block {
+  flex: 1;
+  min-width: 1px;
+  position: relative;
+  /* Base "unlit" background — all blocks share this, earned or not,
+     so when the lit overlays fade out the underlying state is
+     identical across the bar (no shading mismatch between slots
+     that would be earned vs not). */
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Lit color overlay on earned blocks. Using a pseudo rather than
+   changing the base background means the "unlit" slot appearance
+   is consistent whether the block is currently fading, fully dim,
+   or never-would-be-earned. */
+.achievement-block--earned::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--block-color, var(--accent));
+  box-shadow: 0 0 2px var(--block-color, var(--accent));
+  opacity: calc(1 - var(--card-dim, 0));
+  pointer-events: none;
+  /* Asymmetric stagger: on hover-in (card-dim 0), delay is
+     block-index * 45ms → left-to-right fill. On dim (card-dim 1),
+     delay is (9 - block-index) * 45ms → right-to-left empty.
+     The calc blends both formulas weighted by card-dim itself —
+     transition-delay is resolved at the moment the transition
+     fires, so the "new direction" value wins each time. */
+  transition: opacity 0.25s ease calc(
+    (var(--block-index, 0) * (1 - var(--card-dim, 0)) +
+     (9 - var(--block-index, 0)) * var(--card-dim, 0)) * 45ms
+  );
+}
+
+/* Completion reveal: gold overlay layered on top of the platform
+   color overlay (::after stacks above ::before). Same asymmetric
+   stagger as the base layer, plus a 500ms buffer *only on load*
+   so gold appears after the platform sweep finishes. On unload
+   (card-dim=1), the buffer drops to 0 so gold fades in step with
+   platform per block rather than lingering past it. */
+.achievement-bar--complete .achievement-block--earned::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gold-bright, #f5d060);
+  box-shadow: 0 0 2px var(--gold-bright, #f5d060);
+  opacity: calc(1 - var(--card-dim, 0));
+  pointer-events: none;
+  transition: opacity 0.35s ease calc(
+    (var(--block-index, 0) * (1 - var(--card-dim, 0)) +
+     (9 - var(--block-index, 0)) * var(--card-dim, 0)) * 45ms
+    + 0.5s * (1 - var(--card-dim, 0))
+  );
 }
 
 .achievement-bar-label {
+  font-family: 'Share Tech Mono', monospace;
   font-size: 0.55rem;
   color: var(--text-muted);
   white-space: nowrap;
   font-weight: 600;
+  letter-spacing: 0.04em;
   opacity: calc(1 - var(--card-dim, 0));
   transition: opacity 0.4s ease;
 }
