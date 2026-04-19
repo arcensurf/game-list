@@ -67,7 +67,18 @@ jobs:
             echo "No changes to achievement data"
           else
             git commit -m "Update achievement data"
-            git push
+            # In-app edits push directly to data via the GitHub API, so the
+            # branch can move under us between checkout and push. Rebase +
+            # retry handles that race.
+            for attempt in 1 2 3; do
+              if git pull --rebase origin data && git push; then
+                exit 0
+              fi
+              echo "Push attempt $attempt failed, retrying..."
+              sleep 2
+            done
+            echo "Push failed after 3 attempts"
+            exit 1
           fi
 
       # ── PSN NPSSO renewal alert ──
