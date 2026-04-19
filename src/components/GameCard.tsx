@@ -130,7 +130,12 @@ export default function GameCard({
     >
       {game.gameOfGames && compactGogLabel && (
         <div className="game-of-games-label game-of-games-label--compact">
-          <span className="game-of-games-title">A Game of Games</span>
+          <div className="game-of-games-label-row game-of-games-label-row--title">
+            <span className="game-of-games-title">A Game of Games</span>
+          </div>
+          <div className="game-of-games-label-row game-of-games-label-row--tagline">
+            <span className="game-of-games-tagline">{game.gameOfGames}</span>
+          </div>
         </div>
       )}
       <div

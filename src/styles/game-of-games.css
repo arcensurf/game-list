@@ -78,17 +78,100 @@
 .game-of-games-tagline {
   font-size: 0.6rem;
   font-style: italic;
-  color: rgba(0, 0, 0, 0.5);
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.75);
   line-height: 1.3;
 }
 
-/* Compact banner — top of the card on the main list, title only (no tagline). */
+/* Compact banner: absolute-positioned so its expansion overlays the
+   cover instead of shifting it. Expanded size follows the tagline's
+   natural content via the grid-template-rows 1fr/0fr trick. The card
+   itself locks to a 2/3 aspect-ratio so it matches non-GoG card heights
+   across a grid row, and the cover fills whatever remains below the
+   reserved top strip. */
+.game-card.game-of-games--compact {
+  aspect-ratio: 2 / 3;
+}
+
+.game-card.game-of-games--compact .game-card-cover {
+  aspect-ratio: auto;
+  height: calc(100% - var(--gog-banner-rest, 1.4rem));
+  margin-top: var(--gog-banner-rest, 1.4rem);
+}
+
 .game-of-games-label--compact {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
   gap: 0;
 }
 
-/* With the banner at the top, trim the cover slightly so the art sits
-   comfortably within the remaining card area. */
-.game-card.game-of-games--compact .game-card-cover {
-  aspect-ratio: 5 / 7;
+/* Each row is its own 0fr <-> 1fr grid so the height tracks the row's
+   actual content on expand — no max-height overshoot. */
+.game-of-games-label-row {
+  display: grid;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.game-of-games-label-row > span {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.game-of-games-label-row--title {
+  grid-template-rows: 1fr;
+}
+
+.game-of-games-label-row--tagline {
+  grid-template-rows: 0fr;
+}
+
+/* Opacity is sequenced via dual-transition: delay applies only in the
+   direction we're leaving, so title fully fades before tagline fades
+   in (and vice versa on hover-off). */
+.game-of-games-label-row--title > .game-of-games-title {
+  opacity: 1;
+  transition: opacity 0.15s ease 0.15s;
+}
+
+.game-of-games-label-row--tagline > .game-of-games-tagline {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+@media (hover: hover) {
+  .game-card.game-of-games--compact:hover .game-of-games-label-row--title {
+    grid-template-rows: 0fr;
+  }
+  .game-card.game-of-games--compact:hover .game-of-games-label-row--tagline {
+    grid-template-rows: 1fr;
+  }
+  .game-card.game-of-games--compact:hover .game-of-games-label-row--title > .game-of-games-title {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .game-card.game-of-games--compact:hover .game-of-games-label-row--tagline > .game-of-games-tagline {
+    opacity: 1;
+    transition: opacity 0.15s ease 0.15s;
+  }
+}
+
+/* Touch: the card's existing tap-to-open state drives the same reveal. */
+.game-card.game-of-games--compact.info-open .game-of-games-label-row--title {
+  grid-template-rows: 0fr;
+}
+.game-card.game-of-games--compact.info-open .game-of-games-label-row--tagline {
+  grid-template-rows: 1fr;
+}
+.game-card.game-of-games--compact.info-open .game-of-games-label-row--title > .game-of-games-title {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.game-card.game-of-games--compact.info-open .game-of-games-label-row--tagline > .game-of-games-tagline {
+  opacity: 1;
+  transition: opacity 0.15s ease 0.15s;
 }
