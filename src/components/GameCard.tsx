@@ -22,7 +22,13 @@ function nextBatchIndex() {
   return i;
 }
 
-export default function GameCard({ game }: { game: GameWithCover }) {
+export default function GameCard({
+  game,
+  compactGogLabel = false,
+}: {
+  game: GameWithCover;
+  compactGogLabel?: boolean;
+}) {
   const [imgError, setImgError] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -109,6 +115,7 @@ export default function GameCard({ game }: { game: GameWithCover }) {
   const cardClasses = [
     'game-card',
     game.gameOfGames ? 'game-of-games' : '',
+    game.gameOfGames && compactGogLabel ? 'game-of-games--compact' : '',
     infoOpen ? 'info-open' : '',
     revealIndex !== null ? 'revealed' : '',
   ].filter(Boolean).join(' ');
@@ -121,6 +128,11 @@ export default function GameCard({ game }: { game: GameWithCover }) {
       onTouchStart={import.meta.env.DEV ? undefined : handleTouchStart}
       onTouchEnd={import.meta.env.DEV ? undefined : handleTouchEnd}
     >
+      {game.gameOfGames && compactGogLabel && (
+        <div className="game-of-games-label game-of-games-label--compact">
+          <span className="game-of-games-title">A Game of Games</span>
+        </div>
+      )}
       <div
         className="game-card-cover"
         onClick={import.meta.env.DEV ? () => setPickerOpen(true) : undefined}
@@ -178,7 +190,7 @@ export default function GameCard({ game }: { game: GameWithCover }) {
         )}
         </div>
       </div>
-      {game.gameOfGames && (
+      {game.gameOfGames && !compactGogLabel && (
         <div className="game-of-games-label">
           <span className="game-of-games-title">A Game of Games</span>
           <span className="game-of-games-tagline">{game.gameOfGames}</span>

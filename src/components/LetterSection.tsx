@@ -113,7 +113,7 @@ export default function LetterSection({ group }: { group: LetterGroup }) {
             onDragEnd={isDev ? handleDragEnd : undefined}
             className={getCardClass(index)}
           >
-            <GameCard game={game} />
+            <GameCard game={game} compactGogLabel />
             <div className="achievement-slot">
               <AchievementBar achievements={game.achievements} />
             </div>

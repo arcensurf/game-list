@@ -81,3 +81,14 @@
   color: rgba(0, 0, 0, 0.5);
   line-height: 1.3;
 }
+
+/* Compact banner — top of the card on the main list, title only (no tagline). */
+.game-of-games-label--compact {
+  gap: 0;
+}
+
+/* With the banner at the top, trim the cover slightly so the art sits
+   comfortably within the remaining card area. */
+.game-card.game-of-games--compact .game-card-cover {
+  aspect-ratio: 5 / 7;
+}
