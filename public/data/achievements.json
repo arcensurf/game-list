@@ -3500,6 +3500,11 @@
       "earned": 16,
       "total": 50
     },
+    "1313671123": {
+      "title": "Ridge Racer 6",
+      "earned": 0,
+      "total": 36
+    },
     "1313671136": {
       "title": "Soulcalibur IV",
       "earned": 4,
@@ -4011,5 +4016,5 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-04-18T07:02:26.433Z"
+  "updatedAt": "2026-04-19T12:42:27.690Z"
 }

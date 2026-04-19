@@ -2989,16 +2989,22 @@
   ],
   "xbox": [
     {
-      "id": "1397819357",
-      "title": "Star Ocean: The Last Hope",
-      "earned": 6,
-      "total": 50
+      "id": "1297287144",
+      "title": "Mass Effect",
+      "earned": 28,
+      "total": 49
     },
     {
-      "id": "1161890141",
-      "title": "Mass Effect™ 3",
-      "earned": 21,
-      "total": 68
+      "id": "1297287162",
+      "title": "Lost Odyssey",
+      "earned": 5,
+      "total": 42
+    },
+    {
+      "id": "1313671123",
+      "title": "Ridge Racer 6",
+      "earned": 0,
+      "total": 36
     },
     {
       "id": "1161889998",
@@ -3007,10 +3013,16 @@
       "total": 62
     },
     {
-      "id": "1297287144",
-      "title": "Mass Effect",
-      "earned": 28,
-      "total": 49
+      "id": "1161890141",
+      "title": "Mass Effect™ 3",
+      "earned": 21,
+      "total": 68
+    },
+    {
+      "id": "1397819357",
+      "title": "Star Ocean: The Last Hope",
+      "earned": 6,
+      "total": 50
     },
     {
       "id": "1161889756",
@@ -3757,12 +3769,6 @@
       "total": 49
     },
     {
-      "id": "1297287162",
-      "title": "Lost Odyssey",
-      "earned": 5,
-      "total": 42
-    },
-    {
       "id": "1414793262",
       "title": "NHL 2K9",
       "earned": 15,
@@ -4117,5 +4123,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-04-18T07:00:18.896Z"
+  "updatedAt": "2026-04-19T12:40:22.060Z"
 }
