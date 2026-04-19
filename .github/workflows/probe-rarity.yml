@@ -1,0 +1,40 @@
+name: Probe Rarity
+
+# One-off manual probe to see what per-achievement rarity fields PSN (PS3)
+# and Xbox (360) actually return. Output goes to the Actions log only —
+# this workflow writes no files and never commits.
+#
+# Delete this workflow + scripts/probe-rarity.mjs once we've decided on
+# the data shape for the rarest-achievements feature.
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      # Reuse the same token cache as fetch-achievements so we don't
+      # have to re-mint anything. Read-only restore is fine here.
+      - name: Restore auth token cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.game-list
+          key: achievement-tokens-${{ github.run_number }}
+          restore-keys: |
+            achievement-tokens-
+
+      - name: Run rarity probe
+        run: node scripts/probe-rarity.mjs
+        env:
+          TOKEN_DIR: /home/runner/.game-list
+          PSN_NPSSO_TOKEN: ${{ secrets.PSN_NPSSO_TOKEN }}
+          XBOX_REFRESH_TOKEN: ${{ secrets.XBOX_REFRESH_TOKEN }}
