@@ -115,7 +115,7 @@ export default function GameCard({
   const cardClasses = [
     'game-card',
     game.gameOfGames ? 'game-of-games' : '',
-    game.gameOfGames && compactGogLabel ? 'game-of-games--compact' : '',
+    game.gameOfGames && compactGogLabel ? 'game-of-games--foil' : '',
     infoOpen ? 'info-open' : '',
     revealIndex !== null ? 'revealed' : '',
   ].filter(Boolean).join(' ');
@@ -128,16 +128,6 @@ export default function GameCard({
       onTouchStart={import.meta.env.DEV ? undefined : handleTouchStart}
       onTouchEnd={import.meta.env.DEV ? undefined : handleTouchEnd}
     >
-      {game.gameOfGames && compactGogLabel && (
-        <div className="game-of-games-label game-of-games-label--compact">
-          <div className="game-of-games-label-row game-of-games-label-row--title">
-            <span className="game-of-games-title">A Game of Games</span>
-          </div>
-          <div className="game-of-games-label-row game-of-games-label-row--tagline">
-            <span className="game-of-games-tagline">{game.gameOfGames}</span>
-          </div>
-        </div>
-      )}
       <div
         className="game-card-cover"
         onClick={import.meta.env.DEV ? () => setPickerOpen(true) : undefined}

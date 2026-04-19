@@ -1,3 +1,29 @@
+/* @property declarations let the browser interpolate these values
+   across keyframes as percentages (without @property they'd animate
+   as discrete strings and jump between keyframes). A single pair of
+   coordinates represents the foil's "light source" — every layer
+   (rays, hotspot, shine) anchors to this point, so animating it
+   shifts the entire pattern coherently, the way a real foil card
+   reacts when you tilt it. */
+@property --gog-light-x {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 25%;
+}
+@property --gog-light-y {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 20%;
+}
+/* Declaring strength as @property lets it transition smoothly on
+   hover (without @property, CSS treats it as a string and snaps
+   between values). */
+@property --gog-foil-strength {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
 /* Game of Games */
 .game-card.game-of-games {
   border: 2px solid transparent;
@@ -81,6 +107,213 @@
   font-weight: 600;
   color: rgba(0, 0, 0, 0.75);
   line-height: 1.3;
+}
+
+/* ───────────────────────── Foil variant ─────────────────────────
+   Alternative to the compact banner. The cover fills the full card
+   (no reserved top strip), and a subtle holographic sheen plays over
+   the cover on hover — like a foil trading card. A small gold star
+   in the top-right corner carries the "this one's special" signal
+   at rest. Gold border + pulse are retained but softened so the foil
+   sheen has room to read. */
+.game-card.game-of-games--foil {
+  aspect-ratio: 2 / 3;
+  position: relative;
+  overflow: hidden;
+  /* Universal dial for foil visibility. Every alpha in the foil
+     stack is calc(var(--gog-foil-strength) * <base>), so one tweak
+     scales the whole effect proportionally. 1 = baseline; higher =
+     more prismatic, lower = more restrained. */
+  --gog-foil-strength: 2.0;
+  /* Transition only the strength — positions are driven by the
+     drift animation and shouldn't tween on hover. */
+  transition: --gog-foil-strength 0.35s ease;
+  /* Override the parent's gold border gradient with an iridescent
+     conic anchored to the light source. As --gog-light-x/y drift,
+     the border's bright spot moves around the frame — matches the
+     interior rays instead of looking like a separate gold frame. */
+  background-image:
+    linear-gradient(var(--bg-card), var(--bg-card)),
+    conic-gradient(
+      from 0deg at var(--gog-light-x) var(--gog-light-y),
+      rgba(255, 110, 110, 0.85)   0deg,
+      rgba(255, 200, 110, 0.85)  60deg,
+      rgba(200, 255, 130, 0.85) 120deg,
+      rgba(110, 230, 200, 0.85) 180deg,
+      rgba(130, 170, 255, 0.85) 240deg,
+      rgba(210, 130, 255, 0.85) 300deg,
+      rgba(255, 110, 110, 0.85) 360deg
+    );
+  /* Drop the gold pulse — the foil already signals "this one's
+     special," and a gold box-shadow glow layered on top reads as
+     chintzy. The static gold border from .game-card.game-of-games
+     stays and is enough marker on its own. */
+  animation: gog-light-drift 32s linear infinite;
+  animation-delay: calc(var(--card-index, 0) * -2.5s);
+}
+
+/* Revealed: combine the fade-in with the drift, still no pulse. */
+.game-card.game-of-games--foil.revealed {
+  animation:
+    card-fade-in 0.35s ease-out forwards,
+    gog-light-drift 32s linear infinite;
+  animation-delay:
+    calc(min(var(--card-index, 0), 12) * 30ms),
+    calc(var(--card-index, 0) * -2.5s);
+}
+
+/* The light source traces a gentle closed path across the upper-left
+   quadrant of the card — where an overhead/angled light would
+   naturally originate. Closed loop (0% == 100%) + `linear` timing
+   means no velocity pause at the seam. */
+@keyframes gog-light-drift {
+  0%, 100% { --gog-light-x: 22%; --gog-light-y: 18%; }
+  20%      { --gog-light-x: 38%; --gog-light-y: 28%; }
+  40%      { --gog-light-x: 32%; --gog-light-y: 42%; }
+  60%      { --gog-light-x: 15%; --gog-light-y: 38%; }
+  80%      { --gog-light-x: 10%; --gog-light-y: 22%; }
+}
+
+.game-card.game-of-games--foil .game-card-cover {
+  aspect-ratio: auto;
+  height: 100%;
+  margin-top: 0;
+  position: relative;
+  /* Lift the cover's stacking context above the shine layer
+     (.game-card::before at z-index 2) so its descendants —
+     including the absolute-positioned .game-card-info that
+     slides up on hover — render on top of the foil overlays. */
+  z-index: 3;
+}
+
+/* Rainbow rays fanning out from a single light source, plus a soft
+   chroma hotspot around the source. Everything anchors to
+   --gog-light-x / --gog-light-y, so when those animate the whole
+   pattern rotates and shifts as one — the way real foil does when
+   you tilt the card. No per-layer drift; the source is universal. */
+.game-card.game-of-games--foil .game-card-cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    /* Primary: 24 rainbow stops at irregular angular gaps (11-19°)
+       so ray widths vary organically. Four full spectrum cycles
+       cover the 360° so every direction from the source is lit
+       with a different hue — this is what creates the "many narrow
+       pointed rays" look real foil has under a point light. */
+    conic-gradient(
+      from 0deg at var(--gog-light-x) var(--gog-light-y),
+      rgba(255, 110, 110, calc(var(--gog-foil-strength) * 0.14))   0deg,
+      rgba(255, 200, 110, calc(var(--gog-foil-strength) * 0.14))  13deg,
+      rgba(200, 255, 130, calc(var(--gog-foil-strength) * 0.14))  28deg,
+      rgba(110, 230, 200, calc(var(--gog-foil-strength) * 0.14))  41deg,
+      rgba(130, 170, 255, calc(var(--gog-foil-strength) * 0.14))  58deg,
+      rgba(210, 130, 255, calc(var(--gog-foil-strength) * 0.14))  74deg,
+      rgba(255, 110, 110, calc(var(--gog-foil-strength) * 0.14))  92deg,
+      rgba(255, 200, 110, calc(var(--gog-foil-strength) * 0.14)) 107deg,
+      rgba(200, 255, 130, calc(var(--gog-foil-strength) * 0.14)) 125deg,
+      rgba(110, 230, 200, calc(var(--gog-foil-strength) * 0.14)) 139deg,
+      rgba(130, 170, 255, calc(var(--gog-foil-strength) * 0.14)) 156deg,
+      rgba(210, 130, 255, calc(var(--gog-foil-strength) * 0.14)) 172deg,
+      rgba(255, 110, 110, calc(var(--gog-foil-strength) * 0.14)) 191deg,
+      rgba(255, 200, 110, calc(var(--gog-foil-strength) * 0.14)) 205deg,
+      rgba(200, 255, 130, calc(var(--gog-foil-strength) * 0.14)) 223deg,
+      rgba(110, 230, 200, calc(var(--gog-foil-strength) * 0.14)) 238deg,
+      rgba(130, 170, 255, calc(var(--gog-foil-strength) * 0.14)) 254deg,
+      rgba(210, 130, 255, calc(var(--gog-foil-strength) * 0.14)) 272deg,
+      rgba(255, 110, 110, calc(var(--gog-foil-strength) * 0.14)) 287deg,
+      rgba(255, 200, 110, calc(var(--gog-foil-strength) * 0.14)) 303deg,
+      rgba(200, 255, 130, calc(var(--gog-foil-strength) * 0.14)) 319deg,
+      rgba(110, 230, 200, calc(var(--gog-foil-strength) * 0.14)) 334deg,
+      rgba(130, 170, 255, calc(var(--gog-foil-strength) * 0.14)) 349deg,
+      rgba(210, 130, 255, calc(var(--gog-foil-strength) * 0.14)) 360deg
+    ),
+    /* Secondary hotspot: concentrates chroma near the light source
+       and fades with distance. Gives the foil a sense of depth —
+       rays feel "brighter near the source" rather than uniform. */
+    radial-gradient(
+      ellipse 100% 80% at var(--gog-light-x) var(--gog-light-y),
+      rgba(255, 220, 140, calc(var(--gog-foil-strength) * 0.14))  0%,
+      rgba(210, 130, 255, calc(var(--gog-foil-strength) * 0.08)) 45%,
+      rgba(110, 200, 230, 0) 85%
+    );
+  /* `hue` applies only the blend layer's hue while preserving the
+     base's saturation and luminance — saturated covers stay
+     saturated, we just shift their hue in rainbow rays. */
+  mix-blend-mode: hue;
+  /* Hide the conic's vertex — the point where all rays mathematically
+     meet would otherwise read as a mechanical "X" that moves with
+     the light source. Masking out a soft disc at the source dissolves
+     the rays before they converge; the shine layer above fills that
+     void with a bright-white "sun" so the eye reads a glowing source
+     rather than a geometric center. */
+  mask-image: radial-gradient(
+    circle at var(--gog-light-x) var(--gog-light-y),
+    rgba(0, 0, 0, 0)    0%,
+    rgba(0, 0, 0, 0.4)  8%,
+    rgba(0, 0, 0, 1)   22%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--gog-light-x) var(--gog-light-y),
+    rgba(0, 0, 0, 0)    0%,
+    rgba(0, 0, 0, 0.4)  8%,
+    rgba(0, 0, 0, 1)   22%
+  );
+}
+
+/* Shine layer — specular highlight from the SAME light source as
+   the ray layer (both anchor to --gog-light-x/y). `soft-light` is
+   deliberate: it brightens light regions and deepens dark ones
+   gently — how a glossy surface actually catches light — rather
+   than dumping white across everything. No independent animation;
+   the card-level light-drift moves this hotspot in lockstep with
+   the rays. */
+.game-card.game-of-games--foil::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(
+    ellipse 80% 55% at var(--gog-light-x) var(--gog-light-y),
+    rgba(255, 255, 255, calc(var(--gog-foil-strength) * 0.22))  0%,
+    rgba(255, 255, 255, calc(var(--gog-foil-strength) * 0.08)) 40%,
+    rgba(255, 255, 255, 0) 75%
+  );
+  mix-blend-mode: soft-light;
+}
+
+/* Hover intensifies the foil itself rather than layering a separate
+   highlight sweep — the rainbow rays, chroma hotspot, and shine all
+   scale via --gog-foil-strength, so bumping it on hover reads as
+   "more light is hitting the card." Coherent with the foil, no
+   chintzy wipe. @property declaration on --gog-foil-strength lets
+   this transition smoothly. */
+@media (hover: hover) {
+  .game-card.game-of-games--foil:hover {
+    --gog-foil-strength: 2.8;
+  }
+}
+
+.game-card.game-of-games--foil.info-open {
+  --gog-foil-strength: 2.8;
+}
+
+/* Cover image sits below the foil layers; info panel sits above so
+   the title/platforms stay readable. */
+.game-card.game-of-games--foil .game-card-cover img,
+.game-card.game-of-games--foil .game-card-placeholder {
+  position: relative;
+  z-index: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-card.game-of-games--foil,
+  .game-card.game-of-games--foil.revealed {
+    animation: none;
+  }
 }
 
 /* Compact banner: absolute-positioned so its expansion overlays the
