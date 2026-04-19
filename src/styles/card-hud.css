@@ -32,8 +32,10 @@
   /* CRT at-rest: panel collapsed to centerline. clip-path expands
      to full bounds on hover. Kept snappy (~180ms) to match real
      CRT power-on physics — the "unfold" is a fast physical event,
-     not a deliberate animation. */
-  clip-path: inset(50% 0 50% 0);
+     not a deliberate animation. All inset() args use matching
+     units (%) — Safari skips the close transition when arguments
+     mix percentages and unitless zeros. */
+  clip-path: inset(50% 0% 50% 0%);
   opacity: 0;
   transition:
     clip-path 0.18s cubic-bezier(0.2, 0.85, 0.3, 1),
@@ -42,7 +44,7 @@
 
 .game-card:hover .card-hud,
 .game-card.info-open .card-hud {
-  clip-path: inset(0 0 0 0);
+  clip-path: inset(0% 0% 0% 0%);
   opacity: 1;
 }
 
@@ -118,14 +120,14 @@
   letter-spacing: 0.01em;
   color: var(--accent-light);
   text-shadow: 0 0 5px rgba(245, 158, 11, 0.45);
-  clip-path: inset(0 100% 0 0);
+  clip-path: inset(0% 100% 0% 0%);
   transition: clip-path 0.18s steps(22, end);
   position: relative;
 }
 
 .game-card:hover .card-hud .game-card-title,
 .game-card.info-open .card-hud .game-card-title {
-  clip-path: inset(0 0 0 0);
+  clip-path: inset(0% 0% 0% 0%);
   transition: clip-path 0.45s steps(22, end) 0.18s;
 }
 
@@ -396,33 +398,39 @@
    - 1.0–1.3s: glitch + iridescent snap
    - 1.3s+: GoG label fades in, iridescent gradient drifts */
 
-/* GoG label: hidden at rest AND takes no layout space (max-height: 0
-   + overflow: hidden). During the glitch window the max-height
-   expands, pushing the title down as the label's space opens — so
-   the shift feels like part of the corruption reveal rather than
-   a pre-reserved gap. */
+/* GoG label: hidden at rest AND takes no layout space via the
+   grid 0fr → 1fr trick (animates to actual content height, so
+   multi-line taglines don't clip). During the glitch window the
+   track expands, pushing the title down as the label's space
+   opens — shift reads as part of the corruption reveal rather
+   than a pre-reserved gap. */
 .card-hud-gog-label {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  /* Default (hover-out) transition: fast collapse. */
+  transition: grid-template-rows 0.2s ease;
+}
+
+.card-hud-gog-label-inner {
   display: flex;
   flex-direction: column;
   gap: 0.05rem;
-  opacity: 0;
-  max-height: 0;
+  min-height: 0;
   overflow: hidden;
-  /* Default (hover-out) transition: fast collapse. */
-  transition: max-height 0.2s ease;
 }
 
-/* Hover-in: delay the max-height expansion to line up with the
-   glitch start (~1.0s), so the title shifts into its new position
+/* Hover-in: delay the row expansion to line up with the glitch
+   start (~1.0s), so the title shifts into its new position
    during the corruption moment. margin-bottom expands alongside
    so there's visible space between the revealed label and the
    title below (otherwise they sit flush). */
 .game-card.game-of-games:hover .card-hud .card-hud-gog-label,
 .game-card.game-of-games.info-open .card-hud .card-hud-gog-label {
-  max-height: 3rem;
+  grid-template-rows: 1fr;
   margin-bottom: 0.35rem;
   transition:
-    max-height 0.25s ease 1.0s,
+    grid-template-rows 0.25s ease 1.0s,
     margin-bottom 0.25s ease 1.0s;
 }
 

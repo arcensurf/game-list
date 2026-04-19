@@ -35,8 +35,10 @@ export default function GameCardHud({
       <div className="card-hud-header">
         {game.gameOfGames && (
           <div className="card-hud-gog-label" aria-hidden>
-            <span className="card-hud-gog-title">▸ A GAME OF GAMES</span>
-            <span className="card-hud-gog-tagline">{game.gameOfGames}</span>
+            <div className="card-hud-gog-label-inner">
+              <span className="card-hud-gog-title">▸ A GAME OF GAMES</span>
+              <span className="card-hud-gog-tagline">{game.gameOfGames}</span>
+            </div>
           </div>
         )}
         <h3 className="game-card-title">{game.title}</h3>
