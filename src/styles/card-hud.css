@@ -1,0 +1,397 @@
+/* Arcade-HUD styling for the card info overlay. Full-card coverage
+   with a CRT power-on reveal: bright horizontal flash at mid-height
+   (fires from .game-card-cover::after, OUTSIDE the hud's clip-path
+   so it doesn't get clipped at the moment we want it visible),
+   then the hud itself expands vertically from that centerline.
+   Title types in with VT323; body uses Share Tech Mono in white to
+   keep the title visually special. */
+
+.card-hud {
+  /* Full-card HUD — flex column so title sits at top and platforms
+     sit at bottom via justify-content: space-between. The empty
+     middle is intentional HUD whitespace on sparse cards. */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.5rem;
+
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(22, 16, 8, 0.88) 0%,
+      rgba(14, 10, 4, 0.92) 100%
+    );
+
+  /* CRT at-rest: panel collapsed to centerline. clip-path expands
+     to full bounds on hover. Kept snappy (~180ms) to match real
+     CRT power-on physics — the "unfold" is a fast physical event,
+     not a deliberate animation. */
+  clip-path: inset(50% 0 50% 0);
+  opacity: 0;
+  transition:
+    clip-path 0.18s cubic-bezier(0.2, 0.85, 0.3, 1),
+    opacity 0.1s ease;
+}
+
+.game-card:hover .card-hud,
+.game-card.info-open .card-hud {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+}
+
+/* CRT ignition: a bright horizontal scan line across the centerline
+   that snaps to full width, holds briefly, then fades as the panel
+   unfolds vertically from it. This matches the real CRT power-on
+   sequence (horizontal beam active → vertical fill). Positioned on
+   .game-card-cover::after so it's NOT subject to .card-hud's
+   clip-path (which at rest clips to zero height). */
+.game-card-cover::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 14px;
+  background: radial-gradient(
+    ellipse 55% 100% at center,
+    rgba(255, 248, 225, 1)    0%,
+    rgba(255, 215, 140, 0.9)  25%,
+    rgba(250, 180, 60, 0.55)  50%,
+    rgba(245, 158, 11, 0)    100%
+  );
+  filter: blur(1.5px);
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: center;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 11;
+}
+
+.game-card:hover .game-card-cover::after,
+.game-card.info-open .game-card-cover::after {
+  /* Quick ignition — ~230ms total, matching real CRT beam-ignition
+     timescales. Snap to full width, brief bright hold, fade. */
+  animation: crt-ignite 0.23s cubic-bezier(0.2, 0.85, 0.3, 1) forwards;
+}
+
+@keyframes crt-ignite {
+  0%   { transform: translateY(-50%) scaleX(0.05); opacity: 0; }
+  25%  { transform: translateY(-50%) scaleX(1);    opacity: 1; }
+  50%  { transform: translateY(-50%) scaleX(1);    opacity: 1; }
+  100% { transform: translateY(-50%) scaleX(1);    opacity: 0; }
+}
+
+/* Four L-shaped bracket corners — HUD frame markers. */
+.hud-bracket {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  border-color: var(--accent);
+  border-style: solid;
+  border-width: 0;
+  opacity: 0.9;
+}
+.hud-bracket--tl { top: 5px; left: 5px; border-top-width: 1px; border-left-width: 1px; }
+.hud-bracket--tr { top: 5px; right: 5px; border-top-width: 1px; border-right-width: 1px; }
+.hud-bracket--bl { bottom: 5px; left: 5px; border-bottom-width: 1px; border-left-width: 1px; }
+.hud-bracket--br { bottom: 5px; right: 5px; border-bottom-width: 1px; border-right-width: 1px; }
+
+/* Title: VT323, amber, typewriter reveal with blinking cursor.
+   Separate transition for in/out — the in-transition has a 0.18s
+   delay (lining up with the panel unfold), but the out-transition
+   has NO delay so the title starts un-typing as soon as hover ends.
+   Without this split, a quick re-hover finds the title still
+   visible and the typewriter reveal skips. */
+.card-hud .game-card-title {
+  font-family: 'VT323', 'Share Tech Mono', monospace;
+  font-size: 1.1rem;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  color: var(--accent-light);
+  text-shadow: 0 0 5px rgba(245, 158, 11, 0.45);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.18s steps(22, end);
+  position: relative;
+}
+
+.game-card:hover .card-hud .game-card-title,
+.game-card.info-open .card-hud .game-card-title {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.45s steps(22, end) 0.18s;
+}
+
+/* Blinking cursor — appears after typewriter completes (0.63s delay
+   = 0.18s typewriter delay + 0.45s typewriter duration), then
+   blinks on a 0.9s cadence. steps(2) on the animation produces
+   discrete on/off blinking rather than a smooth fade. */
+.card-hud .game-card-title::after {
+  content: '▋';
+  display: inline-block;
+  margin-left: 0.1em;
+  color: var(--accent-light);
+  opacity: 0;
+}
+
+.game-card:hover .card-hud .game-card-title::after,
+.game-card.info-open .card-hud .game-card-title::after {
+  animation: hud-cursor-blink 0.9s steps(2) 0.63s infinite;
+}
+
+@keyframes hud-cursor-blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Body text: Share Tech Mono in near-white — different retro font
+   from the title, kept light-on-dark rather than amber so the title
+   stays the visual anchor. */
+.card-hud .card-hud-header,
+.card-hud .card-hud-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+/* Same split-transition pattern as the title: quick fade-out, delayed
+   fade-in. Without this, the 0.58s hover-in delay also applies to
+   hover-out, leaving body text visible long enough that a quick
+   re-hover finds it still at opacity 1 and skips the fade-in. */
+.card-hud .game-card-subtitle,
+.card-hud .game-card-platforms,
+.card-hud .extras-list {
+  font-family: 'Share Tech Mono', monospace;
+  color: rgba(231, 224, 216, 0.92);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.game-card:hover .card-hud .game-card-subtitle,
+.game-card:hover .card-hud .game-card-platforms,
+.game-card:hover .card-hud .extras-list,
+.game-card.info-open .card-hud .game-card-subtitle,
+.game-card.info-open .card-hud .game-card-platforms,
+.game-card.info-open .card-hud .extras-list {
+  opacity: 1;
+  transition: opacity 0.22s ease 0.58s;
+}
+
+.card-hud .game-card-subtitle {
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+}
+
+/* Override the generic .extras-list border-top from game-card.css —
+   HUD uses bracket corners as its only frame, no internal dividers. */
+.card-hud .extras-list {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+/* Center platforms horizontally in the HUD footer — gives the
+   bottom row a balanced, HUD-like symmetry instead of left-aligned. */
+.card-hud .game-card-platforms {
+  justify-content: center;
+}
+
+/* Extras labels keep the accent amber so section headers read as
+   HUD field labels, distinct from body values. */
+.card-hud .extras-group-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+/* ═══════════ GoG "signal corruption" reveal ═══════════
+   On GoG cards the normal amber HUD loads as usual. After a brief
+   dramatic hold (~200ms post-body-fade), the title glitches — RGB
+   channel split, horizontal displacement, color flicker — then
+   settles into an iridescent rainbow, with a "A GAME OF GAMES"
+   header and tagline fading in above. Reads as "hidden layer
+   revealed through signal corruption," which ties the foil
+   (prismatic) and CRT (analog static) themes together thematically.
+
+   Timing budget:
+   - 0–0.8s: normal amber HUD reveals (shared with all cards)
+   - 0.8–1.0s: dramatic hold
+   - 1.0–1.3s: glitch + iridescent snap
+   - 1.3s+: GoG label fades in, iridescent gradient drifts */
+
+/* GoG label: hidden at rest AND takes no layout space (max-height: 0
+   + overflow: hidden). During the glitch window the max-height
+   expands, pushing the title down as the label's space opens — so
+   the shift feels like part of the corruption reveal rather than
+   a pre-reserved gap. */
+.card-hud-gog-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  /* Default (hover-out) transition: fast collapse. */
+  transition: max-height 0.2s ease;
+}
+
+/* Hover-in: delay the max-height expansion to line up with the
+   glitch start (~1.0s), so the title shifts into its new position
+   during the corruption moment. */
+.game-card.game-of-games:hover .card-hud .card-hud-gog-label,
+.game-card.game-of-games.info-open .card-hud .card-hud-gog-label {
+  max-height: 3rem;
+  transition: max-height 0.25s ease 1.0s;
+}
+
+.card-hud-gog-title {
+  font-family: 'VT323', 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  line-height: 1;
+  /* Iridescent text via background-clip, so the header reads as a
+     prismatic "hidden signal" callout rather than amber. */
+  background: linear-gradient(
+    90deg,
+    rgba(255, 110, 110, 1)   0%,
+    rgba(255, 200, 110, 1)  20%,
+    rgba(200, 255, 130, 1)  40%,
+    rgba(110, 230, 200, 1)  60%,
+    rgba(130, 170, 255, 1)  80%,
+    rgba(210, 130, 255, 1) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.card-hud-gog-tagline {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(231, 224, 216, 0.72);
+  font-style: italic;
+  line-height: 1.2;
+}
+
+.game-card.game-of-games:hover .card-hud .card-hud-gog-label,
+.game-card.game-of-games.info-open .card-hud .card-hud-gog-label {
+  animation:
+    gog-label-flicker-in 0.3s steps(6, end) 1.3s forwards,
+    iridescent-flow 5s linear 1.6s infinite;
+}
+
+/* Flicker-in: staccato opacity steps simulate the label materializing
+   from static rather than a smooth fade. steps() timing gives it
+   discrete on/off frames for the CRT feel. */
+@keyframes gog-label-flicker-in {
+  0%, 15%, 45% { opacity: 0; }
+  25%, 55%, 75%, 100% { opacity: 1; }
+  35%, 65% { opacity: 0.3; }
+}
+
+/* Continuous rainbow drift across the label's gradient after
+   reveal — subtle, not a light show. */
+@keyframes iridescent-flow {
+  0%   { background-position:   0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* GoG title glitch: short burst of RGB channel split + horizontal
+   displacement, then snaps to iridescent styling. background-clip:
+   text is switched on at 100% via animation-fill-mode: forwards —
+   it can't smoothly interpolate from a solid color, but a "snap"
+   on the last keyframe reads as part of the corruption. */
+.game-card.game-of-games:hover .card-hud .game-card-title,
+.game-card.game-of-games.info-open .card-hud .game-card-title {
+  animation:
+    gog-title-glitch 0.28s steps(8, end) 1.0s forwards,
+    iridescent-flow 5s linear 1.28s infinite;
+}
+
+@keyframes gog-title-glitch {
+  0% {
+    transform: translateX(0);
+    text-shadow: 0 0 5px rgba(245, 158, 11, 0.45);
+    color: var(--accent-light);
+  }
+  15% {
+    transform: translateX(-2px);
+    text-shadow: -2px 0 rgba(255, 80, 200, 0.9), 2px 0 rgba(80, 220, 255, 0.9);
+    color: #fff;
+  }
+  30% {
+    transform: translateX(2px);
+    text-shadow: 2px 0 rgba(255, 80, 200, 0.9), -2px 0 rgba(80, 220, 255, 0.9);
+    color: #fff;
+  }
+  50% {
+    transform: translateX(-1px);
+    text-shadow: -1px 0 rgba(255, 110, 110, 0.9), 1px 0 rgba(110, 230, 200, 0.9);
+    color: #fff;
+  }
+  70% {
+    transform: translateX(1px);
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+    color: #fff;
+  }
+  100% {
+    transform: translateX(0);
+    text-shadow: 0 0 6px rgba(255, 200, 200, 0.4);
+    color: transparent;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 110, 110, 1)   0%,
+      rgba(255, 200, 110, 1)  20%,
+      rgba(200, 255, 130, 1)  40%,
+      rgba(110, 230, 200, 1)  60%,
+      rgba(130, 170, 255, 1)  80%,
+      rgba(210, 130, 255, 1) 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
+
+/* The title cursor stays amber — reads as "terminal prompt still
+   active" even after the title's been corrupted. */
+
+@media (prefers-reduced-motion: reduce) {
+  .card-hud {
+    transition: opacity 0.15s ease;
+    clip-path: none;
+  }
+  .game-card-cover::after {
+    display: none;
+  }
+  .card-hud .game-card-title {
+    transition: opacity 0.15s ease;
+    clip-path: none;
+  }
+  .card-hud .game-card-title::after {
+    animation: none;
+    opacity: 1;
+  }
+  .card-hud .game-card-subtitle,
+  .card-hud .game-card-platforms,
+  .card-hud .extras-list {
+    transition: opacity 0.15s ease;
+  }
+  /* Reduced-motion: skip the glitch, show the iridescent label
+     immediately on hover without flicker or gradient drift. */
+  .game-card.game-of-games:hover .card-hud .game-card-title,
+  .game-card.game-of-games:hover .card-hud .card-hud-gog-label,
+  .game-card.game-of-games.info-open .card-hud .game-card-title,
+  .game-card.game-of-games.info-open .card-hud .card-hud-gog-label {
+    animation: none;
+    opacity: 1;
+  }
+}

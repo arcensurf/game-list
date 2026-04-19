@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GameWithCover } from '../types/game';
-import PlatformBadge from './PlatformBadge';
-import ExtrasList from './DlcPopover';
+import GameCardHud from './GameCardHud';
 import CoverPicker from './CoverPicker';
 import EditGameModal from './EditGameModal';
 
@@ -158,32 +157,10 @@ export default function GameCard({
             <span>Change Image</span>
           </div>
         )}
-        <div className="game-card-info">
-        <h3 className="game-card-title">{game.title}</h3>
-        {game.subtitle && (
-          <p className="game-card-subtitle">{game.subtitle}</p>
-        )}
-        <div className="game-card-platforms">
-          {game.platforms.map((p) => (
-            <PlatformBadge key={p} platform={p} />
-          ))}
-          {import.meta.env.DEV && (
-            <button
-              className="dev-edit-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                setEditOpen(true);
-              }}
-              title="Edit game metadata"
-            >
-              Edit
-            </button>
-          )}
-        </div>
-        {game.extras.length > 0 && (
-          <ExtrasList extras={game.extras} />
-        )}
-        </div>
+        <GameCardHud
+          game={game}
+          onEdit={import.meta.env.DEV ? () => setEditOpen(true) : undefined}
+        />
       </div>
       {game.gameOfGames && !compactGogLabel && (
         <div className="game-of-games-label">

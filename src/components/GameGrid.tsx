@@ -9,7 +9,7 @@ export default function GameGrid({ groups, flat }: { groups: LetterGroup[]; flat
       <div className="game-grid-container">
         <div className="game-grid">
           {allGames.map((game) => (
-            <GameCard key={game.title} game={game} />
+            <GameCard key={game.title} game={game} compactGogLabel />
           ))}
         </div>
       </div>

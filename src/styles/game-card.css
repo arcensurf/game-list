@@ -117,27 +117,13 @@ body.lights-on .card-wrapper {
   background: linear-gradient(135deg, var(--bg-surface), var(--bg-card));
 }
 
-/* Card info — slides up on hover / tap */
+/* Card info base — positioning only. Reveal animation and visual
+   treatment live in card-hud.css, since every card uses the HUD. */
 .game-card-info {
   position: absolute;
-  bottom: -1px;
-  left: -1px;
-  right: -1px;
+  inset: 0;
   z-index: 10;
-  padding: 1.5rem 0.75rem 0.6rem;
-  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.85) 40%);
-  transform: translateY(100%);
-  transition: transform 0.25s ease-out;
-}
-
-.game-card.info-open .game-card-info {
-  transform: translateY(0);
-}
-
-@media (hover: hover) {
-  .game-card:hover .game-card-info {
-    transform: translateY(0);
-  }
+  padding: 0.9rem 0.75rem 0.7rem;
 }
 
 .game-card-title {

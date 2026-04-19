@@ -61,26 +61,9 @@
   }
 }
 
-/* Gold-themed info panel for GoG cards */
-.game-card.game-of-games .game-card-info {
-  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.85) 40%);
-}
-
-.game-card.game-of-games .game-card-title {
-  color: var(--gold-bright);
-}
-
-.game-card.game-of-games .game-card-subtitle {
-  color: rgba(245, 208, 96, 0.7);
-}
-
-.game-card.game-of-games .extras-group-label {
-  color: var(--gold-bright);
-}
-
-.game-card.game-of-games .extras-list {
-  border-top-color: rgba(245, 208, 96, 0.2);
-}
+/* GoG cards share the universal HUD info panel — no gold-specific
+   overrides for title/subtitle/extras. The foil border + rays are
+   what signal GoG; the info panel stays consistent across all cards. */
 
 .game-of-games-label {
   position: relative;
