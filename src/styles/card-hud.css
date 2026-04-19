@@ -88,6 +88,7 @@
   100% { transform: translateY(-50%) scaleX(1);    opacity: 0; }
 }
 
+
 /* Four L-shaped bracket corners — HUD frame markers. */
 .hud-bracket {
   position: absolute;
@@ -153,19 +154,31 @@
 /* Body text: Share Tech Mono in near-white — different retro font
    from the title, kept light-on-dark rather than amber so the title
    stays the visual anchor. */
-.card-hud .card-hud-header,
 .card-hud .card-hud-footer {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
 }
 
+/* Header uses explicit margins instead of flex gap — the gap would
+   apply between gog-label and title even when gog-label is
+   collapsed (max-height: 0), pushing the title down by the gap
+   amount on GoG cards. Explicit margins let us tie the spacing
+   to the label's actual visible state. */
+.card-hud .card-hud-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-hud .game-card-subtitle {
+  margin-top: 0.35rem;
+}
+
 /* Same split-transition pattern as the title: quick fade-out, delayed
    fade-in. Without this, the 0.58s hover-in delay also applies to
    hover-out, leaving body text visible long enough that a quick
    re-hover finds it still at opacity 1 and skips the fade-in. */
-.card-hud .game-card-subtitle,
-.card-hud .game-card-platforms,
+.card-hud .game-card-platforms-viewport,
 .card-hud .extras-list {
   font-family: 'Share Tech Mono', monospace;
   color: rgba(231, 224, 216, 0.92);
@@ -173,33 +186,190 @@
   transition: opacity 0.12s ease;
 }
 
-.game-card:hover .card-hud .game-card-subtitle,
-.game-card:hover .card-hud .game-card-platforms,
+.game-card:hover .card-hud .game-card-platforms-viewport,
 .game-card:hover .card-hud .extras-list,
-.game-card.info-open .card-hud .game-card-subtitle,
-.game-card.info-open .card-hud .game-card-platforms,
+.game-card.info-open .card-hud .game-card-platforms-viewport,
 .game-card.info-open .card-hud .extras-list {
   opacity: 1;
   transition: opacity 0.22s ease 0.58s;
 }
 
-.card-hud .game-card-subtitle {
-  font-size: 0.7rem;
-  letter-spacing: 0.03em;
-}
-
 /* Override the generic .extras-list border-top from game-card.css —
-   HUD uses bracket corners as its only frame, no internal dividers. */
+   HUD uses bracket corners as its only frame, no internal dividers.
+   Soft-capped at ~5 lines with a fade-mask on top/bottom so
+   overflow reads as "there's more" at a glance. When content
+   exceeds the cap, .extras-list--scrolling (JS-toggled) triggers
+   a ticker animation that rolls through the full list. */
 .card-hud .extras-list {
   border-top: none;
   padding-top: 0;
   margin-top: 0;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Center platforms horizontally in the HUD footer — gives the
-   bottom row a balanced, HUD-like symmetry instead of left-aligned. */
-.card-hud .game-card-platforms {
+/* Layers are viewport-sized boxes (5.5em) that contain the content
+   inner. Using layer wrappers lets clip-path percentages map to the
+   viewport size rather than to the content's taller intrinsic height
+   — so a 50%-top clip actually hides the top 2.75em of the viewport,
+   not half of a 10em content block. */
+.card-hud .extras-list-layer {
+  max-height: 5.5em;
+  overflow: hidden;
+}
+
+/* Bottom padding only — pushes the last item above the mask's
+   bottom fade. Top padding isn't needed; the group label reads fine
+   inside the top fade region. */
+.card-hud .extras-list-inner {
+  padding: 0.2em 0;
+}
+
+.card-hud .extras-list--scrolling {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%, black 10%, black 90%, transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%, black 10%, black 90%, transparent 100%
+  );
+}
+
+/* When scrolling, primary layer stays in-flow (so the outer has
+   something to size against), and secondary layer overlays it
+   absolutely. Both are locked to exactly 5.5em so clip-path
+   percentages align with the viewport. */
+.card-hud .extras-list--scrolling .extras-list-layer {
+  height: 5.5em;
+  max-height: none;
+}
+
+.card-hud .extras-list--scrolling .extras-list-layer--secondary {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Default-hidden state so secondary doesn't show on top of
+     primary when animations aren't running. */
+  clip-path: inset(0 0 100% 0);
+}
+
+/* Inner inside secondary is translated so its content's bottom
+   aligns with the layer's bottom — revealing "page 2" (the last
+   5.5em of the content). Primary's inner stays at translate 0. */
+.card-hud .extras-list--scrolling .extras-list-layer--secondary .extras-list-inner {
+  transform: translateY(calc(-100% + 5.5em));
+}
+
+/* Scanline bar: bright amber horizontal line that sweeps top-to-bottom
+   during wipes. At rest it's parked above the viewport and invisible —
+   only the animation brings it in. */
+.card-hud .extras-scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: rgba(245, 158, 11, 0.95);
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Wipe animations — only run when the HUD is visible so we don't
+   burn cycles on off-screen cards. 14s cycle: page 1 for ~5s,
+   wipe (1.4s), page 2 for ~5.6s, wipe back (1.4s). Animations
+   target the .extras-list-layer (viewport-sized box) rather than
+   the inner, so clip-path percentages align with the viewport. */
+.game-card:hover .card-hud .extras-list--scrolling .extras-list-layer--primary,
+.game-card.info-open .card-hud .extras-list--scrolling .extras-list-layer--primary {
+  animation: extras-wipe-primary 14s linear 0.58s infinite;
+}
+
+.game-card:hover .card-hud .extras-list--scrolling .extras-list-layer--secondary,
+.game-card.info-open .card-hud .extras-list--scrolling .extras-list-layer--secondary {
+  animation: extras-wipe-secondary 14s linear 0.58s infinite;
+}
+
+.game-card:hover .card-hud .extras-scanline,
+.game-card.info-open .card-hud .extras-scanline {
+  animation: extras-scanline 14s linear 0.58s infinite;
+}
+
+/* Each wipe is 6% of the 14s cycle (~0.84s) — mid-pace between the
+   1.4s slow-pan and the 0.42s snap. Reads as a deliberate scanline
+   refresh. Page holds: page 1 visible ~39%, page 2 visible ~39%. */
+
+@keyframes extras-wipe-primary {
+  0%,  39% { opacity: 1; clip-path: inset(0 0 0 0); }
+  45%      { opacity: 1; clip-path: inset(100% 0 0 0); }
+  46%      { opacity: 0; clip-path: inset(100% 0 0 0); }
+  83%      { opacity: 0; clip-path: inset(0 0 100% 0); }
+  84%      { opacity: 1; clip-path: inset(0 0 100% 0); }
+  90%, 100% { opacity: 1; clip-path: inset(0 0 0 0); }
+}
+
+@keyframes extras-wipe-secondary {
+  0%,  38% { opacity: 0; clip-path: inset(0 0 100% 0); }
+  39%      { opacity: 1; clip-path: inset(0 0 100% 0); }
+  45%      { opacity: 1; clip-path: inset(0 0 0 0); }
+  84%      { opacity: 1; clip-path: inset(0 0 0 0); }
+  90%      { opacity: 1; clip-path: inset(100% 0 0 0); }
+  91%,100% { opacity: 0; clip-path: inset(100% 0 0 0); }
+}
+
+@keyframes extras-scanline {
+  0%,  38% { transform: translateY(-100%); opacity: 0; }
+  39%      { transform: translateY(0); opacity: 1; }
+  45%      { transform: translateY(5.5em); opacity: 1; }
+  46%      { transform: translateY(5.5em); opacity: 0; }
+  83%      { transform: translateY(-100%); opacity: 0; }
+  84%      { transform: translateY(0); opacity: 1; }
+  90%      { transform: translateY(5.5em); opacity: 1; }
+  91%,100% { transform: translateY(5.5em); opacity: 0; }
+}
+
+
+/* Platforms: cap the viewport to one line and let any overflow get
+   rotated through via animation. 2rem matches the actual single-row
+   badge height (.platform-badge has min-height: 1.8rem + a small
+   buffer); any less and the detection logic gets a false positive
+   on single-row cards because scrollHeight already exceeds the cap. */
+.card-hud .game-card-platforms-viewport {
+  max-height: 2rem;
+  overflow: hidden;
+}
+
+.card-hud .game-card-platforms-viewport .game-card-platforms {
   justify-content: center;
+}
+
+/* Platforms rotation: fade between 1st and 2nd row of badges
+   (not a translate-scroll — two simultaneous scrolling animations
+   between extras and platforms looked busy). Each row holds for
+   ~3.5s visible, fades out, the viewport instant-snaps to the next
+   row while invisible, then fades the next row in. JS only flags
+   --rotating when there are 2+ rows; single-row cards stay static. */
+.game-card:hover .card-hud .game-card-platforms-viewport--rotating .game-card-platforms,
+.game-card.info-open .card-hud .game-card-platforms-viewport--rotating .game-card-platforms {
+  animation: platforms-rotate 10s ease-in-out 0.58s infinite;
+}
+
+@keyframes platforms-rotate {
+  /* Translate = 2.1rem: badge min-height (1.8rem) + gap between
+     wrapped rows (0.3rem). That's the exact vertical distance
+     between row 1 and row 2 of badges inside the flex-wrap
+     container. */
+  0%, 40%   { opacity: 1; transform: translateY(0); }        /* row 1 */
+  47%       { opacity: 0; transform: translateY(0); }        /* fade out */
+  50%       { opacity: 0; transform: translateY(-2.1rem); }  /* shift while faded */
+  57%, 90%  { opacity: 1; transform: translateY(-2.1rem); }  /* row 2 */
+  97%       { opacity: 0; transform: translateY(-2.1rem); }  /* fade out */
+  99.99%    { opacity: 0; transform: translateY(0); }        /* shift back */
+  100%      { opacity: 1; transform: translateY(0); }        /* seamless loop */
 }
 
 /* Extras labels keep the accent amber so section headers read as
@@ -244,11 +414,16 @@
 
 /* Hover-in: delay the max-height expansion to line up with the
    glitch start (~1.0s), so the title shifts into its new position
-   during the corruption moment. */
+   during the corruption moment. margin-bottom expands alongside
+   so there's visible space between the revealed label and the
+   title below (otherwise they sit flush). */
 .game-card.game-of-games:hover .card-hud .card-hud-gog-label,
 .game-card.game-of-games.info-open .card-hud .card-hud-gog-label {
   max-height: 3rem;
-  transition: max-height 0.25s ease 1.0s;
+  margin-bottom: 0.35rem;
+  transition:
+    max-height 0.25s ease 1.0s,
+    margin-bottom 0.25s ease 1.0s;
 }
 
 .card-hud-gog-title {
@@ -380,10 +555,21 @@
     animation: none;
     opacity: 1;
   }
-  .card-hud .game-card-subtitle,
-  .card-hud .game-card-platforms,
+  .card-hud .game-card-platforms-viewport,
   .card-hud .extras-list {
     transition: opacity 0.15s ease;
+  }
+  /* Reduced-motion: disable scanline wipe and platform rotation so
+     content stays still. Primary page is shown, secondary/scanline
+     hidden. Overflow beyond primary's viewport gets clipped cleanly. */
+  .card-hud .extras-list--scrolling .extras-list-layer--primary,
+  .card-hud .game-card-platforms-viewport--rotating .game-card-platforms {
+    animation: none !important;
+    transform: none;
+  }
+  .card-hud .extras-list--scrolling .extras-list-layer--secondary,
+  .card-hud .extras-scanline {
+    display: none;
   }
   /* Reduced-motion: skip the glitch, show the iridescent label
      immediately on hover without flicker or gradient drift. */

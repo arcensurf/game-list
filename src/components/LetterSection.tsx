@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import type { LetterGroup, GameWithCover } from '../types/game';
 import GameCard from './GameCard';
 import AchievementBar from './AchievementBar';
+import DevEditControls from './DevEditControls';
 
 type DropSide = 'before' | 'after';
 
@@ -117,6 +118,7 @@ export default function LetterSection({ group }: { group: LetterGroup }) {
             <div className="achievement-slot">
               <AchievementBar achievements={game.achievements} />
             </div>
+            {isDev && <DevEditControls game={game} />}
           </div>
         ))}
       </div>

@@ -423,6 +423,15 @@
   color: var(--text);
 }
 
+/* External variant: dev-only Edit button rendered below each card
+   (outside the HUD overlay) so it doesn't interfere with previewing
+   HUD content like platform rotation or extras ticker. */
+.dev-edit-btn--external {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
 /* Cover picker modal */
 .cover-picker-backdrop {
   position: fixed;

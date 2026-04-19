@@ -46,7 +46,6 @@ export default function EditGameModal({
   onClose: () => void;
 }) {
   const [title, setTitle] = useState(game.title);
-  const [subtitle, setSubtitle] = useState(game.subtitle || '');
   const [platforms, setPlatforms] = useState<string[]>(game.platforms);
   const [extras, setExtras] = useState(serializeExtras(game.extras));
   const [isGameOfGames, setIsGameOfGames] = useState(!!game.gameOfGames);
@@ -166,7 +165,9 @@ export default function EditGameModal({
       body: JSON.stringify({
         originalTitle: game.title,
         title: title.trim(),
-        subtitle: subtitle.trim() || null,
+        // Subtitle is no longer edited in the UI; pass existing value
+        // through so saves don't silently wipe it from the data file.
+        subtitle: game.subtitle ?? null,
         platforms,
         extras: parseExtras(extras),
         gameOfGames: isGameOfGames ? gameOfGamesTagline.trim() || null : null,
@@ -203,15 +204,6 @@ export default function EditGameModal({
             onChange={(e) => setTitle(e.target.value)}
             required
             autoFocus
-          />
-        </label>
-        <label>
-          Subtitle
-          <input
-            type="text"
-            value={subtitle}
-            onChange={(e) => setSubtitle(e.target.value)}
-            placeholder="Story Mode, The Subspace Emissary, etc."
           />
         </label>
         <div className="form-field">

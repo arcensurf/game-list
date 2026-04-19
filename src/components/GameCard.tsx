@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GameWithCover } from '../types/game';
 import GameCardHud from './GameCardHud';
 import CoverPicker from './CoverPicker';
-import EditGameModal from './EditGameModal';
 
 // Shared batch counter: cards revealed in the same animation frame get
 // sequential stagger indexes starting at 0. The counter resets on the next
@@ -30,7 +29,6 @@ export default function GameCard({
 }) {
   const [imgError, setImgError] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
   const [localCoverUrl, setLocalCoverUrl] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
@@ -157,10 +155,7 @@ export default function GameCard({
             <span>Change Image</span>
           </div>
         )}
-        <GameCardHud
-          game={game}
-          onEdit={import.meta.env.DEV ? () => setEditOpen(true) : undefined}
-        />
+        <GameCardHud game={game} />
       </div>
       {game.gameOfGames && !compactGogLabel && (
         <div className="game-of-games-label">
@@ -180,9 +175,6 @@ export default function GameCard({
             }
           }}
         />
-      )}
-      {editOpen && (
-        <EditGameModal game={game} onClose={() => setEditOpen(false)} />
       )}
     </div>
   );
