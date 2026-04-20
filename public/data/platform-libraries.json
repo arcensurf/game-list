@@ -1583,6 +1583,12 @@
   ],
   "psn": [
     {
+      "id": "NPWR35698_00",
+      "title": "STAR OCEAN THE SECOND STORY R",
+      "earned": 48,
+      "total": 51
+    },
+    {
       "id": "NPWR47984_00",
       "title": "EA SPORTS™ NHL® 26",
       "earned": 7,
@@ -1641,12 +1647,6 @@
       "title": "Wreckfest",
       "earned": 3,
       "total": 21
-    },
-    {
-      "id": "NPWR35698_00",
-      "title": "STAR OCEAN THE SECOND STORY R",
-      "earned": 42,
-      "total": 51
     },
     {
       "id": "NPWR14841_00",
@@ -2989,6 +2989,30 @@
   ],
   "xbox": [
     {
+      "id": "1112934375",
+      "title": "Split/Second",
+      "earned": 11,
+      "total": 46
+    },
+    {
+      "id": "1480657180",
+      "title": "METEOS WARS",
+      "earned": 7,
+      "total": 12
+    },
+    {
+      "id": "1480657468",
+      "title": "Puzzle Quest 2",
+      "earned": 3,
+      "total": 12
+    },
+    {
+      "id": "1397819364",
+      "title": "FINAL FANTASY XIII",
+      "earned": 22,
+      "total": 35
+    },
+    {
       "id": "1297287144",
       "title": "Mass Effect",
       "earned": 28,
@@ -3373,12 +3397,6 @@
       "total": 49
     },
     {
-      "id": "1397819364",
-      "title": "FINAL FANTASY XIII",
-      "earned": 22,
-      "total": 35
-    },
-    {
       "id": "1431504989",
       "title": "Assassin's Creed Brotherhood",
       "earned": 54,
@@ -3553,12 +3571,6 @@
       "total": 36
     },
     {
-      "id": "1480657468",
-      "title": "Puzzle Quest 2",
-      "earned": 3,
-      "total": 12
-    },
-    {
       "id": "1480657170",
       "title": "Worms 2: Armageddon",
       "earned": 1,
@@ -3635,12 +3647,6 @@
       "title": "BioShock 2",
       "earned": 2,
       "total": 68
-    },
-    {
-      "id": "1480657180",
-      "title": "METEOS WARS",
-      "earned": 7,
-      "total": 12
     },
     {
       "id": "1396901878",
@@ -3755,12 +3761,6 @@
       "title": "Guitar Hero World Tour",
       "earned": 9,
       "total": 50
-    },
-    {
-      "id": "1112934375",
-      "title": "Split/Second",
-      "earned": 11,
-      "total": 46
     },
     {
       "id": "1096157248",
@@ -4123,5 +4123,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-04-19T12:40:22.060Z"
+  "updatedAt": "2026-04-20T07:57:50.027Z"
 }

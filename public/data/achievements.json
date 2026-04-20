@@ -1898,6 +1898,11 @@
     }
   },
   "psn": {
+    "NPWR35698_00": {
+      "title": "STAR OCEAN THE SECOND STORY R",
+      "earned": 48,
+      "total": 51
+    },
     "NPWR47984_00": {
       "title": "EA SPORTS™ NHL® 26",
       "earned": 7,
@@ -1947,11 +1952,6 @@
       "title": "Wreckfest",
       "earned": 3,
       "total": 21
-    },
-    "NPWR35698_00": {
-      "title": "STAR OCEAN THE SECOND STORY R",
-      "earned": 42,
-      "total": 51
     },
     "NPWR14841_00": {
       "title": "Burnout Paradise Remastered",
@@ -4016,5 +4016,5 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-04-19T12:42:27.690Z"
+  "updatedAt": "2026-04-20T08:00:03.792Z"
 }
