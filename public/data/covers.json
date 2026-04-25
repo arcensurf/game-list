@@ -312,7 +312,7 @@
   "Final Fantasy XIV: A Realm Reborn": {
     "sgdbId": 104831,
     "file": "final-fantasy-xiv-a-realm-reborn.png",
-    "fetchedAt": "2026-04-09T16:38:49.483Z"
+    "fetchedAt": "2026-04-25T00:44:20.338Z"
   },
   "Final Fantasy XV": {
     "sgdbId": 38048,
@@ -754,11 +754,6 @@
     "file": "persona-5-dancing-in-starlight.png",
     "fetchedAt": "2026-04-09T16:22:50.116Z"
   },
-  "Please Touch the Artwork 2": {
-    "sgdbId": 5435209,
-    "file": "please-touch-the-artwork-2.png",
-    "fetchedAt": "2026-04-09T16:22:55.247Z"
-  },
   "Pokemon: Blue Version": {
     "sgdbId": 35291,
     "file": "pokemon-blue-version.png",
@@ -1093,5 +1088,10 @@
     "sgdbId": 36015,
     "file": "dust-an-elysian-tail.png",
     "fetchedAt": "2026-04-18T17:36:47.810Z"
+  },
+  "Please, Touch the Artwork 2": {
+    "sgdbId": 5435209,
+    "file": "please-touch-the-artwork-2.png",
+    "fetchedAt": "2026-04-09T16:22:55.247Z"
   }
 }

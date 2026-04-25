@@ -756,7 +756,11 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"About the jackass on the bike? He's....A jackass.\" game",
-    "order": 54
+    "order": 54,
+    "steamAppId": 2909400,
+    "psnNpCommId": "NPWR35316_00",
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
   },
   {
     "title": "Final Fantasy VIII Remastered",
@@ -860,8 +864,9 @@
     "gameOfGames": "The \"La Hee\" game",
     "order": 61,
     "steamAppId": null,
-    "psnNpCommId": "NPWR23141_00",
-    "xboxTitleId": null
+    "psnNpCommId": "NPWR01649_00",
+    "xboxTitleId": null,
+    "ffxivLodestoneId": "21418122"
   },
   {
     "title": "Final Fantasy XV",
@@ -2097,7 +2102,7 @@
     "order": 156
   },
   {
-    "title": "Please Touch the Artwork 2",
+    "title": "Please, Touch the Artwork 2",
     "subtitle": null,
     "platforms": [
       "PC"
@@ -2106,7 +2111,10 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 157
+    "order": 157,
+    "steamAppId": 2600140,
+    "psnNpCommId": null,
+    "xboxTitleId": null
   },
   {
     "title": "Pokemon: Blue Version",
