@@ -55,6 +55,17 @@ jobs:
           XBOX_EMAIL: ${{ secrets.XBOX_EMAIL }}
           XBOX_PASSWORD: ${{ secrets.XBOX_PASSWORD }}
 
+      # FFXIV scrapes the Lodestone directly — no auth, just the
+      # character ID (which is public anyway, but kept as a secret
+      # for parity with the other env vars). The script merges its
+      # `ffxiv` slice into the same achievements.json the previous
+      # step just wrote, preserving the steam/psn/xbox slices.
+      - name: Fetch FFXIV achievements (Lodestone)
+        run: node scripts/fetch-ffxiv-lodestone.mjs
+        env:
+          DATA_DIR: ${{ github.workspace }}/data-branch/public/data
+          FFXIV_LODESTONE_ID: ${{ secrets.FFXIV_LODESTONE_ID }}
+
       - name: Commit achievement data to data branch
         working-directory: data-branch
         run: |
