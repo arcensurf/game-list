@@ -394,7 +394,7 @@
       "title": "FINAL FANTASY XIV Online",
       "earned": 0,
       "total": 0,
-      "playtimeMinutes": 7543
+      "playtimeMinutes": 7813
     },
     "40700": {
       "title": "Machinarium",
@@ -1898,6 +1898,11 @@
     }
   },
   "psn": {
+    "NPWR10800_00": {
+      "title": "Star Ocean®:Till The End Of Time™",
+      "earned": 25,
+      "total": 30
+    },
     "NPWR35698_00": {
       "title": "STAR OCEAN THE SECOND STORY R",
       "earned": 51,
@@ -2077,11 +2082,6 @@
       "title": "FINAL FANTASY",
       "earned": 24,
       "total": 24
-    },
-    "NPWR10800_00": {
-      "title": "Star Ocean®:Till The End Of Time™",
-      "earned": 24,
-      "total": 30
     },
     "NPWR28604_00": {
       "title": "STAR OCEAN THE DIVINE FORCE",
@@ -4016,5 +4016,79 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-04-24T07:55:52.823Z"
+  "updatedAt": "2026-04-25T01:45:23.246Z",
+  "ffxiv": {
+    "21418122": {
+      "earned": 561,
+      "total": 3282,
+      "pointsEarned": 5265,
+      "pointsTotal": 31065,
+      "categories": [
+        {
+          "id": 1,
+          "name": "Battle",
+          "earned": 129,
+          "total": 681,
+          "pointsEarned": 1085,
+          "pointsTotal": 7035
+        },
+        {
+          "id": 2,
+          "name": "PvP",
+          "earned": 4,
+          "total": 172,
+          "pointsEarned": 20,
+          "pointsTotal": 1260
+        },
+        {
+          "id": 3,
+          "name": "Character",
+          "earned": 105,
+          "total": 544,
+          "pointsEarned": 540,
+          "pointsTotal": 3805
+        },
+        {
+          "id": 4,
+          "name": "Items",
+          "earned": 22,
+          "total": 635,
+          "pointsEarned": 175,
+          "pointsTotal": 6870
+        },
+        {
+          "id": 5,
+          "name": "Crafting & Gathering",
+          "earned": 0,
+          "total": 498,
+          "pointsEarned": 0,
+          "pointsTotal": 4550
+        },
+        {
+          "id": 8,
+          "name": "Quests",
+          "earned": 125,
+          "total": 459,
+          "pointsEarned": 1720,
+          "pointsTotal": 4660
+        },
+        {
+          "id": 11,
+          "name": "Exploration",
+          "earned": 168,
+          "total": 221,
+          "pointsEarned": 1680,
+          "pointsTotal": 2215
+        },
+        {
+          "id": 12,
+          "name": "Grand Company",
+          "earned": 8,
+          "total": 72,
+          "pointsEarned": 45,
+          "pointsTotal": 670
+        }
+      ]
+    }
+  }
 }

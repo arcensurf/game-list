@@ -328,7 +328,7 @@
     {
       "id": 39210,
       "title": "FINAL FANTASY XIV Online",
-      "playtimeMinutes": 7543
+      "playtimeMinutes": 7813
     },
     {
       "id": 40700,
@@ -1583,6 +1583,12 @@
   ],
   "psn": [
     {
+      "id": "NPWR10800_00",
+      "title": "Star Ocean®:Till The End Of Time™",
+      "earned": 25,
+      "total": 30
+    },
+    {
       "id": "NPWR35698_00",
       "title": "STAR OCEAN THE SECOND STORY R",
       "earned": 51,
@@ -1797,12 +1803,6 @@
       "title": "FINAL FANTASY",
       "earned": 24,
       "total": 24
-    },
-    {
-      "id": "NPWR10800_00",
-      "title": "Star Ocean®:Till The End Of Time™",
-      "earned": 24,
-      "total": 30
     },
     {
       "id": "NPWR28604_00",
@@ -4123,5 +4123,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-04-24T07:53:40.514Z"
+  "updatedAt": "2026-04-25T01:43:02.183Z"
 }
