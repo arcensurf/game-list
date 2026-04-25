@@ -53,6 +53,7 @@ export default function EditGameModal({
   const [steamAppId, setSteamAppId] = useState(game.steamAppId?.toString() || '');
   const [psnNpCommId, setPsnNpCommId] = useState(game.psnNpCommId || '');
   const [xboxTitleId, setXboxTitleId] = useState(game.xboxTitleId || '');
+  const [ffxivLodestoneId, setFfxivLodestoneId] = useState(game.ffxivLodestoneId || '');
   const [data, setData] = useState<AchievementData | null>(null);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -174,6 +175,7 @@ export default function EditGameModal({
         steamAppId: steamAppId ? Number(steamAppId) : null,
         psnNpCommId: psnNpCommId.trim() || null,
         xboxTitleId: xboxTitleId.trim() || null,
+        ffxivLodestoneId: ffxivLodestoneId.trim() || null,
       }),
     });
 
@@ -271,6 +273,21 @@ export default function EditGameModal({
                 {xboxMatch.entry.earned}/{xboxMatch.entry.total} achievements
               </span>
             )}
+          </label>
+        )}
+        {/* Only surface the FFXIV override on candidate games — gating by
+            title keeps every other game's edit form from carrying a field
+            that's meaningless to it. There's no auto-detect path: the
+            Lodestone ID is tied to a specific character, not a title. */}
+        {/ffxiv|final fantasy xiv/i.test(title) && (
+          <label>
+            FFXIV Lodestone ID (override)
+            <input
+              type="text"
+              value={ffxivLodestoneId}
+              onChange={(e) => setFfxivLodestoneId(e.target.value)}
+              placeholder="e.g. 21418122"
+            />
           </label>
         )}
         <label className="toggle-label">

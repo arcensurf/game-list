@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GameWithCover } from '../types/game';
 import GameCardHud from './GameCardHud';
+import CardBackFace from './CardBackFace';
 import CoverPicker from './CoverPicker';
 
 // Shared batch counter: cards revealed in the same animation frame get
@@ -49,6 +50,10 @@ export default function GameCard({
   };
 
   const [infoOpen, setInfoOpen] = useState(false);
+  const [flipped, setFlipped] = useState(false);
+  const ffxivDetail = game.achievements?.ffxiv;
+  const canFlip = !!ffxivDetail;
+  const toggleFlip = useCallback(() => setFlipped((f) => !f), []);
   const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -114,8 +119,49 @@ export default function GameCard({
     game.gameOfGames ? 'game-of-games' : '',
     game.gameOfGames && compactGogLabel ? 'game-of-games--foil' : '',
     infoOpen ? 'info-open' : '',
+    flipped ? 'flipped' : '',
+    canFlip ? 'can-flip' : '',
     revealIndex !== null ? 'revealed' : '',
   ].filter(Boolean).join(' ');
+
+  // Non-flippable cards render the cover as a direct child of
+  // .game-card — same DOM structure they always had, so existing CSS
+  // (foil, GoG, etc.) doesn't need to know about a wrapper. Only
+  // flippable cards introduce the flipper + back face.
+  const cover = (
+    <div
+      className="game-card-cover"
+      onClick={import.meta.env.DEV ? () => setPickerOpen(true) : undefined}
+      style={import.meta.env.DEV ? { cursor: 'pointer' } : undefined}
+    >
+      {coverUrl && !imgError ? (
+        <img
+          src={coverUrl}
+          alt={game.title}
+          loading="lazy"
+          onError={() => {
+            if (import.meta.env.DEV && retryCount < 3) {
+              setTimeout(() => {
+                setRetryCount((c) => c + 1);
+                setImgError(false);
+              }, 500);
+            }
+            setImgError(true);
+          }}
+        />
+      ) : (
+        <div className="game-card-placeholder">
+          <span>{game.title}</span>
+        </div>
+      )}
+      {import.meta.env.DEV && (
+        <div className="dev-upload-overlay">
+          <span>Change Image</span>
+        </div>
+      )}
+      <GameCardHud game={game} canFlip={canFlip} onFlip={toggleFlip} />
+    </div>
+  );
 
   return (
     <div
@@ -125,38 +171,16 @@ export default function GameCard({
       onTouchStart={import.meta.env.DEV ? undefined : handleTouchStart}
       onTouchEnd={import.meta.env.DEV ? undefined : handleTouchEnd}
     >
-      <div
-        className="game-card-cover"
-        onClick={import.meta.env.DEV ? () => setPickerOpen(true) : undefined}
-        style={import.meta.env.DEV ? { cursor: 'pointer' } : undefined}
-      >
-        {coverUrl && !imgError ? (
-          <img
-            src={coverUrl}
-            alt={game.title}
-            loading="lazy"
-            onError={() => {
-              if (import.meta.env.DEV && retryCount < 3) {
-                setTimeout(() => {
-                  setRetryCount((c) => c + 1);
-                  setImgError(false);
-                }, 500);
-              }
-              setImgError(true);
-            }}
-          />
-        ) : (
-          <div className="game-card-placeholder">
-            <span>{game.title}</span>
+      {canFlip && ffxivDetail ? (
+        <div className="game-card-flipper">
+          <div className="game-card-face game-card-face--front">{cover}</div>
+          <div className="game-card-face game-card-face--back">
+            <CardBackFace detail={ffxivDetail} onFlip={toggleFlip} />
           </div>
-        )}
-        {import.meta.env.DEV && (
-          <div className="dev-upload-overlay">
-            <span>Change Image</span>
-          </div>
-        )}
-        <GameCardHud game={game} />
-      </div>
+        </div>
+      ) : (
+        cover
+      )}
       {game.gameOfGames && !compactGogLabel && (
         <div className="game-of-games-label">
           <span className="game-of-games-title">A Game of Games</span>

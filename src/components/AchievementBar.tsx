@@ -4,6 +4,7 @@ const PLATFORM_COLORS: Record<string, string> = {
   steam: '#6b7280',
   psn: '#003087',
   xbox: '#107c10',
+  ffxiv: '#d83434',
 };
 
 export default function AchievementBar({ achievements }: { achievements: GameAchievements | null }) {

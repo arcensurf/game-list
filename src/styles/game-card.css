@@ -88,6 +88,61 @@ body.lights-on .card-wrapper {
   --card-dim: 0 !important;
 }
 
+/* Flippable cards (FFXIV today). Sizing is anchored top-down: the
+   card carries the aspect-ratio, the flipper + faces fill it via
+   height: 100%. Don't move aspect-ratio onto the flipper — combined
+   with the foil's own card-level aspect-ratio and an absolute-
+   positioned face inside, the browser collapses the card around
+   min-content (the flipper has no in-flow children) and renders the
+   whole thing as a 6px sliver. */
+.game-card-flipper {
+  position: relative;
+  width: 100%;
+}
+
+.game-card.can-flip {
+  aspect-ratio: 2 / 3;
+  perspective: 1200px;
+}
+
+.game-card.can-flip .game-card-flipper {
+  height: 100%;
+  transform-style: preserve-3d;
+  /* Match the z-index the cover used to hold on the card
+     (.game-card.game-of-games--foil .game-card-cover { z-index: 3 }),
+     so the GoG shine layer (.game-card::before at z:2) stays
+     underneath. */
+  z-index: 3;
+  transition: transform 0.65s cubic-bezier(0.2, 0.85, 0.3, 1);
+}
+
+.game-card.can-flip.flipped .game-card-flipper {
+  transform: rotateY(180deg);
+}
+
+.game-card-face {
+  position: relative;
+}
+
+.game-card.can-flip .game-card-face--front {
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Explicit identity rotateY so the front face is treated as a
+     3D-transformed element. Without it, backface-visibility doesn't
+     activate and the front face stays visible (mirrored) after the
+     flip — you'd see the cover image reversed instead of the back. */
+  transform: rotateY(0deg);
+}
+
+.game-card.can-flip .game-card-face--back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: rotateY(180deg);
+}
+
 /* Cover */
 .game-card-cover {
   position: relative;

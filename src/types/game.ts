@@ -15,6 +15,7 @@ export interface Game {
   steamAppId?: number | null;
   psnNpCommId?: string | null;
   xboxTitleId?: string | null;
+  ffxivLodestoneId?: string | null;
 }
 
 export interface CoverEntry {
@@ -28,12 +29,34 @@ export type CoverMap = Record<string, CoverEntry | null>;
 export interface PlatformAchievementData {
   earned: number;
   total: number;
-  platform: 'steam' | 'psn' | 'xbox';
+  platform: 'steam' | 'psn' | 'xbox' | 'ffxiv';
+}
+
+// FFXIV-only detail (per-category breakdown + point totals) that
+// powers the card's flip face. Normal achievement-bar rendering only
+// needs the earned/total aggregate, which lives in the platforms
+// array above — this is extra data layered on top.
+export interface FfxivCategoryData {
+  id: number;
+  name: string;
+  earned: number;
+  total: number;
+  pointsEarned: number;
+  pointsTotal: number;
+}
+
+export interface FfxivCharacterData {
+  earned: number;
+  total: number;
+  pointsEarned: number;
+  pointsTotal: number;
+  categories: FfxivCategoryData[];
 }
 
 export interface GameAchievements {
   platforms: PlatformAchievementData[];
   best: PlatformAchievementData;
+  ffxiv?: FfxivCharacterData;
   updatedAt: string;
 }
 
@@ -54,6 +77,7 @@ export interface AchievementData {
   steam: Record<string, PlatformLibraryEntry>;
   psn: Record<string, PlatformLibraryEntry>;
   xbox: Record<string, PlatformLibraryEntry>;
+  ffxiv?: Record<string, FfxivCharacterData>;
   updatedAt?: string;
 }
 

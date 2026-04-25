@@ -91,6 +91,58 @@
 }
 
 
+/* Meteor flip button — FFXIV-only affordance. The meteor IS the
+   top-right corner marker on can-flip cards (the bracket--tr is
+   hidden). At rest it's invisible like the rest of the HUD;
+   revealed by hover/info-open. Crimson is applied via background
+   since the SVG is used as a mask — same technique as PlatformBadge. */
+.card-flip-button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  padding: 0;
+  background-color: #d83434;
+  mask-size: contain;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-position: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, filter 0.2s ease, transform 0.2s ease;
+  filter: drop-shadow(0 0 4px rgba(216, 52, 52, 0.55));
+  z-index: 12;
+}
+
+/* When the meteor button is present, reserve a tiny well for it in
+   the title area so long titles wrap before running under it rather
+   than overflowing behind the glyph. */
+.game-card.can-flip .card-hud .game-card-title {
+  padding-right: 1.4rem;
+}
+
+/* Front-face button: inherits the HUD's hover/info-open reveal so it
+   only shows when the HUD is visible. Back-face button is always
+   visible because the back face itself is only shown when flipped. */
+.game-card:hover .card-flip-button--front,
+.game-card.info-open .card-flip-button--front {
+  opacity: 0.88;
+}
+
+.card-flip-button--back {
+  opacity: 0.88;
+}
+
+.card-flip-button:hover {
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(216, 52, 52, 0.95));
+  transform: rotate(-18deg);
+}
+
 /* Four L-shaped bracket corners — HUD frame markers. */
 .hud-bracket {
   position: absolute;
@@ -106,6 +158,14 @@
 .hud-bracket--tr { top: 5px; right: 5px; border-top-width: 1px; border-right-width: 1px; }
 .hud-bracket--bl { bottom: 5px; left: 5px; border-bottom-width: 1px; border-left-width: 1px; }
 .hud-bracket--br { bottom: 5px; right: 5px; border-bottom-width: 1px; border-right-width: 1px; }
+
+/* On flippable cards the meteor button occupies the top-right
+   corner where the bracket would normally sit — the meteor IS the
+   corner marker. Hide the redundant bracket on both faces so they
+   don't overlap. */
+.game-card.can-flip .hud-bracket--tr {
+  display: none;
+}
 
 /* Title: VT323, amber, typewriter reveal with blinking cursor.
    Separate transition for in/out — the in-transition has a 0.18s

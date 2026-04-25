@@ -254,7 +254,7 @@ export default function devApiPlugin(): Plugin {
           if (req.url === '/api/edit-game') {
             const body = JSON.parse(await parseBody(req));
             const { originalTitle, title, subtitle, platforms, extras, gameOfGames,
-                    steamAppId, psnNpCommId, xboxTitleId } = body as {
+                    steamAppId, psnNpCommId, xboxTitleId, ffxivLodestoneId } = body as {
               originalTitle: string;
               title: string;
               subtitle: string | null;
@@ -264,6 +264,7 @@ export default function devApiPlugin(): Plugin {
               steamAppId: number | null;
               psnNpCommId: string | null;
               xboxTitleId: string | null;
+              ffxivLodestoneId: string | null;
             };
 
             const games = readJson(gamesPath) as GameEntry[];
@@ -298,6 +299,7 @@ export default function devApiPlugin(): Plugin {
             game.steamAppId = steamAppId ?? null;
             game.psnNpCommId = psnNpCommId ?? null;
             game.xboxTitleId = xboxTitleId ?? null;
+            game.ffxivLodestoneId = ffxivLodestoneId ?? null;
 
             writeJson(gamesPath, games);
 

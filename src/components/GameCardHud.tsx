@@ -2,11 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import type { GameWithCover } from '../types/game';
 import PlatformBadge from './PlatformBadge';
 import ExtrasList from './DlcPopover';
+import meteorIcon from '../icons/svg/outline/meteor.svg';
 
 export default function GameCardHud({
   game,
+  canFlip = false,
+  onFlip,
 }: {
   game: GameWithCover;
+  canFlip?: boolean;
+  onFlip?: () => void;
 }) {
   const [platformsRotating, setPlatformsRotating] = useState(false);
   const platformsViewportRef = useRef<HTMLDivElement>(null);
@@ -32,6 +37,23 @@ export default function GameCardHud({
       <span className="hud-bracket hud-bracket--tr" aria-hidden />
       <span className="hud-bracket hud-bracket--bl" aria-hidden />
       <span className="hud-bracket hud-bracket--br" aria-hidden />
+      {canFlip && onFlip && (
+        <button
+          type="button"
+          className="card-flip-button card-flip-button--front"
+          onClick={(e) => {
+            // Stop propagation so the mobile tap-to-toggle HUD handler
+            // on the card doesn't also fire and immediately close us.
+            e.stopPropagation();
+            onFlip();
+          }}
+          aria-label="Show FFXIV achievements"
+          style={{
+            maskImage: `url(${meteorIcon})`,
+            WebkitMaskImage: `url(${meteorIcon})`,
+          }}
+        />
+      )}
       <div className="card-hud-header">
         {game.gameOfGames && (
           <div className="card-hud-gog-label" aria-hidden>

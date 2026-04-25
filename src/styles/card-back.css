@@ -1,0 +1,225 @@
+/* Back face of flippable cards. FFXIV-only today — surfaces the
+   8-category breakdown plus overall totals in a 2×4 mini-grid. The
+   auto-cycle between achievements and points modes uses a crimson
+   scanline sweep that mirrors the amber scanline used on extras, so
+   the motion language stays consistent with the rest of the HUD. */
+
+.card-back-face {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1.1rem 0.8rem 0.9rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.04) 0px,
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(30, 12, 12, 0.96) 0%,
+      rgba(16, 8, 6, 0.98) 100%
+    );
+  color: rgba(231, 224, 216, 0.92);
+  font-family: 'Share Tech Mono', monospace;
+  border-radius: var(--radius);
+}
+
+/* Header: eyebrow ("ACHIEVEMENTS" / "POINTS") + big total + percent.
+   The big total is the visual anchor; the eyebrow tells you which
+   mode you're looking at; the percent is supporting context. */
+.card-back-header {
+  text-align: center;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(216, 52, 52, 0.25);
+}
+
+.card-back-eyebrow {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  color: rgba(216, 52, 52, 0.85);
+  text-shadow: 0 0 6px rgba(216, 52, 52, 0.35);
+  margin-bottom: 0.2rem;
+}
+
+.card-back-total {
+  font-family: 'VT323', 'Share Tech Mono', monospace;
+  font-size: 1.55rem;
+  line-height: 1;
+  color: rgba(255, 235, 220, 0.98);
+  text-shadow: 0 0 8px rgba(216, 52, 52, 0.45);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.15em;
+}
+
+.card-back-total-sep {
+  color: rgba(216, 52, 52, 0.8);
+  margin: 0 0.1em;
+}
+
+.card-back-total-of {
+  font-size: 0.95rem;
+  color: rgba(231, 224, 216, 0.7);
+}
+
+.card-back-percent {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: rgba(231, 224, 216, 0.55);
+  margin-top: 0.2rem;
+}
+
+/* 2×4 category grid — each cell is: name / bar / numbers, stacked. */
+.card-back-grid {
+  flex: 1;
+  display: grid;
+  /* minmax(0, 1fr) on both axes — without the 0 floor, a long name
+     (e.g. "Crafting & Gathering") expands its column past 50% and
+     throws the grid out of balance. With it, the column caps at the
+     allotted share and the name truncates via the rules below. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 0.4rem 0.55rem;
+  min-height: 0;
+}
+
+.card-back-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+  min-height: 0;
+}
+
+.card-back-cell-name {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: rgba(231, 224, 216, 0.88);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  line-height: 1.15;
+  /* Soft-fade edges so marquee text doesn't hard-cut at the cell
+     boundary. No-op on short names that don't overflow. */
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%, black 6%, black 94%, transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%, black 6%, black 94%, transparent 100%
+  );
+}
+
+.card-back-cell-name-inner {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Gap between the two copies of the text in the scrolling span —
+   acts as visual breathing room so consecutive loops don't read as
+   one unbroken word. Sized in em so it scales with the name text. */
+.card-back-cell-name-gap {
+  display: inline-block;
+  width: 2em;
+}
+
+.card-back-cell-name--scrolling .card-back-cell-name-inner {
+  animation: cell-name-marquee 9s linear infinite;
+}
+
+/* Classic duplicated-content marquee: the inner span holds [text][gap]
+   [text], and we translate by -50% of its width to land on the second
+   copy — which is pixel-identical to the first, so the loop back to
+   0% is invisible. */
+@keyframes cell-name-marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.card-back-cell-bar {
+  position: relative;
+  width: 100%;
+  /* Bumped from 3px → 5px now that the bar is the only per-category
+     progress signal. Easier to read across 8 cells at a glance. */
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  border-radius: 1px;
+}
+
+.card-back-cell-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(216, 52, 52, 0.95) 0%,
+    rgba(255, 110, 80, 0.95) 100%
+  );
+  box-shadow: 0 0 4px rgba(216, 52, 52, 0.6);
+  transition: width 0.35s ease;
+}
+
+/* Mode-swap sweep: a single crimson scanline crosses top-to-bottom
+   each time the mode cycles. The numbers + bars fade through zero
+   while the scanline is passing so the swap reads as a CRT refresh
+   rather than a sudden re-render. JS toggles `--sweeping` for 0.5s
+   on each cycle tick; CSS keyframes do the rest. */
+.card-back-scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Animate `top` rather than transform: translateY — a translateY of
+     100% on a 2px bar only moves 2px (translate percentages reference
+     the element's own size). `top`'s percentage references the
+     positioned parent, which is the behavior we want. */
+  top: 0;
+  height: 2px;
+  background: rgba(216, 52, 52, 0.95);
+  box-shadow: 0 0 8px rgba(216, 52, 52, 0.85);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.card-back-face--sweeping .card-back-scanline {
+  animation: card-back-scanline 0.5s linear forwards;
+}
+
+.card-back-face--sweeping .card-back-cell-fill,
+.card-back-face--sweeping .card-back-total,
+.card-back-face--sweeping .card-back-percent,
+.card-back-face--sweeping .card-back-eyebrow {
+  animation: card-back-fade 0.5s ease-in-out;
+}
+
+@keyframes card-back-scanline {
+  0%   { opacity: 0; top: 0%; }
+  10%  { opacity: 1; top: 0%; }
+  90%  { opacity: 1; top: calc(100% - 2px); }
+  100% { opacity: 0; top: calc(100% - 2px); }
+}
+
+@keyframes card-back-fade {
+  0%   { opacity: 1; }
+  45%  { opacity: 0; }
+  55%  { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-back-face--sweeping .card-back-scanline { animation: none; }
+  .card-back-face--sweeping .card-back-cell-fill,
+  .card-back-face--sweeping .card-back-total,
+  .card-back-face--sweeping .card-back-percent,
+  .card-back-face--sweeping .card-back-eyebrow { animation: none; }
+  .card-back-cell-fill { transition: none; }
+}

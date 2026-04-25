@@ -10,6 +10,8 @@
     "preview": "vite preview",
     "fetch-covers": "NODE_TLS_REJECT_UNAUTHORIZED=0 node scripts/fetch-covers.mjs",
     "fetch-achievements": "node scripts/fetch-achievements.mjs",
+    "fetch-ffxiv": "node scripts/fetch-ffxiv.mjs",
+    "fetch-ffxiv-lodestone": "node scripts/fetch-ffxiv-lodestone.mjs",
     "xbox-get-refresh-token": "node scripts/xbox-get-refresh-token.mjs",
     "psn-get-npsso-token": "node scripts/psn-get-npsso-token.mjs"
   },

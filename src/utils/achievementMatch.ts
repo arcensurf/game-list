@@ -12,6 +12,7 @@
 
 import type {
   AchievementData,
+  FfxivCharacterData,
   Game,
   GameAchievements,
   PlatformAchievementData,
@@ -129,9 +130,30 @@ export function resolveGameAchievements(
     }
   }
 
+  // FFXIV — override-only (no title fallback). The Lodestone ID is
+  // scoped to a single character, so a title-based lookup would mean
+  // nothing. Also exposes the category breakdown on ffxivDetail so
+  // the card's flip face can render it.
+  let ffxivDetail: FfxivCharacterData | undefined;
+  if (game.ffxivLodestoneId) {
+    const entry = raw.ffxiv?.[game.ffxivLodestoneId];
+    if (entry && entry.total > 0) {
+      platforms.push({ earned: entry.earned, total: entry.total, platform: 'ffxiv' });
+      ffxivDetail = entry;
+    }
+  }
+
   if (platforms.length === 0) return null;
 
-  const best = platforms.reduce((a, b) => {
+  // Normal "best" is the highest-% platform — the right default
+  // because it surfaces the version of a game where the user has
+  // made the most progress. But Lodestone achievements are a
+  // superset of PSN trophies for FFXIV (PSN only covers main-story
+  // expansion gates), so when FFXIV data is present we pin the
+  // main bar to it. Otherwise the (much higher-%) PSN trophy entry
+  // would dominate and misrepresent the real Lodestone progress.
+  const ffxivPlatform = platforms.find((p) => p.platform === 'ffxiv');
+  const best = ffxivPlatform ?? platforms.reduce((a, b) => {
     const pctA = a.total > 0 ? a.earned / a.total : 0;
     const pctB = b.total > 0 ? b.earned / b.total : 0;
     return pctB > pctA ? b : a;
@@ -140,6 +162,7 @@ export function resolveGameAchievements(
   return {
     platforms,
     best,
+    ffxiv: ffxivDetail,
     updatedAt: raw.updatedAt ?? new Date().toISOString(),
   };
 }
