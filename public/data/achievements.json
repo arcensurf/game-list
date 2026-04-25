@@ -394,7 +394,7 @@
       "title": "FINAL FANTASY XIV Online",
       "earned": 0,
       "total": 0,
-      "playtimeMinutes": 7813
+      "playtimeMinutes": 7923
     },
     "40700": {
       "title": "Machinarium",
@@ -4016,20 +4016,20 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-04-25T01:45:23.246Z",
+  "updatedAt": "2026-04-25T07:09:07.545Z",
   "ffxiv": {
     "21418122": {
-      "earned": 561,
+      "earned": 562,
       "total": 3282,
-      "pointsEarned": 5265,
+      "pointsEarned": 5270,
       "pointsTotal": 31065,
       "categories": [
         {
           "id": 1,
           "name": "Battle",
-          "earned": 129,
+          "earned": 130,
           "total": 681,
-          "pointsEarned": 1085,
+          "pointsEarned": 1090,
           "pointsTotal": 7035
         },
         {
