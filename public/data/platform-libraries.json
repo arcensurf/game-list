@@ -558,7 +558,7 @@
     {
       "id": 230330,
       "title": "FINAL FANTASY® XI: Ultimate Collection Seekers Edition NA",
-      "playtimeMinutes": 2099
+      "playtimeMinutes": 2161
     },
     {
       "id": 234710,
@@ -703,7 +703,7 @@
     {
       "id": 292120,
       "title": "FINAL FANTASY XIII",
-      "playtimeMinutes": 5596
+      "playtimeMinutes": 5602
     },
     {
       "id": 292140,
@@ -1523,7 +1523,7 @@
     {
       "id": 2814990,
       "title": "Screamer",
-      "playtimeMinutes": 213
+      "playtimeMinutes": 215
     },
     {
       "id": 2824660,
@@ -4123,5 +4123,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-04-25T07:06:42.752Z"
+  "updatedAt": "2026-04-26T07:21:10.118Z"
 }
