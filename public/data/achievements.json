@@ -1822,7 +1822,7 @@
       "title": "Parking Garage Rally Circuit",
       "earned": 15,
       "total": 15,
-      "playtimeMinutes": 259
+      "playtimeMinutes": 260
     },
     "2814990": {
       "title": "Screamer",
@@ -1926,7 +1926,7 @@
     "NPWR23141_00": {
       "title": "FINAL FANTASY XIV Online",
       "earned": 82,
-      "total": 224
+      "total": 247
     },
     "NPWR24281_00": {
       "title": "art of rally",
@@ -4016,77 +4016,77 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-04-27T08:14:51.905Z",
+  "updatedAt": "2026-04-28T08:16:26.183Z",
   "ffxiv": {
     "21418122": {
-      "earned": 562,
-      "total": 3282,
-      "pointsEarned": 5270,
-      "pointsTotal": 31065,
+      "earned": 0,
+      "total": 0,
+      "pointsEarned": 0,
+      "pointsTotal": 0,
       "categories": [
         {
           "id": 1,
           "name": "Battle",
-          "earned": 130,
-          "total": 681,
-          "pointsEarned": 1090,
-          "pointsTotal": 7035
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         },
         {
           "id": 2,
           "name": "PvP",
-          "earned": 4,
-          "total": 172,
-          "pointsEarned": 20,
-          "pointsTotal": 1260
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         },
         {
           "id": 3,
           "name": "Character",
-          "earned": 105,
-          "total": 544,
-          "pointsEarned": 540,
-          "pointsTotal": 3805
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         },
         {
           "id": 4,
           "name": "Items",
-          "earned": 22,
-          "total": 635,
-          "pointsEarned": 175,
-          "pointsTotal": 6870
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         },
         {
           "id": 5,
           "name": "Crafting & Gathering",
           "earned": 0,
-          "total": 498,
+          "total": 0,
           "pointsEarned": 0,
-          "pointsTotal": 4550
+          "pointsTotal": 0
         },
         {
           "id": 8,
           "name": "Quests",
-          "earned": 125,
-          "total": 459,
-          "pointsEarned": 1720,
-          "pointsTotal": 4660
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         },
         {
           "id": 11,
           "name": "Exploration",
-          "earned": 168,
-          "total": 221,
-          "pointsEarned": 1680,
-          "pointsTotal": 2215
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         },
         {
           "id": 12,
           "name": "Grand Company",
-          "earned": 8,
-          "total": 72,
-          "pointsEarned": 45,
-          "pointsTotal": 670
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         }
       ]
     }
