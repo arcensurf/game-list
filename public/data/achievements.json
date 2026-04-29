@@ -382,7 +382,7 @@
       "title": "FINAL FANTASY VII (2013)",
       "earned": 8,
       "total": 36,
-      "playtimeMinutes": 866
+      "playtimeMinutes": 962
     },
     "39150": {
       "title": "FINAL FANTASY VIII",
@@ -1894,7 +1894,7 @@
       "title": "FINAL FANTASY VII",
       "earned": 1,
       "total": 31,
-      "playtimeMinutes": 4
+      "playtimeMinutes": 10
     }
   },
   "psn": {
@@ -4016,77 +4016,77 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-04-28T08:16:26.183Z",
+  "updatedAt": "2026-04-29T08:09:07.610Z",
   "ffxiv": {
     "21418122": {
-      "earned": 0,
-      "total": 0,
-      "pointsEarned": 0,
-      "pointsTotal": 0,
+      "earned": 562,
+      "total": 3299,
+      "pointsEarned": 5270,
+      "pointsTotal": 31260,
       "categories": [
         {
           "id": 1,
           "name": "Battle",
-          "earned": 0,
-          "total": 0,
-          "pointsEarned": 0,
-          "pointsTotal": 0
+          "earned": 130,
+          "total": 683,
+          "pointsEarned": 1090,
+          "pointsTotal": 7050
         },
         {
           "id": 2,
           "name": "PvP",
-          "earned": 0,
-          "total": 0,
-          "pointsEarned": 0,
-          "pointsTotal": 0
+          "earned": 4,
+          "total": 172,
+          "pointsEarned": 20,
+          "pointsTotal": 1260
         },
         {
           "id": 3,
           "name": "Character",
-          "earned": 0,
-          "total": 0,
-          "pointsEarned": 0,
-          "pointsTotal": 0
+          "earned": 105,
+          "total": 544,
+          "pointsEarned": 540,
+          "pointsTotal": 3805
         },
         {
           "id": 4,
           "name": "Items",
-          "earned": 0,
-          "total": 0,
-          "pointsEarned": 0,
-          "pointsTotal": 0
+          "earned": 22,
+          "total": 636,
+          "pointsEarned": 175,
+          "pointsTotal": 6890
         },
         {
           "id": 5,
           "name": "Crafting & Gathering",
           "earned": 0,
-          "total": 0,
+          "total": 508,
           "pointsEarned": 0,
-          "pointsTotal": 0
+          "pointsTotal": 4660
         },
         {
           "id": 8,
           "name": "Quests",
-          "earned": 0,
-          "total": 0,
-          "pointsEarned": 0,
-          "pointsTotal": 0
+          "earned": 125,
+          "total": 461,
+          "pointsEarned": 1720,
+          "pointsTotal": 4690
         },
         {
           "id": 11,
           "name": "Exploration",
-          "earned": 0,
-          "total": 0,
-          "pointsEarned": 0,
-          "pointsTotal": 0
+          "earned": 168,
+          "total": 223,
+          "pointsEarned": 1680,
+          "pointsTotal": 2235
         },
         {
           "id": 12,
           "name": "Grand Company",
-          "earned": 0,
-          "total": 0,
-          "pointsEarned": 0,
-          "pointsTotal": 0
+          "earned": 8,
+          "total": 72,
+          "pointsEarned": 45,
+          "pointsTotal": 670
         }
       ]
     }

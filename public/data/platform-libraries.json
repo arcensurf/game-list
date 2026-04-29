@@ -318,7 +318,7 @@
     {
       "id": 39140,
       "title": "FINAL FANTASY VII (2013)",
-      "playtimeMinutes": 866
+      "playtimeMinutes": 962
     },
     {
       "id": 39150,
@@ -1578,7 +1578,7 @@
     {
       "id": 3837340,
       "title": "FINAL FANTASY VII",
-      "playtimeMinutes": 4
+      "playtimeMinutes": 10
     }
   ],
   "psn": [
@@ -4123,5 +4123,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-04-28T08:14:09.477Z"
+  "updatedAt": "2026-04-29T08:06:52.947Z"
 }
