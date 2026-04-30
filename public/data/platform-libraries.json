@@ -328,7 +328,7 @@
     {
       "id": 39210,
       "title": "FINAL FANTASY XIV Online",
-      "playtimeMinutes": 7923
+      "playtimeMinutes": 7990
     },
     {
       "id": 40700,
@@ -993,7 +993,7 @@
     {
       "id": 609150,
       "title": "STAR OCEAN™ - THE LAST HOPE™ - 4K & Full HD Remaster",
-      "playtimeMinutes": 18
+      "playtimeMinutes": 25
     },
     {
       "id": 613830,
@@ -1398,7 +1398,7 @@
     {
       "id": 1776380,
       "title": "STAR OCEAN THE DIVINE FORCE",
-      "playtimeMinutes": 162
+      "playtimeMinutes": 350
     },
     {
       "id": 1794680,
@@ -1538,7 +1538,7 @@
     {
       "id": 2909400,
       "title": "FINAL FANTASY VII REBIRTH",
-      "playtimeMinutes": 7919
+      "playtimeMinutes": 7924
     },
     {
       "id": 3065170,
@@ -4123,5 +4123,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-04-29T08:06:52.947Z"
+  "updatedAt": "2026-04-30T08:10:55.115Z"
 }

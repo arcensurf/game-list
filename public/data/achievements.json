@@ -394,7 +394,7 @@
       "title": "FINAL FANTASY XIV Online",
       "earned": 0,
       "total": 0,
-      "playtimeMinutes": 7923
+      "playtimeMinutes": 7990
     },
     "40700": {
       "title": "Machinarium",
@@ -1192,7 +1192,7 @@
       "title": "STAR OCEAN™ - THE LAST HOPE™ - 4K & Full HD Remaster",
       "earned": 0,
       "total": 46,
-      "playtimeMinutes": 18
+      "playtimeMinutes": 25
     },
     "613830": {
       "title": "CHRONO TRIGGER",
@@ -1676,9 +1676,9 @@
     },
     "1776380": {
       "title": "STAR OCEAN THE DIVINE FORCE",
-      "earned": 1,
+      "earned": 4,
       "total": 53,
-      "playtimeMinutes": 162
+      "playtimeMinutes": 350
     },
     "1794680": {
       "title": "Vampire Survivors",
@@ -1846,7 +1846,7 @@
       "title": "FINAL FANTASY VII REBIRTH",
       "earned": 53,
       "total": 61,
-      "playtimeMinutes": 7919
+      "playtimeMinutes": 7924
     },
     "3065170": {
       "title": "Monster Hunter Wilds Beta test",
@@ -4016,7 +4016,7 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-04-29T08:09:07.610Z",
+  "updatedAt": "2026-04-30T08:13:27.413Z",
   "ffxiv": {
     "21418122": {
       "earned": 562,
