@@ -550,7 +550,7 @@
       "title": "YOU DON'T KNOW JACK",
       "earned": 8,
       "total": 33,
-      "playtimeMinutes": 154
+      "playtimeMinutes": 155
     },
     "99700": {
       "title": "NightSky",
@@ -1678,7 +1678,7 @@
       "title": "STAR OCEAN THE DIVINE FORCE",
       "earned": 4,
       "total": 53,
-      "playtimeMinutes": 350
+      "playtimeMinutes": 389
     },
     "1794680": {
       "title": "Vampire Survivors",
@@ -4016,7 +4016,7 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-04-30T08:13:27.413Z",
+  "updatedAt": "2026-05-01T08:08:41.842Z",
   "ffxiv": {
     "21418122": {
       "earned": 562,
