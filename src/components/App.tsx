@@ -7,19 +7,23 @@ import { useScrollReset } from '../hooks/useScrollReset';
 import { useMastheadFlip } from '../hooks/useMastheadFlip';
 import AlphabetNav from './AlphabetNav';
 import GameGrid from './GameGrid';
+import BacklogList from './BacklogList';
 import AddGameForm from './AddGameForm';
 import PublishButton from './PublishButton';
 import StatsView from './StatsView';
+import StatsOverlay from './StatsOverlay';
 import BottomNav from './BottomNav';
 import type { View } from '../types/view';
 
 export default function App() {
   const [view, setView] = useState<View>('list');
-  const [lightsOn, setLightsOn] = useState(false);
+  const lightsOn = false;
   const [inTransition, setInTransition] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
 
   const gogOnly = view === 'gog';
   const perfectOnly = view === 'perfect';
+  const backlogView = view === 'backlog';
   const statsView = view === 'stats';
   const flatLayout = gogOnly || perfectOnly;
 
@@ -27,9 +31,10 @@ export default function App() {
     undefined,
     gogOnly,
     perfectOnly,
+    backlogView ? 'backlog' : 'beaten',
   );
   const activeLetters = new Set(groups.map((g) => g.letter));
-  const effectiveLightsOn = lightsOn || flatLayout || statsView;
+  const effectiveLightsOn = lightsOn || flatLayout || statsView || backlogView;
 
   const changeView = useCallback((next: View) => {
     flushSync(() => {
@@ -65,12 +70,33 @@ export default function App() {
                 ? 'Games of Games'
                 : perfectOnly
                   ? 'Perfect Games'
-                  : 'games completed'}
+                  : backlogView
+                    ? 'in the backlog'
+                    : 'games completed'}
             </p>
           </div>
           <div className="masthead-face masthead-face--letters">
             {view === 'list' && (
-              <AlphabetNav activeLetters={activeLetters} />
+              <>
+                <AlphabetNav activeLetters={activeLetters} />
+                <div className="masthead-divider" aria-hidden="true" />
+                <button
+                  className="stats-trigger"
+                  onClick={() => setStatsOpen(true)}
+                  aria-label="Open platform stats"
+                >
+                  <svg
+                    viewBox="0 0 16 16"
+                    width="14"
+                    height="14"
+                    aria-hidden="true"
+                  >
+                    <rect x="2" y="9" width="3" height="5" />
+                    <rect x="6.5" y="6" width="3" height="8" />
+                    <rect x="11" y="3" width="3" height="11" />
+                  </svg>
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -89,29 +115,19 @@ export default function App() {
           <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '4rem 0' }}>
             Loading...
           </p>
+        ) : backlogView ? (
+          <BacklogList games={groups.flatMap((g) => g.games)} />
         ) : (
           <GameGrid groups={groups} flat={flatLayout} />
         )}
       </main>
 
-      {!statsView && (
-        <button
-          className={`lights-toggle${effectiveLightsOn ? ' lights-toggle--on' : ''}`}
-          onClick={() => setLightsOn(!lightsOn)}
-          disabled={flatLayout}
-          title={
-            flatLayout
-              ? 'Lights stay on while a filter is active'
-              : effectiveLightsOn
-                ? 'Re-enable the spotlight effect'
-                : 'Turn all the lights on'
-          }
-        >
-          {effectiveLightsOn ? 'Lights On' : 'Lights Off'}
-        </button>
-      )}
-
       <BottomNav view={view} onChange={changeView} />
+      <StatsOverlay
+        open={statsOpen}
+        onClose={() => setStatsOpen(false)}
+        stats={platformStats}
+      />
     </div>
   );
 }

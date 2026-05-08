@@ -73,12 +73,43 @@
   background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  width: 100%;
+  flex: 1;
   min-width: 0;
 }
 
 .masthead .alphabet-nav {
   min-width: 0;
+}
+
+.masthead-divider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 1.5rem;
+  margin: 0 0.5rem;
+  background: var(--border);
+}
+
+.stats-trigger {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.stats-trigger svg {
+  fill: currentColor;
+}
+
+.stats-trigger:hover {
+  color: var(--accent-light);
 }
 
 .masthead h1 {

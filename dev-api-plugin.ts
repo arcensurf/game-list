@@ -102,10 +102,11 @@ export default function devApiPlugin(): Plugin {
 
           if (req.url === '/api/add-game') {
             const body = JSON.parse(await parseBody(req));
-            const { title, subtitle, platforms } = body as {
+            const { title, subtitle, platforms, status } = body as {
               title: string;
               subtitle?: string | null;
               platforms: string[];
+              status?: 'beaten' | 'backlog';
             };
 
             const games = readJson(gamesPath) as GameEntry[];
@@ -159,6 +160,7 @@ export default function devApiPlugin(): Plugin {
               coverOverride: null,
               gameOfGames: null,
               order: insertOrder,
+              ...(status === 'backlog' ? { status: 'backlog' } : {}),
             });
 
             renumberOrders(games);
@@ -305,6 +307,26 @@ export default function devApiPlugin(): Plugin {
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ title, platforms, extras }));
+            return;
+          }
+
+          if (req.url === '/api/mark-beaten') {
+            const body = JSON.parse(await parseBody(req));
+            const { title } = body as { title: string };
+
+            const games = readJson(gamesPath) as GameEntry[];
+            const game = games.find((g) => g.title === title);
+            if (!game) {
+              res.writeHead(404, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: `Game "${title}" not found` }));
+              return;
+            }
+
+            delete game.status;
+            writeJson(gamesPath, games);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true, title }));
             return;
           }
 

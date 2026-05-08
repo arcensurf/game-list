@@ -207,91 +207,170 @@
   color: var(--text-muted);
 }
 
+/* Compact two-step add form: Title + Beaten/Backlog buttons. */
+.add-game-form--compact {
+  max-width: 360px;
+}
+
+.add-game-status-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: stretch;
+}
+
+.add-game-status-actions button {
+  flex: 1;
+  padding: 0.65rem 0.75rem;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition), color var(--transition);
+}
+
+.add-game-status-actions button:hover {
+  border-color: var(--accent);
+  color: var(--accent-light);
+}
+
+.add-game-status-actions button.primary {
+  background: var(--accent);
+  border-color: transparent;
+  color: var(--text-on-dark);
+}
+
+.add-game-status-actions button.primary:hover {
+  background: var(--accent-light);
+  color: var(--text-on-dark);
+}
+
 /* Platform picker */
-.platform-picker-chips {
+/* Platform picker — label + pills sit on one row, search input below. */
+.platform-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.platform-picker-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.5rem;
+}
+
+.platform-pills-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
 }
 
-.platform-chip {
-  font-size: 0.6rem;
-  font-weight: 600;
-  padding: 0.2rem 0.4rem;
-  border-radius: 3px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-family: inherit;
-  transition: all var(--transition);
-}
-
-.platform-chip:hover {
-  border-color: var(--text-muted);
-  color: var(--text);
-}
-
-.platform-chip.selected {
-  color: #fff;
-  border-color: transparent;
-}
-
-.platform-add-btn {
-  margin-top: 0.4rem;
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 0.2rem 0.5rem;
-  border-radius: 3px;
-  border: 1px dashed var(--border);
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.platform-add-btn:hover {
-  border-color: var(--accent);
-  color: var(--text);
-}
-
-.platform-add-row {
-  display: flex;
+.platform-pill {
+  display: inline-flex;
+  align-items: center;
   gap: 0.3rem;
-  margin-top: 0.4rem;
+  padding: 0.15rem 0.35rem 0.15rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 3px;
+  color: #fff;
+  background: var(--text-muted);
 }
 
-.platform-add-row input {
-  flex: 1;
-  padding: 0.25rem 0.4rem;
-  font-size: 0.7rem;
+.platform-pill--custom {
+  background: transparent;
+  color: var(--text);
+  border: 1px dashed var(--accent);
+}
+
+.platform-pill-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: inherit;
+  background: rgba(0, 0, 0, 0.25);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.platform-pill-remove:hover {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.platform-picker-search {
+  position: relative;
+}
+
+.platform-picker-input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
   outline: none;
-  font-family: inherit;
 }
 
-.platform-add-row input:focus {
+.platform-picker-input:focus {
   border-color: var(--accent);
 }
 
-.platform-add-row button {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.7rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: inherit;
+.platform-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem;
+  background: var(--bg-surface);
   border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-muted);
+  border-radius: 4px;
+  max-height: 12rem;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
-.platform-add-row button:first-of-type {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+.platform-suggestions li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.platform-suggestions li.highlighted {
+  background: rgba(var(--accent-glow), 0.2);
+}
+
+.platform-suggestion-swatch {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.platform-picker-warning {
+  margin: 0;
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--text-muted);
 }
 
 .toggle-label {
@@ -309,6 +388,230 @@
   height: 1rem;
   accent-color: var(--accent);
   cursor: pointer;
+}
+
+/* Edit modal — tabs sit beside the title for a compact header. */
+.add-game-form--tabbed {
+  max-width: 480px;
+}
+
+.edit-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.edit-modal-header h2 {
+  margin: 0;
+}
+
+.edit-modal-tabs {
+  display: inline-flex;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px;
+}
+
+.edit-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color var(--transition), background var(--transition);
+}
+
+.edit-tab:hover {
+  color: var(--text);
+}
+
+.edit-tab--active {
+  background: var(--accent);
+  color: var(--text-on-dark);
+}
+
+.edit-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.1rem;
+  padding: 0 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.25);
+  color: inherit;
+  border-radius: 999px;
+}
+
+.edit-tab:not(.edit-tab--active) .edit-tab-badge {
+  background: var(--bg-surface);
+  color: var(--accent);
+}
+
+/* Extras collapsible — header button toggles the textarea. */
+.extras-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.extras-toggle:hover {
+  color: var(--text);
+}
+
+.extras-caret {
+  display: inline-block;
+  transition: transform 0.15s ease;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+
+.extras-caret--open {
+  transform: rotate(90deg);
+}
+
+.extras-toggle-summary {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* Game of Games toggle — gold gradient border + star, mirrors the
+   visual language of GoG cards rather than reading as a generic
+   checkbox. Inactive state is desaturated; flipping on saturates the
+   gradient and brightens the star. */
+.gog-row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.6rem 0.85rem;
+  background-image:
+    linear-gradient(var(--bg-card), var(--bg-card)),
+    linear-gradient(135deg, var(--gold-dim), var(--gold-bright), var(--gold-dim));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  filter: saturate(0.4) brightness(0.85);
+  transition: filter 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gog-row:hover {
+  filter: saturate(0.65) brightness(0.95);
+}
+
+.gog-row--active {
+  filter: none;
+  box-shadow: 0 0 18px rgba(245, 208, 96, 0.25);
+}
+
+.gog-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.gog-checkbox-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+}
+
+.gog-checkbox-hidden:focus-visible + .gog-star {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+.gog-star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  color: var(--gold-dim);
+  transition: color 0.3s ease, transform 0.3s ease, filter 0.3s ease;
+}
+
+.gog-row--active .gog-star {
+  color: var(--gold-bright);
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 4px rgba(245, 208, 96, 0.6));
+}
+
+.gog-label {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gog-tagline {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.gog-tagline:focus {
+  border-color: var(--gold);
+}
+
+/* Tracking tab content. */
+.tracking-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.tracking-empty {
+  margin: 0;
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
 }
 
 .add-game-error {

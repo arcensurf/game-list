@@ -1,86 +1,112 @@
 import { useState } from 'react';
-import PlatformPicker from './PlatformPicker';
+import EditGameModal from './EditGameModal';
+import type { GameStatus, GameWithCover } from '../types/game';
 
 export default function AddGameForm() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
-  const [platforms, setPlatforms] = useState<string[]>([]);
-  const [dlc, setDlc] = useState('');
   const [error, setError] = useState('');
+  const [createdStub, setCreatedStub] = useState<GameWithCover | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = async (status: GameStatus) => {
     setError('');
+    const trimmed = title.trim();
+    if (!trimmed) {
+      setError('Title required');
+      return;
+    }
 
     const res = await fetch('/api/add-game', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        title: title.trim(),
-        platforms,
-        dlc: dlc ? dlc.split(',').map((d) => d.trim()).filter(Boolean) : [],
+        title: trimmed,
+        platforms: [],
+        status,
       }),
     });
 
-    if (res.ok) {
-      setTitle('');
-      setPlatforms([]);
-      setDlc('');
-      setOpen(false);
-      window.dispatchEvent(new Event('games-updated'));
-    } else {
+    if (!res.ok) {
       const data = await res.json();
       setError(data.error || 'Failed to add game');
+      return;
     }
+
+    window.dispatchEvent(new Event('games-updated'));
+    setCreatedStub({
+      title: trimmed,
+      subtitle: null,
+      platforms: [],
+      extras: [],
+      sgdbId: null,
+      coverOverride: null,
+      gameOfGames: null,
+      order: 0,
+      status,
+      coverUrl: null,
+      achievements: null,
+    });
+    setTitle('');
+    setOpen(false);
   };
 
-  if (!open) {
-    return (
+  return (
+    <>
       <button className="add-game-btn" onClick={() => setOpen(true)}>
         + Add Game
       </button>
-    );
-  }
-
-  return (
-    <div className="add-game-modal-backdrop" onClick={() => setOpen(false)}>
-      <form
-        className="add-game-form"
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={handleSubmit}
-      >
-        <h2>Add Game</h2>
-        {error && <p className="add-game-error">{error}</p>}
-        <label>
-          Title
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            autoFocus
-          />
-        </label>
-        <div className="form-field">
-          <span className="form-field-label">Platforms</span>
-          <PlatformPicker selected={platforms} onChange={setPlatforms} />
+      {open && (
+        <div
+          className="add-game-modal-backdrop"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="add-game-form add-game-form--compact"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>Add Game</h2>
+            {error && <p className="add-game-error">{error}</p>}
+            <label>
+              Title
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submit('beaten');
+                  }
+                }}
+                autoFocus
+              />
+            </label>
+            <div className="add-game-status-actions">
+              <button type="button" onClick={() => submit('backlog')}>
+                Add to Backlog
+              </button>
+              <button
+                type="button"
+                className="primary"
+                onClick={() => submit('beaten')}
+              >
+                Add as Beaten
+              </button>
+            </div>
+            <div className="add-game-actions">
+              <button type="button" onClick={() => setOpen(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
-        <label>
-          DLC (comma-separated, optional)
-          <input
-            type="text"
-            value={dlc}
-            onChange={(e) => setDlc(e.target.value)}
-            placeholder="Expansion 1, DLC 2"
-          />
-        </label>
-        <div className="add-game-actions">
-          <button type="button" onClick={() => setOpen(false)}>
-            Cancel
-          </button>
-          <button type="submit">Add</button>
-        </div>
-      </form>
-    </div>
+      )}
+      {createdStub && (
+        <EditGameModal
+          game={createdStub}
+          onClose={() => setCreatedStub(null)}
+        />
+      )}
+    </>
   );
 }

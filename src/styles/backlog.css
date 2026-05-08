@@ -1,0 +1,162 @@
+/* Backlog — vertical list with thumbnail covers */
+.backlog-list {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.backlog-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0.85rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.backlog-row:hover {
+  border-color: rgba(var(--accent-glow), 0.4);
+}
+
+.backlog-cover {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 64px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.backlog-cover-edit {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--accent-light);
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.backlog-row:hover .backlog-cover-edit,
+.backlog-cover-edit:focus-visible {
+  opacity: 1;
+}
+
+.backlog-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.backlog-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.04),
+    rgba(255, 255, 255, 0.01)
+  );
+}
+
+.backlog-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.backlog-title {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.backlog-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.backlog-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+}
+
+.backlog-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Reset external-edit-btn flow so it sits inline with the Beat button
+   instead of blocking full-width like in the grid layout. */
+.backlog-actions .dev-edit-btn--external {
+  display: inline-flex;
+  width: auto;
+  margin-top: 0;
+  font-size: 0.7rem;
+  padding: 0.4rem 0.6rem;
+  letter-spacing: 0.06em;
+}
+
+.backlog-beat-btn {
+  flex-shrink: 0;
+  padding: 0.4rem 0.75rem;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+
+.backlog-beat-btn:hover {
+  background: var(--accent);
+  color: var(--text-on-dark);
+}
+
+.backlog-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 4rem 0;
+  font-family: 'Share Tech', sans-serif;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 500px) {
+  .backlog-row {
+    gap: 0.75rem;
+    padding: 0.5rem 0.6rem;
+  }
+  .backlog-cover {
+    width: 36px;
+    height: 52px;
+  }
+  .backlog-beat-btn {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.65rem;
+  }
+}

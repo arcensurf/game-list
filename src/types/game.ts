@@ -3,6 +3,8 @@ export interface ExtraContent {
   items: string[];
 }
 
+export type GameStatus = 'beaten' | 'backlog';
+
 export interface Game {
   title: string;
   subtitle: string | null;
@@ -12,6 +14,7 @@ export interface Game {
   coverOverride: string | null;
   gameOfGames: string | null;
   order: number;
+  status?: GameStatus;
   steamAppId?: number | null;
   psnNpCommId?: string | null;
   xboxTitleId?: string | null;

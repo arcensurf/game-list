@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import type { Game, CoverMap, AchievementData, GameWithCover, LetterGroup } from '../types/game';
+import type { Game, GameStatus, CoverMap, AchievementData, GameWithCover, LetterGroup } from '../types/game';
 import { getCoverUrl } from '../utils/coverUrl';
 import { buildTitleIndex, resolveGameAchievements } from '../utils/achievementMatch';
 
@@ -22,6 +22,7 @@ export function useGames(
   filter?: string,
   gogOnly?: boolean,
   perfectOnly?: boolean,
+  status: GameStatus = 'beaten',
 ): {
   groups: LetterGroup[];
   totalCount: number;
@@ -61,7 +62,9 @@ export function useGames(
   const titleIndex = useMemo(() => buildTitleIndex(achievementData), [achievementData]);
 
   const result = useMemo(() => {
-    let filtered = games;
+    // Status filter runs first — backlog games never participate in
+    // gog/perfect/stats. Games without a status default to 'beaten'.
+    let filtered = games.filter((g) => (g.status ?? 'beaten') === status);
 
     if (gogOnly) {
       filtered = filtered.filter((g) => g.gameOfGames);
@@ -113,8 +116,8 @@ export function useGames(
       games: groupMap.get(letter)!.sort((a, b) => a.order - b.order),
     }));
 
-    // Platform stats (computed from full list, not filtered)
-    // Merge regional variants of the same console
+    // Platform stats — beaten games only, regardless of view filter.
+    // Merge regional variants of the same console.
     const PLATFORM_ALIASES: Record<string, string> = {
       'Famicom': 'NES + Famicom',
       'NES': 'NES + Famicom',
@@ -123,6 +126,7 @@ export function useGames(
     };
     const platMap = new Map<string, number>();
     for (const g of games) {
+      if ((g.status ?? 'beaten') !== 'beaten') continue;
       for (const p of g.platforms) {
         const key = PLATFORM_ALIASES[p] ?? p;
         platMap.set(key, (platMap.get(key) || 0) + 1);
@@ -133,7 +137,7 @@ export function useGames(
       .sort((a, b) => b.count - a.count);
 
     return { groups, totalCount: withCovers.length, platformStats };
-  }, [games, covers, achievementData, titleIndex, filter, gogOnly, perfectOnly]);
+  }, [games, covers, achievementData, titleIndex, filter, gogOnly, perfectOnly, status]);
 
   return { ...result, loading };
 }

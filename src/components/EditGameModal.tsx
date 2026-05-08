@@ -4,14 +4,6 @@ import type { AchievementData, ExtraContent, GameWithCover, PlatformLibraryEntry
 import { buildTitleIndex, normalizeTitle, PLATFORM_FAMILIES } from '../utils/achievementMatch';
 import PlatformPicker from './PlatformPicker';
 
-// The modal reads achievements.json — the same runtime source of truth
-// the render path uses — so pre-fill / hint lookups stay in lockstep
-// with what's actually being displayed. achievements.json is keyed by
-// platform ID, which is exactly what the override fields store, so
-// lookup by ID is a direct map access. Title lookup goes through the
-// shared buildTitleIndex + normalizeTitle helpers so there's one
-// matching implementation shared with useGames.
-
 const DATA_BASE = import.meta.env.DEV
   ? import.meta.env.BASE_URL
   : 'https://raw.githubusercontent.com/arcensurf/game-list/data/public/';
@@ -45,9 +37,12 @@ export default function EditGameModal({
   game: GameWithCover;
   onClose: () => void;
 }) {
+  const [activeTab, setActiveTab] = useState<'game' | 'tracking'>('game');
   const [title, setTitle] = useState(game.title);
   const [platforms, setPlatforms] = useState<string[]>(game.platforms);
-  const [extras, setExtras] = useState(serializeExtras(game.extras));
+  const initialExtras = serializeExtras(game.extras);
+  const [extras, setExtras] = useState(initialExtras);
+  const [extrasOpen, setExtrasOpen] = useState(initialExtras.length > 0);
   const [isGameOfGames, setIsGameOfGames] = useState(!!game.gameOfGames);
   const [gameOfGamesTagline, setGameOfGamesTagline] = useState(game.gameOfGames || '');
   const [steamAppId, setSteamAppId] = useState(game.steamAppId?.toString() || '');
@@ -59,20 +54,10 @@ export default function EditGameModal({
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  // Precomputed normalized-title → best-entry index. Rebuilt only when
-  // data reloads, queried O(1) on every keystroke as the user edits
-  // the title field. Collisions (two DiRT 3 titleIds normalizing to
-  // "dirt3" — one full game, one demo) resolve to the higher-ranked
-  // entry (completion % for PSN/Xbox, playtime for Steam) via the
-  // shared buildTitleIndex helper.
+  const isBacklog = game.status === 'backlog';
+
   const index = useMemo(() => buildTitleIndex(data), [data]);
 
-  // Helpers to recover the platform-ID of a title-matched entry.
-  // buildTitleIndex returns the entry without its key, but the hint
-  // text needs to show the id alongside the title. Fall back to a
-  // direct scan of the raw map to find which id points at the entry
-  // we matched — iteration is cheap since the map is a few hundred
-  // entries and this only runs when a match is found.
   const findIdForEntry = (
     map: Record<string, PlatformLibraryEntry> | undefined,
     entry: PlatformLibraryEntry,
@@ -82,9 +67,6 @@ export default function EditGameModal({
     return null;
   };
 
-  // Fetch achievements.json once on mount, and auto-fill any empty
-  // override fields whose title matches. The same index drives the
-  // live hints below, so pre-fill and hint pick the same entry.
   useEffect(() => {
     fetch(`${DATA_BASE}data/achievements.json`)
       .then((r) => r.json())
@@ -115,7 +97,6 @@ export default function EditGameModal({
         }
       })
       .catch(() => { /* file may not be published yet — silently degrade */ });
-    // Only runs on mount; game.* are read once for the initial pre-fill.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -132,6 +113,18 @@ export default function EditGameModal({
   const xboxMatch = xboxMatchEntry
     ? { entry: xboxMatchEntry, id: findIdForEntry(data?.xbox, xboxMatchEntry) }
     : null;
+
+  const showSteam = platforms.some((p) => PLATFORM_FAMILIES.steam.has(p));
+  const showPsn = platforms.some((p) => PLATFORM_FAMILIES.psn.has(p));
+  const showXbox = platforms.some((p) => PLATFORM_FAMILIES.xbox.has(p));
+  const showFfxiv = /ffxiv|final fantasy xiv/i.test(title);
+  // Badge counts only IDs whose section is actually rendered, so the
+  // number always matches what the user sees inside the tab.
+  const trackingCount =
+    (showSteam && steamAppId ? 1 : 0) +
+    (showPsn && psnNpCommId ? 1 : 0) +
+    (showXbox && xboxTitleId ? 1 : 0) +
+    (showFfxiv && ffxivLodestoneId ? 1 : 0);
 
   const handleDelete = async () => {
     if (!confirmDelete) {
@@ -166,8 +159,6 @@ export default function EditGameModal({
       body: JSON.stringify({
         originalTitle: game.title,
         title: title.trim(),
-        // Subtitle is no longer edited in the UI; pass existing value
-        // through so saves don't silently wipe it from the data file.
         subtitle: game.subtitle ?? null,
         platforms,
         extras: parseExtras(extras),
@@ -192,123 +183,185 @@ export default function EditGameModal({
   return createPortal(
     <div className="add-game-modal-backdrop" onClick={onClose}>
       <form
-        className="add-game-form"
+        className="add-game-form add-game-form--tabbed"
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
       >
-        <h2>Edit Game</h2>
-        {error && <p className="add-game-error">{error}</p>}
-        <label>
-          Title
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            autoFocus
-          />
-        </label>
-        <div className="form-field">
-          <span className="form-field-label">Platforms</span>
-          <PlatformPicker selected={platforms} onChange={setPlatforms} />
+        <div className="edit-modal-header">
+          <h2>Edit Game</h2>
+          <div className="edit-modal-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'game'}
+              className={`edit-tab${activeTab === 'game' ? ' edit-tab--active' : ''}`}
+              onClick={() => setActiveTab('game')}
+            >
+              Game
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'tracking'}
+              className={`edit-tab${activeTab === 'tracking' ? ' edit-tab--active' : ''}`}
+              onClick={() => setActiveTab('tracking')}
+            >
+              Tracking
+              {trackingCount > 0 && (
+                <span className="edit-tab-badge">{trackingCount}</span>
+              )}
+            </button>
+          </div>
         </div>
-        <label>
-          Extras (one group per line: Label: item1, item2)
-          <textarea
-            value={extras}
-            onChange={(e) => setExtras(e.target.value)}
-            rows={3}
-            placeholder={"DLC: Expansion 1, Expansion 2\nPaths: Route A, Route B"}
-          />
-        </label>
-        {platforms.some((p) => PLATFORM_FAMILIES.steam.has(p)) && (
-          <label>
-            Steam App ID (override)
-            <input
-              type="text"
-              value={steamAppId}
-              onChange={(e) => setSteamAppId(e.target.value)}
-              placeholder="e.g. 400 for Portal"
-            />
-            {steamMatch && (
-              <span className="field-hint">
-                Steam library: {steamMatch.entry.title} · id {steamMatch.id}
-                {(steamMatch.entry.playtimeMinutes ?? 0) >= 60 &&
-                  ` · ${Math.round((steamMatch.entry.playtimeMinutes ?? 0) / 60)}h played`}
-                {steamMatch.entry.total > 0 &&
-                  ` · ${steamMatch.entry.earned}/${steamMatch.entry.total} achievements`}
-              </span>
+        {error && <p className="add-game-error">{error}</p>}
+
+        {activeTab === 'game' && (
+          <>
+            <label>
+              Title
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                autoFocus
+              />
+            </label>
+            <PlatformPicker selected={platforms} onChange={setPlatforms} />
+            {!isBacklog && (
+              <div className="form-field">
+                <button
+                  type="button"
+                  className="extras-toggle"
+                  onClick={() => setExtrasOpen((v) => !v)}
+                  aria-expanded={extrasOpen}
+                >
+                  <span className={`extras-caret${extrasOpen ? ' extras-caret--open' : ''}`}>›</span>
+                  Extras
+                  <span className="extras-toggle-summary">
+                    {extras.trim()
+                      ? `${parseExtras(extras).length} group${parseExtras(extras).length === 1 ? '' : 's'}`
+                      : 'none'}
+                  </span>
+                </button>
+                {extrasOpen && (
+                  <textarea
+                    value={extras}
+                    onChange={(e) => setExtras(e.target.value)}
+                    rows={3}
+                    placeholder={"DLC: Expansion 1, Expansion 2\nPaths: Route A, Route B"}
+                  />
+                )}
+              </div>
             )}
-          </label>
-        )}
-        {platforms.some((p) => PLATFORM_FAMILIES.psn.has(p)) && (
-          <label>
-            PSN NPCOMMID (override)
-            <input
-              type="text"
-              value={psnNpCommId}
-              onChange={(e) => setPsnNpCommId(e.target.value)}
-              placeholder="e.g. NPWR01537_00"
-            />
-            {psnMatch && (
-              <span className="field-hint">
-                PSN library: {psnMatch.entry.title} · {psnMatch.id} ·{' '}
-                {psnMatch.entry.earned}/{psnMatch.entry.total} trophies
-              </span>
+            {!isBacklog && (
+              <div className={`gog-row${isGameOfGames ? ' gog-row--active' : ''}`}>
+                <label className="gog-toggle">
+                  <input
+                    type="checkbox"
+                    className="gog-checkbox-hidden"
+                    checked={isGameOfGames}
+                    onChange={(e) => setIsGameOfGames(e.target.checked)}
+                  />
+                  <span className="gog-star" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path
+                        d="M12 2l2.92 6.91L22 9.97l-5.5 4.92L18.18 22 12 18.27 5.82 22l1.68-7.11L2 9.97l7.08-1.06L12 2z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
+                  <span className="gog-label">Game of Games</span>
+                </label>
+                {isGameOfGames && (
+                  <input
+                    type="text"
+                    className="gog-tagline"
+                    value={gameOfGamesTagline}
+                    onChange={(e) => setGameOfGamesTagline(e.target.value)}
+                    placeholder='Tagline — e.g. The "memorable quote" game'
+                  />
+                )}
+              </div>
             )}
-          </label>
+          </>
         )}
-        {platforms.some((p) => PLATFORM_FAMILIES.xbox.has(p)) && (
-          <label>
-            Xbox Title ID (override)
-            <input
-              type="text"
-              value={xboxTitleId}
-              onChange={(e) => setXboxTitleId(e.target.value)}
-              placeholder="Xbox title ID"
-            />
-            {xboxMatch && (
-              <span className="field-hint">
-                Xbox library: {xboxMatch.entry.title} · {xboxMatch.id} ·{' '}
-                {xboxMatch.entry.earned}/{xboxMatch.entry.total} achievements
-              </span>
+
+        {activeTab === 'tracking' && (
+          <div className="tracking-tab">
+            {!showSteam && !showPsn && !showXbox && !showFfxiv && (
+              <p className="tracking-empty">
+                No tracking applies. Add a Steam, PlayStation, or Xbox platform to surface ID overrides, or include "FFXIV" in the title for a Lodestone field.
+              </p>
             )}
-          </label>
+            {showSteam && (
+              <label>
+                Steam App ID (override)
+                <input
+                  type="text"
+                  value={steamAppId}
+                  onChange={(e) => setSteamAppId(e.target.value)}
+                  placeholder="e.g. 400 for Portal"
+                />
+                {steamMatch && (
+                  <span className="field-hint">
+                    Steam library: {steamMatch.entry.title} · id {steamMatch.id}
+                    {(steamMatch.entry.playtimeMinutes ?? 0) >= 60 &&
+                      ` · ${Math.round((steamMatch.entry.playtimeMinutes ?? 0) / 60)}h played`}
+                    {steamMatch.entry.total > 0 &&
+                      ` · ${steamMatch.entry.earned}/${steamMatch.entry.total} achievements`}
+                  </span>
+                )}
+              </label>
+            )}
+            {showPsn && (
+              <label>
+                PSN NPCOMMID (override)
+                <input
+                  type="text"
+                  value={psnNpCommId}
+                  onChange={(e) => setPsnNpCommId(e.target.value)}
+                  placeholder="e.g. NPWR01537_00"
+                />
+                {psnMatch && (
+                  <span className="field-hint">
+                    PSN library: {psnMatch.entry.title} · {psnMatch.id} ·{' '}
+                    {psnMatch.entry.earned}/{psnMatch.entry.total} trophies
+                  </span>
+                )}
+              </label>
+            )}
+            {showXbox && (
+              <label>
+                Xbox Title ID (override)
+                <input
+                  type="text"
+                  value={xboxTitleId}
+                  onChange={(e) => setXboxTitleId(e.target.value)}
+                  placeholder="Xbox title ID"
+                />
+                {xboxMatch && (
+                  <span className="field-hint">
+                    Xbox library: {xboxMatch.entry.title} · {xboxMatch.id} ·{' '}
+                    {xboxMatch.entry.earned}/{xboxMatch.entry.total} achievements
+                  </span>
+                )}
+              </label>
+            )}
+            {showFfxiv && (
+              <label>
+                FFXIV Lodestone ID (override)
+                <input
+                  type="text"
+                  value={ffxivLodestoneId}
+                  onChange={(e) => setFfxivLodestoneId(e.target.value)}
+                  placeholder="e.g. 21418122"
+                />
+              </label>
+            )}
+          </div>
         )}
-        {/* Only surface the FFXIV override on candidate games — gating by
-            title keeps every other game's edit form from carrying a field
-            that's meaningless to it. There's no auto-detect path: the
-            Lodestone ID is tied to a specific character, not a title. */}
-        {/ffxiv|final fantasy xiv/i.test(title) && (
-          <label>
-            FFXIV Lodestone ID (override)
-            <input
-              type="text"
-              value={ffxivLodestoneId}
-              onChange={(e) => setFfxivLodestoneId(e.target.value)}
-              placeholder="e.g. 21418122"
-            />
-          </label>
-        )}
-        <label className="toggle-label">
-          <input
-            type="checkbox"
-            checked={isGameOfGames}
-            onChange={(e) => setIsGameOfGames(e.target.checked)}
-          />
-          Game of Games
-        </label>
-        {isGameOfGames && (
-          <label>
-            Tagline
-            <input
-              type="text"
-              value={gameOfGamesTagline}
-              onChange={(e) => setGameOfGamesTagline(e.target.value)}
-              placeholder='The "memorable quote" game'
-            />
-          </label>
-        )}
+
         <div className="add-game-actions">
           <button
             type="button"

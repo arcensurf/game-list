@@ -1,3 +1,3 @@
-export type View = 'list' | 'gog' | 'perfect' | 'stats';
+export type View = 'list' | 'gog' | 'perfect' | 'backlog' | 'stats';
 
-export const VIEW_ORDER: View[] = ['list', 'gog', 'perfect'];
+export const VIEW_ORDER: View[] = ['list', 'gog', 'perfect', 'backlog'];
