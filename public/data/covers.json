@@ -1073,5 +1073,30 @@
     "sgdbId": 5435209,
     "file": "please-touch-the-artwork-2.png",
     "fetchedAt": "2026-04-09T16:22:55.247Z"
+  },
+  "Baten Kaitos: Origins": {
+    "sgdbId": 163298,
+    "file": "baten-kaitos-origins.png",
+    "fetchedAt": "2026-05-07T23:45:50.017Z"
+  },
+  "Final Fantasy Type-0": {
+    "sgdbId": 76761,
+    "file": "final-fantasy-type-0.png",
+    "fetchedAt": "2026-05-07T23:47:40.499Z"
+  },
+  "Star Ocean Blue Sphere": {
+    "sgdbId": 583175,
+    "file": "star-ocean-blue-sphere.jpg",
+    "fetchedAt": "2026-05-07T23:51:37.109Z"
+  },
+  "Dirt 4": {
+    "sgdbId": 115070,
+    "file": "dirt-4.png",
+    "fetchedAt": "2026-05-07T23:59:20.725Z"
+  },
+  "Zelda's Adventure": {
+    "sgdbId": 152155,
+    "file": "zelda-s-adventure.png",
+    "fetchedAt": "2026-05-08T00:01:16.192Z"
   }
 }

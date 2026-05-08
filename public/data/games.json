@@ -220,6 +220,23 @@
     "order": 16
   },
   {
+    "title": "Baten Kaitos: Origins",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 17,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
     "title": "Bioshock Infinite",
     "subtitle": null,
     "platforms": [
@@ -229,7 +246,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 17,
+    "order": 18,
     "steamAppId": null,
     "psnNpCommId": "NPWR01478_00",
     "xboxTitleId": null
@@ -251,7 +268,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 18
+    "order": 19
   },
   {
     "title": "Borderlands 2",
@@ -273,7 +290,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 19
+    "order": 20
   },
   {
     "title": "BS Zelda no Densetsu",
@@ -285,7 +302,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 20
+    "order": 21
   },
   {
     "title": "BS Zelda no Densetsu: Inishie no Sekiban",
@@ -297,7 +314,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 21
+    "order": 22
   },
   {
     "title": "Burnout 3: Takedown",
@@ -309,7 +326,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 22
+    "order": 23
   },
   {
     "title": "Burnout Paradise",
@@ -321,7 +338,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 23
+    "order": 24
   },
   {
     "title": "Cadence of Hyrule",
@@ -341,7 +358,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 24
+    "order": 25
   },
   {
     "title": "Castle Crashers",
@@ -353,7 +370,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 25
+    "order": 26
   },
   {
     "title": "Castlevania: Symphony of the Night",
@@ -365,7 +382,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 26
+    "order": 27
   },
   {
     "title": "Child of Light",
@@ -377,7 +394,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 27
+    "order": 28
   },
   {
     "title": "Chrono Cross",
@@ -389,7 +406,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 28
+    "order": 29
   },
   {
     "title": "Chrono Trigger",
@@ -401,7 +418,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 29
+    "order": 30
   },
   {
     "title": "Cocoon",
@@ -413,7 +430,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 30
+    "order": 31
   },
   {
     "title": "Colin McRae Rally 05",
@@ -425,7 +442,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 31
+    "order": 32
   },
   {
     "title": "Crisis Core -Final Fantasy VII-",
@@ -438,7 +455,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 32,
+    "order": 33,
     "steamAppId": null,
     "psnNpCommId": "NPWR29622_00",
     "xboxTitleId": null
@@ -453,7 +470,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 33
+    "order": 34
   },
   {
     "title": "Dirt",
@@ -465,7 +482,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 34
+    "order": 35
   },
   {
     "title": "Dirt 2",
@@ -478,7 +495,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Hey, Watch It!\" game",
-    "order": 35
+    "order": 36
   },
   {
     "title": "Dirt 3",
@@ -498,7 +515,24 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The chill Swedish music game",
-    "order": 36
+    "order": 37
+  },
+  {
+    "title": "Dirt 4",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 38,
+    "status": "backlog",
+    "steamAppId": 421020,
+    "psnNpCommId": "NPWR12336_00",
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
   },
   {
     "title": "Dirt 5",
@@ -520,7 +554,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 37
+    "order": 39
   },
   {
     "title": "Dirt Showdown",
@@ -532,7 +566,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 38
+    "order": 40
   },
   {
     "title": "Dispatch",
@@ -544,7 +578,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"I'm a bitch, my name's Robert, such a bitch whose name is Robert\" game",
-    "order": 39
+    "order": 41
   },
   {
     "title": "Dragon Age Inquisition",
@@ -564,7 +598,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 40,
+    "order": 42,
     "steamAppId": 1222690,
     "psnNpCommId": "NPWR05671_00",
     "xboxTitleId": null
@@ -580,7 +614,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 41
+    "order": 43
   },
   {
     "title": "Dragon Warrior II",
@@ -592,7 +626,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 42
+    "order": 44
   },
   {
     "title": "Dust: An Elysian Tail",
@@ -604,7 +638,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 43
+    "order": 45
   },
   {
     "title": "Earthbound",
@@ -616,7 +650,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 44
+    "order": 46
   },
   {
     "title": "Final Fantasy",
@@ -629,7 +663,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 45,
+    "order": 47,
     "steamAppId": null,
     "psnNpCommId": "NPWR21820_00",
     "xboxTitleId": null
@@ -645,7 +679,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 46
+    "order": 48
   },
   {
     "title": "Final Fantasy III Pixel Remaster",
@@ -657,7 +691,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 47,
+    "order": 49,
     "steamAppId": 1173790,
     "psnNpCommId": null,
     "xboxTitleId": null
@@ -672,7 +706,24 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 48
+    "order": 50
+  },
+  {
+    "title": "Final Fantasy Type-0",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 51,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
   },
   {
     "title": "Final Fantasy V Pixel Remaster",
@@ -684,7 +735,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 49,
+    "order": 52,
     "steamAppId": 1173810,
     "psnNpCommId": null,
     "xboxTitleId": null
@@ -699,7 +750,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Son of a Submariner\" game",
-    "order": 50
+    "order": 53
   },
   {
     "title": "Final Fantasy VII",
@@ -711,7 +762,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 51
+    "order": 54
   },
   {
     "title": "Final Fantasy VII Remake",
@@ -731,7 +782,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"I'm not some princess who needs to be coddled...shit\" game",
-    "order": 52
+    "order": 55
   },
   {
     "title": "Final Fantasy VII Rebirth",
@@ -744,7 +795,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"About the jackass on the bike? He's....A jackass.\" game",
-    "order": 53,
+    "order": 56,
     "steamAppId": 2909400,
     "psnNpCommId": "NPWR35316_00",
     "xboxTitleId": null,
@@ -760,7 +811,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 54
+    "order": 57
   },
   {
     "title": "Final Fantasy IX",
@@ -772,7 +823,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 55
+    "order": 58
   },
   {
     "title": "Final Fantasy X HD Remaster",
@@ -784,7 +835,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 56
+    "order": 59
   },
   {
     "title": "Final Fantasy XII",
@@ -797,7 +848,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 57,
+    "order": 60,
     "steamAppId": null,
     "psnNpCommId": "NPWR11367_00",
     "xboxTitleId": null
@@ -813,7 +864,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"This dampness is damp\" game",
-    "order": 58
+    "order": 61
   },
   {
     "title": "Final Fantasy XIII-2",
@@ -825,7 +876,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 59
+    "order": 62
   },
   {
     "title": "Final Fantasy XIV: A Realm Reborn",
@@ -850,7 +901,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"La Hee\" game",
-    "order": 60,
+    "order": 63,
     "steamAppId": null,
     "psnNpCommId": "NPWR01649_00",
     "xboxTitleId": null,
@@ -874,7 +925,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 61
+    "order": 64
   },
   {
     "title": "Final Fantasy XVI",
@@ -886,7 +937,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 62
+    "order": 65
   },
   {
     "title": "Final Fantasy Adventure",
@@ -898,7 +949,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 63
+    "order": 66
   },
   {
     "title": "Final Fantasy Mystic Quest",
@@ -910,7 +961,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 64
+    "order": 67
   },
   {
     "title": "Final Fantasy Tactics",
@@ -923,7 +974,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"I don't know what's going on, but it's in the contract\" game",
-    "order": 65
+    "order": 68
   },
   {
     "title": "Fire Emblem Awakening",
@@ -935,7 +986,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 66
+    "order": 69
   },
   {
     "title": "Fire Emblem Engage",
@@ -954,7 +1005,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 67
+    "order": 70
   },
   {
     "title": "Fire Emblem Warriors",
@@ -966,7 +1017,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 68
+    "order": 71
   },
   {
     "title": "Fire Emblem Warriors: Three Hopes",
@@ -978,7 +1029,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 69
+    "order": 72
   },
   {
     "title": "Fire Emblem: Shadow Dragon and the Blade of Light",
@@ -990,7 +1041,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 70
+    "order": 73
   },
   {
     "title": "Fire Emblem: Three Houses",
@@ -1009,7 +1060,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"So what, we're all supposed to take turns saying we'll do our best till the very end?\" game",
-    "order": 71
+    "order": 74
   },
   {
     "title": "Forza Horizon",
@@ -1021,7 +1072,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 72
+    "order": 75
   },
   {
     "title": "Gears of War",
@@ -1041,7 +1092,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 73,
+    "order": 76,
     "steamAppId": null,
     "psnNpCommId": null,
     "xboxTitleId": "1297287125"
@@ -1056,7 +1107,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 74
+    "order": 77
   },
   {
     "title": "Golden Sun: The Lost Age",
@@ -1068,7 +1119,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 75
+    "order": 78
   },
   {
     "title": "Grandia II",
@@ -1080,7 +1131,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 76
+    "order": 79
   },
   {
     "title": "Grandia III",
@@ -1092,7 +1143,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 77
+    "order": 80
   },
   {
     "title": "The Great Ace Attorney: Adventures",
@@ -1104,7 +1155,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"You think I won't be able to get you off\" game",
-    "order": 78
+    "order": 81
   },
   {
     "title": "The Great Ace Attorney 2: Resolve",
@@ -1116,7 +1167,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Why can't we have a normal, straightforward killing once in a while\" game",
-    "order": 79
+    "order": 82
   },
   {
     "title": "Grid",
@@ -1128,7 +1179,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 80
+    "order": 83
   },
   {
     "title": "Grid 2",
@@ -1140,7 +1191,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"You've been getting getting a reputation for your aggressive starts\" game",
-    "order": 81
+    "order": 84
   },
   {
     "title": "Guild Wars",
@@ -1159,7 +1210,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 82
+    "order": 85
   },
   {
     "title": "Halo 3",
@@ -1171,7 +1222,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 83
+    "order": 86
   },
   {
     "title": "Halo 3: ODST",
@@ -1183,7 +1234,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 84,
+    "order": 87,
     "steamAppId": null,
     "psnNpCommId": null,
     "xboxTitleId": "1297287287"
@@ -1198,7 +1249,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 85,
+    "order": 88,
     "steamAppId": null,
     "psnNpCommId": null,
     "xboxTitleId": "1480657520"
@@ -1213,7 +1264,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 86
+    "order": 89
   },
   {
     "title": "Hyper Light Drifter",
@@ -1225,7 +1276,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 87
+    "order": 90
   },
   {
     "title": "Hyrule Warriors",
@@ -1237,7 +1288,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 88
+    "order": 91
   },
   {
     "title": "Hyrule Warriors: Age of Calamity",
@@ -1256,7 +1307,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 89
+    "order": 92
   },
   {
     "title": "Hyrule Warriors: Age of Imprisonment",
@@ -1268,7 +1319,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 90
+    "order": 93
   },
   {
     "title": "Infamous Second Son",
@@ -1280,7 +1331,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 91
+    "order": 94
   },
   {
     "title": "Jak and Daxter: The Precursor Legacy",
@@ -1292,7 +1343,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 92
+    "order": 95
   },
   {
     "title": "Journey to the Savage Planet",
@@ -1304,7 +1355,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 93
+    "order": 96
   },
   {
     "title": "Kamiko",
@@ -1316,7 +1367,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 94
+    "order": 97
   },
   {
     "title": "Kirby Air Riders",
@@ -1328,7 +1379,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 95
+    "order": 98
   },
   {
     "title": "Kirby Super Star",
@@ -1340,7 +1391,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 96
+    "order": 99
   },
   {
     "title": "Kirby's Dream Land",
@@ -1352,7 +1403,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 97
+    "order": 100
   },
   {
     "title": "Koudelka",
@@ -1364,7 +1415,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 98
+    "order": 101
   },
   {
     "title": "The Legend of Doom",
@@ -1376,7 +1427,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 99
+    "order": 102
   },
   {
     "title": "The Legend of Zelda",
@@ -1388,7 +1439,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 100
+    "order": 103
   },
   {
     "title": "The Legend of Zelda: A Link Between Worlds",
@@ -1400,7 +1451,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 101
+    "order": 104
   },
   {
     "title": "The Legend of Zelda: A Link to the Past",
@@ -1412,7 +1463,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 102
+    "order": 105
   },
   {
     "title": "The Legend of Zelda: Breath of the Wild",
@@ -1424,7 +1475,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 103
+    "order": 106
   },
   {
     "title": "The Legend of Zelda: Echoes of Wisdom",
@@ -1436,7 +1487,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 104
+    "order": 107
   },
   {
     "title": "The Legend of Zelda: Four Swords Adventures",
@@ -1448,7 +1499,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 105
+    "order": 108
   },
   {
     "title": "The Legend of Zelda: Four Swords Anniversary Edition",
@@ -1460,7 +1511,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 106
+    "order": 109
   },
   {
     "title": "The Legend of Zelda: Link's Awakening",
@@ -1474,7 +1525,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 107
+    "order": 110
   },
   {
     "title": "The Legend of Zelda: Majora's Mask",
@@ -1486,7 +1537,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Your true face... what kind of face is it?\" game",
-    "order": 108
+    "order": 111
   },
   {
     "title": "The Legend of Zelda: Ocarina of Time",
@@ -1498,7 +1549,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 109
+    "order": 112
   },
   {
     "title": "The Legend of Zelda: Oracle of Ages",
@@ -1510,7 +1561,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 110
+    "order": 113
   },
   {
     "title": "The Legend of Zelda: Oracle of Seasons",
@@ -1522,7 +1573,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 111
+    "order": 114
   },
   {
     "title": "The Legend of Zelda: Phantom Hourglass",
@@ -1534,7 +1585,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 112
+    "order": 115
   },
   {
     "title": "The Legend of Zelda: Skyward Sword",
@@ -1546,7 +1597,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 113
+    "order": 116
   },
   {
     "title": "The Legend of Zelda: Spirit Tracks",
@@ -1558,7 +1609,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 114
+    "order": 117
   },
   {
     "title": "The Legend of Zelda: Tears of the Kingdom",
@@ -1570,7 +1621,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 115
+    "order": 118
   },
   {
     "title": "The Legend of Zelda: The Minish Cap",
@@ -1582,7 +1633,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 116
+    "order": 119
   },
   {
     "title": "The Legend of Zelda: Tri Force Heroes",
@@ -1594,7 +1645,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 117
+    "order": 120
   },
   {
     "title": "The Legend of Zelda: Twilight Princess HD",
@@ -1606,7 +1657,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 118
+    "order": 121
   },
   {
     "title": "The Legend of Zelda: Wind Waker HD",
@@ -1618,7 +1669,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 119
+    "order": 122
   },
   {
     "title": "Link: Faces of Evil",
@@ -1630,7 +1681,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 120
+    "order": 123
   },
   {
     "title": "Link's Crossbow Training",
@@ -1642,7 +1693,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 121
+    "order": 124
   },
   {
     "title": "The Little Mermaid",
@@ -1654,7 +1705,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 122
+    "order": 125
   },
   {
     "title": "Lufia 2: Rise of the Sinstrials",
@@ -1666,7 +1717,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"My love is my sword\" game",
-    "order": 123
+    "order": 126
   },
   {
     "title": "Mario Tennis",
@@ -1678,7 +1729,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"You sure are an aggressive player\" game",
-    "order": 124
+    "order": 127
   },
   {
     "title": "Mario Tennis: Power Tour",
@@ -1690,7 +1741,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 125
+    "order": 128
   },
   {
     "title": "Mass Effect",
@@ -1710,7 +1761,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 126
+    "order": 129
   },
   {
     "title": "Mass Effect 2",
@@ -1735,7 +1786,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 127
+    "order": 130
   },
   {
     "title": "The Messenger",
@@ -1747,7 +1798,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Please don't touch the cabinet\" game",
-    "order": 128
+    "order": 131
   },
   {
     "title": "Metroid Dread",
@@ -1759,7 +1810,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Accept your helplessness\" game",
-    "order": 129
+    "order": 132
   },
   {
     "title": "Metroid Fusion",
@@ -1771,7 +1822,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 130
+    "order": 133
   },
   {
     "title": "Metroid II: Return of Samus",
@@ -1784,7 +1835,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 131
+    "order": 134
   },
   {
     "title": "Metroid Other M",
@@ -1796,7 +1847,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 132
+    "order": 135
   },
   {
     "title": "Metroid Prime",
@@ -1809,7 +1860,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Science Team wisely decided to move on afterward\" game",
-    "order": 133
+    "order": 136
   },
   {
     "title": "Metroid Prime 2: Echoes",
@@ -1821,7 +1872,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 134
+    "order": 137
   },
   {
     "title": "Metroid Prime 3: Corruption",
@@ -1833,7 +1884,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 135
+    "order": 138
   },
   {
     "title": "Metroid Prime 4: Beyond",
@@ -1845,7 +1896,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 136
+    "order": 139
   },
   {
     "title": "Metroid: Zero Mission",
@@ -1857,7 +1908,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 137
+    "order": 140
   },
   {
     "title": "Monument Valley",
@@ -1869,7 +1920,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 138
+    "order": 141
   },
   {
     "title": "New Super Mario Bros.",
@@ -1881,7 +1932,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 139
+    "order": 142
   },
   {
     "title": "New Super Mario Bros. U",
@@ -1893,7 +1944,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 140
+    "order": 143
   },
   {
     "title": "New Super Mario Bros. Wii",
@@ -1905,7 +1956,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 141
+    "order": 144
   },
   {
     "title": "Pac-Man Championship Edition DX",
@@ -1917,7 +1968,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 142
+    "order": 145
   },
   {
     "title": "Parking Garage Rally Circuit",
@@ -1929,7 +1980,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The drift game",
-    "order": 143
+    "order": 146
   },
   {
     "title": "Peggle",
@@ -1941,7 +1992,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 144
+    "order": 147
   },
   {
     "title": "Persona 3 FES",
@@ -1960,7 +2011,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 145
+    "order": 148
   },
   {
     "title": "Persona 3: Dancing in Moonlight",
@@ -1972,7 +2023,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 146
+    "order": 149
   },
   {
     "title": "Persona 4 Arena",
@@ -1984,7 +2035,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 147,
+    "order": 150,
     "steamAppId": null,
     "psnNpCommId": "NPWR02915_00",
     "xboxTitleId": null
@@ -1999,7 +2050,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 148,
+    "order": 151,
     "steamAppId": 1602010,
     "psnNpCommId": "NPWR06200_00",
     "xboxTitleId": null
@@ -2014,7 +2065,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"You seem to be pretty good with your hands... Never mind\" game",
-    "order": 149
+    "order": 152
   },
   {
     "title": "Persona 4: Dancing All Night",
@@ -2027,7 +2078,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 150
+    "order": 153
   },
   {
     "title": "Persona 5 Royal",
@@ -2039,7 +2090,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 151
+    "order": 154
   },
   {
     "title": "Persona 5 Strikers",
@@ -2051,7 +2102,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Beep Boop\" game",
-    "order": 152
+    "order": 155
   },
   {
     "title": "Persona 5: Dancing in Starlight",
@@ -2063,7 +2114,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 153
+    "order": 156
   },
   {
     "title": "Please, Touch the Artwork 2",
@@ -2075,7 +2126,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 154,
+    "order": 157,
     "steamAppId": 2600140,
     "psnNpCommId": null,
     "xboxTitleId": null
@@ -2090,7 +2141,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 155
+    "order": 158
   },
   {
     "title": "Portal",
@@ -2102,7 +2153,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 156
+    "order": 159
   },
   {
     "title": "Portal 2",
@@ -2114,7 +2165,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 157
+    "order": 160
   },
   {
     "title": "Rogue Legacy",
@@ -2126,7 +2177,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 158
+    "order": 161
   },
   {
     "title": "The Stanley Parable",
@@ -2138,7 +2189,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 159
+    "order": 162
   },
   {
     "title": "Star Ocean",
@@ -2152,10 +2203,27 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 160,
+    "order": 163,
     "steamAppId": null,
     "psnNpCommId": "NPWR19233_00",
     "xboxTitleId": null
+  },
+  {
+    "title": "Star Ocean Blue Sphere",
+    "subtitle": null,
+    "platforms": [
+      "GBC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 164,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
   },
   {
     "title": "Star Ocean Integrity and Faithlessness",
@@ -2167,7 +2235,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 161,
+    "order": 165,
     "steamAppId": null,
     "psnNpCommId": "NPWR09715_00",
     "xboxTitleId": null
@@ -2182,7 +2250,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The Special Delivery, Coming in Hot! game",
-    "order": 162
+    "order": 166
   },
   {
     "title": "Star Ocean The Last Hope",
@@ -2194,7 +2262,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 163,
+    "order": 167,
     "steamAppId": null,
     "psnNpCommId": "NPWR14334_00",
     "xboxTitleId": "1397819357"
@@ -2210,7 +2278,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 164,
+    "order": 168,
     "steamAppId": null,
     "psnNpCommId": "NPWR35698_00",
     "xboxTitleId": null
@@ -2226,7 +2294,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"The whips on this planet hurt, too\" game",
-    "order": 165,
+    "order": 169,
     "steamAppId": null,
     "psnNpCommId": null,
     "xboxTitleId": null
@@ -2241,7 +2309,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 166
+    "order": 170
   },
   {
     "title": "Star Wars: The Force Unleased II",
@@ -2253,7 +2321,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 167,
+    "order": 171,
     "steamAppId": null,
     "psnNpCommId": null,
     "xboxTitleId": "1279330290"
@@ -2268,7 +2336,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 168,
+    "order": 172,
     "steamAppId": null,
     "psnNpCommId": "NPWR24550_00",
     "xboxTitleId": null
@@ -2283,7 +2351,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 169
+    "order": 173
   },
   {
     "title": "Super Mario 3D World",
@@ -2295,7 +2363,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 170
+    "order": 174
   },
   {
     "title": "Super Mario 64",
@@ -2307,7 +2375,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 171
+    "order": 175
   },
   {
     "title": "Super Mario Bros. 3",
@@ -2319,7 +2387,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 172
+    "order": 176
   },
   {
     "title": "Super Mario Land",
@@ -2331,7 +2399,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 173
+    "order": 177
   },
   {
     "title": "Super Mario Land 2: 6 Golden Coins",
@@ -2343,7 +2411,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 174
+    "order": 178
   },
   {
     "title": "Super Mario Maker 2",
@@ -2355,7 +2423,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 175
+    "order": 179
   },
   {
     "title": "Super Mario Odyssey",
@@ -2367,7 +2435,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 176
+    "order": 180
   },
   {
     "title": "Super Mario RPG",
@@ -2379,7 +2447,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 177
+    "order": 181
   },
   {
     "title": "Super Mario Run",
@@ -2391,7 +2459,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 178
+    "order": 182
   },
   {
     "title": "Super Mario Wonder",
@@ -2403,7 +2471,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 179
+    "order": 183
   },
   {
     "title": "Super Mario World",
@@ -2415,7 +2483,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 180
+    "order": 184
   },
   {
     "title": "Super Metroid",
@@ -2427,7 +2495,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 181
+    "order": 185
   },
   {
     "title": "Super Smash Bros. Ultimate",
@@ -2439,7 +2507,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 182
+    "order": 186
   },
   {
     "title": "Super Woden: Rally Edge",
@@ -2451,7 +2519,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The Cinder Bunny game",
-    "order": 183
+    "order": 187
   },
   {
     "title": "Tales of Arise",
@@ -2463,7 +2531,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 184
+    "order": 188
   },
   {
     "title": "Tales of Vesperia",
@@ -2475,7 +2543,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 185
+    "order": 189
   },
   {
     "title": "Teenage Mutant Ninja Turtles: Shredder's Revenge",
@@ -2487,7 +2555,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 186
+    "order": 190
   },
   {
     "title": "Terranigma",
@@ -2499,7 +2567,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 187
+    "order": 191
   },
   {
     "title": "Tetris Effect: Connected",
@@ -2511,7 +2579,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 188
+    "order": 192
   },
   {
     "title": "Theathrhythm Final Fantasy Final Bar Line",
@@ -2523,7 +2591,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 189
+    "order": 193
   },
   {
     "title": "Thomas was Alone",
@@ -2535,7 +2603,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 190
+    "order": 194
   },
   {
     "title": "Tiny Toon Adventures: Babs' Big Break",
@@ -2547,7 +2615,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 191
+    "order": 195
   },
   {
     "title": "Turnip Boy does Tax Evasion",
@@ -2559,7 +2627,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 192
+    "order": 196
   },
   {
     "title": "Uncharted: Drake's Fortune",
@@ -2571,7 +2639,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 193
+    "order": 197
   },
   {
     "title": "Uncharted 2: Among Thieves",
@@ -2583,7 +2651,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 194
+    "order": 198
   },
   {
     "title": "Vampire Survivors",
@@ -2595,7 +2663,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 195
+    "order": 199
   },
   {
     "title": "VVVVVV",
@@ -2607,7 +2675,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 196
+    "order": 200
   },
   {
     "title": "Warriors Abyss",
@@ -2619,7 +2687,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 197
+    "order": 201
   },
   {
     "title": "Xenoblade Chronicles",
@@ -2639,7 +2707,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 198
+    "order": 202
   },
   {
     "title": "Xenoblade Chronicles 2",
@@ -2658,7 +2726,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Think you can take me?\" game",
-    "order": 199
+    "order": 203
   },
   {
     "title": "Xenoblade Chronicles 3",
@@ -2677,7 +2745,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"...and I was the MVP. You were all thinking it\" game",
-    "order": 200
+    "order": 204
   },
   {
     "title": "Xenoblade Chronicles X",
@@ -2697,7 +2765,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 201
+    "order": 205
   },
   {
     "title": "Xenogears",
@@ -2709,7 +2777,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 202
+    "order": 206
   },
   {
     "title": "Xenosaga Episode I: Der Wille zur Macht",
@@ -2721,7 +2789,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 203
+    "order": 207
   },
   {
     "title": "Xenosaga Episode II: Jenseits von Gut und Bose",
@@ -2733,7 +2801,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 204
+    "order": 208
   },
   {
     "title": "Xenosaga Episode III: Also sprach Zarathustra",
@@ -2745,7 +2813,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 205
+    "order": 209
   },
   {
     "title": "Zelda",
@@ -2757,7 +2825,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 206
+    "order": 210
   },
   {
     "title": "Zelda II: The Adventure of Link",
@@ -2769,7 +2837,24 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"I am Error\" game",
-    "order": 207
+    "order": 211
+  },
+  {
+    "title": "Zelda's Adventure",
+    "subtitle": null,
+    "platforms": [
+      "CD-i"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 212,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
   },
   {
     "title": "Zelda: The Wand of Gamelon",
@@ -2781,6 +2866,6 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 208
+    "order": 213
   }
 ]
