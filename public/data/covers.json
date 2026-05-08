@@ -1098,5 +1098,45 @@
     "sgdbId": 152155,
     "file": "zelda-s-adventure.png",
     "fetchedAt": "2026-05-08T00:01:16.192Z"
+  },
+  "Jak II": {
+    "sgdbId": 384902,
+    "file": "jak-ii.png",
+    "fetchedAt": "2026-05-08T00:02:21.680Z"
+  },
+  "Burnout Revenge": {
+    "sgdbId": 104350,
+    "file": "burnout-revenge.png",
+    "fetchedAt": "2026-05-08T00:02:58.822Z"
+  },
+  "Mass Effect 3": {
+    "sgdbId": 44684,
+    "file": "mass-effect-3.png",
+    "fetchedAt": "2026-05-08T00:03:46.120Z"
+  },
+  "Grid Legends": {
+    "sgdbId": 398052,
+    "file": "grid-legends.png",
+    "fetchedAt": "2026-05-08T00:04:17.838Z"
+  },
+  "Crosscode": {
+    "sgdbId": 130687,
+    "file": "crosscode.png",
+    "fetchedAt": "2026-05-08T00:05:11.193Z"
+  },
+  "Lunar 2: Eternal BLue": {
+    "sgdbId": 438037,
+    "file": "lunar-2-eternal-blue.jpg",
+    "fetchedAt": "2026-05-08T00:05:47.036Z"
+  },
+  "Suikoden": {
+    "sgdbId": 163235,
+    "file": "suikoden.png",
+    "fetchedAt": "2026-05-08T00:06:30.991Z"
+  },
+  "JDM: Japanese Drift Master": {
+    "sgdbId": 713197,
+    "file": "jdm-japanese-drift-master.jpg",
+    "fetchedAt": "2026-05-08T00:06:36.350Z"
   }
 }
