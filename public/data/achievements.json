@@ -1052,9 +1052,9 @@
     },
     "421020": {
       "title": "DiRT 4",
-      "earned": 16,
+      "earned": 23,
       "total": 48,
-      "playtimeMinutes": 581
+      "playtimeMinutes": 915
     },
     "422810": {
       "title": "River City Ransom: Underground",
@@ -4016,7 +4016,7 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-05-09T07:56:16.846Z",
+  "updatedAt": "2026-05-10T08:06:52.127Z",
   "ffxiv": {
     "21418122": {
       "earned": 562,
