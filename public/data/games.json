@@ -2268,6 +2268,22 @@
     "xboxTitleId": null
   },
   {
+    "title": "Pokemon Pokopia",
+    "subtitle": null,
+    "platforms": [
+      "Switch 2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 166,
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
     "title": "Pokemon: Blue Version",
     "subtitle": null,
     "platforms": [
@@ -2277,7 +2293,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 166
+    "order": 167
   },
   {
     "title": "Portal",
@@ -2289,7 +2305,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 167
+    "order": 168
   },
   {
     "title": "Portal 2",
@@ -2301,7 +2317,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 168
+    "order": 169
   },
   {
     "title": "Rogue Legacy",
@@ -2313,7 +2329,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 169
+    "order": 170
   },
   {
     "title": "The Stanley Parable",
@@ -2325,7 +2341,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 170
+    "order": 171
   },
   {
     "title": "Star Ocean",
@@ -2339,7 +2355,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 171,
+    "order": 172,
     "steamAppId": null,
     "psnNpCommId": "NPWR19233_00",
     "xboxTitleId": null
@@ -2354,7 +2370,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 172,
+    "order": 173,
     "status": "backlog",
     "steamAppId": null,
     "psnNpCommId": null,
@@ -2371,7 +2387,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 173,
+    "order": 174,
     "steamAppId": null,
     "psnNpCommId": "NPWR09715_00",
     "xboxTitleId": null
@@ -2386,7 +2402,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The Special Delivery, Coming in Hot! game",
-    "order": 174
+    "order": 175
   },
   {
     "title": "Star Ocean The Last Hope",
@@ -2398,7 +2414,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 175,
+    "order": 176,
     "steamAppId": null,
     "psnNpCommId": "NPWR14334_00",
     "xboxTitleId": "1397819357"
@@ -2414,7 +2430,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 176,
+    "order": 177,
     "steamAppId": null,
     "psnNpCommId": "NPWR35698_00",
     "xboxTitleId": null
@@ -2430,7 +2446,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"The whips on this planet hurt, too\" game",
-    "order": 177,
+    "order": 178,
     "steamAppId": null,
     "psnNpCommId": null,
     "xboxTitleId": null
@@ -2445,7 +2461,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 178
+    "order": 179
   },
   {
     "title": "Star Wars: The Force Unleased II",
@@ -2457,7 +2473,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 179,
+    "order": 180,
     "steamAppId": null,
     "psnNpCommId": null,
     "xboxTitleId": "1279330290"
@@ -2472,7 +2488,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 180,
+    "order": 181,
     "steamAppId": null,
     "psnNpCommId": "NPWR24550_00",
     "xboxTitleId": null
@@ -2487,7 +2503,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 181,
+    "order": 182,
     "status": "backlog",
     "steamAppId": null,
     "psnNpCommId": null,
@@ -2504,7 +2520,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 182
+    "order": 183
   },
   {
     "title": "Super Mario 3D World",
@@ -2516,7 +2532,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 183
+    "order": 184
   },
   {
     "title": "Super Mario 64",
@@ -2528,7 +2544,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 184
+    "order": 185
   },
   {
     "title": "Super Mario Bros. 3",
@@ -2540,7 +2556,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 185
+    "order": 186
   },
   {
     "title": "Super Mario Land",
@@ -2552,7 +2568,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 186
+    "order": 187
   },
   {
     "title": "Super Mario Land 2: 6 Golden Coins",
@@ -2564,7 +2580,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 187
+    "order": 188
   },
   {
     "title": "Super Mario Maker 2",
@@ -2576,7 +2592,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 188
+    "order": 189
   },
   {
     "title": "Super Mario Odyssey",
@@ -2588,7 +2604,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 189
+    "order": 190
   },
   {
     "title": "Super Mario RPG",
@@ -2600,7 +2616,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 190
+    "order": 191
   },
   {
     "title": "Super Mario Run",
@@ -2612,7 +2628,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 191
+    "order": 192
   },
   {
     "title": "Super Mario Wonder",
@@ -2624,7 +2640,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 192
+    "order": 193
   },
   {
     "title": "Super Mario World",
@@ -2636,7 +2652,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 193
+    "order": 194
   },
   {
     "title": "Super Metroid",
@@ -2648,7 +2664,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 194
+    "order": 195
   },
   {
     "title": "Super Smash Bros. Ultimate",
@@ -2660,7 +2676,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 195
+    "order": 196
   },
   {
     "title": "Super Woden: Rally Edge",
@@ -2672,7 +2688,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The Cinder Bunny game",
-    "order": 196
+    "order": 197
   },
   {
     "title": "Tales of Arise",
@@ -2684,7 +2700,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 197
+    "order": 198
   },
   {
     "title": "Tales of Vesperia",
@@ -2696,7 +2712,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 198
+    "order": 199
   },
   {
     "title": "Teenage Mutant Ninja Turtles: Shredder's Revenge",
@@ -2708,7 +2724,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 199
+    "order": 200
   },
   {
     "title": "Terranigma",
@@ -2720,7 +2736,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 200
+    "order": 201
   },
   {
     "title": "Tetris Effect: Connected",
@@ -2732,7 +2748,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 201
+    "order": 202
   },
   {
     "title": "Theathrhythm Final Fantasy Final Bar Line",
@@ -2744,7 +2760,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 202
+    "order": 203
   },
   {
     "title": "Thomas was Alone",
@@ -2756,7 +2772,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 203
+    "order": 204
   },
   {
     "title": "Tiny Toon Adventures: Babs' Big Break",
@@ -2768,7 +2784,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 204
+    "order": 205
   },
   {
     "title": "Turnip Boy does Tax Evasion",
@@ -2780,7 +2796,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 205
+    "order": 206
   },
   {
     "title": "Uncharted: Drake's Fortune",
@@ -2792,7 +2808,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 206
+    "order": 207
   },
   {
     "title": "Uncharted 2: Among Thieves",
@@ -2804,7 +2820,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 207
+    "order": 208
   },
   {
     "title": "Vampire Survivors",
@@ -2816,7 +2832,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 208
+    "order": 209
   },
   {
     "title": "VVVVVV",
@@ -2828,7 +2844,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 209
+    "order": 210
   },
   {
     "title": "Warriors Abyss",
@@ -2840,7 +2856,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 210
+    "order": 211
   },
   {
     "title": "Xenoblade Chronicles",
@@ -2860,7 +2876,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 211
+    "order": 212
   },
   {
     "title": "Xenoblade Chronicles 2",
@@ -2879,7 +2895,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Think you can take me?\" game",
-    "order": 212
+    "order": 213
   },
   {
     "title": "Xenoblade Chronicles 3",
@@ -2898,7 +2914,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"...and I was the MVP. You were all thinking it\" game",
-    "order": 213
+    "order": 214
   },
   {
     "title": "Xenoblade Chronicles X",
@@ -2918,7 +2934,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 214
+    "order": 215
   },
   {
     "title": "Xenogears",
@@ -2930,7 +2946,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 215
+    "order": 216
   },
   {
     "title": "Xenosaga Episode I: Der Wille zur Macht",
@@ -2942,7 +2958,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 216
+    "order": 217
   },
   {
     "title": "Xenosaga Episode II: Jenseits von Gut und Bose",
@@ -2954,7 +2970,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 217
+    "order": 218
   },
   {
     "title": "Xenosaga Episode III: Also sprach Zarathustra",
@@ -2966,7 +2982,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 218
+    "order": 219
   },
   {
     "title": "Zelda",
@@ -2978,7 +2994,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 219
+    "order": 220
   },
   {
     "title": "Zelda II: The Adventure of Link",
@@ -2990,7 +3006,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"I am Error\" game",
-    "order": 220
+    "order": 221
   },
   {
     "title": "Zelda's Adventure",
@@ -3002,7 +3018,7 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 221,
+    "order": 222,
     "status": "backlog",
     "steamAppId": null,
     "psnNpCommId": null,
@@ -3019,6 +3035,6 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 222
+    "order": 223
   }
 ]
