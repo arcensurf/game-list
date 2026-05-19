@@ -670,7 +670,7 @@
       "title": "FINAL FANTASY® XI: Ultimate Collection Seekers Edition NA",
       "earned": 0,
       "total": 0,
-      "playtimeMinutes": 2161
+      "playtimeMinutes": 2259
     },
     "234710": {
       "title": "Poker Night 2",
@@ -1793,6 +1793,12 @@
       "earned": 0,
       "total": 30,
       "playtimeMinutes": 0
+    },
+    "2483190": {
+      "title": "Forza Horizon 6",
+      "earned": 19,
+      "total": 57,
+      "playtimeMinutes": 439
     },
     "2494780": {
       "title": "#DRIVE Rally",
@@ -4016,7 +4022,7 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-05-18T09:52:46.361Z",
+  "updatedAt": "2026-05-19T09:35:07.522Z",
   "ffxiv": {
     "21418122": {
       "earned": 562,

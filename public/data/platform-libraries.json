@@ -558,7 +558,7 @@
     {
       "id": 230330,
       "title": "FINAL FANTASY® XI: Ultimate Collection Seekers Edition NA",
-      "playtimeMinutes": 2161
+      "playtimeMinutes": 2259
     },
     {
       "id": 234710,
@@ -1494,6 +1494,11 @@
       "id": 2401970,
       "title": "Ace Attorney Investigations Collection",
       "playtimeMinutes": 0
+    },
+    {
+      "id": 2483190,
+      "title": "Forza Horizon 6",
+      "playtimeMinutes": 439
     },
     {
       "id": 2494780,
@@ -4123,5 +4128,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-05-18T09:50:28.219Z"
+  "updatedAt": "2026-05-19T09:32:54.662Z"
 }
