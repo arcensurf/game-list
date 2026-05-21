@@ -3090,6 +3090,12 @@
       "total": 31
     },
     {
+      "id": "943719970",
+      "title": "GRID",
+      "earned": 0,
+      "total": 38
+    },
+    {
       "id": "1129121873",
       "title": "GRID Autosport",
       "earned": 11,
@@ -4128,5 +4134,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-05-20T08:57:51.347Z"
+  "updatedAt": "2026-05-21T09:28:26.080Z"
 }
