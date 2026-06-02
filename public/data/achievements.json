@@ -1344,6 +1344,12 @@
       "total": 14,
       "playtimeMinutes": 0
     },
+    "858710": {
+      "title": "Gravity Circuit",
+      "earned": 0,
+      "total": 53,
+      "playtimeMinutes": 0
+    },
     "890720": {
       "title": "In Other Waters",
       "earned": 0,
@@ -4027,77 +4033,77 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-06-01T11:22:45.987Z",
+  "updatedAt": "2026-06-02T10:14:29.500Z",
   "ffxiv": {
     "21418122": {
-      "earned": 562,
-      "total": 3299,
-      "pointsEarned": 5270,
-      "pointsTotal": 31260,
+      "earned": 0,
+      "total": 0,
+      "pointsEarned": 0,
+      "pointsTotal": 0,
       "categories": [
         {
           "id": 1,
           "name": "Battle",
-          "earned": 130,
-          "total": 683,
-          "pointsEarned": 1090,
-          "pointsTotal": 7050
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         },
         {
           "id": 2,
           "name": "PvP",
-          "earned": 4,
-          "total": 172,
-          "pointsEarned": 20,
-          "pointsTotal": 1260
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         },
         {
           "id": 3,
           "name": "Character",
-          "earned": 105,
-          "total": 544,
-          "pointsEarned": 540,
-          "pointsTotal": 3805
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         },
         {
           "id": 4,
           "name": "Items",
-          "earned": 22,
-          "total": 636,
-          "pointsEarned": 175,
-          "pointsTotal": 6890
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         },
         {
           "id": 5,
           "name": "Crafting & Gathering",
           "earned": 0,
-          "total": 508,
+          "total": 0,
           "pointsEarned": 0,
-          "pointsTotal": 4660
+          "pointsTotal": 0
         },
         {
           "id": 8,
           "name": "Quests",
-          "earned": 125,
-          "total": 461,
-          "pointsEarned": 1720,
-          "pointsTotal": 4690
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         },
         {
           "id": 11,
           "name": "Exploration",
-          "earned": 168,
-          "total": 223,
-          "pointsEarned": 1680,
-          "pointsTotal": 2235
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         },
         {
           "id": 12,
           "name": "Grand Company",
-          "earned": 8,
-          "total": 72,
-          "pointsEarned": 45,
-          "pointsTotal": 670
+          "earned": 0,
+          "total": 0,
+          "pointsEarned": 0,
+          "pointsTotal": 0
         }
       ]
     }
