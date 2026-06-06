@@ -1368,7 +1368,7 @@
     {
       "id": 1462040,
       "title": "FINAL FANTASY VII REMAKE INTERGRADE",
-      "playtimeMinutes": 461
+      "playtimeMinutes": 479
     },
     {
       "id": 1462810,
@@ -1548,7 +1548,7 @@
     {
       "id": 2909400,
       "title": "FINAL FANTASY VII REBIRTH",
-      "playtimeMinutes": 8114
+      "playtimeMinutes": 8122
     },
     {
       "id": 3065170,
@@ -4139,5 +4139,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-06-05T09:36:32.649Z"
+  "updatedAt": "2026-06-06T08:27:30.086Z"
 }
