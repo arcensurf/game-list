@@ -1640,9 +1640,9 @@
     },
     "1462040": {
       "title": "FINAL FANTASY VII REMAKE INTERGRADE",
-      "earned": 7,
+      "earned": 10,
       "total": 63,
-      "playtimeMinutes": 479
+      "playtimeMinutes": 517
     },
     "1462810": {
       "title": "WRC 10 FIA World Rally Championship",
@@ -1858,7 +1858,7 @@
       "title": "FINAL FANTASY VII REBIRTH",
       "earned": 55,
       "total": 61,
-      "playtimeMinutes": 8122
+      "playtimeMinutes": 8167
     },
     "3065170": {
       "title": "Monster Hunter Wilds Beta test",
@@ -4033,7 +4033,7 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-06-06T08:29:48.586Z",
+  "updatedAt": "2026-06-07T08:50:40.083Z",
   "ffxiv": {
     "21418122": {
       "earned": 562,
