@@ -625,7 +625,7 @@
       "playtimeMinutes": 0
     },
     "208140": {
-      "title": "ENDLESS™ Space - Definitive Edition",
+      "title": "ENDLESS Space™ - Definitive Edition",
       "earned": 0,
       "total": 93,
       "playtimeMinutes": 0
@@ -823,7 +823,7 @@
       "playtimeMinutes": 2
     },
     "289130": {
-      "title": "ENDLESS™ Legend",
+      "title": "ENDLESS Legend™",
       "earned": 2,
       "total": 139,
       "playtimeMinutes": 154
@@ -1027,7 +1027,7 @@
       "playtimeMinutes": 108
     },
     "392110": {
-      "title": "ENDLESS™ Space 2",
+      "title": "ENDLESS Space™ 2",
       "earned": 0,
       "total": 115,
       "playtimeMinutes": 198
@@ -1579,7 +1579,7 @@
       "playtimeMinutes": 0
     },
     "1244090": {
-      "title": "Sea of Stars",
+      "title": "Sea of Stars: Sunset Edition",
       "earned": 0,
       "total": 54,
       "playtimeMinutes": 1
@@ -4033,7 +4033,7 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-06-08T10:27:50.464Z",
+  "updatedAt": "2026-06-09T09:33:24.604Z",
   "ffxiv": {
     "21418122": {
       "earned": 562,

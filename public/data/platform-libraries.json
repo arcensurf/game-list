@@ -522,7 +522,7 @@
     },
     {
       "id": 208140,
-      "title": "ENDLESS™ Space - Definitive Edition",
+      "title": "ENDLESS Space™ - Definitive Edition",
       "playtimeMinutes": 0
     },
     {
@@ -687,7 +687,7 @@
     },
     {
       "id": 289130,
-      "title": "ENDLESS™ Legend",
+      "title": "ENDLESS Legend™",
       "playtimeMinutes": 154
     },
     {
@@ -857,7 +857,7 @@
     },
     {
       "id": 392110,
-      "title": "ENDLESS™ Space 2",
+      "title": "ENDLESS Space™ 2",
       "playtimeMinutes": 198
     },
     {
@@ -1317,7 +1317,7 @@
     },
     {
       "id": 1244090,
-      "title": "Sea of Stars",
+      "title": "Sea of Stars: Sunset Edition",
       "playtimeMinutes": 1
     },
     {
@@ -4139,5 +4139,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-06-08T10:25:22.355Z"
+  "updatedAt": "2026-06-09T09:31:03.733Z"
 }
