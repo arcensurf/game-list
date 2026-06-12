@@ -1858,7 +1858,7 @@
       "title": "FINAL FANTASY VII REBIRTH",
       "earned": 55,
       "total": 61,
-      "playtimeMinutes": 8167
+      "playtimeMinutes": 8170
     },
     "3065170": {
       "title": "Monster Hunter Wilds Beta test",
@@ -3917,11 +3917,6 @@
       "earned": 7,
       "total": 12
     },
-    "1480657195": {
-      "title": "Merv Griffin's Xwords",
-      "earned": 2,
-      "total": 12
-    },
     "1480657209": {
       "title": "FLOCK!",
       "earned": 2,
@@ -4033,7 +4028,7 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-06-11T10:15:48.866Z",
+  "updatedAt": "2026-06-12T10:03:46.062Z",
   "ffxiv": {
     "21418122": {
       "earned": 562,

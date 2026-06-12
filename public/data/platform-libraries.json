@@ -1548,7 +1548,7 @@
     {
       "id": 2909400,
       "title": "FINAL FANTASY VII REBIRTH",
-      "playtimeMinutes": 8167
+      "playtimeMinutes": 8170
     },
     {
       "id": 3065170,
@@ -3527,12 +3527,6 @@
       "total": 47
     },
     {
-      "id": "1480657195",
-      "title": "Merv Griffin's Xwords",
-      "earned": 2,
-      "total": 12
-    },
-    {
       "id": "1480656995",
       "title": "Sonic The Hedgehog 2",
       "earned": 2,
@@ -4139,5 +4133,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-06-11T10:13:29.622Z"
+  "updatedAt": "2026-06-12T10:01:19.334Z"
 }
