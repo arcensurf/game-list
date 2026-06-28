@@ -1606,7 +1606,7 @@
       "title": "GRID Legends",
       "earned": 15,
       "total": 90,
-      "playtimeMinutes": 315
+      "playtimeMinutes": 327
     },
     "1318690": {
       "title": "shapez",
@@ -1804,7 +1804,7 @@
       "title": "Forza Horizon 6",
       "earned": 19,
       "total": 57,
-      "playtimeMinutes": 454
+      "playtimeMinutes": 458
     },
     "2494780": {
       "title": "#DRIVE Rally",
@@ -1834,7 +1834,7 @@
       "title": "Parking Garage Rally Circuit",
       "earned": 15,
       "total": 15,
-      "playtimeMinutes": 260
+      "playtimeMinutes": 263
     },
     "2814990": {
       "title": "Screamer",
@@ -4033,7 +4033,7 @@
       "total": 20
     }
   },
-  "updatedAt": "2026-06-27T08:31:39.817Z",
+  "updatedAt": "2026-06-28T08:46:27.331Z",
   "ffxiv": {
     "21418122": {
       "earned": 562,

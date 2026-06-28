@@ -1338,7 +1338,7 @@
     {
       "id": 1307710,
       "title": "GRID Legends",
-      "playtimeMinutes": 315
+      "playtimeMinutes": 327
     },
     {
       "id": 1318690,
@@ -1503,7 +1503,7 @@
     {
       "id": 2483190,
       "title": "Forza Horizon 6",
-      "playtimeMinutes": 454
+      "playtimeMinutes": 458
     },
     {
       "id": 2494780,
@@ -1528,7 +1528,7 @@
     {
       "id": 2737300,
       "title": "Parking Garage Rally Circuit",
-      "playtimeMinutes": 260
+      "playtimeMinutes": 263
     },
     {
       "id": 2814990,
@@ -4139,5 +4139,5 @@
       "total": 12
     }
   ],
-  "updatedAt": "2026-06-27T08:29:22.620Z"
+  "updatedAt": "2026-06-28T08:44:11.155Z"
 }
