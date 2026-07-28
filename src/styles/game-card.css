@@ -65,6 +65,46 @@
   100% { background-position: 0 0; }
 }
 
+/* Pause every looping animation on a card that's off screen — the grain
+   above, plus the Game of Games pulse and foil drift in game-of-games.css.
+   Ungated, that's 224 cards repainting a noise texture five times a second
+   whether or not you can see them, which is the single biggest thing making
+   the page crawl on mobile. Every animation in card-hud.css is already gated
+   behind :hover/.info-open for exactly this reason; these are the ones that
+   had no gate.
+
+   animation-play-state rather than animation: none, because the GoG rules
+   pack the looping animation into the same shorthand as the reveal fade
+   (`animation: card-fade-in ..., gog-pulse ...`) — unsetting it there would
+   mean restructuring both rules and risking the reveal. Pausing leaves every
+   animation declaration alone and just stops the clock.
+
+   Scoped tightly on purpose. ::after carries nothing but the infinite grain,
+   so pausing it is free of consequences and is where nearly all the win is
+   (224 elements). The card element itself is only paused for Game of Games
+   cards, because they're the only ones with a looping animation up there —
+   for the other ~195 the shorthand holds just card-fade-in, so pausing them
+   would buy nothing while putting the animation that takes a card from
+   opacity 0 to visible behind an attribute. Not worth the exposure.
+
+   The 29 GoG cards do have their reveal fade paused as a side effect, which
+   is safe by construction: the in-view observer's margin (200px) is strictly
+   wider than the reveal observer's (100px), so a card can never be .revealed
+   without already being [data-in-view], and .revealed arrives later anyway —
+   it goes through React state, while data-in-view is set synchronously in
+   the observer callback.
+
+   Deliberately not applied to the cover img, whose fade-in/lock-on are
+   one-shot and can legitimately be mid-flight while the card sits outside the
+   reveal margin.
+
+   data-in-view is set imperatively by a shared IntersectionObserver in
+   GameCard.tsx. */
+.game-card:not([data-in-view])::after,
+.game-card.game-of-games:not([data-in-view]) {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .game-card::after { animation: none; }
 }

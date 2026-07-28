@@ -1,5 +1,17 @@
 import { useEffect } from 'react';
 
+// One card's worth of the lookups the update loop used to redo every frame.
+// `ref` is what we measure (the cover, so taller Game of Games cards don't
+// compute a lower center than their row-mates); `target` is what the value
+// lands on (the wrapper, so siblings like .achievement-slot inherit it).
+// Both fall back to the card itself — flat views (gog/perfect) render cards
+// without a .card-wrapper, and a card can be measured before its cover exists.
+type TrackedCard = {
+  card: HTMLElement;
+  ref: HTMLElement;
+  target: HTMLElement;
+};
+
 // Updates each .game-card's --card-dim based on distance from viewport
 // center (0 = fully lit, 1 = fully dim). CSS derives brightness,
 // saturation, and grain-overlay opacity from that single value.
@@ -25,24 +37,45 @@ export function useCardSpotlight(enabled: boolean = true) {
 
     let rafId: number | null = null;
     let observer: MutationObserver | null = null;
+    let tracked: TrackedCard[] = [];
+    let cardsDirty = true;
+
+    // Re-resolved only when the card set actually changes, not per frame.
+    // At 224 cards, the querySelector + closest this does were ~450 tree
+    // walks per scroll frame spent re-deriving an answer that almost never
+    // changes.
+    const collect = () => {
+      const cards = document.querySelectorAll<HTMLElement>('.game-card');
+      tracked = Array.from(cards, (card) => {
+        const cover = card.querySelector<HTMLElement>('.game-card-cover');
+        const wrapper = card.closest<HTMLElement>('.card-wrapper');
+        return { card, ref: cover ?? card, target: wrapper ?? card };
+      });
+      cardsDirty = false;
+    };
 
     const update = () => {
       rafId = null;
+      if (cardsDirty) collect();
+
       const viewportH = window.innerHeight;
       const center = viewportH * CENTER_Y;
       const plateauPx = viewportH * PLATEAU;
       const falloffPx = viewportH * FALLOFF;
-      const cards = document.querySelectorAll<HTMLElement>('.game-card');
-      cards.forEach((card) => {
+
+      // Two passes, deliberately. Writing --card-dim dirties style, so the
+      // next card's getBoundingClientRect forced the browser to flush style
+      // and layout before it could answer — with reads and writes
+      // interleaved, every card after the first paid for a synchronous
+      // recalc, 224 times a scroll frame. Collecting all the reads first
+      // costs one layout for the whole pass.
+      const writes: Array<[HTMLElement, string]> = [];
+
+      for (const { card, ref, target } of tracked) {
         const rect = card.getBoundingClientRect();
-        if (rect.bottom < 0 || rect.top > viewportH) return; // off-screen, skip
-        // Use the cover's center rather than the card's center so
-        // taller cards (Game of Games has a label) don't compute a
-        // lower center than their row-mates. Fall back to card rect
-        // if the cover isn't there yet.
-        const cover = card.querySelector<HTMLElement>('.game-card-cover');
-        const ref = cover ? cover.getBoundingClientRect() : rect;
-        const refCenter = ref.top + ref.height / 2;
+        if (rect.bottom < 0 || rect.top > viewportH) continue; // off-screen, skip
+        const refRect = ref === card ? rect : ref.getBoundingClientRect();
+        const refCenter = refRect.top + refRect.height / 2;
         const dist = Math.abs(refCenter - center);
         let t: number; // 0 = fully lit, 1 = fully dim
         if (dist <= plateauPx) {
@@ -52,11 +85,12 @@ export function useCardSpotlight(enabled: boolean = true) {
         } else {
           t = (dist - plateauPx) / falloffPx;
         }
-        // Set on the wrapper (.card-wrapper) so sibling elements like
-        // .achievement-slot can also inherit the value.
-        const target = card.closest('.card-wrapper') as HTMLElement | null;
-        (target ?? card).style.setProperty('--card-dim', t.toFixed(3));
-      });
+        writes.push([target, t.toFixed(3)]);
+      }
+
+      for (const [el, value] of writes) {
+        el.style.setProperty('--card-dim', value);
+      }
     };
 
     const schedule = () => {
@@ -67,9 +101,40 @@ export function useCardSpotlight(enabled: boolean = true) {
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule, { passive: true });
 
-    // Re-run when cards are added/removed (filters, data load).
-    observer = new MutationObserver(schedule);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // Re-run when cards are added/removed (filters, data load) — but only
+    // then. Watching every childList mutation meant unrelated renders kicked
+    // off a full recompute: opening a card's HUD mounts its extras list, and
+    // that alone re-measured all 224 cards.
+    const touchesCards = (nodes: NodeList) => {
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        if (!(node instanceof HTMLElement)) continue;
+        // Cards arrive wrapped (.card-wrapper / letter section), so check the
+        // subtree as well as the node itself. Works for removals too — a
+        // detached subtree keeps its structure.
+        if (node.classList.contains('game-card') || node.querySelector('.game-card')) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    observer = new MutationObserver((records) => {
+      for (const record of records) {
+        if (touchesCards(record.addedNodes) || touchesCards(record.removedNodes)) {
+          cardsDirty = true;
+          schedule();
+          return;
+        }
+      }
+    });
+    // Scoped to <main>, which App renders unconditionally and swaps the view
+    // inside of, so it's stable across view changes. Falls back to body in
+    // case that ever stops being true.
+    observer.observe(document.querySelector('main') ?? document.body, {
+      childList: true,
+      subtree: true,
+    });
 
     return () => {
       window.removeEventListener('scroll', schedule);
