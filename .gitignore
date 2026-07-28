@@ -17,6 +17,9 @@ dist-artifact.tar.gz
 public/data/
 public/covers/
 
+# Pre-WebP cover originals, parked by scripts/covers-to-webp.mjs
+.covers-original/
+
 # Claude Code
 CLAUDE.md
 .claude/

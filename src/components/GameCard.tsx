@@ -4,6 +4,9 @@ import GameCardHud from './GameCardHud';
 import CardBackFace from './CardBackFace';
 import CoverPicker from './CoverPicker';
 
+const MAX_COVER_RETRIES = 3;
+const COVER_RETRY_BASE_MS = 500;
+
 // Shared batch counter: cards revealed in the same animation frame get
 // sequential stagger indexes starting at 0. The counter resets on the next
 // frame, so a fresh batch of newly-visible cards always staggers from the top.
@@ -139,12 +142,22 @@ export default function GameCard({
           src={coverUrl}
           alt={game.title}
           loading="lazy"
+          decoding="async"
           onError={() => {
-            if (import.meta.env.DEV && retryCount < 3) {
-              setTimeout(() => {
-                setRetryCount((c) => c + 1);
-                setImgError(false);
-              }, 500);
+            // Retry in production too, not just dev. Covers are served
+            // from a shared host that throttles bursts, and a page view
+            // asks it for every cover at once — so a failure here is
+            // usually "too many at once," not "missing." Falling
+            // straight through to the placeholder made a transient
+            // throttle permanent for that card until a full refresh.
+            if (retryCount < MAX_COVER_RETRIES) {
+              // Exponential backoff: retrying immediately just walks
+              // back into the same wall. Returning early also means we
+              // don't flip to the placeholder mid-retry, so a cover
+              // that recovers never flashes its title text.
+              const delay = COVER_RETRY_BASE_MS * 2 ** retryCount;
+              setTimeout(() => setRetryCount((c) => c + 1), delay);
+              return;
             }
             setImgError(true);
           }}
