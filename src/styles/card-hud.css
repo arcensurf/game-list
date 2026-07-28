@@ -194,12 +194,32 @@
 /* Blinking cursor — appears after typewriter completes (0.63s delay
    = 0.18s typewriter delay + 0.45s typewriter duration), then
    blinks on a 0.9s cadence. steps(2) on the animation produces
-   discrete on/off blinking rather than a smooth fade. */
+   discrete on/off blinking rather than a smooth fade.
+
+   Drawn as an empty box with a background rather than a '▋'
+   character, and deliberately so. On GoG cards the title ends its
+   glitch on `background-clip: text`, whose clip mask is built from
+   ALL of the element's text — a glyph here would join that mask and
+   punch a block-shaped hole in the title's own gradient. Two
+   artifacts followed: the gradient kept painting through the hole
+   after the ::after faded out (so the cursor read as a solid block
+   instead of blinking), and when the GoG label's row expansion
+   shifted the title down mid-animation the mask offset went stale,
+   dropping a second block over the title's first letter. An empty
+   ::after contributes no glyph, so the mask only ever covers the
+   real text. Box metrics approximate the old glyph. */
 .card-hud .game-card-title::after {
-  content: '▋';
+  content: '';
   display: inline-block;
+  width: 0.5em;
+  height: 0.92em;
   margin-left: 0.1em;
-  color: var(--accent-light);
+  vertical-align: -0.12em;
+  background: var(--accent-light);
+  /* Matches the amber glow the glyph used to inherit from the
+     title's text-shadow — and keeps it amber on GoG cards, where
+     the title's shadow shifts pink. */
+  box-shadow: 0 0 5px rgba(245, 158, 11, 0.45);
   opacity: 0;
 }
 
