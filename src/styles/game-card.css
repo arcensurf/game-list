@@ -156,6 +156,86 @@ body.lights-on .card-wrapper {
   height: 100%;
   object-fit: cover;
   display: block;
+  /* Held back until the cover has actually decoded, so it can't hard-cut in
+     at full opacity the instant its bytes land. One of the two animations
+     below brings it up, depending on whether it arrived during startup. */
+  opacity: 0;
+}
+
+/* Baseline: every cover fades up when it decodes. Undramatic on purpose —
+   this is the treatment for covers arriving as you scroll, where the only
+   job is to not hard-cut in at full opacity. The flicker below is reserved
+   for startup. */
+.game-card.revealed .game-card-cover.cover-loaded img {
+  animation: cover-fade-in 0.3s ease-out forwards;
+  animation-delay: calc(min(var(--card-index, 0), 12) * 30ms);
+}
+
+@keyframes cover-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Signal acquisition — the startup treatment.
+
+   Covers come off a shared host, one request per card, so they finish in
+   whatever order the network hands them back; that part isn't fixable.
+   What made it read as sloppy was that arrival had no treatment at all,
+   so ragged timing was the only thing the eye had to latch onto. Here the
+   cover flickers in like a CRT locking onto a channel, which matches the
+   tuned-out-TV language the grain overlay above already establishes — and
+   a wall of sets tuning in is *supposed* to look uneven, so the raggedness
+   becomes the effect instead of fighting it.
+
+   Gated on .acquiring, so it only fires for the opening reveal batch after
+   a page load or view change (see the acquisition window in GameCard.tsx).
+   That gate is the difference between an effect and a bug: one card
+   strobing on its own as you scroll past has no wave to belong to, and
+   just looks broken.
+
+   Requires BOTH .revealed and .cover-loaded, which makes the animation
+   start on whichever lands second, since a CSS animation begins when its
+   selector first matches. Necessary because the browser's lazy-load
+   threshold is far more generous than the reveal observer's 100px
+   rootMargin, so covers are often decoded before their card reveals;
+   keying on the image alone would play the flicker into an invisible
+   card. */
+.game-card.revealed.acquiring .game-card-cover.cover-loaded img {
+  /* steps(1, end) holds each keyframe's value until the next one instead
+     of interpolating — that hard snapping is the whole effect. A smooth
+     version reads as a pulse, not a signal fighting to lock. */
+  animation: cover-lock-on 0.26s steps(1, end) forwards;
+  /* Same 30ms cadence and 12-card cap as the frame's card-fade-in, so
+     covers that already arrived lock on top-left to bottom-right rather
+     than all at once. The extra 110ms lets the frame's fade mostly finish
+     first; the bright frames below have no punch if they're playing
+     through an opacity ramp. */
+  animation-delay: calc(min(var(--card-index, 0), 12) * 30ms + 110ms);
+}
+
+@keyframes cover-lock-on {
+  0%   { opacity: 0; }
+  /* First contact: blown out and colourless, the way a tube shows a
+     signal before it resolves into a picture. */
+  14%  { opacity: 1; filter: brightness(2.3) saturate(0) contrast(1.4); }
+  28%  { opacity: 0.12; filter: brightness(1) saturate(0.25); }
+  44%  { opacity: 1; filter: brightness(1.55) saturate(0.55); }
+  60%  { opacity: 0.38; filter: none; }
+  /* Last dropout is deliberately shallow — the signal is nearly held by
+     this point, so a deep flicker here would read as a second failure
+     rather than the tail of the first. */
+  78%  { opacity: 1; filter: brightness(1.12); }
+  100% { opacity: 1; filter: none; }
+}
+
+/* The flicker is the point, so there's nothing worth salvaging in a gentled
+   version of a strobe — fall all the way back to the baseline fade, which
+   also drops the 110ms offset the flicker needed. */
+@media (prefers-reduced-motion: reduce) {
+  .game-card.revealed.acquiring .game-card-cover.cover-loaded img {
+    animation: cover-fade-in 0.3s ease-out forwards;
+    animation-delay: calc(min(var(--card-index, 0), 12) * 30ms);
+  }
 }
 
 .game-card-placeholder {
