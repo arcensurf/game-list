@@ -19,7 +19,7 @@
  *   node scripts/covers-to-webp.mjs             # convert
  */
 
-import sharp from 'sharp';
+import { loadSharp } from './lib/load-sharp.mjs';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, renameSync } from 'fs';
 import { resolve, dirname, extname, basename } from 'path';
 import { fileURLToPath } from 'url';
@@ -37,6 +37,7 @@ const COVER_HEIGHT = 900;
 const WEBP_QUALITY = 82;
 
 const dryRun = process.argv.includes('--dry-run');
+const sharp = await loadSharp();
 
 const covers = JSON.parse(readFileSync(coversPath, 'utf-8'));
 

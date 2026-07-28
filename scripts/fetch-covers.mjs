@@ -20,7 +20,7 @@
 
 import dotenv from 'dotenv';
 import SGDB from 'steamgriddb';
-import sharp from 'sharp';
+import { loadSharp } from './lib/load-sharp.mjs';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -70,6 +70,8 @@ function slugify(title) {
 function delay(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
+
+const sharp = await loadSharp();
 
 // Download and re-encode in one step — the source bytes never hit disk, so
 // there's no original PNG left behind to get committed by accident.
