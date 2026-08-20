@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTrophyPicker } from '../hooks/useTrophyPicker';
 import { useStageMode } from '../hooks/useStageMode';
 import { usePickerBroadcast, usePickerFollower } from '../hooks/usePickerSync';
@@ -78,12 +78,32 @@ export default function TrophyPickerView() {
   const { roll, loading, rolling, error, poolSize, rollTrophy, markCurrent } =
     useTrophyPicker(minRarity);
 
+  // Steam withholds hidden achievement descriptions from its API
+  // entirely, so for those there's nothing to fetch — this is a manual
+  // fill-in. Keyed to the current roll and never persisted: reading the
+  // key back as empty is what clears it on the next roll, which avoids
+  // resetting state from an effect.
+  const rollKey = roll ? `${roll.platform}/${roll.gameId}/${roll.achievement.id}` : '';
+  const [draft, setDraft] = useState({ key: '', text: '' });
+  const typedDescription = draft.key === rollKey ? draft.text : '';
+
+  // Folded into the achievement itself rather than sent as a separate
+  // field, so the stage renders it through the normal description path
+  // and needs no knowledge of overrides at all.
+  const decorated = useMemo(() => {
+    if (!roll || !typedDescription.trim()) return roll;
+    return {
+      ...roll,
+      achievement: { ...roll.achievement, description: typedDescription.trim() },
+    };
+  }, [roll, typedDescription]);
+
   // Stage mode is a display, not a second roller: it mirrors whatever
   // the control window published, so OBS and the window you're driving
   // never show different trophies.
   const followed = usePickerFollower(stageOnly);
-  usePickerBroadcast(roll, !stageOnly);
-  const shown = stageOnly ? (followed ?? roll) : roll;
+  usePickerBroadcast(decorated, !stageOnly);
+  const shown = stageOnly ? (followed ?? decorated) : decorated;
 
   // Roll on arrival — an empty stage is not worth showing on a stream.
   // Only the control window rolls; the stage would fight it.
@@ -214,6 +234,16 @@ export default function TrophyPickerView() {
             Can't be earned
           </button>
         </div>
+
+        {roll && !roll.achievement.description && (
+          <input
+            className="picker-note"
+            type="text"
+            value={typedDescription}
+            placeholder="Steam hides this one — paste the description to put it on stage"
+            onChange={(e) => setDraft({ key: rollKey, text: e.target.value })}
+          />
+        )}
 
         <div className="picker-footer">
           <button className="picker-btn picker-btn--ghost" onClick={toggleStage}>

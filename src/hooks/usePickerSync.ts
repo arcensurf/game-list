@@ -3,6 +3,7 @@ import type { Roll } from './useTrophyPicker';
 
 const ENDPOINT = '/api/picker-state';
 const POLL_MS = 1000;
+const BROADCAST_DEBOUNCE_MS = 250;
 
 /**
  * Publish each roll from the control window.
@@ -15,14 +16,22 @@ const POLL_MS = 1000;
 export function usePickerBroadcast(roll: Roll | null, enabled: boolean): void {
   useEffect(() => {
     if (!enabled || !roll) return;
-    void fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ roll }),
-    }).catch(() => {
-      // The stage just keeps showing the previous roll — not worth
-      // interrupting the person mid-stream over.
-    });
+
+    // Debounced because the payload changes on every keystroke while a
+    // description is being typed in — without this, each character is
+    // its own POST.
+    const timer = setTimeout(() => {
+      void fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roll }),
+      }).catch(() => {
+        // The stage just keeps showing the previous roll — not worth
+        // interrupting the person mid-stream over.
+      });
+    }, BROADCAST_DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
   }, [roll, enabled]);
 }
 

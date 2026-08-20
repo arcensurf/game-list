@@ -238,6 +238,28 @@
   font-size: 0.82rem;
 }
 
+/* Only appears for achievements whose description the platform won't
+   give us — in practice Steam's hidden ones. */
+.picker-note {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.45rem 0.65rem;
+  font-size: 0.85rem;
+}
+
+.picker-note:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.picker-note::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
 .picker-footer {
   display: flex;
   align-items: center;
