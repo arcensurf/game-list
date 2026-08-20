@@ -15,8 +15,12 @@
    resized with its content would drift out of the capture region. */
 .picker-stage {
   position: relative;
+  /* Cover height drives the stage height — padding is 2rem top and
+     bottom — so bumping the art doesn't silently desync the fixed
+     stage-mode height that the OBS capture is sized to. */
+  --picker-cover-h: 12rem;
   width: min(56rem, 100%);
-  min-height: 15rem;
+  min-height: calc(var(--picker-cover-h) + 4rem);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -37,11 +41,19 @@
 /* Cover + text sit side by side; the cover is fixed-width so the text
    column starts at the same x on every roll — a stage that reflowed per
    game would read as jitter on stream. */
+/* Height-constrained, width follows the source. The art arrives in four
+   shapes — Steam 2:3 portrait, Xbox square or 0.73, and PSN mixing
+   512x512 squares with 320x176 banners — and since only one is ever on
+   screen there's nothing to line it up with, so a fixed box would just
+   letterbox for no gain. Each cover shows at its own proportions.
+   The trade: the text column starts further right for a wide banner
+   (~16rem) than a portrait capsule (6rem). max-width is only a guard
+   against something pathological; nothing in the library reaches it. */
 .picker-stage > .picker-cover {
   flex: none;
-  width: 7.5rem;
-  height: 11rem;
-  object-fit: cover;
+  height: var(--picker-cover-h);
+  width: auto;
+  max-width: 22rem;
   border-radius: calc(var(--radius) / 1.5);
   background: var(--bg-surface);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
@@ -326,7 +338,7 @@ body.stage-only .picker-stage {
   /* Fixed height, not content height. A longer trophy name would
      otherwise grow the card and shift the framing mid-stream, which is
      exactly the drift a browser source can't absorb. */
-  height: 13rem;
+  height: calc(var(--picker-cover-h) + 4rem);
   min-height: 0;
   overflow: hidden;
   justify-content: center;
@@ -341,10 +353,6 @@ body.stage-only .picker-stage {
 /* Long descriptions get clamped rather than allowed to push the card
    past its fixed stage height — two lines is enough for every
    achievement description seen in the data so far. */
-body.stage-only .picker-stage > .picker-cover {
-  width: 6rem;
-  height: 9rem;
-}
 
 body.stage-only .picker-description {
   display: -webkit-box;
