@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, statSync } from 'fs';
-import { resolve, extname } from 'path';
+import { resolve, extname, basename } from 'path';
 import { readdirSync } from 'fs';
 import { createHash } from 'crypto';
 
@@ -23,6 +23,85 @@ function readJson(path: string) {
 
 function writeJson(path: string, data: unknown) {
   writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
+}
+
+
+// Cover encoding, kept in step with scripts/fetch-covers.mjs so a cover
+// picked in the dev UI and one fetched by the script are encoded
+// identically.
+const COVER_WIDTH = 600;
+const COVER_HEIGHT = 900;
+const WEBP_QUALITY = 82;
+
+// Only the slice of sharp's API used here. Declared locally because the
+// specifier below is a variable, which stops TypeScript resolving the
+// module at compile time — sharp is deliberately absent from
+// package.json (its per-platform native packages break `npm ci` on the
+// Linux CI runner), and a static import would make `tsc -b` fail there.
+type SharpFactory = (input: Buffer) => {
+  resize(
+    width: number,
+    height: number,
+    opts: { fit: string; withoutEnlargement: boolean },
+  ): { webp(opts: { quality: number }): { toBuffer(): Promise<Buffer> } };
+};
+
+async function loadSharp(): Promise<SharpFactory | null> {
+  try {
+    const specifier = 'sharp';
+    return ((await import(specifier)) as { default: SharpFactory }).default;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Re-encode a picked cover to WebP.
+ *
+ * A 600x900 grid runs ~700KB as PNG against ~85KB as WebP, and a page
+ * view asks for every cover at once — which is what pushes the batch
+ * past what the host will serve without throttling.
+ *
+ * Degrades rather than fails: with sharp unavailable the original bytes
+ * are saved under their own extension, so picking a cover still works.
+ */
+async function encodeCover(
+  buffer: Buffer,
+  slug: string,
+  sourceExt: string,
+): Promise<{ name: string; buffer: Buffer }> {
+  const sharp = await loadSharp();
+  if (!sharp) {
+    console.warn(
+      `[dev-api] sharp unavailable — saving ${slug}${sourceExt} unconverted.\n` +
+        '          Install it for this checkout with: npm install --no-save sharp',
+    );
+    return { name: `${slug}${sourceExt}`, buffer };
+  }
+
+  try {
+    const webp = await sharp(buffer)
+      // `inside` + withoutEnlargement: shrink anything oversized to fit
+      // the box while keeping aspect ratio, and leave correctly-sized or
+      // smaller grids alone rather than upscaling them.
+      .resize(COVER_WIDTH, COVER_HEIGHT, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: WEBP_QUALITY })
+      .toBuffer();
+    return { name: `${slug}.webp`, buffer: webp };
+  } catch (err) {
+    console.warn(`[dev-api] WebP conversion failed for ${slug}:`, err);
+    return { name: `${slug}${sourceExt}`, buffer };
+  }
+}
+
+
+/** Remove an earlier cover for this slug when the extension changed. */
+function dropStaleCovers(coversDir: string, slug: string, keep: string) {
+  if (!existsSync(coversDir)) return;
+  for (const file of readdirSync(coversDir)) {
+    if (file === keep) continue;
+    if (basename(file, extname(file)) === slug) unlinkSync(resolve(coversDir, file));
+  }
 }
 
 type ExtraGroup = { label: string; items: string[] };
@@ -108,13 +187,14 @@ export default function devApiPlugin(): Plugin {
 
             ensureCoversDir();
 
-            // Decode base64 and write file
-            const ext = extname(filename) || '.png';
             const slug = slugify(title);
-            const outName = `${slug}${ext}`;
-            const outPath = resolve(coversDir, outName);
-            const buffer = Buffer.from(imageData, 'base64');
-            writeFileSync(outPath, buffer);
+            const { name: outName, buffer } = await encodeCover(
+              Buffer.from(imageData, 'base64'),
+              slug,
+              extname(filename) || '.png',
+            );
+            writeFileSync(resolve(coversDir, outName), buffer);
+            dropStaleCovers(coversDir, slug, outName);
 
             const existingCovers = existsSync(coversPath) ? readJson(coversPath) : {};
             updateCoverEntry(title, existingCovers[title]?.sgdbId ?? null, outName);
@@ -265,10 +345,14 @@ export default function devApiPlugin(): Plugin {
               res.end(JSON.stringify({ error: `Failed to download: HTTP ${response.status}` }));
               return;
             }
-            const buffer = Buffer.from(await response.arrayBuffer());
-            const ext = extname(new URL(imageUrl).pathname) || '.png';
-            const outName = `${slugify(title)}${ext}`;
+            const slug = slugify(title);
+            const { name: outName, buffer } = await encodeCover(
+              Buffer.from(await response.arrayBuffer()),
+              slug,
+              extname(new URL(imageUrl).pathname) || '.png',
+            );
             writeFileSync(resolve(coversDir, outName), buffer);
+            dropStaleCovers(coversDir, slug, outName);
 
             updateCoverEntry(title, sgdbId, outName);
 
