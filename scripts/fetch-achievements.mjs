@@ -521,14 +521,24 @@ async function fetchXboxLibrary() {
 // titleHub's decoration only carries the counts block, so per-game
 // lists come from the achievements service one title at a time.
 //
-// Contract v2 is the 2017+ achievement format. For an Xbox 360 title it
-// returns 200 with an empty list rather than an error — the same gap
-// that used to hide 360 games from the library fetch — so an empty v2
-// response falls through to the legacy v1 endpoint, which has a
-// different response shape and predates rarity entirely.
-async function fetchXboxAchievementList(titleId) {
+// Two traps here, both found the hard way on the first real run:
+//
+//   1. This endpoint defaults to returning ONLY unlocked achievements.
+//      Without unlockedOnly=false you get a shard containing exactly
+//      the achievements you've already earned — precisely the ones the
+//      picker doesn't want. 189 of 190 shards came back that way.
+//   2. Contract v2 is the 2017+ format and returns an empty list (200,
+//      not an error) for Xbox 360 titles — the same gap that used to
+//      hide 360 games from the library fetch. v1 is the only place
+//      those live, and it has a different response shape and no rarity.
+//
+// So: ask v2 for everything, and if it comes back short of the count
+// titleHub reported, try v1 and keep whichever list is longer.
+async function fetchXboxAchievementList(titleId, expectedTotal) {
   if (!xboxAuth) return null;
-  const url = `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements?titleId=${titleId}&maxItems=1000`;
+  const url = (contractVersion) =>
+    `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements`
+    + `?titleId=${titleId}&maxItems=1000&unlockedOnly=false`;
   const headers = (contractVersion) => ({
     Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
     'x-xbl-contract-version': contractVersion,
@@ -539,44 +549,45 @@ async function fetchXboxAchievementList(titleId) {
   const unlockedAt = (value) =>
     value && !String(value).startsWith('0001') ? value : null;
 
-  try {
-    const modern = await fetch(url, { headers: headers('2') });
-    if (modern.ok) {
-      const rows = (await modern.json()).achievements ?? [];
-      if (rows.length > 0) {
-        return rows.map((a) => ({
-          id: String(a.id),
-          name: a.name ?? '',
-          // `description` is the post-unlock text; `lockedDescription`
-          // is the "how do I get this" hint, which is the useful one
-          // for something the picker is asking you to go earn.
-          description: a.lockedDescription || a.description || '',
-          hidden: a.isSecret === true,
-          points: Number(a.rewards?.find((r) => r.type === 'Gamerscore')?.value) || null,
-          earned: a.progressState === 'Achieved',
-          earnedAt: unlockedAt(a.progression?.timeUnlocked),
-          rarity: roundRarity(a.rarity?.currentPercentage),
-        }));
-      }
+  const fetchRows = async (contractVersion) => {
+    try {
+      const res = await fetch(url(contractVersion), { headers: headers(contractVersion) });
+      if (!res.ok) return [];
+      return (await res.json()).achievements ?? [];
+    } catch {
+      return [];
     }
+  };
 
-    const legacy = await fetch(url, { headers: headers('1') });
-    if (!legacy.ok) return null;
-    const rows = (await legacy.json()).achievements ?? [];
-    return rows.map((a) => ({
-      id: String(a.id),
-      name: a.name ?? '',
-      description: a.description || a.lockedDescription || '',
-      hidden: a.isSecret === true,
-      points: Number(a.gamerscore) || null,
-      earned: a.unlocked === true,
-      earnedAt: unlockedAt(a.timeUnlocked),
-      rarity: null, // v1 predates the rarity block
-    }));
-  } catch (err) {
-    console.error(`  Xbox: achievement list failed for ${titleId}`, err.message);
-    return null;
-  }
+  const modern = (await fetchRows('2')).map((a) => ({
+    id: String(a.id),
+    name: a.name ?? '',
+    // `description` is the post-unlock text; `lockedDescription` is the
+    // "how do I get this" hint, which is the useful one for something
+    // the picker is asking you to go earn.
+    description: a.lockedDescription || a.description || '',
+    hidden: a.isSecret === true,
+    points: Number(a.rewards?.find((r) => r.type === 'Gamerscore')?.value) || null,
+    earned: a.progressState === 'Achieved',
+    earnedAt: unlockedAt(a.progression?.timeUnlocked),
+    rarity: roundRarity(a.rarity?.currentPercentage),
+  }));
+  if (expectedTotal > 0 && modern.length >= expectedTotal) return modern;
+
+  const legacy = (await fetchRows('1')).map((a) => ({
+    id: String(a.id),
+    name: a.name ?? '',
+    description: a.description || a.lockedDescription || '',
+    hidden: a.isSecret === true,
+    points: Number(a.gamerscore) || null,
+    earned: a.unlocked === true,
+    earnedAt: unlockedAt(a.timeUnlocked),
+    rarity: null, // v1 predates the rarity block
+  }));
+
+  // Keep whichever endpoint knew about more of the title.
+  const best = legacy.length > modern.length ? legacy : modern;
+  return best.length > 0 ? best : null;
 }
 
 // Shared PSN/Xbox shard pass. Both platforms get earned/total free from
@@ -586,12 +597,20 @@ async function fetchXboxAchievementList(titleId) {
 async function syncShards(platform, lib, fetchList, throttleMs) {
   console.log(`\nSyncing ${platform} achievement lists for ${lib.length} games...`);
   let written = 0, fetched = 0, unchanged = 0, failed = 0, done = 0;
+  const short = [];
   for (const e of lib) {
     const id = String(e.platformId);
     if (e.total > 0 && !currentShard(platform, id, e.earned, e.total)) {
       const list = await fetchList(e);
       fetched++;
       if (list) {
+        // A list shorter than the platform's own count means we didn't
+        // get the whole set — worth surfacing, since it's silent
+        // corruption otherwise: the shard looks fine, it's just missing
+        // the achievements the picker most wants to offer.
+        if (list.length < e.total) {
+          short.push(`${e.platformTitle} (${list.length}/${e.total})`);
+        }
         const payload = {
           platform,
           id,
@@ -618,6 +637,9 @@ async function syncShards(platform, lib, fetchList, throttleMs) {
   }
   const pruned = pruneShards(platform, lib.map((e) => String(e.platformId)));
   console.log(`  ${platform} shards: ${written} written, ${fetched} fetched, ${unchanged} unchanged, ${failed} failed, ${pruned} pruned`);
+  if (short.length > 0) {
+    console.log(`  ${platform}: ${short.length} incomplete list(s) — ${short.slice(0, 10).join(', ')}${short.length > 10 ? ', ...' : ''}`);
+  }
 }
 
 // ── Main ──
@@ -767,7 +789,7 @@ async function main() {
   // that's already on disk. Steam's shards were written inline above,
   // since its counts and its list arrive in the same response.
   if (fetchedPlatforms.has('psn')) await syncShards('psn', psnLib, fetchPsnTrophyList, 300);
-  if (fetchedPlatforms.has('xbox')) await syncShards('xbox', xboxLib, (e) => fetchXboxAchievementList(e.platformId), 250);
+  if (fetchedPlatforms.has('xbox')) await syncShards('xbox', xboxLib, (e) => fetchXboxAchievementList(e.platformId, e.total), 250);
 }
 
 main().catch((err) => {
