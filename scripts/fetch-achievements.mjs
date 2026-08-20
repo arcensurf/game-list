@@ -521,37 +521,32 @@ async function fetchXboxLibrary() {
 // titleHub's decoration only carries the counts block, so per-game
 // lists come from the achievements service one title at a time.
 //
-// Two traps here, both found the hard way on the first real run:
+// This needs two calls, for the same reason PSN does — definitions and
+// progress live behind different requests:
 //
-//   1. This endpoint defaults to returning ONLY unlocked achievements.
-//      Without unlockedOnly=false you get a shard containing exactly
-//      the achievements you've already earned — precisely the ones the
-//      picker doesn't want. 189 of 190 shards came back that way.
-//   2. Contract v2 is the 2017+ format and returns an empty list (200,
-//      not an error) for Xbox 360 titles — the same gap that used to
-//      hide 360 games from the library fetch. v1 is the only place
-//      those live, and it has a different response shape and no rarity.
+//   * The plain call returns the player's record. It carries unlock
+//     state and rarity, but in practice lists only achievements already
+//     unlocked. (unlockedOnly defaults to false, so passing it changes
+//     nothing — that was a wasted run.)
+//   * possibleOnly=true is documented as "return all possible results
+//     but not unlocked metadata": the full definition list with the
+//     unlock state deliberately stripped.
 //
-// So: ask v2 for everything, and if it comes back short of the count
-// titleHub reported, try v1 and keep whichever list is longer.
+// So: definitions from one, progress from the other, joined on id.
+// Xbox 360 titles predate the v2 format and only exist under contract
+// v1, which does return locked achievements directly.
 async function fetchXboxAchievementList(titleId, expectedTotal) {
   if (!xboxAuth) return null;
-  const url = (contractVersion) =>
-    `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements`
-    + `?titleId=${titleId}&maxItems=1000&unlockedOnly=false`;
-  const headers = (contractVersion) => ({
-    Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
-    'x-xbl-contract-version': contractVersion,
-    'Accept-Language': 'en-US',
-  });
-
-  // Unearned achievements come back with a placeholder unlock date.
-  const unlockedAt = (value) =>
-    value && !String(value).startsWith('0001') ? value : null;
-
-  const fetchRows = async (contractVersion) => {
+  const base = `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements`;
+  const get = async (contractVersion, query) => {
     try {
-      const res = await fetch(url(contractVersion), { headers: headers(contractVersion) });
+      const res = await fetch(`${base}?titleId=${titleId}&maxItems=1000${query}`, {
+        headers: {
+          Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
+          'x-xbl-contract-version': contractVersion,
+          'Accept-Language': 'en-US',
+        },
+      });
       if (!res.ok) return [];
       return (await res.json()).achievements ?? [];
     } catch {
@@ -559,7 +554,11 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
     }
   };
 
-  const modern = (await fetchRows('2')).map((a) => ({
+  // Unearned achievements come back with a placeholder unlock date.
+  const unlockedAt = (value) =>
+    value && !String(value).startsWith('0001') ? value : null;
+
+  const mapModern = (a) => ({
     id: String(a.id),
     name: a.name ?? '',
     // `description` is the post-unlock text; `lockedDescription` is the
@@ -571,10 +570,9 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
     earned: a.progressState === 'Achieved',
     earnedAt: unlockedAt(a.progression?.timeUnlocked),
     rarity: roundRarity(a.rarity?.currentPercentage),
-  }));
-  if (expectedTotal > 0 && modern.length >= expectedTotal) return modern;
+  });
 
-  const legacy = (await fetchRows('1')).map((a) => ({
+  const mapLegacy = (a) => ({
     id: String(a.id),
     name: a.name ?? '',
     description: a.description || a.lockedDescription || '',
@@ -583,11 +581,28 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
     earned: a.unlocked === true,
     earnedAt: unlockedAt(a.timeUnlocked),
     rarity: null, // v1 predates the rarity block
-  }));
+  });
 
-  // Keep whichever endpoint knew about more of the title.
-  const best = legacy.length > modern.length ? legacy : modern;
-  return best.length > 0 ? best : null;
+  const player = (await get('2', '')).map(mapModern);
+  await delay(120);
+  let defs = (await get('2', '&possibleOnly=true')).map(mapModern);
+
+  if (expectedTotal > 0 && defs.length < expectedTotal) {
+    await delay(120);
+    const legacy = (await get('1', '')).map(mapLegacy);
+    if (legacy.length > defs.length) defs = legacy;
+  }
+
+  // Whichever call knew about more of the title supplies the entries;
+  // unlock state always comes from the player call, since possibleOnly
+  // strips it by design.
+  const source = defs.length >= player.length ? defs : player;
+  const unlocked = new Map(player.filter((a) => a.earned).map((a) => [a.id, a]));
+  const merged = source.map((a) => {
+    const hit = unlocked.get(a.id);
+    return hit ? { ...a, earned: true, earnedAt: hit.earnedAt, rarity: a.rarity ?? hit.rarity } : a;
+  });
+  return merged.length > 0 ? merged : null;
 }
 
 // Shared PSN/Xbox shard pass. Both platforms get earned/total free from
