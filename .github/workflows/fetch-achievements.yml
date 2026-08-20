@@ -3,7 +3,16 @@ name: Fetch Achievements
 on:
   schedule:
     - cron: '0 6 * * *' # Daily at 6am UTC
-  workflow_dispatch: {} # Manual trigger
+  workflow_dispatch: # Manual trigger
+    inputs:
+      force_refresh:
+        description: >-
+          Rebuild every per-game achievement shard, ignoring the
+          unchanged/staggered-refresh checks. Needed for the first run
+          after adding a platform, and for backfills. Slow: it re-pulls
+          every trophy list in the library.
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -54,6 +63,7 @@ jobs:
           XBOX_REFRESH_TOKEN: ${{ secrets.XBOX_REFRESH_TOKEN }}
           XBOX_EMAIL: ${{ secrets.XBOX_EMAIL }}
           XBOX_PASSWORD: ${{ secrets.XBOX_PASSWORD }}
+          FORCE_REFRESH: ${{ inputs.force_refresh && '1' || '0' }}
 
       # FFXIV scrapes the Lodestone directly — no auth, just the
       # character ID (which is public anyway, but kept as a secret
@@ -74,6 +84,9 @@ jobs:
           # Explicit file list — never stage refresh tokens or anything
           # else that might end up in the work tree.
           git add public/data/achievements.json public/data/platform-libraries.json
+          # -A so pruned shards (delisted games) are staged as deletions,
+          # not just left behind in the tree.
+          git add -A public/data/achievements
           if git diff --cached --quiet; then
             echo "No changes to achievement data"
           else

@@ -2,10 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import type { Game, GameStatus, CoverMap, AchievementData, GameWithCover, LetterGroup } from '../types/game';
 import { getCoverUrl } from '../utils/coverUrl';
 import { buildTitleIndex, resolveGameAchievements } from '../utils/achievementMatch';
-
-const DATA_BASE = import.meta.env.DEV
-  ? import.meta.env.BASE_URL
-  : 'https://raw.githubusercontent.com/arcensurf/game-list/data/public/';
+import { DATA_BASE } from '../utils/dataBase';
 
 function getGroupLetter(title: string): string {
   const normalized = title.replace(/^the\s+/i, '');

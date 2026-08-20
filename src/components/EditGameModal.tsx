@@ -2,11 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { AchievementData, ExtraContent, GameWithCover, PlatformLibraryEntry } from '../types/game';
 import { buildTitleIndex, normalizeTitle, PLATFORM_FAMILIES } from '../utils/achievementMatch';
+import { DATA_BASE } from '../utils/dataBase';
 import PlatformPicker from './PlatformPicker';
-
-const DATA_BASE = import.meta.env.DEV
-  ? import.meta.env.BASE_URL
-  : 'https://raw.githubusercontent.com/arcensurf/game-list/data/public/';
 
 function serializeExtras(extras: ExtraContent[]): string {
   return extras

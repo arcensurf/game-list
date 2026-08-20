@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, unlinkSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { homedir } from 'os';
@@ -37,6 +37,106 @@ const XBOX_REFRESH_TOKEN = process.env.XBOX_REFRESH_TOKEN;
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// ── Achievement list shards ──
+//
+// achievements.json holds one summary row per game. The individual
+// achievement lists behind those rows are ~31k entries library-wide —
+// roughly 4MB of JSON against the 83KB the app loads on every page — so
+// they live one file per game instead, fetched on demand:
+//
+//   public/data/achievements/steam/620.json
+//   public/data/achievements/psn/NPWR24281_00.json
+//   public/data/achievements/xbox/1234567890.json
+//
+// Sharding also keeps the nightly commit proportional to what actually
+// changed, but only while untouched games serialize byte-identically.
+// That's why nothing in a shard is a timestamp and writeShard skips
+// no-op writes — one played game should be a one-file diff, not 670.
+const listsDir = resolve(dataDir, 'achievements');
+
+// Platform IDs are alphanumeric in practice (Steam appids, PSN
+// NPWR....., Xbox titleIds), but they come from upstream APIs and get
+// used as a path, so don't take that on trust.
+const safeId = (id) => String(id).replace(/[^A-Za-z0-9_-]/g, '_');
+
+const shardPath = (platform, id) => resolve(listsDir, platform, `${safeId(id)}.json`);
+
+function writeShard(platform, id, payload) {
+  const file = shardPath(platform, id);
+  mkdirSync(dirname(file), { recursive: true });
+  const json = JSON.stringify(payload, null, 2) + '\n';
+  if (existsSync(file) && readFileSync(file, 'utf-8') === json) return false;
+  writeFileSync(file, json);
+  return true;
+}
+
+function readShard(platform, id) {
+  const file = shardPath(platform, id);
+  if (!existsSync(file)) return null;
+  try {
+    return JSON.parse(readFileSync(file, 'utf-8'));
+  } catch {
+    return null; // corrupt shard — treat as missing so it gets refetched
+  }
+}
+
+// Drop shards for games that have left the platform library (delisted,
+// refunded, region-swapped). Only ever called for a platform that
+// actually returned data this run, so a failed fetch can't wipe a slice.
+function pruneShards(platform, keepIds) {
+  const dir = resolve(listsDir, platform);
+  if (!existsSync(dir)) return 0;
+  const keep = new Set([...keepIds].map((id) => `${safeId(id)}.json`));
+  let removed = 0;
+  for (const file of readdirSync(dir)) {
+    if (!file.endsWith('.json') || keep.has(file)) continue;
+    unlinkSync(resolve(dir, file));
+    removed++;
+  }
+  return removed;
+}
+
+// Global unlock rates are stored to one decimal place. At full float
+// precision they drift a little every single night, which would rewrite
+// every shard on every run and undo the whole point of sharding.
+const roundRarity = (pct) => {
+  const n = typeof pct === 'string' ? Number.parseFloat(pct) : pct;
+  return Number.isFinite(n) ? Math.round(n * 10) / 10 : null;
+};
+
+// Trophy definitions effectively never change once a game ships, so a
+// game whose earned/total counts haven't moved doesn't need its list
+// pulled again. Rarity *does* drift, so shards still get re-pulled
+// periodically — on a day derived from the game's own ID, so the
+// library spreads across the week and a given night refreshes ~1/7 of
+// it rather than landing all 670 in one commit. Pure function of ID and
+// date, so it needs no persisted "last checked" state.
+const FORCE_REFRESH = process.env.FORCE_REFRESH === '1';
+const REFRESH_CYCLE_DAYS = 7;
+
+function idHash(id) {
+  let h = 0;
+  for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return h;
+}
+
+const dayIndex = Math.floor(Date.now() / 86_400_000);
+const isRefreshDay = (id) =>
+  idHash(id) % REFRESH_CYCLE_DAYS === dayIndex % REFRESH_CYCLE_DAYS;
+
+// PSN and Xbox get earned/total free with the library call, so a
+// skipped game costs no request at all. Steam has to call
+// GetPlayerAchievements per game regardless (that IS where its counts
+// come from), so there the check only gates the extra rarity call.
+// Returns the existing shard when it's still good, otherwise null.
+function currentShard(platform, id, earned, total) {
+  if (FORCE_REFRESH) return null;
+  const shard = readShard(platform, id);
+  if (!shard || !Array.isArray(shard.achievements)) return null;
+  if (shard.earned !== earned || shard.total !== total) return null;
+  return isRefreshDay(id) ? null : shard;
+}
+
 // This script no longer does any game-list matching. It dumps each
 // platform's library (keyed by the platform's own ID) into
 // achievements.json, and the app resolves game → entry at render time
@@ -69,16 +169,59 @@ async function fetchSteamLibrary() {
   }));
 }
 
+// Returns the raw per-achievement rows. `l=english` is what turns the
+// response from bare API names into display names + descriptions — the
+// counts this used to reduce to are just the array length and the
+// achieved filter, so the list costs nothing extra to keep.
 async function fetchSteamAchievements(appId) {
-  const url = `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=${STEAM_API_KEY}&steamid=${STEAM_USER_ID}&appid=${appId}`;
+  const url = `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=${STEAM_API_KEY}&steamid=${STEAM_USER_ID}&appid=${appId}&l=english`;
   const res = await fetch(url);
   if (!res.ok) return null;
   const data = await res.json();
-  const achievements = data.playerstats?.achievements;
-  if (!achievements) return null;
-  const total = achievements.length;
-  const earned = achievements.filter((a) => a.achieved === 1).length;
-  return { earned, total, platform: 'steam' };
+  return data.playerstats?.achievements ?? null;
+}
+
+// Global unlock percentages, so the picker can weight or filter by how
+// grindy a trophy is. No API key needed. Plenty of apps publish no
+// stats at all (403 or an empty body), so this is best-effort — a game
+// without rarity just gets nulls.
+async function fetchSteamGlobalRarity(appId) {
+  const url = `https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=${appId}&format=json`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return new Map();
+    const data = await res.json();
+    const rows = data.achievementpercentages?.achievements ?? [];
+    return new Map(rows.map((r) => [r.name, roundRarity(r.percent)]));
+  } catch {
+    return new Map();
+  }
+}
+
+function buildSteamShard(entry, rows, rarity) {
+  return {
+    platform: 'steam',
+    id: String(entry.platformId),
+    title: entry.platformTitle,
+    earned: rows.filter((a) => a.achieved === 1).length,
+    total: rows.length,
+    achievements: rows.map((a) => ({
+      id: a.apiname,
+      name: a.name || a.apiname,
+      // Steam withholds the description of a hidden achievement until
+      // it's unlocked, so a blank one is the only "is this hidden"
+      // signal GetPlayerAchievements gives us — GetSchemaForGame has a
+      // real flag but costs another call per game. Inferred, not exact:
+      // a handful of visible achievements just ship without text.
+      description: a.description ?? '',
+      hidden: !a.description,
+      earned: a.achieved === 1,
+      earnedAt: a.achieved === 1 && a.unlocktime
+        ? new Date(a.unlocktime * 1000).toISOString()
+        : null,
+      rarity: rarity.get(a.apiname) ?? null,
+    })),
+  };
 }
 
 // ── PSN ──
@@ -169,10 +312,70 @@ async function fetchPsnLibrary() {
       platform: 'psn',
       earned: sumCounts(t.earnedTrophies),
       total: sumCounts(t.definedTrophies),
+      // Required by the per-title trophy endpoints below ('trophy' for
+      // PS3/PS4/Vita, 'trophy2' for PS5) — they 404 without the right
+      // one. Carried on the in-memory entry only; it never reaches
+      // achievements.json.
+      npServiceName: t.npServiceName,
     }));
   } catch (err) {
     console.error('PSN: failed to fetch library', err.message);
     return [];
+  }
+}
+
+// The library response carries counts but no trophy names, so a shard
+// needs two more calls per title: getTitleTrophies for the definitions
+// and getUserTrophiesEarnedForTitle for the unlock state and rarity,
+// joined on trophyId. Group id 'all' covers DLC groups in one pass.
+async function fetchPsnTrophyList(entry) {
+  if (!psnAuth) return null;
+  const psn = await import('psn-api');
+  const auth = { accessToken: psnAuth.accessToken };
+  const base = { npServiceName: entry.npServiceName };
+
+  // Both endpoints page at 100. Trophy sets run past that (FFXIV's PSN
+  // set is 224), so walk nextOffset the same way fetchPsnLibrary does.
+  const pageAll = async (call) => {
+    const out = [];
+    let offset = 0;
+    while (true) {
+      const page = await call(offset);
+      const items = page.trophies ?? [];
+      out.push(...items);
+      if (page.nextOffset == null || items.length === 0) break;
+      offset = page.nextOffset;
+      await delay(150);
+    }
+    return out;
+  };
+
+  try {
+    const defs = await pageAll((offset) =>
+      psn.getTitleTrophies(auth, entry.platformId, 'all', { ...base, offset }),
+    );
+    await delay(150);
+    const earnedRows = await pageAll((offset) =>
+      psn.getUserTrophiesEarnedForTitle(auth, 'me', entry.platformId, 'all', { ...base, offset }),
+    );
+
+    const earnedById = new Map(earnedRows.map((t) => [t.trophyId, t]));
+    return defs.map((d) => {
+      const e = earnedById.get(d.trophyId);
+      return {
+        id: String(d.trophyId),
+        name: d.trophyName ?? '',
+        description: d.trophyDetail ?? '',
+        hidden: d.trophyHidden === true,
+        type: d.trophyType ?? null,
+        earned: e?.earned === true,
+        earnedAt: e?.earnedDateTime ?? null,
+        rarity: roundRarity(e?.trophyEarnedRate),
+      };
+    });
+  } catch (err) {
+    console.error(`  PSN: trophy list failed for ${entry.platformId}`, err.message);
+    return null;
   }
 }
 
@@ -315,6 +518,108 @@ async function fetchXboxLibrary() {
   }
 }
 
+// titleHub's decoration only carries the counts block, so per-game
+// lists come from the achievements service one title at a time.
+//
+// Contract v2 is the 2017+ achievement format. For an Xbox 360 title it
+// returns 200 with an empty list rather than an error — the same gap
+// that used to hide 360 games from the library fetch — so an empty v2
+// response falls through to the legacy v1 endpoint, which has a
+// different response shape and predates rarity entirely.
+async function fetchXboxAchievementList(titleId) {
+  if (!xboxAuth) return null;
+  const url = `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements?titleId=${titleId}&maxItems=1000`;
+  const headers = (contractVersion) => ({
+    Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
+    'x-xbl-contract-version': contractVersion,
+    'Accept-Language': 'en-US',
+  });
+
+  // Unearned achievements come back with a placeholder unlock date.
+  const unlockedAt = (value) =>
+    value && !String(value).startsWith('0001') ? value : null;
+
+  try {
+    const modern = await fetch(url, { headers: headers('2') });
+    if (modern.ok) {
+      const rows = (await modern.json()).achievements ?? [];
+      if (rows.length > 0) {
+        return rows.map((a) => ({
+          id: String(a.id),
+          name: a.name ?? '',
+          // `description` is the post-unlock text; `lockedDescription`
+          // is the "how do I get this" hint, which is the useful one
+          // for something the picker is asking you to go earn.
+          description: a.lockedDescription || a.description || '',
+          hidden: a.isSecret === true,
+          points: Number(a.rewards?.find((r) => r.type === 'Gamerscore')?.value) || null,
+          earned: a.progressState === 'Achieved',
+          earnedAt: unlockedAt(a.progression?.timeUnlocked),
+          rarity: roundRarity(a.rarity?.currentPercentage),
+        }));
+      }
+    }
+
+    const legacy = await fetch(url, { headers: headers('1') });
+    if (!legacy.ok) return null;
+    const rows = (await legacy.json()).achievements ?? [];
+    return rows.map((a) => ({
+      id: String(a.id),
+      name: a.name ?? '',
+      description: a.description || a.lockedDescription || '',
+      hidden: a.isSecret === true,
+      points: Number(a.gamerscore) || null,
+      earned: a.unlocked === true,
+      earnedAt: unlockedAt(a.timeUnlocked),
+      rarity: null, // v1 predates the rarity block
+    }));
+  } catch (err) {
+    console.error(`  Xbox: achievement list failed for ${titleId}`, err.message);
+    return null;
+  }
+}
+
+// Shared PSN/Xbox shard pass. Both platforms get earned/total free from
+// their library call, so a game whose counts haven't moved costs zero
+// requests here — the opposite of Steam, where the per-game call is the
+// only source of counts and can't be skipped.
+async function syncShards(platform, lib, fetchList, throttleMs) {
+  console.log(`\nSyncing ${platform} achievement lists for ${lib.length} games...`);
+  let written = 0, fetched = 0, unchanged = 0, failed = 0, done = 0;
+  for (const e of lib) {
+    const id = String(e.platformId);
+    if (e.total > 0 && !currentShard(platform, id, e.earned, e.total)) {
+      const list = await fetchList(e);
+      fetched++;
+      if (list) {
+        const payload = {
+          platform,
+          id,
+          title: e.platformTitle,
+          // Counts mirror achievements.json (i.e. the library response)
+          // rather than list.length, so the currentShard check always
+          // compares like with like — otherwise a one-off disagreement
+          // between the two endpoints would wedge a game into being
+          // refetched every single night.
+          earned: e.earned,
+          total: e.total,
+          achievements: list,
+        };
+        if (writeShard(platform, id, payload)) written++;
+      } else {
+        failed++;
+      }
+      await delay(throttleMs);
+    } else if (e.total > 0) {
+      unchanged++;
+    }
+    done++;
+    if (done % 50 === 0) console.log(`  ${platform}: ${done}/${lib.length}`);
+  }
+  const pruned = pruneShards(platform, lib.map((e) => String(e.platformId)));
+  console.log(`  ${platform} shards: ${written} written, ${fetched} fetched, ${unchanged} unchanged, ${failed} failed, ${pruned} pruned`);
+}
+
 // ── Main ──
 
 async function main() {
@@ -387,21 +692,43 @@ async function main() {
   // only returns playtime). PSN and Xbox already include earned/total
   // in their library responses, so those are in-memory transforms.
   const steamMap = {};
+  const steamShards = { written: 0, rarityCalls: 0 };
   if (fetchedPlatforms.has('steam')) {
     console.log(`\nFetching Steam achievements for ${steamLib.length} games...`);
     let done = 0;
     for (const e of steamLib) {
-      const ach = await fetchSteamAchievements(e.platformId);
-      steamMap[String(e.platformId)] = {
+      const id = String(e.platformId);
+      const rows = (await fetchSteamAchievements(e.platformId)) ?? [];
+      const earned = rows.filter((a) => a.achieved === 1).length;
+      steamMap[id] = {
         title: e.platformTitle,
-        earned: ach?.earned ?? 0,
-        total: ach?.total ?? 0,
+        earned,
+        total: rows.length,
         playtimeMinutes: e.playtimeMinutes ?? 0,
       };
       await delay(300);
+
+      // The list itself came free with the call above, so the only
+      // thing worth skipping here is the extra rarity request — reuse
+      // the percentages already in the shard when nothing has moved.
+      if (rows.length > 0) {
+        const reusable = currentShard('steam', id, earned, rows.length);
+        let rarity;
+        if (reusable) {
+          rarity = new Map(reusable.achievements.map((a) => [a.id, a.rarity ?? null]));
+        } else {
+          rarity = await fetchSteamGlobalRarity(e.platformId);
+          steamShards.rarityCalls++;
+          await delay(300);
+        }
+        if (writeShard('steam', id, buildSteamShard(e, rows, rarity))) steamShards.written++;
+      }
+
       done++;
       if (done % 50 === 0) console.log(`  Steam: ${done}/${steamLib.length}`);
     }
+    const pruned = pruneShards('steam', Object.keys(steamMap));
+    console.log(`  Steam shards: ${steamShards.written} written, ${steamShards.rarityCalls} rarity calls, ${pruned} pruned`);
   }
 
   const psnMap = {};
@@ -435,6 +762,12 @@ async function main() {
 
   writeFileSync(achievementsPath, JSON.stringify(achievements, null, 2) + '\n');
   console.log(`\nWrote achievements.json — steam: ${Object.keys(achievements.steam).length}, psn: ${Object.keys(achievements.psn).length}, xbox: ${Object.keys(achievements.xbox).length}`);
+
+  // Shards come last so a failure here can't cost us the summary data
+  // that's already on disk. Steam's shards were written inline above,
+  // since its counts and its list arrive in the same response.
+  if (fetchedPlatforms.has('psn')) await syncShards('psn', psnLib, fetchPsnTrophyList, 300);
+  if (fetchedPlatforms.has('xbox')) await syncShards('xbox', xboxLib, (e) => fetchXboxAchievementList(e.platformId), 250);
 }
 
 main().catch((err) => {

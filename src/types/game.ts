@@ -84,6 +84,44 @@ export interface AchievementData {
   updatedAt?: string;
 }
 
+// ── Per-game achievement lists ──
+//
+// One entry from a shard at
+// public/data/achievements/<platform>/<id>.json, written by
+// scripts/fetch-achievements.mjs. The full lists run to ~31k entries
+// library-wide, far too much for achievements.json, so they're fetched
+// one game at a time on demand (see hooks/useAchievementList.ts).
+export interface AchievementEntry {
+  id: string;
+  name: string;
+  /** Empty when the platform withholds it for a hidden achievement. */
+  description: string;
+  hidden: boolean;
+  earned: boolean;
+  /** ISO 8601, or null when unearned. */
+  earnedAt: string | null;
+  /**
+   * Percentage of players who have unlocked this, to one decimal place.
+   * Null where the platform doesn't publish it — Xbox 360 titles on the
+   * legacy endpoint, and Steam games with no public stats.
+   */
+  rarity: number | null;
+  /** PSN only: bronze / silver / gold / platinum. */
+  type?: string | null;
+  /** Xbox only: gamerscore value. */
+  points?: number | null;
+}
+
+export interface AchievementList {
+  platform: 'steam' | 'psn' | 'xbox';
+  id: string;
+  title: string;
+  /** Mirrors the achievements.json summary row for this game. */
+  earned: number;
+  total: number;
+  achievements: AchievementEntry[];
+}
+
 export interface GameWithCover extends Game {
   coverUrl: string | null;
   achievements: GameAchievements | null;
