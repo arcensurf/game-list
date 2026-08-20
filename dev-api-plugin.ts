@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, statSync } from 'fs';
 import { resolve, extname } from 'path';
 import { readdirSync } from 'fs';
 import { createHash } from 'crypto';
@@ -48,6 +48,7 @@ export default function devApiPlugin(): Plugin {
   const gamesPath = resolve(root, 'public/data/games.json');
   const coversPath = resolve(root, 'public/data/covers.json');
   const coversDir = resolve(root, 'public/covers');
+  const overridesDir = resolve(root, 'public/data/overrides');
 
   // Load .env.local for SGDB API key
   config({ path: resolve(root, '.env.local') });
@@ -412,6 +413,78 @@ export default function devApiPlugin(): Plugin {
             res.end(JSON.stringify({ title, extras: game.extras }));
             return;
           }
+          // Trophy-picker marks. One file per game under
+          // public/data/overrides/<platform>/<id>.json, written only
+          // for games that actually have a mark, so the set stays
+          // sparse — the achievement shards next door are dense by
+          // construction, these are hand-entered.
+          if (req.url === '/api/achievement-override') {
+            const body = JSON.parse(await parseBody(req));
+            const { platform, gameId, title, achievementId, status, days } =
+              body as {
+                platform: string;
+                gameId: string;
+                title: string;
+                achievementId: string;
+                status: 'earned' | 'skipped' | 'unachievable' | null;
+                days?: number;
+              };
+
+            if (!/^(steam|psn|xbox)$/.test(platform) || !gameId || !achievementId) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'platform, gameId and achievementId are required' }));
+              return;
+            }
+
+            // gameId reaches the filesystem, and it originates from
+            // platform APIs — same sanitising the fetch script applies.
+            const safeGameId = String(gameId).replace(/[^A-Za-z0-9_-]/g, '_');
+            const dir = resolve(overridesDir, platform);
+            const file = resolve(dir, `${safeGameId}.json`);
+
+            const existing = existsSync(file)
+              ? readJson(file) as { overrides?: Record<string, { status: string; at: string; until?: string }> }
+              : {};
+            const now = Date.now();
+
+            // Drop expired skips on every write. This is what keeps the
+            // files from accumulating dead entries as you roll — an
+            // expired skip is not a block, just leftovers.
+            const overrides: Record<string, { status: string; at: string; until?: string }> = {};
+            for (const [id, mark] of Object.entries(existing.overrides ?? {})) {
+              const expired =
+                mark.status === 'skipped' && mark.until != null && Date.parse(mark.until) <= now;
+              if (!expired) overrides[id] = mark;
+            }
+
+            if (status == null) {
+              delete overrides[achievementId];
+            } else {
+              const mark: { status: string; at: string; until?: string } = {
+                status,
+                at: new Date(now).toISOString(),
+              };
+              if (status === 'skipped') {
+                const span = Number(days) > 0 ? Number(days) : 14;
+                mark.until = new Date(now + span * 86400000).toISOString();
+              }
+              overrides[achievementId] = mark;
+            }
+
+            // An empty file is just noise in the tree — drop it so the
+            // directory only ever lists games you've actually marked.
+            if (Object.keys(overrides).length === 0) {
+              if (existsSync(file)) unlinkSync(file);
+            } else {
+              if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+              writeJson(file, { platform, id: String(gameId), title, overrides });
+            }
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true, platform, id: String(gameId), title, overrides }));
+            return;
+          }
+
           if (req.url === '/api/publish') {
             const token = process.env.GITHUB_TOKEN;
             if (!token) {
@@ -447,6 +520,27 @@ export default function devApiPlugin(): Plugin {
               }
             }
 
+            // Trophy-picker marks, one file per marked game. Unlike the
+            // achievement shards next door — which CI writes straight to
+            // the data branch — these only exist locally until a publish.
+            const OVERRIDES_PREFIX = 'public/data/overrides/';
+            const localOverridePaths = new Set<string>();
+            if (existsSync(overridesDir)) {
+              for (const platform of readdirSync(overridesDir)) {
+                const platformDir = resolve(overridesDir, platform);
+                if (!statSync(platformDir).isDirectory()) continue;
+                for (const file of readdirSync(platformDir)) {
+                  if (!file.endsWith('.json')) continue;
+                  const repoPath = `${OVERRIDES_PREFIX}${platform}/${file}`;
+                  localOverridePaths.add(repoPath);
+                  filesToPush.push({
+                    repoPath,
+                    localPath: resolve(platformDir, file),
+                  });
+                }
+              }
+            }
+
             // Get current commit SHA of the data branch
             const refResp = await gh(`/repos/${repo}/git/ref/heads/${branch}`);
             if (!refResp.ok) {
@@ -472,7 +566,7 @@ export default function devApiPlugin(): Plugin {
             }
 
             // Only upload files that have changed
-            const treeItems: { path: string; mode: string; type: string; sha: string }[] = [];
+            const treeItems: { path: string; mode: string; type: string; sha: string | null }[] = [];
 
             for (const file of filesToPush) {
               if (!existsSync(file.localPath)) continue;
@@ -497,6 +591,16 @@ export default function devApiPlugin(): Plugin {
               }
               const blobData = await blobResp.json() as { sha: string };
               treeItems.push({ path: file.repoPath, mode: '100644', type: 'blob', sha: blobData.sha });
+            }
+
+            // Clearing a game's last mark deletes its override file, so
+            // publish has to remove it on the branch too — otherwise the
+            // mark would come back on the next fresh clone. Scoped to the
+            // overrides prefix; nothing else here deletes.
+            for (const repoPath of remoteShas.keys()) {
+              if (!repoPath.startsWith(OVERRIDES_PREFIX)) continue;
+              if (localOverridePaths.has(repoPath)) continue;
+              treeItems.push({ path: repoPath, mode: '100644', type: 'blob', sha: null });
             }
 
             // Nothing changed

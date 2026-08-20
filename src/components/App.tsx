@@ -10,6 +10,7 @@ import GameGrid from './GameGrid';
 import BacklogList from './BacklogList';
 import AddGameForm from './AddGameForm';
 import PublishButton from './PublishButton';
+import TrophyPicker from './TrophyPicker';
 import StatsView from './StatsView';
 import StatsOverlay from './StatsOverlay';
 import BottomNav from './BottomNav';
@@ -104,6 +105,7 @@ export default function App() {
       {import.meta.env.DEV && (
         <div className="header-controls">
           <AddGameForm />
+          <TrophyPicker />
           <PublishButton />
         </div>
       )}
