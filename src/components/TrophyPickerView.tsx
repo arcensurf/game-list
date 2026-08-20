@@ -236,13 +236,28 @@ export default function TrophyPickerView() {
         </div>
 
         {roll && !roll.achievement.description && (
-          <input
-            className="picker-note"
-            type="text"
-            value={typedDescription}
-            placeholder="Steam hides this one — paste the description to put it on stage"
-            onChange={(e) => setDraft({ key: rollKey, text: e.target.value })}
-          />
+          <div className="picker-note-row">
+            <input
+              className="picker-note"
+              type="text"
+              value={typedDescription}
+              placeholder="Steam hides this one — paste the description to put it on stage"
+              onChange={(e) => setDraft({ key: rollKey, text: e.target.value })}
+            />
+            {roll.platform === 'steam' && (
+              // The pool id for Steam is the appid, so the community
+              // achievement list is a straight substitution — somewhere
+              // to go read the text that has to be typed in above.
+              <a
+                className="picker-btn picker-btn--ghost picker-note-link"
+                href={`https://steamcommunity.com/stats/${roll.gameId}/achievements/`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Look it up ↗
+              </a>
+            )}
+          </div>
         )}
 
         <div className="picker-footer">

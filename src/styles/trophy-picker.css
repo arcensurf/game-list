@@ -240,6 +240,19 @@
 
 /* Only appears for achievements whose description the platform won't
    give us — in practice Steam's hidden ones. */
+.picker-note-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.picker-note-link {
+  flex: none;
+  white-space: nowrap;
+  text-decoration: none;
+  line-height: 1.6;
+}
+
 .picker-note {
   width: 100%;
   background: var(--bg-surface);
