@@ -64,7 +64,11 @@ function RarityNote({ rarity }: { rarity: number | null }) {
     return <span className="picker-rarity picker-rarity--unknown">rarity unknown</span>;
   }
   const tier = rarity < 5 ? 'ultra' : rarity < 20 ? 'rare' : 'common';
-  return <span className={`picker-rarity picker-rarity--${tier}`}>{rarity}% of players</span>;
+  return (
+    <span className={`picker-rarity picker-rarity--${tier}`}>
+      Earned by {rarity}% of players
+    </span>
+  );
 }
 
 export default function TrophyPickerView() {
