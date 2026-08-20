@@ -679,10 +679,20 @@ export default function devApiPlugin(): Plugin {
             // publish has to remove it on the branch too — otherwise the
             // mark would come back on the next fresh clone. Scoped to the
             // overrides prefix; nothing else here deletes.
-            for (const repoPath of remoteShas.keys()) {
-              if (!repoPath.startsWith(OVERRIDES_PREFIX)) continue;
-              if (localOverridePaths.has(repoPath)) continue;
-              treeItems.push({ path: repoPath, mode: '100644', type: 'blob', sha: null });
+            //
+            // Guarded on the directory existing, because public/data is
+            // gitignored: a fresh clone has no local overrides at all,
+            // and without this check the first publish from one would
+            // read that emptiness as "everything was cleared" and wipe
+            // every ban and unachievable mark off the data branch. An
+            // absent directory means "no local state to compare", which
+            // is not the same as "the user cleared their marks".
+            if (existsSync(overridesDir)) {
+              for (const repoPath of remoteShas.keys()) {
+                if (!repoPath.startsWith(OVERRIDES_PREFIX)) continue;
+                if (localOverridePaths.has(repoPath)) continue;
+                treeItems.push({ path: repoPath, mode: '100644', type: 'blob', sha: null });
+              }
             }
 
             // Nothing changed
