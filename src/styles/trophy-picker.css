@@ -9,15 +9,16 @@
 }
 
 /* ── The stage ──
-   Everything OBS captures lives here and nothing else does. Fixed
-   width and min-height so a browser source keeps the same framing from
-   one roll to the next, and from one session to the next — a stage that
-   resized with its content would drift out of the capture region. */
+   Built from the same devices as the cards rather than as a plain
+   panel: the game's own art blurred into a color field behind a warm
+   near-black scrim, CRT scanlines over the top, and the platform's
+   color as a structural edge. Everything OBS captures lives here and
+   nothing else does — fixed width and height so the framing holds from
+   one roll to the next. */
 .picker-stage {
   position: relative;
-  /* Cover height drives the stage height — padding is 2rem top and
-     bottom — so bumping the art doesn't silently desync the fixed
-     stage-mode height that the OBS capture is sized to. */
+  isolation: isolate;
+  overflow: hidden;
   --picker-cover-h: 12rem;
   width: min(56rem, 100%);
   min-height: calc(var(--picker-cover-h) + 4rem);
@@ -25,43 +26,104 @@
   flex-direction: column;
   justify-content: center;
   background: var(--bg-card);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 2rem 2.25rem;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  /* Platform color as a solid edge, plus the amber hairline the rest of
+     the app uses to mark a live surface. */
+  box-shadow:
+    inset 0 1px 0 rgba(var(--accent-glow), 0.18),
+    0 18px 48px rgba(0, 0, 0, 0.45);
+}
+
+/* The game's art as a blurred color field. Gives each roll its own
+   palette without any of it competing with the text. */
+.picker-stage::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  background-image: var(--stage-cover, none);
+  background-size: cover;
+  background-position: center;
+  filter: blur(38px) saturate(1.6);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* Scrim + CRT scanlines, the card-hud recipe — the scanline pitch and
+   the warm near-black are lifted from it so the panel reads as part of
+   the same machine. */
+.picker-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    /* Platform color as a structural edge. Lives here rather than as an
+       inset shadow on the panel, which would paint underneath these
+       overlay layers and never be seen. */
+    linear-gradient(to right, var(--stage-accent, transparent) 0 4px, transparent 4px),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(
+      to right,
+      rgba(14, 10, 4, 0.9) 0%,
+      rgba(18, 13, 6, 0.82) 45%,
+      rgba(14, 10, 4, 0.9) 100%
+    );
+}
+
+/* Content rides above both layers. */
+.picker-stage > * {
+  position: relative;
+  z-index: 2;
 }
 
 /* Row once there's a cover to place; the status states stay centered. */
 .picker-stage:has(.picker-cover) {
   flex-direction: row;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.75rem;
 }
 
-/* Cover + text sit side by side; the cover is fixed-width so the text
-   column starts at the same x on every roll — a stage that reflowed per
-   game would read as jitter on stream. */
 /* Height-constrained, width follows the source. The art arrives in four
    shapes — Steam 2:3 portrait, Xbox square or 0.73, and PSN mixing
    512x512 squares with 320x176 banners — and since only one is ever on
    screen there's nothing to line it up with, so a fixed box would just
-   letterbox for no gain. Each cover shows at its own proportions.
-   The trade: the text column starts further right for a wide banner
-   (~16rem) than a portrait capsule (6rem). max-width is only a guard
-   against something pathological; nothing in the library reaches it. */
+   letterbox for no gain. max-width is only a guard against something
+   pathological; nothing in the library reaches it. */
+/* Shrinks before the text does. The body carries a min-width floor, so
+   when the panel runs out of room the cover gives up space first and the
+   trophy name keeps its line — `contain` means giving up width just
+   letterboxes rather than distorting. */
 .picker-stage > .picker-cover {
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
   height: var(--picker-cover-h);
   width: auto;
-  max-width: 22rem;
+  /* PSN's 320x176 banners reach 349px at this height — about 2.7x the
+     width of a Steam capsule, which throws the whole panel off balance.
+     Capping width and letting `contain` do the fitting keeps them
+     proportional and just gives back some vertical space. */
+  max-width: 16rem;
+  object-fit: contain;
   border-radius: calc(var(--radius) / 1.5);
-  background: var(--bg-surface);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  /* Lifted off the backdrop rather than sitting flat on it. No hairline
+     frame — plenty of the PSN art is a logo on transparency, and an
+     outline round that reads as an empty box. */
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
 }
 
 .picker-body {
-  min-width: 0;
-  flex: 1;
+  flex: 1 1 auto;
+  /* The floor the cover shrinks to protect. */
+  min-width: 26rem;
 }
 
 .picker-status {
@@ -80,28 +142,41 @@
 }
 
 .picker-game-title {
+  font-family: 'Share Tech', sans-serif;
   font-size: 0.95rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
   color: var(--text-muted);
 }
 
-/* Colors come from the platform itself (see platformColors.ts) rather
-   than the amber accent, so a PlayStation trophy reads blue and an Xbox
-   achievement green — matching the achievement bars on the cards. */
+/* A solid block of the platform's own color — PlayStation blue, Xbox
+   green, Steam grey, same values the achievement bars use. Square-ish
+   corners and the app's label face (Share Tech, wide tracking) rather
+   than a rounded translucent chip. */
 .picker-platform {
-  border: 1px solid;
-  border-radius: 999px;
-  padding: 0.15rem 0.65rem;
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-family: 'Share Tech', sans-serif;
+  padding: 0.22rem 0.6rem 0.16rem;
+  border-radius: 2px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  color: #fff;
   white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
+/* The card-hud title treatment, at stage scale: VT323 in amber with
+   the same soft glow, so a trophy name reads like a game title does
+   everywhere else in the app. */
 .picker-trophy {
-  font-size: 2rem;
-  line-height: 1.15;
-  margin-bottom: 0.6rem;
+  font-family: 'VT323', 'Share Tech Mono', monospace;
+  font-size: 2.9rem;
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  color: var(--accent-light);
+  text-shadow: 0 0 5px rgba(var(--accent-glow), 0.45);
+  margin-bottom: 0.45rem;
   display: flex;
   align-items: baseline;
   gap: 0.7rem;
@@ -109,27 +184,33 @@
 }
 
 .picker-hidden {
-  font-size: 0.65rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.14em;
   color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0.1rem 0.5rem;
+  opacity: 0.85;
 }
 
+.picker-hidden::before { content: '['; }
+.picker-hidden::after { content: ']'; }
+
 .picker-description {
-  color: var(--text-muted);
-  font-size: 1.05rem;
+  font-family: 'Share Tech Mono', monospace;
+  color: rgba(231, 224, 216, 0.92);
+  font-size: 1.02rem;
+  line-height: 1.35;
   margin-bottom: 1rem;
 }
 
 .picker-meta {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.9rem;
   flex-wrap: wrap;
   align-items: center;
+  font-family: 'Share Tech Mono', monospace;
   font-size: 0.82rem;
+  letter-spacing: 0.03em;
 }
 
 .picker-rarity--ultra { color: var(--gold-bright); }

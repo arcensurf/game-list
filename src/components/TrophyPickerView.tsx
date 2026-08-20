@@ -3,10 +3,7 @@ import { useTrophyPicker } from '../hooks/useTrophyPicker';
 import { useStageMode } from '../hooks/useStageMode';
 import { usePickerBroadcast, usePickerFollower } from '../hooks/usePickerSync';
 import { DEFAULT_SKIP_DAYS } from '../types/overrides';
-import {
-  ACHIEVEMENT_PLATFORM_COLORS,
-  ACHIEVEMENT_PLATFORM_COLORS_LIGHT,
-} from '../utils/platformColors';
+import { ACHIEVEMENT_PLATFORM_COLORS } from '../utils/platformColors';
 import { steamCoverFallback } from '../utils/pickerCover';
 import BanListOverlay from './BanListOverlay';
 
@@ -17,15 +14,11 @@ const PLATFORM_LABELS: Record<string, string> = {
 };
 
 function PlatformTag({ platform }: { platform: string }) {
+  // Solid platform color, no border. The translucent-fill-plus-outline
+  // version read as a default component rather than a decision.
   const solid = ACHIEVEMENT_PLATFORM_COLORS[platform] ?? '#6b7280';
-  const light = ACHIEVEMENT_PLATFORM_COLORS_LIGHT[platform] ?? '#a1a8b4';
   return (
-    <span
-      className="picker-platform"
-      // Eight-digit hex: the platform's own color at low alpha for the
-      // fill, its lightened variant for text and edge.
-      style={{ background: `${solid}33`, borderColor: `${solid}aa`, color: light }}
-    >
+    <span className="picker-platform" style={{ background: solid }}>
       {PLATFORM_LABELS[platform] ?? platform}
     </span>
   );
@@ -136,7 +129,19 @@ export default function TrophyPickerView() {
       {/* The stage is the only thing OBS captures: fixed size, fixed
           position, and nothing interactive inside it, so the capture
           stays stable no matter what the controls below are doing. */}
-      <div className="picker-stage">
+      <div
+        className="picker-stage"
+        style={
+          {
+            // Feed the panel its own art and the platform's color, so the
+            // backdrop and edge treatment change with every roll.
+            '--stage-cover': shown?.coverUrl ? `url("${shown.coverUrl}")` : 'none',
+            '--stage-accent': shown
+              ? (ACHIEVEMENT_PLATFORM_COLORS[shown.platform] ?? '#6b7280')
+              : 'transparent',
+          } as React.CSSProperties
+        }
+      >
         {stageOnly && !shown ? (
           <p className="picker-status">Waiting for a roll...</p>
         ) : loading ? (
