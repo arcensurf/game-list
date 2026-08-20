@@ -5,12 +5,11 @@ on:
     - cron: '0 6 * * *' # Daily at 6am UTC
   workflow_dispatch: # Manual trigger
     inputs:
+      # Only needed when shards exist but are stale in a way the
+      # unchanged/staggered-refresh checks won't catch — a shard format
+      # change, or wanting rarity current before the 7-day cycle.
       force_refresh:
-        description: >-
-          Rebuild every per-game achievement shard, ignoring the
-          unchanged/staggered-refresh checks. Needed for the first run
-          after adding a platform, and for backfills. Slow: it re-pulls
-          every trophy list in the library.
+        description: 'Re-pull every trophy list (slow)'
         type: boolean
         default: false
 
