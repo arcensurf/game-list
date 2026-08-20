@@ -10,14 +10,15 @@ import GameGrid from './GameGrid';
 import BacklogList from './BacklogList';
 import AddGameForm from './AddGameForm';
 import PublishButton from './PublishButton';
-import TrophyPicker from './TrophyPicker';
+import TrophyPickerView from './TrophyPickerView';
 import StatsView from './StatsView';
 import StatsOverlay from './StatsOverlay';
 import BottomNav from './BottomNav';
+import { getInitialView } from '../types/view';
 import type { View } from '../types/view';
 
 export default function App() {
-  const [view, setView] = useState<View>('list');
+  const [view, setView] = useState<View>(getInitialView);
   const lightsOn = false;
   const [inTransition, setInTransition] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
@@ -26,6 +27,10 @@ export default function App() {
   const perfectOnly = view === 'perfect';
   const backlogView = view === 'backlog';
   const statsView = view === 'stats';
+  // Gated on DEV at the point of use, not just kept out of VIEW_ORDER:
+  // without this the view stays reachable code and Rollup ships the
+  // whole picker (and its dev-API calls) to the public bundle.
+  const pickerView = import.meta.env.DEV && view === 'picker';
   const flatLayout = gogOnly || perfectOnly;
 
   const { groups, totalCount, platformStats, loading } = useGames(
@@ -35,7 +40,7 @@ export default function App() {
     backlogView ? 'backlog' : 'beaten',
   );
   const activeLetters = new Set(groups.map((g) => g.letter));
-  const effectiveLightsOn = lightsOn || flatLayout || statsView || backlogView;
+  const effectiveLightsOn = lightsOn || flatLayout || statsView || backlogView || pickerView;
 
   const changeView = useCallback((next: View) => {
     flushSync(() => {
@@ -105,13 +110,14 @@ export default function App() {
       {import.meta.env.DEV && (
         <div className="header-controls">
           <AddGameForm />
-          <TrophyPicker />
           <PublishButton />
         </div>
       )}
 
       <main>
-        {inTransition ? null : statsView ? (
+        {inTransition ? null : pickerView ? (
+          <TrophyPickerView />
+        ) : statsView ? (
           <StatsView stats={platformStats} />
         ) : loading ? (
           <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '4rem 0' }}>

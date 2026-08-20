@@ -9,3 +9,24 @@ export const PLATFORM_COLORS: Record<string, string> = {
   'Xbox 360': '#107c10',
   PC: '#6b7280', Mac: '#6b7280', iPhone: '#6b7280', 'CD-i': '#6b7280',
 };
+
+// Achievement-platform colors, keyed by the shard platform id rather
+// than by console name. Same palette as the console map above —
+// PlayStation blue, Xbox green, Steam grey — so an achievement bar and
+// a platform badge for the same game agree.
+export const ACHIEVEMENT_PLATFORM_COLORS: Record<string, string> = {
+  steam: '#6b7280',
+  psn: '#003087',
+  xbox: '#107c10',
+  ffxiv: '#d83434',
+};
+
+// Lightened for use as text on the dark surfaces. PlayStation blue and
+// Xbox green are picked for filled bars and go muddy as small text, so
+// they get the same treatment the platform badges already use.
+export const ACHIEVEMENT_PLATFORM_COLORS_LIGHT: Record<string, string> = {
+  steam: '#a1a8b4',
+  psn: '#4a7fd4',
+  xbox: '#4ade80',
+  ffxiv: '#f06a6a',
+};

@@ -1,11 +1,5 @@
 import type { GameAchievements } from '../types/game';
-
-const PLATFORM_COLORS: Record<string, string> = {
-  steam: '#6b7280',
-  psn: '#003087',
-  xbox: '#107c10',
-  ffxiv: '#d83434',
-};
+import { ACHIEVEMENT_PLATFORM_COLORS } from '../utils/platformColors';
 
 export default function AchievementBar({ achievements }: { achievements: GameAchievements | null }) {
   if (!achievements) return null;
@@ -17,7 +11,7 @@ export default function AchievementBar({ achievements }: { achievements: GameAch
   // The bar always fills in the platform color first. For complete
   // games, CSS layers a gold overlay that fades in after the sweep
   // finishes — the "completion reveal" moment.
-  const color = PLATFORM_COLORS[best.platform] ?? '#6b7280';
+  const color = ACHIEVEMENT_PLATFORM_COLORS[best.platform] ?? '#6b7280';
 
   // Fixed 10-segment bar — each block represents 10% of completion.
   // Keeps the visual rhythm consistent across all cards regardless

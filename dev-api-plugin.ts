@@ -50,6 +50,14 @@ export default function devApiPlugin(): Plugin {
   const coversDir = resolve(root, 'public/covers');
   const overridesDir = resolve(root, 'public/data/overrides');
 
+  // Whatever the control window last rolled. OBS runs its own browser
+  // process, so a browser source shares nothing with the window you're
+  // driving from — no localStorage, no BroadcastChannel. The dev server
+  // is the only thing both can see, so it relays the current roll.
+  // In-memory on purpose: this is throwaway display state, and it has
+  // no business being written into public/data.
+  let pickerState: unknown = null;
+
   // Load .env.local for SGDB API key
   config({ path: resolve(root, '.env.local') });
 
@@ -72,6 +80,16 @@ export default function devApiPlugin(): Plugin {
     apply: 'serve',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
+        // The stage view polls this; everything else here is a POST.
+        if (req.method === 'GET' && req.url?.split('?')[0] === '/api/picker-state') {
+          res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+          });
+          res.end(JSON.stringify({ roll: pickerState }));
+          return;
+        }
+
         if (req.method !== 'POST') return next();
 
         try {
@@ -482,6 +500,16 @@ export default function devApiPlugin(): Plugin {
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ ok: true, platform, id: String(gameId), title, overrides }));
+            return;
+          }
+
+          // The control window publishes each roll here so the stage
+          // view (and therefore OBS) can pick it up.
+          if (req.url === '/api/picker-state') {
+            const body = JSON.parse(await parseBody(req));
+            pickerState = (body as { roll?: unknown }).roll ?? null;
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true }));
             return;
           }
 
