@@ -6,11 +6,33 @@ export const VIEW_ORDER: View[] = import.meta.env.DEV
   ? ['list', 'gog', 'perfect', 'backlog', 'picker']
   : ['list', 'gog', 'perfect', 'backlog'];
 
+const VIEW_KEY = 'game-list:view';
+
 // OBS points a browser source straight at ?stage=1 so the capture comes
 // back up on the picker after a restart, with no clicking required.
+//
+// Otherwise the last view is restored, but only in dev: a stray reload
+// while working shouldn't dump you back on the full list, and on the
+// picker that also means losing the achievement on screen. The deployed
+// site always opens on the list — visitors get the front door, not
+// wherever someone happened to be last.
 export function getInitialView(): View {
   if (!import.meta.env.DEV) return 'list';
-  return new URLSearchParams(window.location.search).get('stage') === '1'
-    ? 'picker'
-    : 'list';
+  if (new URLSearchParams(window.location.search).get('stage') === '1') return 'picker';
+  try {
+    const saved = localStorage.getItem(VIEW_KEY) as View | null;
+    if (saved && VIEW_ORDER.includes(saved)) return saved;
+  } catch {
+    // Private windows and blocked site data both throw on access.
+  }
+  return 'list';
+}
+
+export function rememberView(view: View): void {
+  if (!import.meta.env.DEV) return;
+  try {
+    localStorage.setItem(VIEW_KEY, view);
+  } catch {
+    // Not worth interrupting anyone over.
+  }
 }

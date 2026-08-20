@@ -36,6 +36,26 @@ export interface Roll {
 // floor rules out a lot of games, hence the generous ceiling.
 const MAX_ATTEMPTS = 60;
 
+// The current roll survives a reload. Losing the achievement you were
+// working on to a stray refresh is worse than showing a slightly stale
+// one, and this is per-device convenience rather than real state — the
+// marks are what get persisted properly, on the data branch.
+const STORAGE_KEY = 'game-list:picker-roll';
+
+function readStoredRoll(): Roll | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Roll;
+    // Anything without an achievement id predates a format change or is
+    // junk; treat it as absent rather than rendering half a card.
+    return parsed?.achievement?.id ? parsed : null;
+  } catch {
+    // Private windows and blocked site data both throw on access.
+    return null;
+  }
+}
+
 /**
  * Weighted pick. Weighting by unearned count and then picking uniformly
  * within the chosen game is exactly uniform across the whole unearned
@@ -101,6 +121,11 @@ export function useTrophyPicker(minRarity: number = 0) {
           }
         }
         setAllGames(games);
+        // Restore before the view's auto-roll effect can fire — it only
+        // rolls when there's nothing on screen, so a restored roll
+        // simply pre-empts it.
+        const stored = readStoredRoll();
+        if (stored) setRoll(stored);
         setLoading(false);
       })
       .catch(() => {
@@ -112,6 +137,16 @@ export function useTrophyPicker(minRarity: number = 0) {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!roll) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(roll));
+    } catch {
+      // Not being able to remember the roll is not worth interrupting
+      // anyone over.
+    }
+  }, [roll]);
 
   const pool = useMemo(
     () => allGames.filter((g) => !banned[banKey(g.platform, g.id)]),

@@ -14,7 +14,7 @@ import TrophyPickerView from './TrophyPickerView';
 import StatsView from './StatsView';
 import StatsOverlay from './StatsOverlay';
 import BottomNav from './BottomNav';
-import { getInitialView } from '../types/view';
+import { getInitialView, rememberView } from '../types/view';
 import type { View } from '../types/view';
 
 export default function App() {
@@ -43,6 +43,7 @@ export default function App() {
   const effectiveLightsOn = lightsOn || flatLayout || statsView || backlogView || pickerView;
 
   const changeView = useCallback((next: View) => {
+    rememberView(next);
     flushSync(() => {
       setInTransition(true);
       setView(next);

@@ -188,6 +188,8 @@ The pool is every game in `achievements.json` with something left to earn — th
 
 Because a game's summary counts can't tell you whether its remaining achievements are all marked or filtered out, a draw that lands on an empty game re-rolls, bounded, and remembers that game for the session.
 
+The current roll is kept in `localStorage`, so a reload doesn't cost you the achievement you were working on. In dev the last view is remembered too — otherwise a stray refresh drops you back on the full list and the picker is gone regardless of what was stored. The deployed site always opens on the list.
+
 Sampling uniformly over *achievements* means games with huge lists dominate — Halo MCC alone is 700 of ~26,000 unearned, so about 2.7% of rolls. Picking the game uniformly first instead is a one-line change to `pickWeighted`.
 
 ### Marks
