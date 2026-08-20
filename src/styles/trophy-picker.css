@@ -20,14 +20,15 @@
   isolation: isolate;
   overflow: hidden;
   --picker-cover-h: 12rem;
+  --picker-pad-y: 2rem;
   width: min(56rem, 100%);
-  min-height: calc(var(--picker-cover-h) + 4rem);
+  min-height: calc(var(--picker-cover-h) + var(--picker-pad-y) * 2);
   display: flex;
   flex-direction: column;
   justify-content: center;
   background: var(--bg-card);
   border-radius: var(--radius);
-  padding: 2rem 2.25rem;
+  padding: var(--picker-pad-y) 2.25rem;
   /* Platform color as a solid edge, plus the amber hairline the rest of
      the app uses to mark a live surface. */
   box-shadow:
@@ -419,7 +420,7 @@ body.stage-only .picker-stage {
   /* Fixed height, not content height. A longer trophy name would
      otherwise grow the card and shift the framing mid-stream, which is
      exactly the drift a browser source can't absorb. */
-  height: calc(var(--picker-cover-h) + 4rem);
+  height: calc(var(--picker-cover-h) + var(--picker-pad-y) * 2);
   min-height: 0;
   overflow: hidden;
   justify-content: center;
@@ -434,6 +435,48 @@ body.stage-only .picker-stage {
 /* Long descriptions get clamped rather than allowed to push the card
    past its fixed stage height — two lines is enough for every
    achievement description seen in the data so far. */
+
+/* Sized for its real job: a strip under a 16:9 game capture, where the
+   frame has very little height to give. Everything here is tighter than
+   the in-app view, which stays comfortable for actually working in.
+   Both heights derive from --picker-cover-h and --picker-pad-y, so
+   retuning the band is two numbers. */
+body.stage-only .picker-stage {
+  --picker-cover-h: 7rem;
+  --picker-pad-y: 0.85rem;
+  padding: var(--picker-pad-y) 1.4rem;
+}
+
+body.stage-only .picker-stage:has(.picker-cover) {
+  gap: 1.1rem;
+}
+
+body.stage-only .picker-game {
+  margin-bottom: 0.35rem;
+}
+
+body.stage-only .picker-trophy {
+  font-size: 2rem;
+  margin-bottom: 0.2rem;
+}
+
+body.stage-only .picker-description {
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+body.stage-only .picker-meta {
+  font-size: 0.75rem;
+}
+
+body.stage-only .picker-platform {
+  font-size: 0.65rem;
+  padding: 0.18rem 0.5rem 0.12rem;
+}
+
+body.stage-only .picker-game-title {
+  font-size: 0.8rem;
+}
 
 body.stage-only .picker-description {
   display: -webkit-box;
