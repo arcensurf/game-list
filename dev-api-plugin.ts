@@ -49,6 +49,11 @@ export default function devApiPlugin(): Plugin {
   const coversPath = resolve(root, 'public/data/covers.json');
   const coversDir = resolve(root, 'public/covers');
   const overridesDir = resolve(root, 'public/data/overrides');
+  // Banned games are a game-level concern, so they live in one small
+  // file rather than as a flag inside the per-achievement override
+  // files — the picker needs to know every ban up front to filter its
+  // pool, and it can't fetch 657 per-game files to find out.
+  const bannedPath = resolve(overridesDir, 'banned.json');
 
   // Whatever the control window last rolled. OBS runs its own browser
   // process, so a browser source shares nothing with the window you're
@@ -513,6 +518,50 @@ export default function devApiPlugin(): Plugin {
             return;
           }
 
+          // Toggle a whole game out of the picker pool.
+          if (req.url === '/api/ban-game') {
+            const body = JSON.parse(await parseBody(req));
+            const { platform, gameId, title, banned } = body as {
+              platform: string;
+              gameId: string;
+              title: string;
+              banned: boolean;
+            };
+
+            if (!/^(steam|psn|xbox)$/.test(platform) || !gameId) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'platform and gameId are required' }));
+              return;
+            }
+
+            const store = existsSync(bannedPath)
+              ? readJson(bannedPath) as { games?: Record<string, { title: string; at: string }> }
+              : {};
+            const games = store.games ?? {};
+            const key = `${platform}/${gameId}`;
+
+            if (banned) {
+              games[key] = { title, at: new Date().toISOString() };
+            } else {
+              delete games[key];
+            }
+
+            if (Object.keys(games).length === 0) {
+              if (existsSync(bannedPath)) unlinkSync(bannedPath);
+            } else {
+              if (!existsSync(overridesDir)) mkdirSync(overridesDir, { recursive: true });
+              // Sorted so the committed file has a stable order and a
+              // single ban is a one-line diff.
+              const sorted: Record<string, { title: string; at: string }> = {};
+              for (const k of Object.keys(games).sort()) sorted[k] = games[k];
+              writeJson(bannedPath, { games: sorted });
+            }
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true, games }));
+            return;
+          }
+
           if (req.url === '/api/publish') {
             const token = process.env.GITHUB_TOKEN;
             if (!token) {
@@ -553,6 +602,11 @@ export default function devApiPlugin(): Plugin {
             // the data branch — these only exist locally until a publish.
             const OVERRIDES_PREFIX = 'public/data/overrides/';
             const localOverridePaths = new Set<string>();
+            if (existsSync(bannedPath)) {
+              const repoPath = `${OVERRIDES_PREFIX}banned.json`;
+              localOverridePaths.add(repoPath);
+              filesToPush.push({ repoPath, localPath: bannedPath });
+            }
             if (existsSync(overridesDir)) {
               for (const platform of readdirSync(overridesDir)) {
                 const platformDir = resolve(overridesDir, platform);

@@ -353,3 +353,141 @@ body.stage-only .picker-description {
   overflow: hidden;
   margin-bottom: 0.75rem;
 }
+
+/* ── Ban list ──
+   The roll button handles "not this one again" in the moment; this is
+   for clearing out a batch, which waiting for random draws can't do. */
+.ban-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  z-index: 220;
+}
+
+.ban-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(44rem, 100%);
+  max-height: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.4rem 1rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.ban-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.ban-head h2 { font-size: 1.1rem; }
+
+.ban-count {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.ban-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ban-close:hover { color: var(--text); }
+
+.ban-search {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.45rem 0.65rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.ban-search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* The only scrolling region — the header and search stay put. */
+.ban-rows {
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ban-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.2rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.ban-row--banned .ban-row-title {
+  text-decoration: line-through;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.ban-row-platform {
+  flex: none;
+  width: 3.2rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ban-row-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ban-row-count {
+  flex: none;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ban-row-toggle {
+  flex: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.ban-row-toggle:hover {
+  border-color: #b4544a;
+  color: #e0857c;
+}
+
+.ban-empty {
+  color: var(--text-muted);
+  padding: 1.5rem 0;
+  text-align: center;
+}

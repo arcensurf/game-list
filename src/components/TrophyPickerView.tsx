@@ -8,6 +8,7 @@ import {
   ACHIEVEMENT_PLATFORM_COLORS_LIGHT,
 } from '../utils/platformColors';
 import { steamCoverFallback } from '../utils/pickerCover';
+import BanListOverlay from './BanListOverlay';
 
 const PLATFORM_LABELS: Record<string, string> = {
   steam: 'Steam',
@@ -75,8 +76,11 @@ export default function TrophyPickerView() {
   const [skipDays, setSkipDays] = useState(DEFAULT_SKIP_DAYS);
   const [minRarity, setMinRarity] = useState(0);
   const { stageOnly, toggleStage } = useStageMode();
-  const { roll, loading, rolling, error, poolSize, rollTrophy, markCurrent } =
-    useTrophyPicker(minRarity);
+  const [banListOpen, setBanListOpen] = useState(false);
+  const {
+    roll, loading, rolling, error, poolSize, rollTrophy, markCurrent,
+    allGames, banned, toggleBan, banCurrentGame,
+  } = useTrophyPicker(minRarity);
 
   // Steam withholds hidden achievement descriptions from its API
   // entirely, so for those there's nothing to fetch — this is a manual
@@ -233,6 +237,14 @@ export default function TrophyPickerView() {
           >
             Can't be earned
           </button>
+          <button
+            className="picker-btn picker-btn--danger"
+            onClick={() => void banCurrentGame()}
+            disabled={!roll || rolling}
+            title="Drop this whole game from the pool"
+          >
+            Ban game
+          </button>
         </div>
 
         {roll && !roll.achievement.description && (
@@ -264,9 +276,23 @@ export default function TrophyPickerView() {
           <button className="picker-btn picker-btn--ghost" onClick={toggleStage}>
             {stageOnly ? 'Show controls' : 'Stage only'}
           </button>
+          <button
+            className="picker-btn picker-btn--ghost"
+            onClick={() => setBanListOpen(true)}
+          >
+            Manage bans ({Object.keys(banned).length})
+          </button>
           <span className="picker-pool">{poolSize.toLocaleString()} unearned in the pool</span>
         </div>
       </div>
+
+      <BanListOverlay
+        open={banListOpen}
+        onClose={() => setBanListOpen(false)}
+        games={allGames}
+        banned={banned}
+        onToggle={(platform, id, title, next) => void toggleBan(platform, id, title, next)}
+      />
     </div>
   );
 }

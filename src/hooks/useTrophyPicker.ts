@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AchievementData, AchievementEntry } from '../types/game';
 import type { GameOverrides, OverrideStatus } from '../types/overrides';
 import { DATA_BASE } from '../utils/dataBase';
@@ -6,6 +6,7 @@ import { loadAchievementList, type ShardPlatform } from './useAchievementList';
 import { eligibleAchievements } from '../utils/achievementOverrides';
 import { loadGameOverrides, saveMark } from '../utils/overridesApi';
 import { pickerCoverUrl } from '../utils/pickerCover';
+import { banKey, loadBannedGames, setGameBanned, type BannedMap } from '../utils/bannedGames';
 
 const PLATFORMS: ShardPlatform[] = ['steam', 'psn', 'xbox'];
 
@@ -53,7 +54,10 @@ function pickWeighted(games: PoolGame[]): PoolGame | null {
 }
 
 export function useTrophyPicker(minRarity: number = 0) {
-  const [pool, setPool] = useState<PoolGame[]>([]);
+  // Every game with something left to earn, bans included — the manage
+  // list needs to show banned games so they can be un-banned.
+  const [allGames, setAllGames] = useState<PoolGame[]>([]);
+  const [banned, setBanned] = useState<BannedMap>({});
   const [loading, setLoading] = useState(true);
   const [rolling, setRolling] = useState(false);
   const [roll, setRoll] = useState<Roll | null>(null);
@@ -74,10 +78,13 @@ export function useTrophyPicker(minRarity: number = 0) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${DATA_BASE}data/achievements.json`)
-      .then((res) => res.json() as Promise<AchievementData>)
-      .then((data) => {
+    Promise.all([
+      fetch(`${DATA_BASE}data/achievements.json`).then((res) => res.json() as Promise<AchievementData>),
+      loadBannedGames(),
+    ])
+      .then(([data, bans]) => {
         if (cancelled) return;
+        setBanned(bans);
         const games: PoolGame[] = [];
         for (const platform of PLATFORMS) {
           for (const [id, entry] of Object.entries(data[platform] ?? {})) {
@@ -93,7 +100,7 @@ export function useTrophyPicker(minRarity: number = 0) {
             }
           }
         }
-        setPool(games);
+        setAllGames(games);
         setLoading(false);
       })
       .catch(() => {
@@ -105,6 +112,11 @@ export function useTrophyPicker(minRarity: number = 0) {
       cancelled = true;
     };
   }, []);
+
+  const pool = useMemo(
+    () => allGames.filter((g) => !banned[banKey(g.platform, g.id)]),
+    [allGames, banned],
+  );
 
   const rollTrophy = useCallback(async () => {
     setRolling(true);
@@ -182,7 +194,43 @@ export function useTrophyPicker(minRarity: number = 0) {
     [roll, rollTrophy],
   );
 
+  const toggleBan = useCallback(
+    async (platform: ShardPlatform, gameId: string, title: string, next: boolean) => {
+      try {
+        setBanned(await setGameBanned(platform, gameId, title, next));
+        // rollTrophy closes over the pool as it was, so a freshly banned
+        // game could still be drawn on the very next roll. The exhausted
+        // set is a ref, so marking it here takes effect immediately.
+        if (next) exhausted.current.add(banKey(platform, gameId));
+        else exhausted.current.delete(banKey(platform, gameId));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to save ban');
+      }
+    },
+    [],
+  );
+
+  /** Ban the game currently on screen, then move on. */
+  const banCurrentGame = useCallback(async () => {
+    if (!roll) return;
+    await toggleBan(roll.platform, roll.gameId, roll.gameTitle, true);
+    await rollTrophy();
+  }, [roll, toggleBan, rollTrophy]);
+
   const poolSize = pool.reduce((sum, g) => sum + g.unearned, 0);
 
-  return { roll, marks, loading, rolling, error, poolSize, rollTrophy, markCurrent };
+  return {
+    roll,
+    marks,
+    loading,
+    rolling,
+    error,
+    poolSize,
+    rollTrophy,
+    markCurrent,
+    allGames,
+    banned,
+    toggleBan,
+    banCurrentGame,
+  };
 }
