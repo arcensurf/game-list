@@ -73,6 +73,17 @@ function pickWeighted(games: PoolGame[]): PoolGame | null {
   return games[games.length - 1] ?? null;
 }
 
+// One step back per action, so a mis-click doesn't cost you the
+// achievement — or, worse, silently leave a permanent "can't be earned"
+// on it. Undoing a mark clears the mark too, not just the roll.
+interface UndoEntry {
+  roll: Roll;
+  mark?: { platform: ShardPlatform; gameId: string; achievementId: string };
+  ban?: { platform: ShardPlatform; gameId: string; title: string };
+}
+
+const UNDO_LIMIT = 10;
+
 export function useTrophyPicker(minRarity: number = 0) {
   // Every game with something left to earn, bans included — the manage
   // list needs to show banned games so they can be un-banned.
@@ -88,6 +99,14 @@ export function useTrophyPicker(minRarity: number = 0) {
   // marked or filtered out. Kept out of the pool so repeated rolls
   // don't keep paying for the same dead end.
   const exhausted = useRef<Set<string>>(new Set());
+
+  const [undoStack, setUndoStack] = useState<UndoEntry[]>([]);
+
+  // Read inside rollTrophy without making it a dependency — otherwise
+  // the callback changes identity on every roll and everything built on
+  // top of it churns with it.
+  const rollRef = useRef<Roll | null>(null);
+  rollRef.current = roll;
 
   // "Empty" is relative to the rarity floor, so moving the slider makes
   // every previous verdict stale — a game with nothing above 20% may
@@ -153,9 +172,14 @@ export function useTrophyPicker(minRarity: number = 0) {
     [allGames, banned],
   );
 
-  const rollTrophy = useCallback(async () => {
+  const rollTrophy = useCallback(async (undoMeta?: Omit<UndoEntry, 'roll'>) => {
     setRolling(true);
     setError(null);
+
+    const previous = rollRef.current;
+    if (previous) {
+      setUndoStack((stack) => [...stack.slice(-(UNDO_LIMIT - 1)), { roll: previous, ...undoMeta }]);
+    }
 
     try {
       for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
@@ -221,7 +245,13 @@ export function useTrophyPicker(minRarity: number = 0) {
         setMarks(updated);
         // The game may now be fully spoken for; the next roll finds out.
         exhausted.current.delete(`${roll.platform}/${roll.gameId}`);
-        await rollTrophy();
+        await rollTrophy({
+          mark: {
+            platform: roll.platform,
+            gameId: roll.gameId,
+            achievementId: roll.achievement.id,
+          },
+        });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to save mark');
       }
@@ -249,8 +279,43 @@ export function useTrophyPicker(minRarity: number = 0) {
   const banCurrentGame = useCallback(async () => {
     if (!roll) return;
     await toggleBan(roll.platform, roll.gameId, roll.gameTitle, true);
-    await rollTrophy();
+    await rollTrophy({
+      ban: { platform: roll.platform, gameId: roll.gameId, title: roll.gameTitle },
+    });
   }, [roll, toggleBan, rollTrophy]);
+
+  /** Step back to the previous roll, reversing whatever caused the move. */
+  const undo = useCallback(async () => {
+    const entry = undoStack[undoStack.length - 1];
+    if (!entry) return;
+    setUndoStack((stack) => stack.slice(0, -1));
+
+    try {
+      if (entry.mark) {
+        setMarks(
+          await saveMark(
+            entry.mark.platform,
+            entry.mark.gameId,
+            entry.roll.gameTitle,
+            entry.mark.achievementId,
+            null,
+          ),
+        );
+      }
+      if (entry.ban) {
+        setBanned(
+          await setGameBanned(entry.ban.platform, entry.ban.gameId, entry.ban.title, false),
+        );
+        exhausted.current.delete(banKey(entry.ban.platform, entry.ban.gameId));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to undo');
+    }
+
+    // Whatever ruled this game out no longer applies.
+    exhausted.current.delete(`${entry.roll.platform}/${entry.roll.gameId}`);
+    setRoll(entry.roll);
+  }, [undoStack]);
 
   const poolSize = pool.reduce((sum, g) => sum + g.unearned, 0);
 
@@ -267,5 +332,7 @@ export function useTrophyPicker(minRarity: number = 0) {
     banned,
     toggleBan,
     banCurrentGame,
+    undo,
+    canUndo: undoStack.length > 0,
   };
 }

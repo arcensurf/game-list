@@ -200,6 +200,9 @@ Sampling uniformly over *achievements* means games with huge lists dominate — 
 | Skip | Snoozed; returns to the pool after N days (default 14, adjustable) | Yes |
 | Can't be earned | Dead servers, delisted DLC — never offered again | Yes |
 | Ban game | Drops the whole game from the pool | Yes |
+| Undo | Steps back one roll, reversing any mark or ban that caused it | Session only |
+
+**Undo** (or `Cmd`/`Ctrl+Z`) steps back to the previous roll, up to ten deep. It reverses whatever caused the move, not just the display — undoing a mark clears the mark, and undoing a ban lifts it, so a mis-clicked "can't be earned" doesn't quietly become permanent.
 
 Per-achievement marks live in `public/data/overrides/<platform>/<id>.json`, one file per marked game, created only when a game actually has a mark and deleted when its last one is cleared. Expired skips are pruned on every write, so the files don't accumulate.
 

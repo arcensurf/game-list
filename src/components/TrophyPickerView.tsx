@@ -72,7 +72,7 @@ export default function TrophyPickerView() {
   const [banListOpen, setBanListOpen] = useState(false);
   const {
     roll, loading, rolling, error, poolSize, rollTrophy, markCurrent,
-    allGames, banned, toggleBan, banCurrentGame,
+    allGames, banned, toggleBan, banCurrentGame, undo, canUndo,
   } = useTrophyPicker(minRarity);
 
   // Steam withholds hidden achievement descriptions from its API
@@ -109,18 +109,24 @@ export default function TrophyPickerView() {
     if (!roll && !rolling && !loading && !error) void rollTrophy();
   }, [stageOnly, roll, rolling, loading, error, rollTrophy]);
 
-  // R rolls, so you're not hunting for the button mid-stream.
+  // R rolls and Cmd/Ctrl+Z steps back, so neither needs hunting for
+  // mid-stream.
   useEffect(() => {
     if (stageOnly) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'r' && e.key !== 'R') return;
       const el = document.activeElement;
       if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return;
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        void undo();
+        return;
+      }
+      if (e.key !== 'r' && e.key !== 'R') return;
       void rollTrophy();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [stageOnly, rollTrophy]);
+  }, [stageOnly, rollTrophy, undo]);
 
   const trophy = shown?.achievement;
 
@@ -193,6 +199,14 @@ export default function TrophyPickerView() {
             disabled={rolling || loading}
           >
             {rolling ? 'Rolling...' : 'Roll again (R)'}
+          </button>
+          <button
+            className="picker-btn"
+            onClick={() => void undo()}
+            disabled={!canUndo || rolling}
+            title="Back to the previous roll, undoing any mark that moved it"
+          >
+            Undo
           </button>
           <button
             className="picker-btn"
