@@ -27,6 +27,31 @@
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
 }
 
+/* Row once there's a cover to place; the status states stay centered. */
+.picker-stage:has(.picker-cover) {
+  flex-direction: row;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Cover + text sit side by side; the cover is fixed-width so the text
+   column starts at the same x on every roll — a stage that reflowed per
+   game would read as jitter on stream. */
+.picker-stage > .picker-cover {
+  flex: none;
+  width: 7.5rem;
+  height: 11rem;
+  object-fit: cover;
+  border-radius: calc(var(--radius) / 1.5);
+  background: var(--bg-surface);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.picker-body {
+  min-width: 0;
+  flex: 1;
+}
+
 .picker-status {
   color: var(--text-muted);
   text-align: center;
@@ -173,6 +198,28 @@
   padding: 0.3rem 0.7rem;
 }
 
+/* Rarity floor. Applies on the next roll rather than immediately —
+   re-rolling while the slider is being dragged would fire a burst of
+   requests and flicker the stage. */
+.picker-floor {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.picker-floor input[type='range'] {
+  width: 7rem;
+  accent-color: var(--accent);
+}
+
+.picker-floor-value {
+  min-width: 2.2rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
 .picker-days {
   display: flex;
   align-items: center;
@@ -259,6 +306,11 @@ body.stage-only .picker-stage {
 /* Long descriptions get clamped rather than allowed to push the card
    past its fixed stage height — two lines is enough for every
    achievement description seen in the data so far. */
+body.stage-only .picker-stage > .picker-cover {
+  width: 6rem;
+  height: 9rem;
+}
+
 body.stage-only .picker-description {
   display: -webkit-box;
   -webkit-line-clamp: 2;

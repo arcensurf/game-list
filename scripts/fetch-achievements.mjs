@@ -317,6 +317,11 @@ async function fetchPsnLibrary() {
       // one. Carried on the in-memory entry only; it never reaches
       // achievements.json.
       npServiceName: t.npServiceName,
+      // Game art, already in this response. The covers in covers.json
+      // only exist for games on the curated list, which is a small
+      // fraction of the owned library the picker draws from — so the
+      // platform's own art is the only thing with full coverage.
+      icon: t.trophyTitleIconUrl ?? null,
     }));
   } catch (err) {
     console.error('PSN: failed to fetch library', err.message);
@@ -511,6 +516,8 @@ async function fetchXboxLibrary() {
         platform: 'xbox',
         earned: t.achievement.currentAchievements ?? 0,
         total: t.achievement.totalAchievements ?? 0,
+        // Box art from the same titleHub response — see the PSN note.
+        icon: t.displayImage ?? null,
       }));
   } catch (err) {
     console.error('Xbox: failed to fetch library', err.message);
@@ -535,6 +542,22 @@ async function fetchXboxLibrary() {
 // So: definitions from one, progress from the other, joined on id.
 // Xbox 360 titles predate the v2 format and only exist under contract
 // v1, which does return locked achievements directly.
+//
+// KNOWN LIMITATION — do not re-attempt without new information.
+// As of 2026-08-20 this still returns only unlocked achievements for
+// 176 of 190 titles (7 more return nothing at all, all of them titles
+// with zero earned). Verified against the live API on force_refresh
+// runs, each producing byte-identical output:
+//   * unlockedOnly=false  — no effect (it is already the default)
+//   * possibleOnly=true   — no effect, despite being documented as
+//                           "return all possible results"
+//   * contract v1 fallback — works for exactly one title (GRID)
+// The 14 titles that do come back complete are almost all games that
+// were 100%'d, i.e. "complete" only because everything was unlocked.
+// The likely explanation is that Xbox Live keeps no definition set for
+// these mostly-360 titles on an account-scoped endpoint — consistent
+// with the earlier finding that 360 rarity is unavailable (commit
+// bd9bb4a). Steam and PSN are unaffected and fully populated.
 async function fetchXboxAchievementList(titleId, expectedTotal) {
   if (!xboxAuth) return null;
   const base = `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements`;
@@ -663,8 +686,8 @@ async function main() {
   // achievements.json stores full per-platform libraries keyed by the
   // platform's own ID. Shape:
   //   { steam: { [appid]: { title, earned, total, playtimeMinutes } },
-  //     psn:   { [npId]:  { title, earned, total } },
-  //     xbox:  { [titleId]: { title, earned, total } },
+  //     psn:   { [npId]:  { title, earned, total, icon } },
+  //     xbox:  { [titleId]: { title, earned, total, icon } },
   //     updatedAt }
   // The app resolves game → entry at render time (see
   // src/utils/achievementMatch.ts), so a manual override change takes
@@ -775,6 +798,7 @@ async function main() {
         title: e.platformTitle,
         earned: e.earned,
         total: e.total,
+        icon: e.icon ?? null,
       };
     }
   }
@@ -786,6 +810,7 @@ async function main() {
         title: e.platformTitle,
         earned: e.earned,
         total: e.total,
+        icon: e.icon ?? null,
       };
     }
   }

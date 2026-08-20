@@ -7,6 +7,7 @@ import {
   ACHIEVEMENT_PLATFORM_COLORS,
   ACHIEVEMENT_PLATFORM_COLORS_LIGHT,
 } from '../utils/platformColors';
+import { steamCoverFallback } from '../utils/pickerCover';
 
 const PLATFORM_LABELS: Record<string, string> = {
   steam: 'Steam',
@@ -29,6 +30,33 @@ function PlatformTag({ platform }: { platform: string }) {
   );
 }
 
+function Cover({
+  platform,
+  gameId,
+  url,
+}: {
+  platform: string;
+  gameId: string;
+  url: string | null;
+}) {
+  const [src, setSrc] = useState(url);
+  if (!src) return null;
+  return (
+    <img
+      className="picker-cover"
+      src={src}
+      alt=""
+      onError={() => {
+        // Not every Steam app has a portrait capsule; header.jpg does
+        // exist for essentially all of them. One retry, then give up
+        // and render nothing rather than a broken image on stream.
+        const fallback = steamCoverFallback(gameId);
+        setSrc(platform === 'steam' && src !== fallback ? fallback : null);
+      }}
+    />
+  );
+}
+
 function RarityNote({ rarity }: { rarity: number | null }) {
   // Xbox 360 titles come off the legacy endpoint, which predates
   // rarity — absent is normal here, not a failure.
@@ -41,9 +69,10 @@ function RarityNote({ rarity }: { rarity: number | null }) {
 
 export default function TrophyPickerView() {
   const [skipDays, setSkipDays] = useState(DEFAULT_SKIP_DAYS);
+  const [minRarity, setMinRarity] = useState(0);
   const { stageOnly, toggleStage } = useStageMode();
   const { roll, loading, rolling, error, poolSize, rollTrophy, markCurrent } =
-    useTrophyPicker();
+    useTrophyPicker(minRarity);
 
   // Stage mode is a display, not a second roller: it mirrors whatever
   // the control window published, so OBS and the window you're driving
@@ -90,6 +119,13 @@ export default function TrophyPickerView() {
           <p className="picker-status">Rolling...</p>
         ) : (
           <>
+            <Cover
+              key={`${shown.platform}/${shown.gameId}`}
+              platform={shown.platform}
+              gameId={shown.gameId}
+              url={shown.coverUrl}
+            />
+            <div className="picker-body">
             <div className="picker-game">
               <PlatformTag platform={shown.platform} />
               <span className="picker-game-title">{shown.gameTitle}</span>
@@ -110,6 +146,7 @@ export default function TrophyPickerView() {
                 <span className={`picker-type picker-type--${trophy!.type}`}>{trophy!.type}</span>
               )}
               {trophy!.points != null && <span className="picker-points">{trophy!.points}G</span>}
+            </div>
             </div>
           </>
         )}
@@ -140,6 +177,20 @@ export default function TrophyPickerView() {
           >
             Skip
           </button>
+          <label className="picker-floor" title="Applies to the next roll">
+            <span>min rarity</span>
+            <input
+              type="range"
+              min={0}
+              max={50}
+              step={1}
+              value={minRarity}
+              onChange={(e) => setMinRarity(Number(e.target.value))}
+            />
+            <span className="picker-floor-value">
+              {minRarity === 0 ? 'off' : `${minRarity}%`}
+            </span>
+          </label>
           <label className="picker-days">
             <input
               type="number"

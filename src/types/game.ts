@@ -74,6 +74,10 @@ export interface PlatformLibraryEntry {
   // Only populated for Steam; used as a tie-breaker when multiple
   // Steam entries normalize to the same title.
   playtimeMinutes?: number;
+  // Game art from the platform itself (PSN trophy icon, Xbox box art).
+  // Absent for Steam, whose art is derivable from the appid — see
+  // utils/pickerCover.ts.
+  icon?: string | null;
 }
 
 export interface AchievementData {

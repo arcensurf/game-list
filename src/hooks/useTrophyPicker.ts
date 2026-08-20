@@ -5,6 +5,7 @@ import { DATA_BASE } from '../utils/dataBase';
 import { loadAchievementList, type ShardPlatform } from './useAchievementList';
 import { eligibleAchievements } from '../utils/achievementOverrides';
 import { loadGameOverrides, saveMark } from '../utils/overridesApi';
+import { pickerCoverUrl } from '../utils/pickerCover';
 
 const PLATFORMS: ShardPlatform[] = ['steam', 'psn', 'xbox'];
 
@@ -16,19 +17,23 @@ interface PoolGame {
   id: string;
   title: string;
   unearned: number;
+  coverUrl: string | null;
 }
 
 export interface Roll {
   platform: ShardPlatform;
   gameId: string;
   gameTitle: string;
+  coverUrl: string | null;
   achievement: AchievementEntry;
 }
 
 // A roll can land on a game whose every remaining achievement turns out
-// to be marked. That can't be known from the summary counts, so the
-// picker re-rolls — bounded, so a heavily-marked library can't spin.
-const MAX_ATTEMPTS = 25;
+// to be marked, or filtered out by the rarity floor. Neither is knowable
+// from the summary counts the weights are built from, so the picker
+// re-rolls — bounded, so an aggressive filter can't spin forever. A high
+// floor rules out a lot of games, hence the generous ceiling.
+const MAX_ATTEMPTS = 60;
 
 /**
  * Weighted pick. Weighting by unearned count and then picking uniformly
@@ -47,7 +52,7 @@ function pickWeighted(games: PoolGame[]): PoolGame | null {
   return games[games.length - 1] ?? null;
 }
 
-export function useTrophyPicker() {
+export function useTrophyPicker(minRarity: number = 0) {
   const [pool, setPool] = useState<PoolGame[]>([]);
   const [loading, setLoading] = useState(true);
   const [rolling, setRolling] = useState(false);
@@ -56,9 +61,16 @@ export function useTrophyPicker() {
   const [error, setError] = useState<string | null>(null);
 
   // Games proven empty this session — every remaining achievement is
-  // marked. Kept out of the pool so repeated rolls don't keep paying
-  // for the same dead end.
+  // marked or filtered out. Kept out of the pool so repeated rolls
+  // don't keep paying for the same dead end.
   const exhausted = useRef<Set<string>>(new Set());
+
+  // "Empty" is relative to the rarity floor, so moving the slider makes
+  // every previous verdict stale — a game with nothing above 20% may
+  // have plenty above 5%.
+  useEffect(() => {
+    exhausted.current.clear();
+  }, [minRarity]);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,7 +83,13 @@ export function useTrophyPicker() {
           for (const [id, entry] of Object.entries(data[platform] ?? {})) {
             const unearned = entry.total - entry.earned;
             if (entry.total > 0 && unearned > 0) {
-              games.push({ platform, id, title: entry.title, unearned });
+              games.push({
+                platform,
+                id,
+                title: entry.title,
+                unearned,
+                coverUrl: pickerCoverUrl(platform, id, entry.icon),
+              });
             }
           }
         }
@@ -111,7 +129,9 @@ export function useTrophyPicker() {
 
         // No shard yet (a game added since the last nightly run), or the
         // whole set is spoken for — either way, stop drawing this game.
-        const eligible = list ? eligibleAchievements(list.achievements, gameMarks) : [];
+        const eligible = list
+          ? eligibleAchievements(list.achievements, gameMarks, { minRarity })
+          : [];
         if (eligible.length === 0) {
           exhausted.current.add(`${game.platform}/${game.id}`);
           continue;
@@ -121,17 +141,22 @@ export function useTrophyPicker() {
           platform: game.platform,
           gameId: game.id,
           gameTitle: list?.title ?? game.title,
+          coverUrl: game.coverUrl,
           achievement: eligible[Math.floor(Math.random() * eligible.length)],
         });
         setMarks(gameMarks);
         return;
       }
 
-      setError('Gave up after 25 tries — try again.');
+      setError(
+        minRarity > 0
+          ? `Nothing found above ${minRarity}% — try lowering the rarity floor.`
+          : 'Gave up after 60 tries — try again.',
+      );
     } finally {
       setRolling(false);
     }
-  }, [pool]);
+  }, [pool, minRarity]);
 
   /** Mark the current roll, then draw a fresh one. */
   const markCurrent = useCallback(
