@@ -6,12 +6,29 @@ import { DEFAULT_SKIP_DAYS } from '../types/overrides';
 import { ACHIEVEMENT_PLATFORM_COLORS } from '../utils/platformColors';
 import { steamCoverFallback } from '../utils/pickerCover';
 import BanListOverlay from './BanListOverlay';
+import ManualPickerOverlay from './ManualPickerOverlay';
 
 const PLATFORM_LABELS: Record<string, string> = {
   steam: 'Steam',
   psn: 'PlayStation',
   xbox: 'Xbox',
 };
+
+// Per-device preferences, not real state — worth remembering across a
+// reload, not worth syncing anywhere.
+const MIN_RARITY_KEY = 'game-list:picker-min-rarity';
+const SKIP_DAYS_KEY = 'game-list:picker-skip-days';
+
+function readStoredNumber(key: string, fallback: number): number {
+  try {
+    const raw = localStorage.getItem(key);
+    const n = raw == null ? NaN : Number(raw);
+    return Number.isFinite(n) ? n : fallback;
+  } catch {
+    // Private windows and blocked site data both throw on access.
+    return fallback;
+  }
+}
 
 function PlatformTag({ platform }: { platform: string }) {
   // Solid platform color, no border. The translucent-fill-plus-outline
@@ -66,12 +83,29 @@ function RarityNote({ rarity }: { rarity: number | null }) {
 }
 
 export default function TrophyPickerView() {
-  const [skipDays, setSkipDays] = useState(DEFAULT_SKIP_DAYS);
-  const [minRarity, setMinRarity] = useState(0);
+  const [skipDays, setSkipDays] = useState(() => readStoredNumber(SKIP_DAYS_KEY, DEFAULT_SKIP_DAYS));
+  const [minRarity, setMinRarity] = useState(() => readStoredNumber(MIN_RARITY_KEY, 0));
   const { stageOnly, toggleStage } = useStageMode();
   const [banListOpen, setBanListOpen] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SKIP_DAYS_KEY, String(skipDays));
+    } catch {
+      // Not worth interrupting anyone over.
+    }
+  }, [skipDays]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(MIN_RARITY_KEY, String(minRarity));
+    } catch {
+      // Not worth interrupting anyone over.
+    }
+  }, [minRarity]);
   const {
-    roll, loading, rolling, error, poolSize, rollTrophy, markCurrent,
+    roll, loading, rolling, error, poolSize, rollTrophy, markCurrent, selectManually,
     allGames, banned, toggleBan, banCurrentGame, undo, canUndo,
   } = useTrophyPicker(minRarity);
 
@@ -148,6 +182,8 @@ export default function TrophyPickerView() {
           } as React.CSSProperties
         }
       >
+        <span className="picker-stage-label">Target</span>
+
         {stageOnly && !shown ? (
           <p className="picker-status">Waiting for a roll...</p>
         ) : loading ? (
@@ -171,7 +207,7 @@ export default function TrophyPickerView() {
             </div>
 
             <h2 className="picker-trophy">
-              {trophy!.name}
+              <span className="picker-trophy-name">{trophy!.name}</span>
               {trophy!.hidden && <span className="picker-hidden">hidden</span>}
             </h2>
 
@@ -301,6 +337,14 @@ export default function TrophyPickerView() {
           >
             Manage bans ({Object.keys(banned).length})
           </button>
+          <button
+            className="picker-btn picker-btn--ghost"
+            onClick={() => setManualOpen(true)}
+            disabled={rolling}
+            title="Load a specific achievement instead of rolling for one"
+          >
+            Pick manually
+          </button>
           <span className="picker-pool">{poolSize.toLocaleString()} unearned in the pool</span>
         </div>
       </div>
@@ -311,6 +355,17 @@ export default function TrophyPickerView() {
         games={allGames}
         banned={banned}
         onToggle={(platform, id, title, next) => void toggleBan(platform, id, title, next)}
+      />
+
+      <ManualPickerOverlay
+        open={manualOpen}
+        onClose={() => setManualOpen(false)}
+        games={allGames}
+        minRarity={minRarity}
+        onSelect={(platform, gameId, gameTitle, coverUrl, achievement) => {
+          setManualOpen(false);
+          void selectManually(platform, gameId, gameTitle, coverUrl, achievement);
+        }}
       />
     </div>
   );

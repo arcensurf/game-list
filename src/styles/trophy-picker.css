@@ -86,6 +86,32 @@
   z-index: 2;
 }
 
+/* Rotated edge label — the band has no other text identifying what it
+   is, so a viewer scrubbing past it on stream has nothing to go on.
+   Positioned absolute so it doesn't take part in the row layout below.
+   Kept to one short word: at any length that reads as a sentence, the
+   vertical line runs taller than the band and gets clipped by the
+   stage's overflow:hidden — which was also why it read as illegible. */
+.picker-stage > .picker-stage-label {
+  position: absolute;
+  left: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  /* Pinned to 1 so the label's horizontal footprint tracks font-size
+     exactly — needed to keep it clear of the padding edge next door. */
+  line-height: 1;
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-light);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 /* Row once there's a cover to place; the status states stay centered. */
 .picker-stage:has(.picker-cover) {
   flex-direction: row;
@@ -182,6 +208,36 @@
   align-items: baseline;
   gap: 0.7rem;
   flex-wrap: wrap;
+}
+
+/* The card-hud's typewriter cursor, lifted as-is — same box metrics
+   (in em, so it scales with the trophy name's own font-size) and the
+   same amber glow. The card only blinks it once the typewriter reveal
+   finishes and gates it on hover; the picker has no reveal or hover
+   state to wait on, so it just runs continuously.
+
+   Attached to the name span rather than .picker-trophy itself, for two
+   reasons: it needs to land before the hidden badge (a sibling flex
+   item), and .picker-trophy is a flex container — vertical-align does
+   nothing on a flex item, so on the container it was aligning to flex
+   baseline instead of the text baseline and sitting noticeably high.
+   Inside the name span it's normal inline content again, where
+   vertical-align actually applies. */
+.picker-trophy-name::after {
+  content: '';
+  display: inline-block;
+  width: 0.5em;
+  height: 0.92em;
+  margin-left: 0.1em;
+  vertical-align: -0.12em;
+  background: var(--accent-light);
+  box-shadow: 0 0 5px rgba(var(--accent-glow), 0.45);
+  animation: picker-cursor-blink 0.9s steps(2) infinite;
+}
+
+@keyframes picker-cursor-blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 
 .picker-hidden {
@@ -440,50 +496,74 @@ body.stage-only .picker-stage {
    frame has very little height to give. Everything here is tighter than
    the in-app view, which stays comfortable for actually working in.
    Both heights derive from --picker-cover-h and --picker-pad-y, so
-   retuning the band is two numbers. */
+   retuning the band is two numbers — padding is kept thin here on
+   purpose and the difference handed to --picker-cover-h instead, so the
+   total stays the same fixed height but more of it goes to content. */
 body.stage-only .picker-stage {
-  --picker-cover-h: 7rem;
-  --picker-pad-y: 0.85rem;
-  padding: var(--picker-pad-y) 1.4rem;
+  --picker-cover-h: 7.9rem;
+  --picker-pad-y: 0.4rem;
+  padding: var(--picker-pad-y) 1.25rem;
 }
 
 body.stage-only .picker-stage:has(.picker-cover) {
   gap: 1.1rem;
 }
 
-body.stage-only .picker-game {
-  margin-bottom: 0.35rem;
-}
-
-body.stage-only .picker-trophy {
-  font-size: 2rem;
-  margin-bottom: 0.2rem;
-}
-
-body.stage-only .picker-description {
-  font-size: 0.9rem;
-  margin-bottom: 0.35rem;
-}
-
-body.stage-only .picker-meta {
-  font-size: 0.75rem;
-}
-
-body.stage-only .picker-platform {
-  font-size: 0.65rem;
-  padding: 0.18rem 0.5rem 0.12rem;
-}
-
-body.stage-only .picker-game-title {
+body.stage-only .picker-stage > .picker-stage-label {
+  left: 0.3rem;
   font-size: 0.8rem;
 }
 
+/* Game/platform and the rarity+type+points meta share one row instead
+   of stacking as a fourth — the band doesn't have height to spare for
+   a whole row of the card's smallest text. */
+body.stage-only .picker-body {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'game meta'
+    'trophy trophy'
+    'desc desc';
+  column-gap: 0.75rem;
+  row-gap: 0.25rem;
+  align-items: center;
+}
+
+body.stage-only .picker-game {
+  grid-area: game;
+  margin-bottom: 0;
+}
+
+body.stage-only .picker-meta {
+  grid-area: meta;
+  justify-self: end;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+body.stage-only .picker-trophy {
+  grid-area: trophy;
+  font-size: 2.9rem;
+  margin-bottom: 0;
+}
+
+body.stage-only .picker-platform {
+  font-size: 0.8rem;
+  padding: 0.24rem 0.6rem 0.18rem;
+}
+
+body.stage-only .picker-game-title {
+  font-size: 1.1rem;
+}
+
 body.stage-only .picker-description {
+  grid-area: desc;
+  font-size: 1.1rem;
+  margin-bottom: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-bottom: 0.75rem;
 }
 
 /* ── Ban list ──
@@ -622,4 +702,110 @@ body.stage-only .picker-description {
   color: var(--text-muted);
   padding: 1.5rem 0;
   text-align: center;
+}
+
+/* ── Manual picker ──
+   Reuses the ban overlay's shell (backdrop, panel, header, search,
+   scrolling rows) for both of its steps — picking a game and picking
+   one of its achievements are the same "search a list, click a row"
+   shape as the ban list, just with different row content. */
+.manual-row-btn {
+  width: 100%;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.manual-row-btn:hover {
+  color: var(--accent-light);
+}
+
+.manual-row-btn--earned .manual-ach-name {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.manual-ach-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.manual-ach-badge {
+  flex: none;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.manual-back {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.manual-back:hover {
+  color: var(--text);
+}
+
+/* The game row has two independent actions — open its list, or roll
+   straight from it — so it's a plain row with two sibling buttons
+   rather than one button (which .manual-row-btn's achievement rows
+   are), since a button can't nest inside a button. */
+.manual-game-btn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+
+.manual-game-btn:hover {
+  color: var(--accent-light);
+}
+
+.manual-random-btn {
+  flex: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+
+.manual-random-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.manual-random-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.manual-pick-error {
+  color: var(--accent-dim);
+  font-size: 0.8rem;
+  margin: -0.35rem 0 0.6rem;
 }

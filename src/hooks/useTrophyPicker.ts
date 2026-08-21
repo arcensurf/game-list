@@ -259,6 +259,32 @@ export function useTrophyPicker(minRarity: number = 0) {
     [roll, rollTrophy],
   );
 
+  /**
+   * Load a specific achievement directly, bypassing the weighted draw —
+   * for when the random pool isn't going to land on the one you actually
+   * need right now. Goes through the same undo stack as a normal roll,
+   * just with no mark/ban to reverse.
+   */
+  const selectManually = useCallback(
+    async (
+      platform: ShardPlatform,
+      gameId: string,
+      gameTitle: string,
+      coverUrl: string | null,
+      achievement: AchievementEntry,
+    ) => {
+      const previous = rollRef.current;
+      if (previous) {
+        setUndoStack((stack) => [...stack.slice(-(UNDO_LIMIT - 1)), { roll: previous }]);
+      }
+      exhausted.current.delete(`${platform}/${gameId}`);
+      setError(null);
+      setRoll({ platform, gameId, gameTitle, coverUrl, achievement });
+      setMarks(await loadGameOverrides(platform, gameId));
+    },
+    [],
+  );
+
   const toggleBan = useCallback(
     async (platform: ShardPlatform, gameId: string, title: string, next: boolean) => {
       try {
@@ -328,6 +354,7 @@ export function useTrophyPicker(minRarity: number = 0) {
     poolSize,
     rollTrophy,
     markCurrent,
+    selectManually,
     allGames,
     banned,
     toggleBan,
