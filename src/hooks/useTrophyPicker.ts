@@ -8,15 +8,7 @@ import { loadGameOverrides, saveMark } from '../utils/overridesApi';
 import { pickerCoverUrl } from '../utils/pickerCover';
 import { banKey, loadBannedGames, setGameBanned, type BannedMap } from '../utils/bannedGames';
 
-// Xbox stays out of the roll pool: its achievement-list API only
-// returns already-earned achievements for nearly the whole library
-// (183 of 184 titles as of 2026-08-22 — see the KNOWN LIMITATION note
-// above fetchXboxAchievementList in scripts/fetch-achievements.mjs),
-// so there's essentially nothing real to draw from. 'xbox' stays in
-// ShardPlatform so existing marks/bans and the fetch script are
-// unaffected — this only pulls it out of the picker until that gap
-// has a fix.
-export const PLATFORMS: ShardPlatform[] = ['steam', 'psn', 'ra'];
+export const PLATFORMS: ShardPlatform[] = ['steam', 'psn', 'xbox', 'ra'];
 
 // A game the picker can draw from, straight out of achievements.json.
 // That file is keyed by the platform's own ID, which is exactly the

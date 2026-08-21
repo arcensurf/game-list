@@ -556,59 +556,43 @@ async function fetchXboxLibrary() {
 // titleHub's decoration only carries the counts block, so per-game
 // lists come from the achievements service one title at a time.
 //
-// This needs two calls, for the same reason PSN does — definitions and
-// progress live behind different requests:
+// Two populations, two different shapes:
 //
-//   * The plain call returns the player's record. It carries unlock
-//     state and rarity, but in practice lists only achievements already
-//     unlocked. (unlockedOnly defaults to false, so passing it changes
-//     nothing — that was a wasted run.)
-//   * possibleOnly=true is documented as "return all possible results
-//     but not unlocked metadata": the full definition list with the
-//     unlock state deliberately stripped.
-//
-// So: definitions from one, progress from the other, joined on id.
-// Xbox 360 titles predate the v2 format and only exist under contract
-// v1, which does return locked achievements directly.
-//
-// KNOWN LIMITATION — do not re-attempt without new information.
-// As of 2026-08-20 this still returns only unlocked achievements for
-// 176 of 190 titles (7 more return nothing at all, all of them titles
-// with zero earned). Verified against the live API on force_refresh
-// runs, each producing byte-identical output:
-//   * unlockedOnly=false  — no effect (it is already the default)
-//   * possibleOnly=true   — no effect, despite being documented as
-//                           "return all possible results"
-//   * contract v1 fallback — works for exactly one title (GRID)
-//   * /titleachievements (a distinct endpoint, contract v1, found in
-//     OpenXbox/xbox-webapi-python) — tried and reverted 2026-08-22.
-//     Returns more entries for some titles, but its ids are a legacy
-//     scheme that never matches the modern /achievements ids used to
-//     attribute earned state, so every entry it contributes comes back
-//     earned:false regardless of truth — confirmed on Guitar Hero III,
-//     which showed 32 achievements all unearned despite 13 actually
-//     earned. Worse than the status quo (the picker could re-offer
-//     something already earned), not just unhelpful — do not reuse
-//     this endpoint's data for earned state without solving the id
-//     mapping first.
-// The 14 titles that do come back complete are almost all games that
-// were 100%'d, i.e. "complete" only because everything was unlocked.
-// The likely explanation is that Xbox Live keeps no definition set for
-// these mostly-360 titles on an account-scoped endpoint — consistent
-// with the earlier finding that 360 rarity is unavailable (commit
-// bd9bb4a). Steam and PSN are unaffected and fully populated.
+//   * Modern (2017+ format) titles: contract v2's bare call returns
+//     the player's earned record; possibleOnly=true returns the full
+//     definition list with unlock state stripped. Definitions from
+//     one, progress from the other, joined on id — both use the same
+//     modern id scheme, so that join is safe.
+//   * Old-gen (pre-2017/Xbox 360) titles: /achievements only ever
+//     returns what's earned, full stop — exhaustively confirmed
+//     2026-08-22 against every contract version (1-4) and every query
+//     flag (bare, possibleOnly, unlockedOnly): identical short output
+//     every time. The full catalog lives at the separate
+//     /titleachievements endpoint instead (found via
+//     OpenXbox/xbox-webapi-python) — but ITS earned flag is always
+//     false, so it has to be joined against v1 /achievements' earned
+//     list, not v2's: v1 and /titleachievements share the same legacy
+//     small-integer id scheme, v2's doesn't overlap with either at
+//     all for these titles. Verified against real accounts: 7/58 and
+//     13/59 with zero id/name mismatches. (An earlier attempt on
+//     2026-08-22 joined /titleachievements against v2's list instead —
+//     wrong id scheme, so every entry silently came back earned:false
+//     regardless of truth. Reverted before it could re-offer an
+//     already-earned achievement; this is the fixed version.)
 async function fetchXboxAchievementList(titleId, expectedTotal) {
   if (!xboxAuth) return null;
-  const base = `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements`;
-  const get = async (contractVersion, query) => {
+  const get = async (path, contractVersion, query = '') => {
     try {
-      const res = await fetch(`${base}?titleId=${titleId}&maxItems=1000${query}`, {
-        headers: {
-          Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
-          'x-xbl-contract-version': contractVersion,
-          'Accept-Language': 'en-US',
+      const res = await fetch(
+        `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/${path}?titleId=${titleId}&maxItems=1000${query}`,
+        {
+          headers: {
+            Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
+            'x-xbl-contract-version': contractVersion,
+            'Accept-Language': 'en-US',
+          },
         },
-      });
+      );
       if (!res.ok) return [];
       return (await res.json()).achievements ?? [];
     } catch {
@@ -642,24 +626,43 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
     points: Number(a.gamerscore) || null,
     earned: a.unlocked === true,
     earnedAt: unlockedAt(a.timeUnlocked),
-    rarity: null, // v1 predates the rarity block
+    rarity: null, // v1/legacy predates the rarity block
   });
 
-  const player = (await get('2', '')).map(mapModern);
+  const player = (await get('achievements', '2')).map(mapModern);
   await delay(120);
-  let defs = (await get('2', '&possibleOnly=true')).map(mapModern);
+  let defs = (await get('achievements', '2', '&possibleOnly=true')).map(mapModern);
+  let unlockedSource = player;
 
   if (expectedTotal > 0 && defs.length < expectedTotal) {
     await delay(120);
-    const legacy = (await get('1', '')).map(mapLegacy);
-    if (legacy.length > defs.length) defs = legacy;
+    const legacyEarned = (await get('achievements', '1')).map(mapLegacy);
+
+    if (legacyEarned.length > defs.length) {
+      defs = legacyEarned;
+      unlockedSource = legacyEarned;
+    }
+
+    // Still short after the legacy earned-only list — reach for the
+    // full old-gen catalog and join it against that same earned list
+    // (see the block comment above for why it has to be this one).
+    if (defs.length < expectedTotal) {
+      await delay(120);
+      const legacyDefs = (await get('titleachievements', '1')).map(mapLegacy);
+      if (legacyDefs.length > defs.length) {
+        defs = legacyDefs;
+        unlockedSource = legacyEarned;
+      }
+    }
   }
 
   // Whichever call knew about more of the title supplies the entries;
-  // unlock state always comes from the player call, since possibleOnly
-  // strips it by design.
+  // unlock state comes from whichever earned-only source shares that
+  // source's id scheme (v2's "player" for modern titles, the legacy
+  // earned list for old-gen ones).
   const source = defs.length >= player.length ? defs : player;
-  const unlocked = new Map(player.filter((a) => a.earned).map((a) => [a.id, a]));
+  const finalUnlockedSource = source === player ? player : unlockedSource;
+  const unlocked = new Map(finalUnlockedSource.filter((a) => a.earned).map((a) => [a.id, a]));
   const merged = source.map((a) => {
     const hit = unlocked.get(a.id);
     return hit ? { ...a, earned: true, earnedAt: hit.earnedAt, rarity: a.rarity ?? hit.rarity } : a;
@@ -821,60 +824,6 @@ function buildRaShard(entry, rows, playersCasual) {
   };
 }
 
-// ── Temporary diagnostic ──
-//
-// Only runs when DEBUG_XBOX_CONTRACTS=1 (see the workflow's
-// debug_xbox_contracts input). Reuses whatever session initXbox()
-// already established this run — mints nothing new, writes nothing.
-// Verifies the merge hypothesis below against two known-broken
-// titles before it goes anywhere near the real fetch/write path.
-async function debugXboxContractVersions() {
-  const titles = [
-    ['1096157146', 'Marvel Ult. Alliance', 7, 58],
-    ['1096157175', 'Guitar Hero III', 13, 59],
-  ];
-  for (const [titleId, name, realEarned, realTotal] of titles) {
-    console.log(`\n=== ${name} (real: ${realEarned}/${realTotal}) ===`);
-
-    // The merge hypothesis: /titleachievements gives the full
-    // definition list (confirmed complete, but earned always false),
-    // and /achievements v1 bare gives a correctly-attributed
-    // earned-only list — sharing the same small-integer id scheme, so
-    // a merge by id should work where the original attempt (merging
-    // against v2's differently-scheme'd, empty-for-these-titles
-    // "player" list) couldn't.
-    let fullList, earned;
-    try {
-      const fullRes = await fetch(
-        `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/titleachievements?titleId=${titleId}&maxItems=1000`,
-        { headers: { Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`, 'x-xbl-contract-version': '1', 'Accept-Language': 'en-US' } },
-      );
-      fullList = (await fullRes.json())?.achievements ?? [];
-      await delay(300);
-      const earnedRes = await fetch(
-        `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements?titleId=${titleId}&maxItems=1000`,
-        { headers: { Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`, 'x-xbl-contract-version': '1', 'Accept-Language': 'en-US' } },
-      );
-      earned = (await earnedRes.json())?.achievements ?? [];
-    } catch (err) {
-      console.log('  fetch failed:', err.message);
-      continue;
-    }
-
-    const fullById = new Map(fullList.map((a) => [a.id, a]));
-    let matched = 0, mismatched = 0;
-    for (const e of earned) {
-      const hit = fullById.get(e.id);
-      if (hit && hit.name === e.name) matched++;
-      else { mismatched++; console.log(`  MISMATCH id=${e.id} earned-name="${e.name}" full-list-has="${hit?.name}"`); }
-    }
-    console.log(`  full list: ${fullList.length} items | earned list: ${earned.length} items`);
-    console.log(`  id+name matches: ${matched} | mismatches: ${mismatched}`);
-    console.log(`  merged result would be: ${matched}/${fullList.length} earned (real: ${realEarned}/${realTotal})`);
-  }
-  console.log('\nDiagnostic done — nothing was written.');
-}
-
 // ── Main ──
 
 async function main() {
@@ -893,15 +842,6 @@ async function main() {
 
   await initPsn();
   await initXbox();
-
-  if (process.env.DEBUG_XBOX_CONTRACTS === '1') {
-    if (!xboxAuth) {
-      console.log('DEBUG_XBOX_CONTRACTS set but Xbox auth failed — nothing to probe.');
-    } else {
-      await debugXboxContractVersions();
-    }
-    return;
-  }
 
   console.log('\nFetching platform libraries...');
   const [steamLib, psnLib, xboxLib, raLib] = await Promise.all([
