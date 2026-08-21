@@ -558,27 +558,42 @@ async function fetchXboxLibrary() {
 //
 // Two populations, two different shapes:
 //
+//   * Old-gen (pre-2017/Xbox 360) titles: /achievements only ever
+//     returns what's earned under contract v1 or v2, full stop —
+//     exhaustively confirmed 2026-08-22 against every contract
+//     version (1-4) and every query flag (bare, possibleOnly,
+//     unlockedOnly): identical short output every time *except* v3,
+//     which returns that same earned-only set plus a native rarity
+//     block v1 lacks — a strict upgrade, so legacy calls use v3 now.
+//     The full catalog lives at the separate /titleachievements
+//     endpoint instead (found via OpenXbox/xbox-webapi-python) — its
+//     own earned flag is always false, so it has to be joined against
+//     v3 /achievements' earned list, not v2's: v3 (like v1) and
+//     /titleachievements share the same legacy small-integer id
+//     scheme, v2's doesn't overlap with either at all for these
+//     titles. Verified against real accounts: 7/58 and 13/59 with
+//     zero id/name mismatches, then a full-library force_refresh
+//     that brought shard-derived unearned counts to an exact 5,323/
+//     5,323 match against the summary, 184/184 games contributing
+//     real data (up from 1/184 — just GRID) and zero earned-count
+//     regressions. (An earlier attempt on 2026-08-22 joined
+//     /titleachievements against v2's list instead — wrong id scheme,
+//     so every entry silently came back earned:false regardless of
+//     truth. Reverted before it could re-offer an already-earned
+//     achievement; this is the fixed version.)
 //   * Modern (2017+ format) titles: contract v2's bare call returns
 //     the player's earned record; possibleOnly=true returns the full
 //     definition list with unlock state stripped. Definitions from
 //     one, progress from the other, joined on id — both use the same
-//     modern id scheme, so that join is safe.
-//   * Old-gen (pre-2017/Xbox 360) titles: /achievements only ever
-//     returns what's earned, full stop — exhaustively confirmed
-//     2026-08-22 against every contract version (1-4) and every query
-//     flag (bare, possibleOnly, unlockedOnly): identical short output
-//     every time. The full catalog lives at the separate
-//     /titleachievements endpoint instead (found via
-//     OpenXbox/xbox-webapi-python) — but ITS earned flag is always
-//     false, so it has to be joined against v1 /achievements' earned
-//     list, not v2's: v1 and /titleachievements share the same legacy
-//     small-integer id scheme, v2's doesn't overlap with either at
-//     all for these titles. Verified against real accounts: 7/58 and
-//     13/59 with zero id/name mismatches. (An earlier attempt on
-//     2026-08-22 joined /titleachievements against v2's list instead —
-//     wrong id scheme, so every entry silently came back earned:false
-//     regardless of truth. Reverted before it could re-offer an
-//     already-earned achievement; this is the fixed version.)
+//     modern id scheme, so that join is safe. v4 is tried first as a
+//     possible strict upgrade (per the same community lead that led
+//     to v3 above, v4 is supposedly v2's current-gen counterpart) but
+//     this library doesn't yet have a current-gen Xbox title to
+//     verify it against, so it's UNVERIFIED — only used when it beats
+//     v2's own count, and falls straight back to the already-proven
+//     v2 path otherwise. Revisit once there's a real title to check
+//     it against; if v4 turns out to always win, the v2 fallback
+//     below can go.
 async function fetchXboxAchievementList(titleId, expectedTotal) {
   if (!xboxAuth) return null;
   const get = async (path, contractVersion, query = '') => {
@@ -626,17 +641,31 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
     points: Number(a.gamerscore) || null,
     earned: a.unlocked === true,
     earnedAt: unlockedAt(a.timeUnlocked),
-    rarity: null, // v1/legacy predates the rarity block
+    rarity: roundRarity(a.rarity?.currentPercentage), // v1 lacked this; v3 has it
   });
 
-  const player = (await get('achievements', '2')).map(mapModern);
+  let player = (await get('achievements', '4')).map(mapModern);
   await delay(120);
-  let defs = (await get('achievements', '2', '&possibleOnly=true')).map(mapModern);
+  let defs = (await get('achievements', '4', '&possibleOnly=true')).map(mapModern);
   let unlockedSource = player;
+
+  // v4 unverified (see the block comment) — if it didn't beat v2's own
+  // count, trust v2 instead rather than whatever v4 came back with.
+  if (expectedTotal > 0 && defs.length < expectedTotal) {
+    await delay(120);
+    const v2Player = (await get('achievements', '2')).map(mapModern);
+    await delay(120);
+    const v2Defs = (await get('achievements', '2', '&possibleOnly=true')).map(mapModern);
+    if (v2Defs.length > defs.length) {
+      player = v2Player;
+      defs = v2Defs;
+      unlockedSource = v2Player;
+    }
+  }
 
   if (expectedTotal > 0 && defs.length < expectedTotal) {
     await delay(120);
-    const legacyEarned = (await get('achievements', '1')).map(mapLegacy);
+    const legacyEarned = (await get('achievements', '3')).map(mapLegacy);
 
     if (legacyEarned.length > defs.length) {
       defs = legacyEarned;
@@ -648,7 +677,7 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
     // (see the block comment above for why it has to be this one).
     if (defs.length < expectedTotal) {
       await delay(120);
-      const legacyDefs = (await get('titleachievements', '1')).map(mapLegacy);
+      const legacyDefs = (await get('titleachievements', '3')).map(mapLegacy);
       if (legacyDefs.length > defs.length) {
         defs = legacyDefs;
         unlockedSource = legacyEarned;
@@ -658,8 +687,8 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
 
   // Whichever call knew about more of the title supplies the entries;
   // unlock state comes from whichever earned-only source shares that
-  // source's id scheme (v2's "player" for modern titles, the legacy
-  // earned list for old-gen ones).
+  // source's id scheme ("player" — v4 or its v2 fallback — for modern
+  // titles, the legacy earned list for old-gen ones).
   const source = defs.length >= player.length ? defs : player;
   const finalUnlockedSource = source === player ? player : unlockedSource;
   const unlocked = new Map(finalUnlockedSource.filter((a) => a.earned).map((a) => [a.id, a]));
