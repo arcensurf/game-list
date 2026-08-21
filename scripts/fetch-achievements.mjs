@@ -829,6 +829,29 @@ function buildRaShard(entry, rows, playersCasual) {
 // Probes contract versions 3 and 4 (the script has only ever tried 1
 // and 2) against two known-broken titles, per a lead from an OpenXBL
 // GitHub issue comment claiming v3 covers old-gen titles.
+async function probeXbox(path, titleId, version, query) {
+  try {
+    const res = await fetch(
+      `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/${path}?titleId=${titleId}&maxItems=1000${query}`,
+      {
+        headers: {
+          Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
+          'x-xbl-contract-version': String(version),
+          'Accept-Language': 'en-US',
+        },
+      },
+    );
+    const json = res.ok ? await res.json() : null;
+    const achievements = json?.achievements ?? [];
+    const earnedLooking = achievements.filter(
+      (a) => a.unlocked === true || a.progressState === 'Achieved',
+    ).length;
+    return { status: res.status, count: achievements.length, earnedLooking, sample: achievements[0] };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
 async function debugXboxContractVersions() {
   const titles = [
     ['1096157146', 'Marvel Ult. Alliance', 7, 58],
@@ -841,30 +864,29 @@ async function debugXboxContractVersions() {
   ];
   for (const [titleId, name, realEarned, realTotal] of titles) {
     console.log(`\n=== ${name} (real: ${realEarned}/${realTotal}) ===`);
+    console.log(' -- /achievements --');
     for (const version of [1, 2, 3, 4]) {
       for (const [label, query] of variants) {
-        try {
-          const res = await fetch(
-            `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements?titleId=${titleId}&maxItems=1000${query}`,
-            {
-              headers: {
-                Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
-                'x-xbl-contract-version': String(version),
-                'Accept-Language': 'en-US',
-              },
-            },
-          );
-          const json = res.ok ? await res.json() : null;
-          const achievements = json?.achievements ?? [];
-          const earnedLooking = achievements.filter(
-            (a) => a.unlocked === true || a.progressState === 'Achieved',
-          ).length;
-          console.log(`  v${version} ${label}: status=${res.status} count=${achievements.length} earned-looking=${earnedLooking}`);
-        } catch (err) {
-          console.log(`  v${version} ${label}: ERROR ${err.message}`);
-        }
+        const r = await probeXbox('achievements', titleId, version, query);
+        if (r.error) console.log(`  v${version} ${label}: ERROR ${r.error}`);
+        else console.log(`  v${version} ${label}: status=${r.status} count=${r.count} earned-looking=${r.earnedLooking}`);
         await delay(300);
       }
+    }
+    // Never tried at anything but v1 before (see the 2026-08-22 revert
+    // note above fetchXboxAchievementList) — OpenXBL's full-58/59-item
+    // response for these same titles doesn't match what our own v1
+    // call on this path returns (32/58), so something between v2-v4
+    // might close that gap.
+    console.log(' -- /titleachievements --');
+    for (const version of [1, 2, 3, 4]) {
+      const r = await probeXbox('titleachievements', titleId, version, '');
+      if (r.error) console.log(`  v${version}: ERROR ${r.error}`);
+      else {
+        console.log(`  v${version}: status=${r.status} count=${r.count} earned-looking=${r.earnedLooking}`);
+        if (r.sample) console.log(`       sample keys: ${Object.keys(r.sample).join(', ')}`);
+      }
+      await delay(300);
     }
   }
   console.log('\nDiagnostic done — nothing was written.');
