@@ -821,6 +821,49 @@ function buildRaShard(entry, rows, playersCasual) {
   };
 }
 
+// ── Temporary diagnostic ──
+//
+// Only runs when DEBUG_XBOX_CONTRACTS=1 (see the workflow's
+// debug_xbox_contracts input). Reuses whatever session initXbox()
+// already established this run — mints nothing new, writes nothing.
+// Probes contract versions 3 and 4 (the script has only ever tried 1
+// and 2) against two known-broken titles, per a lead from an OpenXBL
+// GitHub issue comment claiming v3 covers old-gen titles.
+async function debugXboxContractVersions() {
+  const titles = [
+    ['1096157146', 'Marvel Ult. Alliance', 7, 58],
+    ['1096157175', 'Guitar Hero III', 13, 59],
+  ];
+  for (const [titleId, name, realEarned, realTotal] of titles) {
+    console.log(`\n=== ${name} (real: ${realEarned}/${realTotal}) ===`);
+    for (const version of [1, 2, 3, 4]) {
+      try {
+        const res = await fetch(
+          `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements?titleId=${titleId}&maxItems=1000`,
+          {
+            headers: {
+              Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
+              'x-xbl-contract-version': String(version),
+              'Accept-Language': 'en-US',
+            },
+          },
+        );
+        const json = res.ok ? await res.json() : null;
+        const achievements = json?.achievements ?? [];
+        const earnedLooking = achievements.filter(
+          (a) => a.unlocked === true || a.progressState === 'Achieved',
+        ).length;
+        console.log(`  v${version}: status=${res.status} count=${achievements.length} earned-looking=${earnedLooking}`);
+        if (achievements[0]) console.log(`       sample keys: ${Object.keys(achievements[0]).join(', ')}`);
+      } catch (err) {
+        console.log(`  v${version}: ERROR ${err.message}`);
+      }
+      await delay(300);
+    }
+  }
+  console.log('\nDiagnostic done — nothing was written.');
+}
+
 // ── Main ──
 
 async function main() {
@@ -839,6 +882,15 @@ async function main() {
 
   await initPsn();
   await initXbox();
+
+  if (process.env.DEBUG_XBOX_CONTRACTS === '1') {
+    if (!xboxAuth) {
+      console.log('DEBUG_XBOX_CONTRACTS set but Xbox auth failed — nothing to probe.');
+    } else {
+      await debugXboxContractVersions();
+    }
+    return;
+  }
 
   console.log('\nFetching platform libraries...');
   const [steamLib, psnLib, xboxLib, raLib] = await Promise.all([
