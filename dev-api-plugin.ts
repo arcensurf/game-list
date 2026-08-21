@@ -637,7 +637,7 @@ export default function devApiPlugin(): Plugin {
                 days?: number;
               };
 
-            if (!/^(steam|psn|xbox)$/.test(platform) || !gameId || !achievementId) {
+            if (!/^(steam|psn|xbox|ra)$/.test(platform) || !gameId || !achievementId) {
               res.writeHead(400, { 'Content-Type': 'application/json' });
               res.end(JSON.stringify({ error: 'platform, gameId and achievementId are required' }));
               return;
@@ -712,7 +712,7 @@ export default function devApiPlugin(): Plugin {
               banned: boolean;
             };
 
-            if (!/^(steam|psn|xbox)$/.test(platform) || !gameId) {
+            if (!/^(steam|psn|xbox|ra)$/.test(platform) || !gameId) {
               res.writeHead(400, { 'Content-Type': 'application/json' });
               res.end(JSON.stringify({ error: 'platform and gameId are required' }));
               return;

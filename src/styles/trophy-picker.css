@@ -283,6 +283,11 @@
 .picker-type--gold { color: var(--gold-bright); }
 .picker-type--silver { color: #cdd3d8; }
 .picker-type--bronze { color: #c08457; }
+/* RetroAchievements' three optional flags — most achievements carry
+   none of these and get the plain, unstyled label. */
+.picker-type--progression { color: #7ea8d8; }
+.picker-type--win_condition { color: var(--accent-light); }
+.picker-type--missable { color: #e0857c; }
 
 .picker-points { color: var(--text-muted); }
 

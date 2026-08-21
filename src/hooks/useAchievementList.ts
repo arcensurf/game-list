@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { AchievementList } from '../types/game';
 import { DATA_BASE } from '../utils/dataBase';
 
-export type ShardPlatform = 'steam' | 'psn' | 'xbox';
+export type ShardPlatform = 'steam' | 'psn' | 'xbox' | 'ra';
 
 // Shards only change when the nightly fetch runs, and in production
 // they're served from raw.githubusercontent.com (five-minute cache,

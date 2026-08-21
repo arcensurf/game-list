@@ -34,6 +34,8 @@ const PSN_NPSSO_TOKEN = process.env.PSN_NPSSO_TOKEN
 const PSN_REFRESH_TOKEN_FILE = resolve(tokenDir, 'psn-refresh-token');
 const PSN_STATUS_FILE = resolve(tokenDir, 'psn-status');
 const XBOX_REFRESH_TOKEN = process.env.XBOX_REFRESH_TOKEN;
+const RA_API_KEY = process.env.RA_API_KEY;
+const RA_USERNAME = process.env.RA_USERNAME;
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -706,6 +708,108 @@ async function syncShards(platform, lib, fetchList, throttleMs) {
   }
 }
 
+// ── RetroAchievements ──
+//
+// No OAuth, just an API key + username as query params — simpler than
+// PSN/Xbox. But unlike them, the per-game call (below) is the only
+// place real box art shows up: the library call only carries a tiny
+// 96x96 icon (confirmed empirically — PSN/Xbox icons run much larger,
+// so treating RA's the same way would visibly pixelate the picker's
+// cover). Box art doesn't change once a game's added to RA, so it's
+// resolved once and cached forever, same as Steam's header image —
+// which is also why this doesn't use the shared syncShards() pass PSN
+// and Xbox use: that helper only ever calls fetchList when the shard
+// itself is stale, and box art can still be missing on a shard that's
+// otherwise current (right after this feature ships, backfilling
+// everyone's existing library).
+//
+// "Earned" means hardcore-earned (DateEarnedHardcore) specifically —
+// RA distinguishes hardcore (no save states/rewind/cheats) from
+// softcore, and a softcore-only clear is treated as still open here,
+// both for the per-achievement rows and the library summary counts
+// (so the two stay consistent with each other).
+
+const RA_BASE = 'https://retroachievements.org/API';
+const RA_MEDIA_BASE = 'https://media.retroachievements.org';
+
+async function raCall(endpoint, params) {
+  const qs = new URLSearchParams({ y: RA_API_KEY, u: RA_USERNAME, ...params });
+  const res = await fetch(`${RA_BASE}/${endpoint}.php?${qs}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function fetchRaLibrary() {
+  if (!RA_API_KEY || !RA_USERNAME) {
+    console.log('RetroAchievements: skipping (no API key or username)');
+    return [];
+  }
+
+  const all = [];
+  let offset = 0;
+  const pageSize = 500;
+  try {
+    while (true) {
+      const page = await raCall('API_GetUserCompletionProgress', { c: pageSize, o: offset });
+      const results = page.Results ?? [];
+      all.push(...results);
+      offset += results.length;
+      if (results.length < pageSize || offset >= (page.Total ?? 0)) break;
+      await delay(200);
+    }
+  } catch (err) {
+    console.error('RetroAchievements: failed to fetch library', err.message);
+    return [];
+  }
+
+  // MaxPossible === 0 means the game has no achievement set on RA at
+  // all — nothing for the picker to ever draw from.
+  return all
+    .filter((g) => (g.MaxPossible ?? 0) > 0)
+    .map((g) => ({
+      platformTitle: g.Title,
+      platformId: g.GameID,
+      platform: 'ra',
+      earned: g.NumAwardedHardcore ?? 0,
+      total: g.MaxPossible ?? 0,
+    }));
+}
+
+// RA timestamps are "2022-08-23 22:56:38" — space-separated, always
+// UTC, no offset given.
+function raTimestampToIso(value) {
+  if (!value) return null;
+  const d = new Date(`${value.replace(' ', 'T')}Z`);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+function buildRaShard(entry, rows, playersCasual) {
+  return {
+    platform: 'ra',
+    id: String(entry.platformId),
+    title: entry.platformTitle,
+    earned: entry.earned,
+    total: entry.total,
+    achievements: rows.map((a) => ({
+      id: String(a.ID),
+      name: a.Title ?? '',
+      // RA never withholds the description before unlock — no hidden
+      // concept the way Steam has.
+      description: a.Description ?? '',
+      hidden: false,
+      type: a.Type ?? null,
+      points: a.Points ?? null,
+      earned: a.DateEarnedHardcore != null,
+      earnedAt: raTimestampToIso(a.DateEarnedHardcore),
+      // Percent of everyone who's played the game that has this
+      // specific achievement — the same "Earned by X% of players"
+      // semantic Steam's rarity carries, just computed from fields RA
+      // already returns instead of a separate call.
+      rarity: playersCasual > 0 ? roundRarity((a.NumAwarded / playersCasual) * 100) : null,
+    })),
+  };
+}
+
 // ── Main ──
 
 async function main() {
@@ -720,18 +824,19 @@ async function main() {
   // effect on the next page load without re-running this script.
   const existing = existsSync(achievementsPath)
     ? JSON.parse(readFileSync(achievementsPath, 'utf-8'))
-    : { steam: {}, psn: {}, xbox: {} };
+    : { steam: {}, psn: {}, xbox: {}, ra: {} };
 
   await initPsn();
   await initXbox();
 
   console.log('\nFetching platform libraries...');
-  const [steamLib, psnLib, xboxLib] = await Promise.all([
+  const [steamLib, psnLib, xboxLib, raLib] = await Promise.all([
     fetchSteamLibrary(),
     fetchPsnLibrary(),
     fetchXboxLibrary(),
+    fetchRaLibrary(),
   ]);
-  console.log(`Steam: ${steamLib.length} games, PSN: ${psnLib.length} games, Xbox: ${xboxLib.length} games`);
+  console.log(`Steam: ${steamLib.length} games, PSN: ${psnLib.length} games, Xbox: ${xboxLib.length} games, RetroAchievements: ${raLib.length} games`);
 
   // Only replace a platform's slice if we actually fetched it this run.
   // A transient API failure (empty list) preserves the previous data
@@ -740,12 +845,13 @@ async function main() {
   if (steamLib.length > 0) fetchedPlatforms.add('steam');
   if (psnLib.length > 0) fetchedPlatforms.add('psn');
   if (xboxLib.length > 0) fetchedPlatforms.add('xbox');
+  if (raLib.length > 0) fetchedPlatforms.add('ra');
 
   // platform-libraries.json is a simplified human-readable reference
   // for manually finding override IDs. Not consumed by the app.
   const existingLibs = existsSync(librariesPath)
     ? JSON.parse(readFileSync(librariesPath, 'utf-8'))
-    : { steam: [], psn: [], xbox: [] };
+    : { steam: [], psn: [], xbox: [], ra: [] };
   const libraries = {
     steam: fetchedPlatforms.has('steam')
       ? steamLib.map((e) => ({
@@ -770,6 +876,14 @@ async function main() {
           total: e.total,
         }))
       : (existingLibs.xbox ?? []),
+    ra: fetchedPlatforms.has('ra')
+      ? raLib.map((e) => ({
+          id: e.platformId,
+          title: e.platformTitle,
+          earned: e.earned,
+          total: e.total,
+        }))
+      : (existingLibs.ra ?? []),
     updatedAt: new Date().toISOString(),
   };
   writeFileSync(librariesPath, JSON.stringify(libraries, null, 2) + '\n');
@@ -854,19 +968,67 @@ async function main() {
     }
   }
 
+  // Like Steam, RA's shards are written inline here rather than through
+  // syncShards — see the comment above buildRaShard for why (box art
+  // resolution needs to piggyback on the same per-game call).
+  const raMap = {};
+  if (fetchedPlatforms.has('ra')) {
+    console.log(`\nSyncing RetroAchievements lists for ${raLib.length} games...`);
+    let written = 0, fetched = 0, unchanged = 0, failed = 0, iconCalls = 0, done = 0;
+    for (const e of raLib) {
+      const id = String(e.platformId);
+      let icon = existing.ra?.[id]?.icon ?? null;
+      const needsIcon = !icon;
+      const needsRefresh = !currentShard('ra', id, e.earned, e.total);
+
+      if (needsIcon || needsRefresh) {
+        try {
+          const game = await raCall('API_GetGameInfoAndUserProgress', { g: e.platformId });
+          if (game.ImageBoxArt) icon = `${RA_MEDIA_BASE}${game.ImageBoxArt}`;
+          if (needsIcon) iconCalls++;
+
+          if (needsRefresh) {
+            fetched++;
+            const rows = Object.values(game.Achievements ?? {});
+            if (rows.length > 0) {
+              const playersCasual = game.NumDistinctPlayersCasual ?? 0;
+              if (writeShard('ra', id, buildRaShard(e, rows, playersCasual))) written++;
+            } else {
+              failed++;
+            }
+          }
+        } catch (err) {
+          console.error(`  RetroAchievements: fetch failed for ${e.platformTitle} (${id})`, err.message);
+          if (needsRefresh) failed++;
+        }
+        await delay(350);
+      } else {
+        unchanged++;
+      }
+
+      raMap[id] = { title: e.platformTitle, earned: e.earned, total: e.total, icon };
+      done++;
+      if (done % 50 === 0) console.log(`  RetroAchievements: ${done}/${raLib.length}`);
+    }
+    const pruned = pruneShards('ra', raLib.map((e) => String(e.platformId)));
+    console.log(`  RetroAchievements shards: ${written} written, ${fetched} fetched, ${unchanged} unchanged, ${failed} failed, ${iconCalls} icon calls, ${pruned} pruned`);
+  }
+
   const achievements = {
     steam: fetchedPlatforms.has('steam') ? steamMap : (existing.steam ?? {}),
     psn: fetchedPlatforms.has('psn') ? psnMap : (existing.psn ?? {}),
     xbox: fetchedPlatforms.has('xbox') ? xboxMap : (existing.xbox ?? {}),
+    ra: fetchedPlatforms.has('ra') ? raMap : (existing.ra ?? {}),
     updatedAt: new Date().toISOString(),
   };
 
   writeFileSync(achievementsPath, JSON.stringify(achievements, null, 2) + '\n');
-  console.log(`\nWrote achievements.json — steam: ${Object.keys(achievements.steam).length}, psn: ${Object.keys(achievements.psn).length}, xbox: ${Object.keys(achievements.xbox).length}`);
+  console.log(`\nWrote achievements.json — steam: ${Object.keys(achievements.steam).length}, psn: ${Object.keys(achievements.psn).length}, xbox: ${Object.keys(achievements.xbox).length}, ra: ${Object.keys(achievements.ra).length}`);
 
   // Shards come last so a failure here can't cost us the summary data
-  // that's already on disk. Steam's shards were written inline above,
-  // since its counts and its list arrive in the same response.
+  // that's already on disk. Steam's and RA's shards were written
+  // inline above, since their counts and lists arrive in the same
+  // response.
   if (fetchedPlatforms.has('psn')) await syncShards('psn', psnLib, fetchPsnTrophyList, 300);
   if (fetchedPlatforms.has('xbox')) await syncShards('xbox', xboxLib, (e) => fetchXboxAchievementList(e.platformId, e.total), 250);
 }

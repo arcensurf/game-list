@@ -27,7 +27,7 @@ export interface AchievementOverride {
 }
 
 export interface GameOverrides {
-  platform: 'steam' | 'psn' | 'xbox';
+  platform: 'steam' | 'psn' | 'xbox' | 'ra';
   id: string;
   title: string;
   /** Keyed by achievement id, as it appears in the game's shard. */

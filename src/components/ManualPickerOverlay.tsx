@@ -23,6 +23,7 @@ const PLATFORM_LABELS: Record<string, string> = {
   steam: 'Steam',
   psn: 'PSN',
   xbox: 'Xbox',
+  ra: 'RA',
 };
 
 /**

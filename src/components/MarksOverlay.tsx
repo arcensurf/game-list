@@ -10,6 +10,7 @@ const PLATFORM_LABELS: Record<string, string> = {
   steam: 'Steam',
   psn: 'PSN',
   xbox: 'Xbox',
+  ra: 'RA',
 };
 
 const STATUS_LABELS: Record<OverrideStatus, string> = {

@@ -87,6 +87,7 @@ export interface AchievementData {
   steam: Record<string, PlatformLibraryEntry>;
   psn: Record<string, PlatformLibraryEntry>;
   xbox: Record<string, PlatformLibraryEntry>;
+  ra: Record<string, PlatformLibraryEntry>;
   ffxiv?: Record<string, FfxivCharacterData>;
   updatedAt?: string;
 }
@@ -113,14 +114,14 @@ export interface AchievementEntry {
    * legacy endpoint, and Steam games with no public stats.
    */
   rarity: number | null;
-  /** PSN only: bronze / silver / gold / platinum. */
+  /** PSN: bronze / silver / gold / platinum. RA: progression / win_condition / missable. */
   type?: string | null;
-  /** Xbox only: gamerscore value. */
+  /** Xbox: gamerscore value. RA: point value. */
   points?: number | null;
 }
 
 export interface AchievementList {
-  platform: 'steam' | 'psn' | 'xbox';
+  platform: 'steam' | 'psn' | 'xbox' | 'ra';
   id: string;
   title: string;
   /** Mirrors the achievements.json summary row for this game. */

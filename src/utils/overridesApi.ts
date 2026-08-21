@@ -2,7 +2,7 @@ import type { GameOverrides, OverrideStatus } from '../types/overrides';
 import { DEFAULT_SKIP_DAYS } from '../types/overrides';
 import { DATA_BASE } from './dataBase';
 
-export type ShardPlatform = 'steam' | 'psn' | 'xbox';
+export type ShardPlatform = 'steam' | 'psn' | 'xbox' | 'ra';
 
 const key = (platform: ShardPlatform, id: string) => `${platform}/${id}`;
 

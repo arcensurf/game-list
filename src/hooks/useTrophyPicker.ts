@@ -8,7 +8,7 @@ import { loadGameOverrides, saveMark } from '../utils/overridesApi';
 import { pickerCoverUrl } from '../utils/pickerCover';
 import { banKey, loadBannedGames, setGameBanned, type BannedMap } from '../utils/bannedGames';
 
-export const PLATFORMS: ShardPlatform[] = ['steam', 'psn', 'xbox'];
+export const PLATFORMS: ShardPlatform[] = ['steam', 'psn', 'xbox', 'ra'];
 
 // A game the picker can draw from, straight out of achievements.json.
 // That file is keyed by the platform's own ID, which is exactly the

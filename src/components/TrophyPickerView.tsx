@@ -14,6 +14,7 @@ const PLATFORM_LABELS: Record<string, string> = {
   steam: 'Steam',
   psn: 'PlayStation',
   xbox: 'Xbox',
+  ra: 'RA',
 };
 
 // Per-device preferences, not real state — worth remembering across a
@@ -309,7 +310,12 @@ export default function TrophyPickerView() {
               {trophy!.type && (
                 <span className={`picker-type picker-type--${trophy!.type}`}>{trophy!.type}</span>
               )}
-              {trophy!.points != null && <span className="picker-points">{trophy!.points}G</span>}
+              {trophy!.points != null && (
+                <span className="picker-points">
+                  {trophy!.points}
+                  {shown.platform === 'xbox' ? 'G' : ''}
+                </span>
+              )}
             </div>
             </div>
           </>
