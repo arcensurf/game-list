@@ -388,6 +388,47 @@
   font-size: 0.82rem;
 }
 
+/* Platform toggles. Applies to the pool immediately, unlike the rarity
+   floor — this is "don't draw from this platform at all" rather than a
+   quality filter, so there's no burst-of-requests concern to wait out. */
+.picker-platform-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.picker-platform-toggle {
+  font-family: 'Share Tech', sans-serif;
+  padding: 0.22rem 0.6rem 0.16rem;
+  border-radius: 2px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity var(--transition), border-color var(--transition), color var(--transition);
+  /* Off state: same shape as the on-state badge, hollowed out — so the
+     row reads as one control with two states rather than a badge next
+     to an unrelated button. */
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.picker-platform-toggle--on {
+  border-color: transparent;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.picker-platform-toggle:not(.picker-platform-toggle--on):hover {
+  border-color: var(--accent);
+  color: var(--accent-light);
+}
+
+.picker-platform-toggle--on:hover {
+  opacity: 0.85;
+}
+
 /* Only appears for achievements whose description the platform won't
    give us — in practice Steam's hidden ones. */
 .picker-note-row {

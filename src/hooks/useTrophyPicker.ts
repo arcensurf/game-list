@@ -8,7 +8,7 @@ import { loadGameOverrides, saveMark } from '../utils/overridesApi';
 import { pickerCoverUrl } from '../utils/pickerCover';
 import { banKey, loadBannedGames, setGameBanned, type BannedMap } from '../utils/bannedGames';
 
-const PLATFORMS: ShardPlatform[] = ['steam', 'psn', 'xbox'];
+export const PLATFORMS: ShardPlatform[] = ['steam', 'psn', 'xbox'];
 
 // A game the picker can draw from, straight out of achievements.json.
 // That file is keyed by the platform's own ID, which is exactly the
@@ -19,6 +19,11 @@ interface PoolGame {
   title: string;
   unearned: number;
   coverUrl: string | null;
+  // The platform's own resolved art (Steam's real header image, PSN/Xbox
+  // icon). For PSN/Xbox this duplicates coverUrl; for Steam it's the
+  // last-resort fallback when the guessed capsule/header URLs 404 — see
+  // utils/pickerCover.ts.
+  iconUrl: string | null;
 }
 
 export interface Roll {
@@ -26,6 +31,7 @@ export interface Roll {
   gameId: string;
   gameTitle: string;
   coverUrl: string | null;
+  iconUrl: string | null;
   achievement: AchievementEntry;
 }
 
@@ -84,7 +90,7 @@ interface UndoEntry {
 
 const UNDO_LIMIT = 10;
 
-export function useTrophyPicker(minRarity: number = 0) {
+export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPlatform[] = PLATFORMS) {
   // Every game with something left to earn, bans included — the manage
   // list needs to show banned games so they can be un-banned.
   const [allGames, setAllGames] = useState<PoolGame[]>([]);
@@ -135,6 +141,7 @@ export function useTrophyPicker(minRarity: number = 0) {
                 title: entry.title,
                 unearned,
                 coverUrl: pickerCoverUrl(platform, id, entry.icon),
+                iconUrl: entry.icon ?? null,
               });
             }
           }
@@ -168,8 +175,11 @@ export function useTrophyPicker(minRarity: number = 0) {
   }, [roll]);
 
   const pool = useMemo(
-    () => allGames.filter((g) => !banned[banKey(g.platform, g.id)]),
-    [allGames, banned],
+    () =>
+      allGames.filter(
+        (g) => !banned[banKey(g.platform, g.id)] && enabledPlatforms.includes(g.platform),
+      ),
+    [allGames, banned, enabledPlatforms],
   );
 
   const rollTrophy = useCallback(async (undoMeta?: Omit<UndoEntry, 'roll'>) => {
@@ -213,6 +223,7 @@ export function useTrophyPicker(minRarity: number = 0) {
           gameId: game.id,
           gameTitle: list?.title ?? game.title,
           coverUrl: game.coverUrl,
+          iconUrl: game.iconUrl,
           achievement: eligible[Math.floor(Math.random() * eligible.length)],
         });
         setMarks(gameMarks);
@@ -271,6 +282,7 @@ export function useTrophyPicker(minRarity: number = 0) {
       gameId: string,
       gameTitle: string,
       coverUrl: string | null,
+      iconUrl: string | null,
       achievement: AchievementEntry,
     ) => {
       const previous = rollRef.current;
@@ -279,7 +291,7 @@ export function useTrophyPicker(minRarity: number = 0) {
       }
       exhausted.current.delete(`${platform}/${gameId}`);
       setError(null);
-      setRoll({ platform, gameId, gameTitle, coverUrl, achievement });
+      setRoll({ platform, gameId, gameTitle, coverUrl, iconUrl, achievement });
       setMarks(await loadGameOverrides(platform, gameId));
     },
     [],

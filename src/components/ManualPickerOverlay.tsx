@@ -16,6 +16,7 @@ interface ListGame {
   title: string;
   unearned: number;
   coverUrl: string | null;
+  iconUrl: string | null;
 }
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -47,6 +48,7 @@ export default function ManualPickerOverlay({
     gameId: string,
     gameTitle: string,
     coverUrl: string | null,
+    iconUrl: string | null,
     achievement: AchievementEntry,
   ) => void;
 }) {
@@ -118,7 +120,7 @@ export default function ManualPickerOverlay({
         return;
       }
       const achievement = eligible[Math.floor(Math.random() * eligible.length)];
-      onSelect(g.platform, g.id, gameList.title, g.coverUrl, achievement);
+      onSelect(g.platform, g.id, gameList.title, g.coverUrl, g.iconUrl, achievement);
     } finally {
       setRandomizing(null);
     }
@@ -226,7 +228,7 @@ export default function ManualPickerOverlay({
                     key={a.id}
                     className={`ban-row manual-row-btn${a.earned ? ' manual-row-btn--earned' : ''}`}
                     onClick={() =>
-                      onSelect(picked.platform, picked.id, list.title, picked.coverUrl, a)
+                      onSelect(picked.platform, picked.id, list.title, picked.coverUrl, picked.iconUrl, a)
                     }
                   >
                     <span className="manual-ach-name">

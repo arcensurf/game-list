@@ -75,7 +75,10 @@ export interface PlatformLibraryEntry {
   // Steam entries normalize to the same title.
   playtimeMinutes?: number;
   // Game art from the platform itself (PSN trophy icon, Xbox box art).
-  // Absent for Steam, whose art is derivable from the appid — see
+  // For Steam this is the real header image resolved via the store API
+  // — see fetchSteamHeaderImage in fetch-achievements.mjs — used only as
+  // a fallback when the guessed capsule/header URLs 404, since most
+  // Steam apps resolve those without needing a network round trip. See
   // utils/pickerCover.ts.
   icon?: string | null;
 }

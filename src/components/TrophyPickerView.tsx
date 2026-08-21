@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useTrophyPicker } from '../hooks/useTrophyPicker';
+import { PLATFORMS, useTrophyPicker } from '../hooks/useTrophyPicker';
+import type { ShardPlatform } from '../hooks/useAchievementList';
 import { useStageMode } from '../hooks/useStageMode';
 import { usePickerBroadcast, usePickerFollower } from '../hooks/usePickerSync';
 import { DEFAULT_SKIP_DAYS } from '../types/overrides';
@@ -18,6 +19,7 @@ const PLATFORM_LABELS: Record<string, string> = {
 // reload, not worth syncing anywhere.
 const MIN_RARITY_KEY = 'game-list:picker-min-rarity';
 const SKIP_DAYS_KEY = 'game-list:picker-skip-days';
+const PLATFORMS_KEY = 'game-list:picker-platforms';
 
 function readStoredNumber(key: string, fallback: number): number {
   try {
@@ -27,6 +29,23 @@ function readStoredNumber(key: string, fallback: number): number {
   } catch {
     // Private windows and blocked site data both throw on access.
     return fallback;
+  }
+}
+
+function readStoredPlatforms(): ShardPlatform[] {
+  try {
+    const raw = localStorage.getItem(PLATFORMS_KEY);
+    if (!raw) return PLATFORMS;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return PLATFORMS;
+    const kept = PLATFORMS.filter((p) => parsed.includes(p));
+    // An empty save predates a guard against it, or came from storage
+    // edited by hand — either way, nothing to roll from is worse than
+    // ignoring the save.
+    return kept.length > 0 ? kept : PLATFORMS;
+  } catch {
+    // Private windows and blocked site data both throw on access.
+    return PLATFORMS;
   }
 }
 
@@ -45,10 +64,12 @@ function Cover({
   platform,
   gameId,
   url,
+  iconUrl,
 }: {
   platform: string;
   gameId: string;
   url: string | null;
+  iconUrl: string | null;
 }) {
   const [src, setSrc] = useState(url);
   if (!src) return null;
@@ -58,11 +79,22 @@ function Cover({
       src={src}
       alt=""
       onError={() => {
-        // Not every Steam app has a portrait capsule; header.jpg does
-        // exist for essentially all of them. One retry, then give up
+        // Steam art has two guessed URLs to fall through — not every app
+        // has a portrait capsule, and header.jpg exists at the legacy
+        // flat path for most (but not all) of the rest — before landing
+        // on iconUrl, the real header image resolved server-side during
+        // the nightly fetch. That last one is the only reliable source
+        // for games Valve has moved onto the newer hashed-path CDN
+        // scheme, which has no flat-path alias at all. Only then give up
         // and render nothing rather than a broken image on stream.
         const fallback = steamCoverFallback(gameId);
-        setSrc(platform === 'steam' && src !== fallback ? fallback : null);
+        if (platform === 'steam' && src !== fallback) {
+          setSrc(fallback);
+        } else if (iconUrl && src !== iconUrl) {
+          setSrc(iconUrl);
+        } else {
+          setSrc(null);
+        }
       }}
     />
   );
@@ -85,6 +117,7 @@ function RarityNote({ rarity }: { rarity: number | null }) {
 export default function TrophyPickerView() {
   const [skipDays, setSkipDays] = useState(() => readStoredNumber(SKIP_DAYS_KEY, DEFAULT_SKIP_DAYS));
   const [minRarity, setMinRarity] = useState(() => readStoredNumber(MIN_RARITY_KEY, 0));
+  const [enabledPlatforms, setEnabledPlatforms] = useState<ShardPlatform[]>(readStoredPlatforms);
   const { stageOnly, toggleStage } = useStageMode();
   const [banListOpen, setBanListOpen] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
@@ -104,10 +137,29 @@ export default function TrophyPickerView() {
       // Not worth interrupting anyone over.
     }
   }, [minRarity]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PLATFORMS_KEY, JSON.stringify(enabledPlatforms));
+    } catch {
+      // Not worth interrupting anyone over.
+    }
+  }, [enabledPlatforms]);
+
+  const togglePlatform = (platform: ShardPlatform) => {
+    setEnabledPlatforms((prev) => {
+      const on = prev.includes(platform);
+      // At least one platform must stay on, or there's nothing left to
+      // roll from — silently ignoring the click beats a dead picker.
+      if (on && prev.length === 1) return prev;
+      return on ? prev.filter((p) => p !== platform) : [...prev, platform];
+    });
+  };
+
   const {
     roll, loading, rolling, error, poolSize, rollTrophy, markCurrent, selectManually,
     allGames, banned, toggleBan, banCurrentGame, undo, canUndo,
-  } = useTrophyPicker(minRarity);
+  } = useTrophyPicker(minRarity, enabledPlatforms);
 
   // Steam withholds hidden achievement descriptions from its API
   // entirely, so for those there's nothing to fetch — this is a manual
@@ -199,6 +251,7 @@ export default function TrophyPickerView() {
               platform={shown.platform}
               gameId={shown.gameId}
               url={shown.coverUrl}
+              iconUrl={shown.iconUrl}
             />
             <div className="picker-body">
             <div className="picker-game">
@@ -302,6 +355,29 @@ export default function TrophyPickerView() {
           </button>
         </div>
 
+        <div className="picker-platform-toggles" role="group" aria-label="Platforms to roll from">
+          {PLATFORMS.map((p) => {
+            const on = enabledPlatforms.includes(p);
+            const label = PLATFORM_LABELS[p] ?? p;
+            return (
+              <button
+                key={p}
+                type="button"
+                className={`picker-platform-toggle${on ? ' picker-platform-toggle--on' : ''}`}
+                style={on ? { background: ACHIEVEMENT_PLATFORM_COLORS[p] } : undefined}
+                onClick={() => togglePlatform(p)}
+                title={
+                  on
+                    ? `Stop rolling ${label} achievements`
+                    : `Include ${label} achievements again`
+                }
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
         {roll && !roll.achievement.description && (
           <div className="picker-note-row">
             <input
@@ -362,9 +438,9 @@ export default function TrophyPickerView() {
         onClose={() => setManualOpen(false)}
         games={allGames}
         minRarity={minRarity}
-        onSelect={(platform, gameId, gameTitle, coverUrl, achievement) => {
+        onSelect={(platform, gameId, gameTitle, coverUrl, iconUrl, achievement) => {
           setManualOpen(false);
-          void selectManually(platform, gameId, gameTitle, coverUrl, achievement);
+          void selectManually(platform, gameId, gameTitle, coverUrl, iconUrl, achievement);
         }}
       />
     </div>

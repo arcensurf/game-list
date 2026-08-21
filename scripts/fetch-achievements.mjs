@@ -198,6 +198,32 @@ async function fetchSteamGlobalRarity(appId) {
   }
 }
 
+// Fallback art for the picker, resolved once per game and then cached
+// forever in achievements.json (see currentIcon below) — box art doesn't
+// change, so there's no reason to keep paying for this call.
+//
+// GetOwnedGames carries no art at all, so the picker guesses a URL from
+// the appid client-side instead (utils/pickerCover.ts). That guess
+// depends on Steam serving assets from the older flat
+// apps/{id}/header.jpg path; newer titles are increasingly showing up
+// on a per-app hashed path instead (e.g.
+// apps/{id}/2d8e4389.../header.jpg) with no flat-path alias at all, so
+// the guess 404s for them. The store API is the only place that hashed
+// path is discoverable, and it can't be resolved client-side — Valve
+// doesn't send CORS headers on it.
+async function fetchSteamHeaderImage(appId) {
+  try {
+    const res = await fetch(`https://store.steampowered.com/api/appdetails?appids=${appId}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const entry = data?.[appId];
+    if (!entry?.success) return null;
+    return entry.data?.header_image ?? null;
+  } catch {
+    return null;
+  }
+}
+
 function buildSteamShard(entry, rows, rarity) {
   return {
     platform: 'steam',
@@ -685,7 +711,7 @@ async function syncShards(platform, lib, fetchList, throttleMs) {
 async function main() {
   // achievements.json stores full per-platform libraries keyed by the
   // platform's own ID. Shape:
-  //   { steam: { [appid]: { title, earned, total, playtimeMinutes } },
+  //   { steam: { [appid]: { title, earned, total, playtimeMinutes, icon } },
   //     psn:   { [npId]:  { title, earned, total, icon } },
   //     xbox:  { [titleId]: { title, earned, total, icon } },
   //     updatedAt }
@@ -756,15 +782,28 @@ async function main() {
   if (fetchedPlatforms.has('steam')) {
     console.log(`\nFetching Steam achievements for ${steamLib.length} games...`);
     let done = 0;
+    let iconCalls = 0;
     for (const e of steamLib) {
       const id = String(e.platformId);
       const rows = (await fetchSteamAchievements(e.platformId)) ?? [];
       const earned = rows.filter((a) => a.achieved === 1).length;
+
+      // Resolved once and kept forever — box art doesn't change, so a
+      // game that already has one costs nothing here. Only new library
+      // additions (or a first backfill run) pay for the extra request.
+      let icon = existing.steam?.[id]?.icon ?? null;
+      if (!icon) {
+        icon = await fetchSteamHeaderImage(id);
+        iconCalls++;
+        await delay(400);
+      }
+
       steamMap[id] = {
         title: e.platformTitle,
         earned,
         total: rows.length,
         playtimeMinutes: e.playtimeMinutes ?? 0,
+        icon,
       };
       await delay(300);
 
@@ -788,7 +827,7 @@ async function main() {
       if (done % 50 === 0) console.log(`  Steam: ${done}/${steamLib.length}`);
     }
     const pruned = pruneShards('steam', Object.keys(steamMap));
-    console.log(`  Steam shards: ${steamShards.written} written, ${steamShards.rarityCalls} rarity calls, ${pruned} pruned`);
+    console.log(`  Steam shards: ${steamShards.written} written, ${steamShards.rarityCalls} rarity calls, ${iconCalls} icon calls, ${pruned} pruned`);
   }
 
   const psnMap = {};
