@@ -185,7 +185,7 @@ export default function TrophyPickerView() {
   };
 
   const {
-    roll, loading, rolling, error, poolSize, eligibleCount, rollTrophy, markCurrent, selectManually,
+    roll, marks, loading, rolling, error, poolSize, eligibleCount, rollTrophy, markCurrent, selectManually,
     rerollSameGame, allGames, banned, toggleBan, banCurrentGame, undo, canUndo,
   } = useTrophyPicker(minRarity, enabledPlatforms);
 
@@ -243,6 +243,12 @@ export default function TrophyPickerView() {
   }, [stageOnly, rollTrophy, undo]);
 
   const trophy = shown?.achievement;
+
+  // Marking no longer moves the roll off screen, so this is the only
+  // signal that a click landed — read from the same `marks` state
+  // markCurrent just wrote, keyed to the achievement actually on
+  // screen so a fresh roll doesn't carry a stale badge over.
+  const currentMarkStatus = roll ? marks?.overrides[roll.achievement.id]?.status : undefined;
 
   // Starts as the roll's own guess and gets refined by Cover as it
   // works through the fallback chain — kept separate from `shown` so
@@ -352,21 +358,21 @@ export default function TrophyPickerView() {
           <span className="picker-divider" aria-hidden="true" />
 
           <button
-            className="picker-btn"
+            className={`picker-btn${currentMarkStatus === 'earned' ? ' picker-btn--marked' : ''}`}
             onClick={() => void markCurrent('earned')}
             disabled={!roll || rolling}
             title="Already earned — the nightly run hasn't caught up yet"
           >
-            Earned it
+            {currentMarkStatus === 'earned' ? '✓ Earned' : 'Earned it'}
           </button>
           <span className="picker-skip-group">
             <button
-              className="picker-btn"
+              className={`picker-btn${currentMarkStatus === 'skipped' ? ' picker-btn--marked' : ''}`}
               onClick={() => void markCurrent('skipped', skipDays)}
               disabled={!roll || rolling}
               title={`Hide this one for ${skipDays} days`}
             >
-              Skip
+              {currentMarkStatus === 'skipped' ? '✓ Skipped' : 'Skip'}
             </button>
             <label className="picker-days">
               <input
@@ -383,12 +389,12 @@ export default function TrophyPickerView() {
           <span className="picker-divider" aria-hidden="true" />
 
           <button
-            className="picker-btn picker-btn--danger"
+            className={`picker-btn picker-btn--danger${currentMarkStatus === 'unachievable' ? ' picker-btn--marked' : ''}`}
             onClick={() => void markCurrent('unachievable')}
             disabled={!roll || rolling}
             title="Dead servers, delisted DLC — never offer this again"
           >
-            Can't be earned
+            {currentMarkStatus === 'unachievable' ? '✓ Marked' : "Can't be earned"}
           </button>
           <button
             className="picker-btn picker-btn--danger"

@@ -347,6 +347,21 @@
   color: #e0857c;
 }
 
+/* Marking no longer moves the roll off screen, so this is the only
+   confirmation a click landed — a persistent state, not just a hover,
+   since the whole point is it's still visible after the mouse moves
+   away. Wins over --danger (Can't be earned combines both). */
+.picker-btn--marked {
+  background: rgba(74, 222, 128, 0.14);
+  border-color: #4ade80;
+  color: #4ade80;
+}
+
+.picker-btn--marked:hover:not(:disabled) {
+  border-color: #4ade80;
+  color: #4ade80;
+}
+
 .picker-btn--ghost {
   background: transparent;
   font-size: 0.78rem;

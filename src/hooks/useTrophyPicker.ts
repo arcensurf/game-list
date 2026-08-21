@@ -281,7 +281,12 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
     }
   }, [pool, minRarity]);
 
-  /** Mark the current roll, then draw a fresh one. */
+  /**
+   * Mark the current roll — earned, skipped, or unachievable — without
+   * moving on. Marking and "give me something new" used to be the
+   * same click; splitting them lets Roll again / Same game be a
+   * deliberate choice after the mark instead of bundled with it.
+   */
   const markCurrent = useCallback(
     async (status: OverrideStatus, days?: number) => {
       if (!roll) return;
@@ -297,18 +302,18 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
         setMarks(updated);
         // The game may now be fully spoken for; the next roll finds out.
         exhausted.current.delete(`${roll.platform}/${roll.gameId}`);
-        await rollTrophy({
-          mark: {
-            platform: roll.platform,
-            gameId: roll.gameId,
-            achievementId: roll.achievement.id,
+        setUndoStack((stack) => [
+          ...stack.slice(-(UNDO_LIMIT - 1)),
+          {
+            roll,
+            mark: { platform: roll.platform, gameId: roll.gameId, achievementId: roll.achievement.id },
           },
-        });
+        ]);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to save mark');
       }
     },
-    [roll, rollTrophy],
+    [roll],
   );
 
   /**
