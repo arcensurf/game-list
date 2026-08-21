@@ -338,6 +338,47 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
     [],
   );
 
+  /**
+   * Roll again within the current game — same eligibility rules as a
+   * normal roll (unearned, unmarked, above the rarity floor), just
+   * narrowed to one title instead of the whole pool. For staying on a
+   * game you're enjoying rather than moving on. Goes through the same
+   * undo stack as a normal roll, with no mark/ban to reverse.
+   */
+  const rerollSameGame = useCallback(async () => {
+    const current = rollRef.current;
+    if (!current) return;
+    setRolling(true);
+    setError(null);
+    try {
+      const [list, marks] = await Promise.all([
+        loadAchievementList(current.platform, current.gameId),
+        loadGameOverrides(current.platform, current.gameId),
+      ]);
+      if (!list) {
+        setError(`No achievement data for ${current.gameTitle}.`);
+        return;
+      }
+      const eligible = eligibleAchievements(list.achievements, marks, { minRarity });
+      // Exclude what's already on screen — "same game, new challenge"
+      // shouldn't just hand back the one you're looking at.
+      const candidates = eligible.filter((a) => a.id !== current.achievement.id);
+      const pool = candidates.length > 0 ? candidates : eligible;
+      if (pool.length === 0) {
+        setError(`Nothing else left to earn in ${current.gameTitle}.`);
+        return;
+      }
+      const achievement = pool[Math.floor(Math.random() * pool.length)];
+      setUndoStack((stack) => [...stack.slice(-(UNDO_LIMIT - 1)), { roll: current }]);
+      setRoll({ ...current, achievement });
+      setMarks(marks);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reroll');
+    } finally {
+      setRolling(false);
+    }
+  }, [minRarity]);
+
   const toggleBan = useCallback(
     async (platform: ShardPlatform, gameId: string, title: string, next: boolean) => {
       try {
@@ -409,6 +450,7 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
     rollTrophy,
     markCurrent,
     selectManually,
+    rerollSameGame,
     allGames,
     banned,
     toggleBan,

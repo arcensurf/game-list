@@ -186,7 +186,7 @@ export default function TrophyPickerView() {
 
   const {
     roll, loading, rolling, error, poolSize, eligibleCount, rollTrophy, markCurrent, selectManually,
-    allGames, banned, toggleBan, banCurrentGame, undo, canUndo,
+    rerollSameGame, allGames, banned, toggleBan, banCurrentGame, undo, canUndo,
   } = useTrophyPicker(minRarity, enabledPlatforms);
 
   // Steam withholds hidden achievement descriptions from its API
@@ -331,6 +331,14 @@ export default function TrophyPickerView() {
             disabled={rolling || loading}
           >
             {rolling ? 'Rolling...' : 'Roll again (R)'}
+          </button>
+          <button
+            className="picker-btn"
+            onClick={() => void rerollSameGame()}
+            disabled={!roll || rolling}
+            title="Roll another achievement from this same game"
+          >
+            Same game
           </button>
           <button
             className="picker-btn"
