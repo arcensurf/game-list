@@ -313,7 +313,7 @@ export default function TrophyPickerView() {
               {trophy!.points != null && (
                 <span className="picker-points">
                   {trophy!.points}
-                  {shown.platform === 'xbox' ? 'G' : ''}
+                  {shown.platform === 'xbox' ? 'G' : shown.platform === 'ra' ? ' points' : ''}
                 </span>
               )}
             </div>
