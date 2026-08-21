@@ -32,6 +32,17 @@ export default function BanListOverlay({
 }) {
   const [query, setQuery] = useState('');
 
+  // Sort order is pinned to how things stood when the panel opened, not
+  // to live `banned` state — otherwise banning a game while scrolled
+  // partway down yanks it (and everything around it) to the top mid-scroll.
+  // Re-sorting only on open still surfaces freshly-banned games next visit.
+  const [sortSnapshot, setSortSnapshot] = useState(banned);
+
+  useEffect(() => {
+    if (open) setSortSnapshot(banned);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -49,12 +60,12 @@ export default function BanListOverlay({
     return games
       .filter((g) => !q || g.title.toLowerCase().includes(q))
       .sort((a, b) => {
-        const aBanned = banned[banKey(a.platform, a.id)] ? 0 : 1;
-        const bBanned = banned[banKey(b.platform, b.id)] ? 0 : 1;
+        const aBanned = sortSnapshot[banKey(a.platform, a.id)] ? 0 : 1;
+        const bBanned = sortSnapshot[banKey(b.platform, b.id)] ? 0 : 1;
         if (aBanned !== bBanned) return aBanned - bBanned;
         return a.title.localeCompare(b.title);
       });
-  }, [games, banned, query]);
+  }, [games, sortSnapshot, query]);
 
   if (!open) return null;
 

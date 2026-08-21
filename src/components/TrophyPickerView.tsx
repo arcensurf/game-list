@@ -5,9 +5,10 @@ import { useStageMode } from '../hooks/useStageMode';
 import { usePickerBroadcast, usePickerFollower } from '../hooks/usePickerSync';
 import { DEFAULT_SKIP_DAYS } from '../types/overrides';
 import { ACHIEVEMENT_PLATFORM_COLORS } from '../utils/platformColors';
-import { steamCoverFallback } from '../utils/pickerCover';
+import { loadArtFallback, steamCoverFallback } from '../utils/pickerCover';
 import BanListOverlay from './BanListOverlay';
 import ManualPickerOverlay from './ManualPickerOverlay';
+import MarksOverlay from './MarksOverlay';
 
 const PLATFORM_LABELS: Record<string, string> = {
   steam: 'Steam',
@@ -63,15 +64,34 @@ function PlatformTag({ platform }: { platform: string }) {
 function Cover({
   platform,
   gameId,
+  gameTitle,
   url,
   iconUrl,
+  onResolved,
 }: {
-  platform: string;
+  platform: ShardPlatform;
   gameId: string;
+  gameTitle: string;
   url: string | null;
   iconUrl: string | null;
+  // Reports each guess as it's tried, so the blurred stage backdrop
+  // (a plain CSS background-image, which has no onError of its own)
+  // can track the same fallback chain instead of freezing on whichever
+  // URL happened to be first.
+  onResolved: (url: string | null) => void;
 }) {
   const [src, setSrc] = useState(url);
+  // Guards the SGDB round trip to one attempt — if that image is itself
+  // broken there's nowhere left to fall back to.
+  const [triedFallback, setTriedFallback] = useState(false);
+
+  useEffect(() => {
+    onResolved(src);
+    // onResolved is a fresh setState wrapper each render — only the
+    // resolved src itself should retrigger this.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
+
   if (!src) return null;
   return (
     <img
@@ -85,13 +105,18 @@ function Cover({
         // on iconUrl, the real header image resolved server-side during
         // the nightly fetch. That last one is the only reliable source
         // for games Valve has moved onto the newer hashed-path CDN
-        // scheme, which has no flat-path alias at all. Only then give up
-        // and render nothing rather than a broken image on stream.
+        // scheme, which has no flat-path alias at all. Only past all of
+        // that does SGDB get a shot — it's a live lookup rather than
+        // something baked into the nightly data, so it's the slowest
+        // path and the last one tried.
         const fallback = steamCoverFallback(gameId);
         if (platform === 'steam' && src !== fallback) {
           setSrc(fallback);
         } else if (iconUrl && src !== iconUrl) {
           setSrc(iconUrl);
+        } else if (!triedFallback) {
+          setTriedFallback(true);
+          void loadArtFallback(platform, gameId, gameTitle).then(setSrc);
         } else {
           setSrc(null);
         }
@@ -121,6 +146,7 @@ export default function TrophyPickerView() {
   const { stageOnly, toggleStage } = useStageMode();
   const [banListOpen, setBanListOpen] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
+  const [marksOpen, setMarksOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -157,7 +183,7 @@ export default function TrophyPickerView() {
   };
 
   const {
-    roll, loading, rolling, error, poolSize, rollTrophy, markCurrent, selectManually,
+    roll, loading, rolling, error, poolSize, eligibleCount, rollTrophy, markCurrent, selectManually,
     allGames, banned, toggleBan, banCurrentGame, undo, canUndo,
   } = useTrophyPicker(minRarity, enabledPlatforms);
 
@@ -216,6 +242,14 @@ export default function TrophyPickerView() {
 
   const trophy = shown?.achievement;
 
+  // Starts as the roll's own guess and gets refined by Cover as it
+  // works through the fallback chain — kept separate from `shown` so
+  // the backdrop doesn't need its own copy of that resolution logic.
+  const [resolvedCoverUrl, setResolvedCoverUrl] = useState<string | null>(null);
+  useEffect(() => {
+    setResolvedCoverUrl(shown?.coverUrl ?? null);
+  }, [shown?.platform, shown?.gameId, shown?.coverUrl]);
+
   return (
     <div className="picker-view">
       {/* The stage is the only thing OBS captures: fixed size, fixed
@@ -227,7 +261,7 @@ export default function TrophyPickerView() {
           {
             // Feed the panel its own art and the platform's color, so the
             // backdrop and edge treatment change with every roll.
-            '--stage-cover': shown?.coverUrl ? `url("${shown.coverUrl}")` : 'none',
+            '--stage-cover': resolvedCoverUrl ? `url("${resolvedCoverUrl}")` : 'none',
             '--stage-accent': shown
               ? (ACHIEVEMENT_PLATFORM_COLORS[shown.platform] ?? '#6b7280')
               : 'transparent',
@@ -250,8 +284,10 @@ export default function TrophyPickerView() {
               key={`${shown.platform}/${shown.gameId}`}
               platform={shown.platform}
               gameId={shown.gameId}
+              gameTitle={shown.gameTitle}
               url={shown.coverUrl}
               iconUrl={shown.iconUrl}
+              onResolved={setResolvedCoverUrl}
             />
             <div className="picker-body">
             <div className="picker-game">
@@ -297,6 +333,9 @@ export default function TrophyPickerView() {
           >
             Undo
           </button>
+
+          <span className="picker-divider" aria-hidden="true" />
+
           <button
             className="picker-btn"
             onClick={() => void markCurrent('earned')}
@@ -305,38 +344,29 @@ export default function TrophyPickerView() {
           >
             Earned it
           </button>
-          <button
-            className="picker-btn"
-            onClick={() => void markCurrent('skipped', skipDays)}
-            disabled={!roll || rolling}
-            title={`Hide this one for ${skipDays} days`}
-          >
-            Skip
-          </button>
-          <label className="picker-floor" title="Applies to the next roll">
-            <span>min rarity</span>
-            <input
-              type="range"
-              min={0}
-              max={50}
-              step={1}
-              value={minRarity}
-              onChange={(e) => setMinRarity(Number(e.target.value))}
-            />
-            <span className="picker-floor-value">
-              {minRarity === 0 ? 'off' : `${minRarity}%`}
-            </span>
-          </label>
-          <label className="picker-days">
-            <input
-              type="number"
-              min={1}
-              max={3650}
-              value={skipDays}
-              onChange={(e) => setSkipDays(Number(e.target.value) || DEFAULT_SKIP_DAYS)}
-            />
-            days
-          </label>
+          <span className="picker-skip-group">
+            <button
+              className="picker-btn"
+              onClick={() => void markCurrent('skipped', skipDays)}
+              disabled={!roll || rolling}
+              title={`Hide this one for ${skipDays} days`}
+            >
+              Skip
+            </button>
+            <label className="picker-days">
+              <input
+                type="number"
+                min={1}
+                max={3650}
+                value={skipDays}
+                onChange={(e) => setSkipDays(Number(e.target.value) || DEFAULT_SKIP_DAYS)}
+              />
+              days
+            </label>
+          </span>
+
+          <span className="picker-divider" aria-hidden="true" />
+
           <button
             className="picker-btn picker-btn--danger"
             onClick={() => void markCurrent('unachievable')}
@@ -355,27 +385,52 @@ export default function TrophyPickerView() {
           </button>
         </div>
 
-        <div className="picker-platform-toggles" role="group" aria-label="Platforms to roll from">
-          {PLATFORMS.map((p) => {
-            const on = enabledPlatforms.includes(p);
-            const label = PLATFORM_LABELS[p] ?? p;
-            return (
-              <button
-                key={p}
-                type="button"
-                className={`picker-platform-toggle${on ? ' picker-platform-toggle--on' : ''}`}
-                style={on ? { background: ACHIEVEMENT_PLATFORM_COLORS[p] } : undefined}
-                onClick={() => togglePlatform(p)}
-                title={
-                  on
-                    ? `Stop rolling ${label} achievements`
-                    : `Include ${label} achievements again`
-                }
-              >
-                {label}
-              </button>
-            );
-          })}
+        <div className="picker-filters">
+          <label className="picker-floor" title="Applies to the next roll">
+            <span>min rarity</span>
+            <input
+              type="range"
+              min={0}
+              max={50}
+              step={1}
+              value={minRarity}
+              onChange={(e) => setMinRarity(Number(e.target.value))}
+            />
+            <span className="picker-floor-value">
+              {minRarity === 0 ? 'off' : `${minRarity}%`}
+            </span>
+          </label>
+
+          <span className="picker-divider" aria-hidden="true" />
+
+          <div className="picker-platform-toggles" role="group" aria-label="Platforms to roll from">
+            {PLATFORMS.map((p) => {
+              const on = enabledPlatforms.includes(p);
+              const label = PLATFORM_LABELS[p] ?? p;
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  className={`picker-platform-toggle${on ? ' picker-platform-toggle--on' : ''}`}
+                  style={on ? { background: ACHIEVEMENT_PLATFORM_COLORS[p] } : undefined}
+                  onClick={() => togglePlatform(p)}
+                  title={
+                    on
+                      ? `Stop rolling ${label} achievements`
+                      : `Include ${label} achievements again`
+                  }
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          <span className="picker-divider" aria-hidden="true" />
+
+          <span className="picker-eligible" title="Unearned achievements this rarity floor and platform selection leave in the pool">
+            {eligibleCount == null ? 'counting…' : `${eligibleCount.toLocaleString()} eligible`}
+          </span>
         </div>
 
         {roll && !roll.achievement.description && (
@@ -421,6 +476,13 @@ export default function TrophyPickerView() {
           >
             Pick manually
           </button>
+          <button
+            className="picker-btn picker-btn--ghost"
+            onClick={() => setMarksOpen(true)}
+            title="Review and clear individual earned/skipped/unachievable marks"
+          >
+            Review marks
+          </button>
           <span className="picker-pool">{poolSize.toLocaleString()} unearned in the pool</span>
         </div>
       </div>
@@ -443,6 +505,8 @@ export default function TrophyPickerView() {
           void selectManually(platform, gameId, gameTitle, coverUrl, iconUrl, achievement);
         }}
       />
+
+      <MarksOverlay open={marksOpen} onClose={() => setMarksOpen(false)} />
     </div>
   );
 }

@@ -182,6 +182,47 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
     [allGames, banned, enabledPlatforms],
   );
 
+  // Rarity of every unearned, unmarked achievement across the current
+  // pool (bans and platform toggles already applied) — loaded once per
+  // pool membership change, not per rarity-slider tick, since the
+  // slider itself needs no network round trip once these are in hand.
+  // Every shard/override lookup here is the same cached call the roll
+  // path already makes, so a game already seen this session costs
+  // nothing extra to re-scan.
+  const [poolRarities, setPoolRarities] = useState<(number | null)[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPoolRarities(null);
+    Promise.all(
+      pool.map(async (g) => {
+        const [list, marks] = await Promise.all([
+          loadAchievementList(g.platform, g.id),
+          loadGameOverrides(g.platform, g.id),
+        ]);
+        if (!list) return [];
+        // minRarity: 0 so this stays the rarity-independent eligible
+        // set — the floor is applied afterward, against these rarities,
+        // so moving the slider never re-triggers this fetch.
+        return eligibleAchievements(list.achievements, marks, { minRarity: 0 }).map(
+          (a) => a.rarity,
+        );
+      }),
+    ).then((lists) => {
+      if (!cancelled) setPoolRarities(lists.flat());
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [pool]);
+
+  // Null while poolRarities is still loading — the count below would
+  // otherwise flash 0 for whichever games haven't resolved yet.
+  const eligibleCount = useMemo(() => {
+    if (!poolRarities) return null;
+    return poolRarities.filter((r) => minRarity === 0 || r == null || r >= minRarity).length;
+  }, [poolRarities, minRarity]);
+
   const rollTrophy = useCallback(async (undoMeta?: Omit<UndoEntry, 'roll'>) => {
     setRolling(true);
     setError(null);
@@ -364,6 +405,7 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
     rolling,
     error,
     poolSize,
+    eligibleCount,
     rollTrophy,
     markCurrent,
     selectManually,

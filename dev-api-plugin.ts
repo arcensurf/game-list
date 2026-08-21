@@ -174,6 +174,106 @@ export default function devApiPlugin(): Plugin {
           return;
         }
 
+        // Every marked achievement, across every game with an override
+        // file. Unlike bans there's no single index to read — the marks
+        // are sparse per-game files by design — so this walks the
+        // directory. Only the "manage marks" overlay calls it, and it's
+        // dev-only like everything else in this plugin, so a directory
+        // scan on demand is cheap enough not to need a cache.
+        if (req.method === 'GET' && req.url?.split('?')[0] === '/api/all-overrides') {
+          const games: unknown[] = [];
+          if (existsSync(overridesDir)) {
+            for (const platform of readdirSync(overridesDir)) {
+              const platformDir = resolve(overridesDir, platform);
+              if (!statSync(platformDir).isDirectory()) continue;
+              for (const file of readdirSync(platformDir)) {
+                if (!file.endsWith('.json')) continue;
+                try {
+                  games.push(readJson(resolve(platformDir, file)));
+                } catch {
+                  // A half-written or corrupt file shouldn't blank the
+                  // whole list — skip it and show the rest.
+                }
+              }
+            }
+          }
+          res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+          });
+          res.end(JSON.stringify({ games }));
+          return;
+        }
+
+        // Last-resort art for the picker: Steam's own capsule/header art
+        // is occasionally gone entirely (delisted-adjacent apps, CDN
+        // path changes the nightly fetch hasn't caught up with yet), and
+        // PSN/Xbox icons can 404 too. SGDB is already wired up for the
+        // curated list's cover picker below, so this reuses the same
+        // client and key rather than adding a second art source — it
+        // just resolves live instead of being curated by hand.
+        if (req.method === 'GET' && req.url?.split('?')[0] === '/api/art-fallback') {
+          const apiKey = process.env.SGDB_API_KEY;
+          const params = new URLSearchParams(req.url.split('?')[1] ?? '');
+          const platform = params.get('platform');
+          const id = params.get('id');
+          const title = params.get('title') ?? '';
+
+          const respond = (url: string | null) => {
+            res.writeHead(200, {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-store',
+            });
+            res.end(JSON.stringify({ url }));
+          };
+
+          if (!apiKey || !id) {
+            respond(null);
+            return;
+          }
+
+          try {
+            const SGDB = (await import('steamgriddb')).default;
+            const client = new SGDB(apiKey);
+
+            // Steam appids resolve directly; PSN/Xbox have no such
+            // lookup in SGDB, so those fall through to a title search —
+            // same as the curated cover picker does further down.
+            let grids: Awaited<ReturnType<typeof client.getGrids>> = [];
+            if (platform === 'steam') {
+              try {
+                grids = await client.getGridsBySteamAppId(Number(id), undefined, ['600x900']);
+              } catch { grids = []; }
+              if (!grids || grids.length === 0) {
+                try {
+                  grids = await client.getGridsBySteamAppId(Number(id));
+                } catch { grids = []; }
+              }
+            }
+
+            if ((!grids || grids.length === 0) && title) {
+              const results = await client.searchGame(title).catch(() => []);
+              const match = results?.[0];
+              if (match) {
+                try {
+                  grids = await client.getGridsById(match.id, undefined, ['600x900']);
+                } catch { grids = []; }
+                if (!grids || grids.length === 0) {
+                  try {
+                    grids = await client.getGridsById(match.id);
+                  } catch { grids = []; }
+                }
+              }
+            }
+
+            const best = (grids ?? []).sort((a, b) => b.score - a.score)[0];
+            respond(best ? best.url.toString() : null);
+          } catch {
+            respond(null);
+          }
+          return;
+        }
+
         if (req.method !== 'POST') return next();
 
         try {

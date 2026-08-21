@@ -26,3 +26,30 @@ export function pickerCoverUrl(
   if (platform === 'steam') return steamCapsule(gameId);
   return icon ?? null;
 }
+
+// Last resort once every platform-native source has 404'd: the same
+// SteamGridDB lookup the curated list's cover picker uses, just
+// resolved live instead of picked by hand. Cached per game — a roll
+// that lands on the same dead-art game twice in a session shouldn't
+// hit SGDB twice, and a game with no match is worth remembering as a
+// miss too rather than re-querying every time it comes up.
+const fallbackCache = new Map<string, Promise<string | null>>();
+
+export function loadArtFallback(
+  platform: ShardPlatform,
+  gameId: string,
+  title: string,
+): Promise<string | null> {
+  const key = `${platform}/${gameId}`;
+  const cached = fallbackCache.get(key);
+  if (cached) return cached;
+
+  const params = new URLSearchParams({ platform, id: gameId, title });
+  const request = fetch(`/api/art-fallback?${params}`)
+    .then((res) => (res.ok ? (res.json() as Promise<{ url: string | null }>) : null))
+    .then((data) => data?.url ?? null)
+    .catch(() => null);
+
+  fallbackCache.set(key, request);
+  return request;
+}

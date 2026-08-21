@@ -348,6 +348,36 @@
   padding: 0.3rem 0.7rem;
 }
 
+/* Separates the row into clusters (roll / mark / danger) without the
+   heavier weight of a full border — same recipe as .masthead-divider.
+   Side margin on top of the row's own gap, so clusters read as
+   separate groups rather than a line squeezed between two buttons. */
+.picker-divider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 1.5rem;
+  margin: 0 0.3rem;
+  background: var(--border);
+}
+
+/* Skip and its day count read as one control, not a button followed by
+   an unrelated setting — tighter gap than the row's default holds them
+   together at a glance. */
+.picker-skip-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Both filters shape the pool the next roll draws from, so they share a
+   row separate from the action buttons above. */
+.picker-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 /* Rarity floor. Applies on the next roll rather than immediately —
    re-rolling while the slider is being dragged would fire a burst of
    requests and flicker the stage. */
@@ -427,6 +457,15 @@
 
 .picker-platform-toggle--on:hover {
   opacity: 0.85;
+}
+
+/* Rarity floor and platform toggles both narrow the pool; this is
+   their combined result, so it sits after both rather than next to
+   either one alone. */
+.picker-eligible {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Only appears for achievements whose description the platform won't
@@ -850,3 +889,32 @@ body.stage-only .picker-description {
   font-size: 0.8rem;
   margin: -0.35rem 0 0.6rem;
 }
+
+/* ── Marked achievements ──
+   Reuses the ban overlay's shell, same as the manual picker above. */
+.marks-row-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.marks-row-btn:hover {
+  color: var(--accent-light);
+}
+
+.marks-status {
+  flex: none;
+  width: 6.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.marks-status--earned { color: var(--gold-bright); }
+.marks-status--skipped { color: var(--text-muted); }
+.marks-status--unachievable { color: #e0857c; }

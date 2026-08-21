@@ -36,6 +36,18 @@ export async function loadGameOverrides(
 }
 
 /**
+ * Every game with at least one mark, straight from the dev API — the
+ * marks overlay needs the whole set at once, unlike the picker's
+ * per-game lookups above. Dev-only, like the write path below.
+ */
+export async function loadAllOverrides(): Promise<GameOverrides[]> {
+  return fetch(`/api/all-overrides?t=${Date.now()}`)
+    .then((res) => (res.ok ? (res.json() as Promise<{ games?: GameOverrides[] }>) : null))
+    .then((data) => data?.games ?? [])
+    .catch(() => []);
+}
+
+/**
  * Write a mark through the dev API. Passing `status: null` clears it.
  *
  * Dev-only by construction — the deployed site has no write path, which
