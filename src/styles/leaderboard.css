@@ -62,6 +62,15 @@
   border-radius: 6px;
 }
 
+.leaderboard-row--complete {
+  border-color: var(--accent-dim);
+  background: linear-gradient(
+    90deg,
+    rgba(var(--accent-glow), 0.12),
+    rgba(var(--accent-glow), 0.03) 40%
+  );
+}
+
 .leaderboard-rank {
   font-family: 'Share Tech', sans-serif;
   font-size: 0.85rem;
@@ -113,6 +122,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.leaderboard-completion--complete {
+  color: var(--accent-light);
 }
 
 .leaderboard-platform {

@@ -103,22 +103,29 @@ export default function LeaderboardView() {
 
       {tab === 'games' ? (
         <ol className="leaderboard-list">
-          {data.games.map((g, i) => (
-            <li key={`${g.platform}/${g.id}`} className="leaderboard-row">
-              <span className="leaderboard-rank">{i + 1}</span>
-              <Thumb platform={g.platform} gameId={g.id} icon={g.icon} />
-              <div className="leaderboard-main">
-                <div className="leaderboard-title">{g.title}</div>
-                <div className="leaderboard-meta">
-                  <PlatformPill platform={g.platform} />
-                  <span className="leaderboard-completion">
-                    {g.earned}/{g.total} &middot; {g.completion}% complete
-                  </span>
+          {data.games.map((g, i) => {
+            const complete = g.earned === g.total;
+            return (
+              <li
+                key={`${g.platform}/${g.id}`}
+                className={`leaderboard-row${complete ? ' leaderboard-row--complete' : ''}`}
+              >
+                <span className="leaderboard-rank">{i + 1}</span>
+                <Thumb platform={g.platform} gameId={g.id} icon={g.icon} />
+                <div className="leaderboard-main">
+                  <div className="leaderboard-title">{g.title}</div>
+                  <div className="leaderboard-meta">
+                    <PlatformPill platform={g.platform} />
+                    <span className={`leaderboard-completion${complete ? ' leaderboard-completion--complete' : ''}`}>
+                      {complete && '✓ '}
+                      {g.earned}/{g.total} &middot; {g.completion}% complete
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <span className="leaderboard-score">{Math.round(g.score).toLocaleString()}</span>
-            </li>
-          ))}
+                <span className="leaderboard-score">{Math.round(g.score).toLocaleString()}</span>
+              </li>
+            );
+          })}
         </ol>
       ) : (
         <ol className="leaderboard-list">
