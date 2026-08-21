@@ -39,9 +39,9 @@ export function eligibleAchievements(
   const overrides = marks?.overrides ?? {};
   return achievements.filter((a) => {
     if (a.earned || isActive(overrides[a.id], now)) return false;
-    // Unknown rarity passes the filter rather than failing it. Only the
-    // legacy Xbox path lacks rarity, and dropping those would silently
-    // remove a whole platform the moment the slider left zero.
+    // Unknown rarity passes the filter rather than failing it. Steam
+    // games with no public stats are the main case now (Xbox old-gen
+    // titles used to lack rarity too, before the contract v3 fix).
     if (minRarity > 0 && a.rarity != null && a.rarity < minRarity) return false;
     return true;
   });

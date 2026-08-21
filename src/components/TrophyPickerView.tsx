@@ -127,8 +127,9 @@ function Cover({
 }
 
 function RarityNote({ rarity }: { rarity: number | null }) {
-  // Xbox 360 titles come off the legacy endpoint, which predates
-  // rarity — absent is normal here, not a failure.
+  // Absent mainly means a Steam game with no public stats — not a
+  // failure (Xbox old-gen titles used to be null here too, before the
+  // contract v3 fix in scripts/fetch-achievements.mjs).
   if (rarity == null) {
     return <span className="picker-rarity picker-rarity--unknown">rarity unknown</span>;
   }

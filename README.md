@@ -56,6 +56,8 @@ Achievement syncing runs automatically via a daily GitHub Actions workflow. The 
 | `XBOX_REFRESH_TOKEN` | Xbox Live refresh token (auto-rotates) | Run `npm run xbox-get-refresh-token` locally and follow the prompts |
 | `XBOX_EMAIL` | Xbox/Microsoft account email | Used as fallback for Xbox auth |
 | `XBOX_PASSWORD` | Xbox/Microsoft account password | Used as fallback for Xbox auth |
+| `RA_API_KEY` | RetroAchievements Web API key | From your account's control panel on [retroachievements.org](https://retroachievements.org) |
+| `RA_USERNAME` | Your RetroAchievements username | — |
 
 The PSN token expires roughly every 60 days. When it does, the workflow automatically opens a GitHub issue with renewal instructions. Xbox tokens auto-rotate as long as the workflow runs at least once every 90 days.
 
@@ -89,7 +91,7 @@ These scripts manage the data files that live in `public/data/`.
 
 ```bash
 npm run fetch-covers             # Download cover art from SteamGridDB (requires SGDB_API_KEY in .env.local)
-npm run fetch-achievements       # Sync achievement data from Steam, PSN, Xbox
+npm run fetch-achievements       # Sync achievement data from Steam, PSN, Xbox, RetroAchievements
 npm run psn-get-npsso-token      # Interactive helper to get a PSN authentication token
 npm run xbox-get-refresh-token   # Interactive helper to mint an Xbox refresh token
 ```
@@ -136,7 +138,7 @@ Production fetches data from the `data` branch on GitHub. The dev server reads f
 
 ### Achievement Data
 
-`achievements.json` holds one summary row per game — title, earned, total — keyed by the platform's own ID (Steam appid, PSN npCommunicationId, Xbox titleId). Overrides on a game point straight at a row, so changing one takes effect on the next page load without re-running anything.
+`achievements.json` holds one summary row per game — title, earned, total — keyed by the platform's own ID (Steam appid, PSN npCommunicationId, Xbox titleId, RA GameID). Overrides on a game point straight at a row, so changing one takes effect on the next page load without re-running anything.
 
 The individual achievement lists behind those rows are far too large to sit in that file — roughly 31,000 entries library-wide, about 4MB against the 83KB the app loads on every page. They live one file per game under `public/data/achievements/` and are fetched on demand.
 
@@ -144,7 +146,7 @@ Sharding also keeps the nightly commit proportional to what actually changed: a 
 
 Definitions effectively never change once a game ships, so a game whose counts haven't moved isn't re-fetched. Global rarity does drift, so shards are re-pulled periodically — on a day derived from the game's own ID, spreading the library across the week so a given night refreshes about a seventh of it.
 
-**Known limitation — Xbox locked achievements.** Xbox Live returns only the achievements you have already *earned* for most titles: 176 of 190 come back short, and 7 (all with zero earned) come back empty. Verified against the live API, each producing byte-identical output: `unlockedOnly=false` (no effect — it is already the default), `possibleOnly=true` (no effect, despite being documented as "return all possible results"), and the contract v1 fallback (works for exactly one title). The titles that do come back complete are almost all games that were 100%'d. Steam and PSN are unaffected and fully populated. Don't re-attempt without a new documented endpoint — the dead ends are recorded above `fetchXboxAchievementList` in `scripts/fetch-achievements.mjs`.
+**Xbox old-gen titles** (pre-2017 format — Xbox 360-era, mostly) need extra fallback calls beyond the standard v2 API, which only ever returns what's already *earned* for them. The fix joins a separate `/titleachievements` endpoint (the full catalog, but with no reliable earned state of its own) against the contract-v3 `/achievements` response (correctly-attributed earned state, sharing `/titleachievements`' id scheme — v2's ids don't overlap with either at all for these titles). See the comment above `fetchXboxAchievementList` in `scripts/fetch-achievements.mjs` for the full mechanism and how it was verified. Modern (2017+) titles also try contract v4 first, as an unverified possible upgrade over v2 — it only takes effect when it actually returns more than v2 would, so it can't make things worse.
 
 ### Display Order
 
@@ -212,11 +214,11 @@ All of it is committed data, pushed by the **Publish** button — it has to surv
 
 ### Rarity floor
 
-A slider excludes anything below a given global unlock percentage, applied on the next roll rather than mid-drag. Unknown rarity passes rather than fails, so the legacy Xbox entries don't vanish the moment the slider leaves zero. For scale: a 5% floor removes about a third of the pool, 10% removes about half.
+A slider excludes anything below a given global unlock percentage, applied on the next roll rather than mid-drag. Unknown rarity passes rather than fails — mainly Steam games with no public stats — so those don't vanish the moment the slider leaves zero. For scale: a 5% floor removes about a third of the pool, 10% removes about half.
 
 ### Hidden descriptions
 
-PSN and Xbox supply descriptions for hidden achievements (100% of them). **Steam withholds them from the Web API by design** — both `GetPlayerAchievements` and `GetSchemaForGame` return them empty, even for achievements you've already unlocked. There is nothing to fetch.
+PSN and Xbox supply descriptions for hidden achievements (100% of them). RA has no hidden-achievement concept at all — every description is public from the start. **Steam withholds them from the Web API by design** — both `GetPlayerAchievements` and `GetSchemaForGame` return them empty, even for achievements you've already unlocked. There is nothing to fetch.
 
 So for those, the controls offer a text box to type the description in by hand, plus a **Look it up ↗** link to `steamcommunity.com/stats/<appid>/achievements/`. The typed text is deliberately not persisted — it shows for the current roll and clears on the next one.
 

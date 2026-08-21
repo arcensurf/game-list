@@ -65,8 +65,9 @@ export interface GameAchievements {
 
 // Raw per-platform achievement data, as produced by
 // scripts/fetch-achievements.mjs. Keyed by the platform's own ID
-// (Steam appid, PSN npCommunicationId, Xbox titleId) so overrides can
-// resolve directly and title-based matching can run at render time.
+// (Steam appid, PSN npCommunicationId, Xbox titleId, RA GameID) so
+// overrides can resolve directly and title-based matching can run at
+// render time.
 export interface PlatformLibraryEntry {
   title: string;
   earned: number;
@@ -74,12 +75,12 @@ export interface PlatformLibraryEntry {
   // Only populated for Steam; used as a tie-breaker when multiple
   // Steam entries normalize to the same title.
   playtimeMinutes?: number;
-  // Game art from the platform itself (PSN trophy icon, Xbox box art).
-  // For Steam this is the real header image resolved via the store API
-  // — see fetchSteamHeaderImage in fetch-achievements.mjs — used only as
-  // a fallback when the guessed capsule/header URLs 404, since most
-  // Steam apps resolve those without needing a network round trip. See
-  // utils/pickerCover.ts.
+  // Game art from the platform itself (PSN trophy icon, Xbox box art,
+  // RA box art). For Steam this is the real header image resolved via
+  // the store API — see fetchSteamHeaderImage in fetch-achievements.mjs
+  // — used only as a fallback when the guessed capsule/header URLs
+  // 404, since most Steam apps resolve those without needing a
+  // network round trip. See utils/pickerCover.ts.
   icon?: string | null;
 }
 
@@ -110,8 +111,10 @@ export interface AchievementEntry {
   earnedAt: string | null;
   /**
    * Percentage of players who have unlocked this, to one decimal place.
-   * Null where the platform doesn't publish it — Xbox 360 titles on the
-   * legacy endpoint, and Steam games with no public stats.
+   * Null where the platform doesn't publish it — Steam games with no
+   * public stats being the only regular case (Xbox old-gen titles used
+   * to be null too before the contract v3 fix; see the comment above
+   * fetchXboxAchievementList in scripts/fetch-achievements.mjs).
    */
   rarity: number | null;
   /** PSN: bronze / silver / gold / platinum. RA: progression / win_condition / missable. */
