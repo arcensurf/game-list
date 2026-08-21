@@ -571,7 +571,7 @@ async function fetchXboxLibrary() {
 // Xbox 360 titles predate the v2 format and only exist under contract
 // v1, which does return locked achievements directly.
 //
-// KNOWN LIMITATION.
+// KNOWN LIMITATION — do not re-attempt without new information.
 // As of 2026-08-20 this still returns only unlocked achievements for
 // 176 of 190 titles (7 more return nothing at all, all of them titles
 // with zero earned). Verified against the live API on force_refresh
@@ -579,24 +579,13 @@ async function fetchXboxLibrary() {
 //   * unlockedOnly=false  — no effect (it is already the default)
 //   * possibleOnly=true   — no effect, despite being documented as
 //                           "return all possible results"
-//   * contract v1 fallback on /achievements — works for exactly one
-//                           title (GRID)
+//   * contract v1 fallback — works for exactly one title (GRID)
 // The 14 titles that do come back complete are almost all games that
 // were 100%'d, i.e. "complete" only because everything was unlocked.
 // The likely explanation is that Xbox Live keeps no definition set for
 // these mostly-360 titles on an account-scoped endpoint — consistent
 // with the earlier finding that 360 rarity is unavailable (commit
 // bd9bb4a). Steam and PSN are unaffected and fully populated.
-//
-// 2026-08-22: one more attempt added below — /titleachievements, a
-// distinct endpoint (not just a different contract header on
-// /achievements) found in a community Xbox API wrapper
-// (OpenXbox/xbox-webapi-python), paired with contract v1 there too.
-// Untested against this library at the time of writing; if it turns
-// out to only reach the same population contract v1 already does,
-// this really is the wall — every third-party wrapper and the
-// official docs checked at the time funnel through the same two
-// endpoints/contract versions already tried above.
 async function fetchXboxAchievementList(titleId, expectedTotal) {
   if (!xboxAuth) return null;
   const base = `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements`;
@@ -645,27 +634,6 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
     rarity: null, // v1 predates the rarity block
   });
 
-  // A different endpoint entirely, not just a different contract
-  // header on /achievements — see the KNOWN LIMITATION note above.
-  const getTitleAchievements = async () => {
-    try {
-      const res = await fetch(
-        `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/titleachievements?titleId=${titleId}`,
-        {
-          headers: {
-            Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
-            'x-xbl-contract-version': '1',
-            'Accept-Language': 'en-US',
-          },
-        },
-      );
-      if (!res.ok) return [];
-      return (await res.json()).achievements ?? [];
-    } catch {
-      return [];
-    }
-  };
-
   const player = (await get('2', '')).map(mapModern);
   await delay(120);
   let defs = (await get('2', '&possibleOnly=true')).map(mapModern);
@@ -674,12 +642,6 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
     await delay(120);
     const legacy = (await get('1', '')).map(mapLegacy);
     if (legacy.length > defs.length) defs = legacy;
-  }
-
-  if (expectedTotal > 0 && defs.length < expectedTotal) {
-    await delay(120);
-    const titleAch = (await getTitleAchievements()).map(mapLegacy);
-    if (titleAch.length > defs.length) defs = titleAch;
   }
 
   // Whichever call knew about more of the title supplies the entries;
