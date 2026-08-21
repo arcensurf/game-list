@@ -834,31 +834,37 @@ async function debugXboxContractVersions() {
     ['1096157146', 'Marvel Ult. Alliance', 7, 58],
     ['1096157175', 'Guitar Hero III', 13, 59],
   ];
+  const variants = [
+    ['bare', ''],
+    ['possibleOnly=true', '&possibleOnly=true'],
+    ['unlockedOnly=true', '&unlockedOnly=true'],
+  ];
   for (const [titleId, name, realEarned, realTotal] of titles) {
     console.log(`\n=== ${name} (real: ${realEarned}/${realTotal}) ===`);
     for (const version of [1, 2, 3, 4]) {
-      try {
-        const res = await fetch(
-          `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements?titleId=${titleId}&maxItems=1000`,
-          {
-            headers: {
-              Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
-              'x-xbl-contract-version': String(version),
-              'Accept-Language': 'en-US',
+      for (const [label, query] of variants) {
+        try {
+          const res = await fetch(
+            `https://achievements.xboxlive.com/users/xuid(${xboxAuth.xuid})/achievements?titleId=${titleId}&maxItems=1000${query}`,
+            {
+              headers: {
+                Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
+                'x-xbl-contract-version': String(version),
+                'Accept-Language': 'en-US',
+              },
             },
-          },
-        );
-        const json = res.ok ? await res.json() : null;
-        const achievements = json?.achievements ?? [];
-        const earnedLooking = achievements.filter(
-          (a) => a.unlocked === true || a.progressState === 'Achieved',
-        ).length;
-        console.log(`  v${version}: status=${res.status} count=${achievements.length} earned-looking=${earnedLooking}`);
-        if (achievements[0]) console.log(`       sample keys: ${Object.keys(achievements[0]).join(', ')}`);
-      } catch (err) {
-        console.log(`  v${version}: ERROR ${err.message}`);
+          );
+          const json = res.ok ? await res.json() : null;
+          const achievements = json?.achievements ?? [];
+          const earnedLooking = achievements.filter(
+            (a) => a.unlocked === true || a.progressState === 'Achieved',
+          ).length;
+          console.log(`  v${version} ${label}: status=${res.status} count=${achievements.length} earned-looking=${earnedLooking}`);
+        } catch (err) {
+          console.log(`  v${version} ${label}: ERROR ${err.message}`);
+        }
+        await delay(300);
       }
-      await delay(300);
     }
   }
   console.log('\nDiagnostic done — nothing was written.');
