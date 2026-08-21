@@ -133,6 +133,43 @@ export interface AchievementList {
   achievements: AchievementEntry[];
 }
 
+// ── Leaderboard ──
+//
+// Precomputed by scripts/build-leaderboard.mjs from achievements.json
+// + every shard, and published as public/data/leaderboard.json — the
+// scoring formula needs every earned achievement's rarity, which is
+// far too much to compute client-side against 500+ individual shard
+// fetches on every page load.
+export interface LeaderboardGame {
+  platform: 'steam' | 'psn' | 'xbox' | 'ra';
+  id: string;
+  title: string;
+  icon: string | null;
+  earned: number;
+  total: number;
+  /** Percent, 1 decimal. Weighted by achievement value where the platform publishes one — see build-leaderboard.mjs. */
+  completion: number;
+  score: number;
+}
+
+export interface LeaderboardAchievement {
+  platform: 'steam' | 'psn' | 'xbox' | 'ra';
+  gameId: string;
+  gameTitle: string;
+  icon: string | null;
+  name: string;
+  rarity: number;
+  earnedAt: string | null;
+}
+
+export interface LeaderboardData {
+  updatedAt: string;
+  /** Sorted by score, descending. */
+  games: LeaderboardGame[];
+  /** Sorted by rarity, ascending. Capped to the rarest 200 — see build-leaderboard.mjs. */
+  rarestAchievements: LeaderboardAchievement[];
+}
+
 export interface GameWithCover extends Game {
   coverUrl: string | null;
   achievements: GameAchievements | null;

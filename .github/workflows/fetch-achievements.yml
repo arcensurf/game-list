@@ -77,6 +77,14 @@ jobs:
           DATA_DIR: ${{ github.workspace }}/data-branch/public/data
           FFXIV_LODESTONE_ID: ${{ secrets.FFXIV_LODESTONE_ID }}
 
+      # Reads achievements.json + every shard (not just what this run
+      # touched) to (re)build the score/rarity leaderboard, so a stale
+      # shard from an earlier run still counts.
+      - name: Build leaderboard
+        run: node scripts/build-leaderboard.mjs
+        env:
+          DATA_DIR: ${{ github.workspace }}/data-branch/public/data
+
       - name: Commit achievement data to data branch
         working-directory: data-branch
         run: |
@@ -84,7 +92,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # Explicit file list — never stage refresh tokens or anything
           # else that might end up in the work tree.
-          git add public/data/achievements.json public/data/platform-libraries.json
+          git add public/data/achievements.json public/data/platform-libraries.json public/data/leaderboard.json
           # -A so pruned shards (delisted games) are staged as deletions,
           # not just left behind in the tree.
           git add -A public/data/achievements

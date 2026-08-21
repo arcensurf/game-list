@@ -11,6 +11,7 @@ import BacklogList from './BacklogList';
 import AddGameForm from './AddGameForm';
 import PublishButton from './PublishButton';
 import TrophyPickerView from './TrophyPickerView';
+import LeaderboardView from './LeaderboardView';
 import StatsView from './StatsView';
 import StatsOverlay from './StatsOverlay';
 import BottomNav from './BottomNav';
@@ -31,6 +32,7 @@ export default function App() {
   // without this the view stays reachable code and Rollup ships the
   // whole picker (and its dev-API calls) to the public bundle.
   const pickerView = import.meta.env.DEV && view === 'picker';
+  const leaderboardView = view === 'leaderboard';
   const flatLayout = gogOnly || perfectOnly;
 
   const { groups, totalCount, platformStats, loading } = useGames(
@@ -40,7 +42,7 @@ export default function App() {
     backlogView ? 'backlog' : 'beaten',
   );
   const activeLetters = new Set(groups.map((g) => g.letter));
-  const effectiveLightsOn = lightsOn || flatLayout || statsView || backlogView || pickerView;
+  const effectiveLightsOn = lightsOn || flatLayout || statsView || backlogView || pickerView || leaderboardView;
 
   const changeView = useCallback((next: View) => {
     rememberView(next);
@@ -118,6 +120,8 @@ export default function App() {
       <main>
         {inTransition ? null : pickerView ? (
           <TrophyPickerView />
+        ) : leaderboardView ? (
+          <LeaderboardView />
         ) : statsView ? (
           <StatsView stats={platformStats} />
         ) : loading ? (

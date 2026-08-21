@@ -1,10 +1,12 @@
-export type View = 'list' | 'gog' | 'perfect' | 'backlog' | 'stats' | 'picker';
+export type View = 'list' | 'gog' | 'perfect' | 'backlog' | 'stats' | 'picker' | 'leaderboard';
 
 // The trophy picker writes through the dev API, so it has no meaning on
 // the deployed site — it only joins the nav and the swipe order locally.
+// The leaderboard is read-only and derived from already-public data, so
+// unlike the picker it ships everywhere.
 export const VIEW_ORDER: View[] = import.meta.env.DEV
-  ? ['list', 'gog', 'perfect', 'backlog', 'picker']
-  : ['list', 'gog', 'perfect', 'backlog'];
+  ? ['list', 'gog', 'perfect', 'backlog', 'leaderboard', 'picker']
+  : ['list', 'gog', 'perfect', 'backlog', 'leaderboard'];
 
 const VIEW_KEY = 'game-list:view';
 

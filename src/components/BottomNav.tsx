@@ -8,6 +8,7 @@ const LABELS: Record<View, string> = {
   backlog: 'Backlog',
   stats: 'Stats',
   picker: 'Trophy Picker',
+  leaderboard: 'Leaderboard',
 };
 
 export default function BottomNav({

@@ -1,0 +1,138 @@
+.leaderboard-view {
+  padding: 2rem 0;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.leaderboard-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.leaderboard-header h2 {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.leaderboard-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.leaderboard-tab {
+  font-family: 'Share Tech', sans-serif;
+  padding: 0.4rem 0.9rem;
+  border-radius: 2px;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.leaderboard-tab--active {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.6rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.leaderboard-rank {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  min-width: 1.75rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.leaderboard-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.leaderboard-thumb--empty {
+  visibility: hidden;
+}
+
+.leaderboard-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.leaderboard-title {
+  font-size: 0.92rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.leaderboard-completion {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-platform {
+  font-family: 'Share Tech', sans-serif;
+  padding: 0.18rem 0.5rem 0.14rem;
+  border-radius: 2px;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.leaderboard-score {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-light, var(--accent));
+  flex-shrink: 0;
+  min-width: 3.5rem;
+  text-align: right;
+}
