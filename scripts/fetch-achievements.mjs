@@ -580,6 +580,17 @@ async function fetchXboxLibrary() {
 //   * possibleOnly=true   — no effect, despite being documented as
 //                           "return all possible results"
 //   * contract v1 fallback — works for exactly one title (GRID)
+//   * /titleachievements (a distinct endpoint, contract v1, found in
+//     OpenXbox/xbox-webapi-python) — tried and reverted 2026-08-22.
+//     Returns more entries for some titles, but its ids are a legacy
+//     scheme that never matches the modern /achievements ids used to
+//     attribute earned state, so every entry it contributes comes back
+//     earned:false regardless of truth — confirmed on Guitar Hero III,
+//     which showed 32 achievements all unearned despite 13 actually
+//     earned. Worse than the status quo (the picker could re-offer
+//     something already earned), not just unhelpful — do not reuse
+//     this endpoint's data for earned state without solving the id
+//     mapping first.
 // The 14 titles that do come back complete are almost all games that
 // were 100%'d, i.e. "complete" only because everything was unlocked.
 // The likely explanation is that Xbox Live keeps no definition set for
