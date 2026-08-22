@@ -555,36 +555,35 @@ async function fetchXboxLibrary() {
 
     console.log(`Xbox: title history spanned ${page} page(s), ${allTitles.length} titles total`);
 
-    // Temporary: the achievement-block filter below drops a title if
-    // totalAchievements comes back falsy, which is dropping known-good
-    // current-gen titles (Forza Horizon 6 etc. — confirmed missing from
-    // the output despite real achievement progress). Logging exactly
-    // what titleHub sent for each dropped title, so the next run shows
-    // whether it's really achievement-less apps/system tiles being
-    // dropped, or real games whose achievement block just has a
-    // different shape on this account than legacy titles get.
-    const dropped = allTitles.filter((t) => !(t.achievement && (t.achievement.totalAchievements ?? 0) > 0));
-    if (dropped.length > 0) {
-      console.log(`Xbox: ${dropped.length} title(s) dropped by the achievement-block filter:`);
-      for (const t of dropped.slice(0, 30)) {
-        console.log(
-          `  ${JSON.stringify(t.name)} type=${t.type ?? 'n/a'} devices=${JSON.stringify(t.devices ?? [])} achievement=${JSON.stringify(t.achievement ?? null)}`,
-        );
-      }
-    }
-
+    // titleHub's achievement.totalAchievements comes back 0 for every
+    // sourceVersion:2 (2017+/current-gen) title on this account
+    // regardless of real progress — confirmed 2026-08-21 against a live
+    // dump: Forza Horizon 6 reported currentAchievements:19,
+    // totalGamerscore:1000, totalAchievements:0. currentAchievements is
+    // the one field that's reliable across both eras, so it's what gates
+    // inclusion now. It's also the only total we have for these titles
+    // at this point, so it's used as a bootstrap "at least this many"
+    // total — nonzero, which is all that's needed to get the title past
+    // syncShards' fetch gate below. main() corrects it to the real count
+    // (marked via totalUnreliable) once the per-title fetch returns the
+    // actual achievement list.
     return allTitles
-      // Drop apps/system tiles and anything that doesn't have achievements.
-      .filter((t) => t.achievement && (t.achievement.totalAchievements ?? 0) > 0)
-      .map((t) => ({
-        platformTitle: t.name,
-        platformId: t.titleId,
-        platform: 'xbox',
-        earned: t.achievement.currentAchievements ?? 0,
-        total: t.achievement.totalAchievements ?? 0,
-        // Box art from the same titleHub response — see the PSN note.
-        icon: t.displayImage ?? null,
-      }));
+      // Drop apps/system tiles and anything with zero real progress.
+      .filter((t) => t.achievement && ((t.achievement.totalAchievements ?? 0) > 0 || (t.achievement.currentAchievements ?? 0) > 0))
+      .map((t) => {
+        const a = t.achievement;
+        const totalUnreliable = !(a.totalAchievements > 0);
+        return {
+          platformTitle: t.name,
+          platformId: t.titleId,
+          platform: 'xbox',
+          earned: a.currentAchievements ?? 0,
+          total: totalUnreliable ? (a.currentAchievements ?? 0) : a.totalAchievements,
+          totalUnreliable,
+          // Box art from the same titleHub response — see the PSN note.
+          icon: t.displayImage ?? null,
+        };
+      });
   } catch (err) {
     console.error('Xbox: failed to fetch library', err.message);
     return [];
@@ -1119,7 +1118,40 @@ async function main() {
   // inline above, since their counts and lists arrive in the same
   // response.
   if (fetchedPlatforms.has('psn')) await syncShards('psn', psnLib, fetchPsnTrophyList, 300);
-  if (fetchedPlatforms.has('xbox')) await syncShards('xbox', xboxLib, (e) => fetchXboxAchievementList(e.platformId, e.total), 250);
+  if (fetchedPlatforms.has('xbox')) {
+    await syncShards('xbox', xboxLib, (e) => fetchXboxAchievementList(e.platformId, e.total), 250);
+
+    // xbox entries flagged totalUnreliable went into achievements.json
+    // above with a bootstrap total (currentAchievements) rather than a
+    // real one, since titleHub doesn't supply it for these — see the
+    // comment in fetchXboxLibrary. Now that syncShards has pulled their
+    // actual achievement list, correct the summary to the real count and
+    // rewrite. A second small write rather than reordering the pipeline,
+    // so a shard-fetch failure still leaves the safe bootstrap values
+    // (nonzero, just possibly short) already on disk rather than nothing.
+    const unreliable = xboxLib.filter((e) => e.totalUnreliable);
+    if (unreliable.length > 0) {
+      let corrected = 0;
+      for (const e of unreliable) {
+        const id = String(e.platformId);
+        const shard = readShard('xbox', id);
+        if (!shard || !Array.isArray(shard.achievements) || shard.achievements.length === 0) continue;
+        const total = shard.achievements.length;
+        const earnedCount = shard.achievements.filter((a) => a.earned).length;
+        achievements.xbox[id] = { ...achievements.xbox[id], earned: earnedCount, total };
+        // Keep the shard's own counts in step with the corrected summary —
+        // syncShards wrote them as the bootstrap values, and currentShard()
+        // compares against achievements.json's total on the next run.
+        writeShard('xbox', id, { ...shard, earned: earnedCount, total });
+        corrected++;
+      }
+      if (corrected > 0) {
+        achievements.updatedAt = new Date().toISOString();
+        writeFileSync(achievementsPath, JSON.stringify(achievements, null, 2) + '\n');
+        console.log(`Xbox: corrected ${corrected} bootstrap total(s) to real counts from their fetched shards`);
+      }
+    }
+  }
 }
 
 main().catch((err) => {
