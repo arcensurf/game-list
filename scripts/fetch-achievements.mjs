@@ -518,24 +518,44 @@ async function fetchXboxLibrary() {
     // covers the 2017+ achievement format and silently drops legacy 360
     // titles, which is why a previous version of this script was only
     // seeing a handful of modern Xbox games.
-    const url = `https://titlehub.xboxlive.com/users/xuid(${xboxAuth.xuid})/titles/titleHistory/decoration/achievement`;
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
-        'x-xbl-contract-version': '2',
-        'Accept-Language': 'en-US',
-      },
-    });
+    //
+    // Unpaginated, this came back entirely legacy 360-range titles —
+    // zero current-gen ones, for an account that definitely has current-
+    // gen achievement progress (confirmed against real unlocks missing
+    // from the output). maxItems + continuationToken paging is how the
+    // per-title achievements call below already avoids the same trap;
+    // titleHistory just needed the same treatment.
+    const allTitles = [];
+    let continuationToken = null;
+    let page = 0;
+    do {
+      const params = new URLSearchParams({ maxItems: '1000' });
+      if (continuationToken) params.set('continuationToken', continuationToken);
+      const url = `https://titlehub.xboxlive.com/users/xuid(${xboxAuth.xuid})/titles/titleHistory/decoration/achievement?${params}`;
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `XBL3.0 x=${xboxAuth.userHash};${xboxAuth.xstsToken}`,
+          'x-xbl-contract-version': '2',
+          'Accept-Language': 'en-US',
+        },
+      });
 
-    if (!res.ok) {
-      console.error('Xbox: failed to fetch title history', res.status, await res.text());
-      return [];
-    }
+      if (!res.ok) {
+        console.error('Xbox: failed to fetch title history', res.status, await res.text());
+        break;
+      }
 
-    const data = await res.json();
-    const titles = data.titles ?? [];
+      const data = await res.json();
+      allTitles.push(...(data.titles ?? []));
+      continuationToken = data.pagingInfo?.continuationToken || null;
+      page += 1;
+      // Guard against an API that always echoes a token back — this
+      // account's full history shouldn't run past a handful of pages.
+    } while (continuationToken && page < 20);
 
-    return titles
+    console.log(`Xbox: title history spanned ${page} page(s), ${allTitles.length} titles total`);
+
+    return allTitles
       // Drop apps/system tiles and anything that doesn't have achievements.
       .filter((t) => t.achievement && (t.achievement.totalAchievements ?? 0) > 0)
       .map((t) => ({
