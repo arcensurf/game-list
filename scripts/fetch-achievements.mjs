@@ -615,9 +615,17 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
     }
   };
 
-  // Unearned achievements come back with a placeholder unlock date.
-  const unlockedAt = (value) =>
-    value && !String(value).startsWith('0001') ? value : null;
+  // Unearned achievements come back with a placeholder unlock date —
+  // .NET's DateTime.MinValue serialized as "0001-01-01...", except the
+  // legacy (old-gen) contract uses a different placeholder instead:
+  // "1753-01-01T00:00:00.0000000Z" (SQL Server's own minimum date).
+  // Checking the resulting year rather than a specific string prefix
+  // catches both, plus any other unset-date sentinel that shows up.
+  const unlockedAt = (value) => {
+    if (!value) return null;
+    const year = new Date(value).getFullYear();
+    return Number.isFinite(year) && year >= 2000 ? value : null;
+  };
 
   const mapModern = (a) => ({
     id: String(a.id),

@@ -33,8 +33,26 @@ const PLATFORMS = ['steam', 'psn', 'xbox', 'ra'];
 const BASE_POINTS = 10;
 const SCORE_CAP = 100; // = BASE_POINTS * sqrt(100 / 1), i.e. a 1% rarity floor
 const PSN_TIER_XP = { bronze: 15, silver: 30, gold: 90, platinum: 300 };
-const RAREST_LIMIT = 200;
-const GAMES_LIMIT = 100;
+// Per platform, not overall — the leaderboard view lets visitors filter
+// down to one platform, and a global top-100/200 cut here would starve
+// that filter down to whatever fraction of, say, RA happened to make
+// the global cut. Keeping each platform's own top N guarantees any
+// single-platform (or combined) view has a full list to slice from; see
+// topPerPlatform below and the client-side re-slice in LeaderboardView.
+const RAREST_LIMIT_PER_PLATFORM = 200;
+const GAMES_LIMIT_PER_PLATFORM = 100;
+
+// Rows must already be sorted into the desired order — this preserves
+// that order within each platform's slice, it doesn't re-sort.
+function topPerPlatform(rows, limit) {
+  const byPlatform = new Map();
+  for (const row of rows) {
+    const list = byPlatform.get(row.platform) ?? [];
+    if (list.length < limit) list.push(row);
+    byPlatform.set(row.platform, list);
+  }
+  return PLATFORMS.flatMap((p) => byPlatform.get(p) ?? []);
+}
 
 function achievementScore(rarity) {
   if (typeof rarity !== 'number' || rarity <= 0) return null;
@@ -118,12 +136,12 @@ function main() {
 
   const output = {
     updatedAt: new Date().toISOString(),
-    games: games.slice(0, GAMES_LIMIT),
-    rarestAchievements: rarestAchievements.slice(0, RAREST_LIMIT),
+    games: topPerPlatform(games, GAMES_LIMIT_PER_PLATFORM),
+    rarestAchievements: topPerPlatform(rarestAchievements, RAREST_LIMIT_PER_PLATFORM),
   };
 
   writeFileSync(leaderboardPath, JSON.stringify(output));
-  console.log(`Wrote ${output.games.length} of ${games.length} scored games and ${output.rarestAchievements.length} rarest achievements to ${leaderboardPath}`);
+  console.log(`Wrote ${output.games.length} of ${games.length} scored games and ${output.rarestAchievements.length} of ${rarestAchievements.length} rarest achievements to ${leaderboardPath}`);
 }
 
 main();
