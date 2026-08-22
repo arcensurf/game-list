@@ -507,7 +507,7 @@ async function initXbox() {
   }
 }
 
-async function fetchXboxLibrary() {
+async function fetchXboxLibrary(existingXbox) {
   if (!xboxAuth) return [];
 
   try {
@@ -561,24 +561,36 @@ async function fetchXboxLibrary() {
     // dump: Forza Horizon 6 reported currentAchievements:19,
     // totalGamerscore:1000, totalAchievements:0. currentAchievements is
     // the one field that's reliable across both eras, so it's what gates
-    // inclusion now. It's also the only total we have for these titles
-    // at this point, so it's used as a bootstrap "at least this many"
-    // total — nonzero, which is all that's needed to get the title past
-    // syncShards' fetch gate below. main() corrects it to the real count
-    // (marked via totalUnreliable) once the per-title fetch returns the
-    // actual achievement list.
+    // inclusion now.
+    //
+    // For the total, prefer whatever main() last corrected it to (see the
+    // post-sync correction pass) — a real, stable achievement count that
+    // only changes if the title itself changes, so passing the same value
+    // back in lets currentShard() compare like with like and skip the
+    // refetch when nothing was actually earned. Only titles seen for the
+    // first time (nothing in last run's achievements.json yet) fall back
+    // to currentAchievements as a bootstrap — nonzero is all that's
+    // needed to get past syncShards' fetch gate; main() corrects it to
+    // the real count (marked via totalUnreliable) once that first fetch
+    // returns the actual achievement list.
     return allTitles
       // Drop apps/system tiles and anything with zero real progress.
       .filter((t) => t.achievement && ((t.achievement.totalAchievements ?? 0) > 0 || (t.achievement.currentAchievements ?? 0) > 0))
       .map((t) => {
         const a = t.achievement;
         const totalUnreliable = !(a.totalAchievements > 0);
+        const priorTotal = existingXbox?.[t.titleId]?.total;
+        const total = !totalUnreliable
+          ? a.totalAchievements
+          : priorTotal > 0
+            ? priorTotal
+            : (a.currentAchievements ?? 0);
         return {
           platformTitle: t.name,
           platformId: t.titleId,
           platform: 'xbox',
           earned: a.currentAchievements ?? 0,
-          total: totalUnreliable ? (a.currentAchievements ?? 0) : a.totalAchievements,
+          total,
           totalUnreliable,
           // Box art from the same titleHub response — see the PSN note.
           icon: t.displayImage ?? null,
@@ -921,7 +933,7 @@ async function main() {
   const [steamLib, psnLib, xboxLib, raLib] = await Promise.all([
     fetchSteamLibrary(),
     fetchPsnLibrary(),
-    fetchXboxLibrary(),
+    fetchXboxLibrary(existing.xbox),
     fetchRaLibrary(),
   ]);
   console.log(`Steam: ${steamLib.length} games, PSN: ${psnLib.length} games, Xbox: ${xboxLib.length} games, RetroAchievements: ${raLib.length} games`);
@@ -1122,13 +1134,16 @@ async function main() {
     await syncShards('xbox', xboxLib, (e) => fetchXboxAchievementList(e.platformId, e.total), 250);
 
     // xbox entries flagged totalUnreliable went into achievements.json
-    // above with a bootstrap total (currentAchievements) rather than a
-    // real one, since titleHub doesn't supply it for these — see the
-    // comment in fetchXboxLibrary. Now that syncShards has pulled their
-    // actual achievement list, correct the summary to the real count and
-    // rewrite. A second small write rather than reordering the pipeline,
-    // so a shard-fetch failure still leaves the safe bootstrap values
-    // (nonzero, just possibly short) already on disk rather than nothing.
+    // above with a total titleHub didn't actually supply — carried
+    // forward from last run's corrected value where we had one, or a
+    // currentAchievements bootstrap the first time a title's seen — see
+    // the comment in fetchXboxLibrary. Now that syncShards has pulled
+    // the real achievement list (only for titles where earned count
+    // moved, thanks to that carried-forward total keeping the cache
+    // check honest), true the summary up and rewrite. A second small
+    // write rather than reordering the pipeline, so a shard-fetch
+    // failure still leaves the prior-known-good values on disk rather
+    // than nothing.
     const unreliable = xboxLib.filter((e) => e.totalUnreliable);
     if (unreliable.length > 0) {
       let corrected = 0;
