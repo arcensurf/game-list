@@ -215,6 +215,25 @@
   visibility: hidden;
 }
 
+.leaderboard-thumb--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard-thumb--fallback-icon {
+  width: 22px;
+  height: 22px;
+  background-color: var(--text-muted);
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-position: center;
+  mask-size: contain;
+  -webkit-mask-size: contain;
+}
+
 .leaderboard-main {
   flex: 1;
   min-width: 0;

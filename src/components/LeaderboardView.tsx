@@ -3,6 +3,7 @@ import { useLeaderboard } from '../hooks/useLeaderboard';
 import { useGameSearchIndex } from '../hooks/useGameSearchIndex';
 import { pickerCoverUrl, steamCoverFallback } from '../utils/pickerCover';
 import { ACHIEVEMENT_PLATFORM_COLORS } from '../utils/platformColors';
+import xboxLogo from '../icons/svg/outline/xbox.svg';
 import type { ShardPlatform } from '../hooks/useAchievementList';
 import { PLATFORMS } from '../hooks/useTrophyPicker';
 import LeaderboardGameModal from './LeaderboardGameModal';
@@ -81,7 +82,24 @@ function Thumb({
   icon: string | null;
 }) {
   const [src, setSrc] = useState(pickerCoverUrl(platform, gameId, icon));
-  if (!src) return <div className="leaderboard-thumb leaderboard-thumb--empty" />;
+  if (!src) {
+    // Xbox is the one platform where titleHub sometimes just omits box art
+    // for a title (not a broken URL, an absent one — nothing for the
+    // fetch-time re-hosting in fetch-achievements.mjs to act on), so it
+    // gets a generic logo instead of an empty slot. Rare enough for the
+    // other platforms that it isn't worth sourcing matching logos for them.
+    if (platform === 'xbox') {
+      return (
+        <div className="leaderboard-thumb leaderboard-thumb--fallback">
+          <span
+            className="leaderboard-thumb--fallback-icon"
+            style={{ maskImage: `url(${xboxLogo})`, WebkitMaskImage: `url(${xboxLogo})` }}
+          />
+        </div>
+      );
+    }
+    return <div className="leaderboard-thumb leaderboard-thumb--empty" />;
+  }
   return (
     <img
       className="leaderboard-thumb"
