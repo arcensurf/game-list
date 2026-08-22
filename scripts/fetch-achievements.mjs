@@ -555,6 +555,24 @@ async function fetchXboxLibrary() {
 
     console.log(`Xbox: title history spanned ${page} page(s), ${allTitles.length} titles total`);
 
+    // Temporary: the achievement-block filter below drops a title if
+    // totalAchievements comes back falsy, which is dropping known-good
+    // current-gen titles (Forza Horizon 6 etc. — confirmed missing from
+    // the output despite real achievement progress). Logging exactly
+    // what titleHub sent for each dropped title, so the next run shows
+    // whether it's really achievement-less apps/system tiles being
+    // dropped, or real games whose achievement block just has a
+    // different shape on this account than legacy titles get.
+    const dropped = allTitles.filter((t) => !(t.achievement && (t.achievement.totalAchievements ?? 0) > 0));
+    if (dropped.length > 0) {
+      console.log(`Xbox: ${dropped.length} title(s) dropped by the achievement-block filter:`);
+      for (const t of dropped.slice(0, 30)) {
+        console.log(
+          `  ${JSON.stringify(t.name)} type=${t.type ?? 'n/a'} devices=${JSON.stringify(t.devices ?? [])} achievement=${JSON.stringify(t.achievement ?? null)}`,
+        );
+      }
+    }
+
     return allTitles
       // Drop apps/system tiles and anything that doesn't have achievements.
       .filter((t) => t.achievement && (t.achievement.totalAchievements ?? 0) > 0)
