@@ -507,6 +507,57 @@ async function initXbox() {
   }
 }
 
+// titleHub hands back box art as a bare http:// URL. Most of those hosts
+// (store-images.s-microsoft.com) serve https fine, so upgrading the scheme
+// is enough — the leaderboard/picker run on an https-only page (GitHub
+// Pages) and browsers refuse to fall back to plain http for a failed
+// same-page upgrade. images-eds.xboxlive.com (legacy 360/XBLA titles) is
+// different: confirmed 2026-08-22 that host's TLS is actually broken
+// (cert CN mismatch), not just absent, so no scheme rewrite fixes it. For
+// that host specifically, download the art once here (server-side, so
+// plain http is fine) and re-host it under dataDir, where it's served over
+// a real cert via raw.githubusercontent.com same as the rest of public/data.
+const DEAD_TLS_XBOX_HOSTS = new Set(['images-eds.xboxlive.com']);
+const XBOX_ICON_DIR = resolve(dataDir, 'xbox-icons');
+// Mirrors DATA_BASE in src/utils/dataBase.ts — dataDir *is* public/data on
+// the data branch, so a file written under XBOX_ICON_DIR is public/data/
+// xbox-icons/... there, i.e. DATA_BASE + 'data/xbox-icons/...'.
+const XBOX_ICON_PUBLIC_BASE =
+  'https://raw.githubusercontent.com/arcensurf/game-list/data/public/data/xbox-icons/';
+
+async function rehostDeadTlsXboxIcon(titleId, url) {
+  const dest = resolve(XBOX_ICON_DIR, `${titleId}.jpg`);
+  const publicUrl = `${XBOX_ICON_PUBLIC_BASE}${titleId}.jpg`;
+  if (existsSync(dest)) return publicUrl;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const bytes = Buffer.from(await res.arrayBuffer());
+    if (!existsSync(XBOX_ICON_DIR)) mkdirSync(XBOX_ICON_DIR, { recursive: true });
+    writeFileSync(dest, bytes);
+    return publicUrl;
+  } catch (err) {
+    console.warn(`Xbox: failed to re-host icon for ${titleId}: ${err.message}`);
+    return null;
+  }
+}
+
+async function resolveXboxIcon(titleId, rawUrl) {
+  if (!rawUrl) return null;
+  let parsed;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return rawUrl;
+  }
+  if (DEAD_TLS_XBOX_HOSTS.has(parsed.hostname)) {
+    return (await rehostDeadTlsXboxIcon(titleId, rawUrl)) ?? rawUrl;
+  }
+  parsed.protocol = 'https:';
+  return parsed.toString();
+}
+
 async function fetchXboxLibrary(existingXbox) {
   if (!xboxAuth) return [];
 
@@ -573,29 +624,34 @@ async function fetchXboxLibrary(existingXbox) {
     // needed to get past syncShards' fetch gate; main() corrects it to
     // the real count (marked via totalUnreliable) once that first fetch
     // returns the actual achievement list.
-    return allTitles
-      // Drop apps/system tiles and anything with zero real progress.
-      .filter((t) => t.achievement && ((t.achievement.totalAchievements ?? 0) > 0 || (t.achievement.currentAchievements ?? 0) > 0))
-      .map((t) => {
-        const a = t.achievement;
-        const totalUnreliable = !(a.totalAchievements > 0);
-        const priorTotal = existingXbox?.[t.titleId]?.total;
-        const total = !totalUnreliable
-          ? a.totalAchievements
-          : priorTotal > 0
-            ? priorTotal
-            : (a.currentAchievements ?? 0);
-        return {
-          platformTitle: t.name,
-          platformId: t.titleId,
-          platform: 'xbox',
-          earned: a.currentAchievements ?? 0,
-          total,
-          totalUnreliable,
-          // Box art from the same titleHub response — see the PSN note.
-          icon: t.displayImage ?? null,
-        };
+    // Drop apps/system tiles and anything with zero real progress.
+    const live = allTitles.filter(
+      (t) => t.achievement && ((t.achievement.totalAchievements ?? 0) > 0 || (t.achievement.currentAchievements ?? 0) > 0),
+    );
+    const results = [];
+    for (const t of live) {
+      const a = t.achievement;
+      const totalUnreliable = !(a.totalAchievements > 0);
+      const priorTotal = existingXbox?.[t.titleId]?.total;
+      const total = !totalUnreliable
+        ? a.totalAchievements
+        : priorTotal > 0
+          ? priorTotal
+          : (a.currentAchievements ?? 0);
+      results.push({
+        platformTitle: t.name,
+        platformId: t.titleId,
+        platform: 'xbox',
+        earned: a.currentAchievements ?? 0,
+        total,
+        totalUnreliable,
+        // Box art from the same titleHub response — see the PSN note.
+        // Re-hosted for the dead-TLS host, scheme-upgraded otherwise; see
+        // resolveXboxIcon.
+        icon: await resolveXboxIcon(t.titleId, t.displayImage ?? null),
       });
+    }
+    return results;
   } catch (err) {
     console.error('Xbox: failed to fetch library', err.message);
     return [];

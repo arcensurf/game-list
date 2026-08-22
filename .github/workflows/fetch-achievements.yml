@@ -96,6 +96,11 @@ jobs:
           # -A so pruned shards (delisted games) are staged as deletions,
           # not just left behind in the tree.
           git add -A public/data/achievements
+          # Re-hosted box art for Xbox titles whose own CDN host has dead
+          # TLS — see resolveXboxIcon in fetch-achievements.mjs. Only ever
+          # grows (one file per affected title, fetched once and cached),
+          # but -A for consistency with the shards above.
+          git add -A public/data/xbox-icons
           if git diff --cached --quiet; then
             echo "No changes to achievement data"
           else
