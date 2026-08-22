@@ -78,6 +78,79 @@
   opacity: 0.85;
 }
 
+.leaderboard-search-wrap {
+  position: relative;
+}
+
+.leaderboard-search {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.45rem 0.65rem;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.leaderboard-search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.leaderboard-search-dropdown {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  list-style: none;
+  margin: 0;
+  padding: 0.3rem;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.leaderboard-search-option {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.leaderboard-search-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard-search-option-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-search-option-meta {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.leaderboard-search-empty {
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 .leaderboard-empty {
   text-align: center;
   color: var(--text-muted);

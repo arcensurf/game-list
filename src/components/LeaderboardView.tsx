@@ -1,11 +1,35 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useLeaderboard } from '../hooks/useLeaderboard';
+import { useGameSearchIndex } from '../hooks/useGameSearchIndex';
 import { pickerCoverUrl, steamCoverFallback } from '../utils/pickerCover';
 import { ACHIEVEMENT_PLATFORM_COLORS } from '../utils/platformColors';
 import type { ShardPlatform } from '../hooks/useAchievementList';
 import { PLATFORMS } from '../hooks/useTrophyPicker';
 import LeaderboardGameModal from './LeaderboardGameModal';
 import type { LeaderboardModalTarget } from './LeaderboardGameModal';
+
+const SEARCH_RESULTS_LIMIT = 8;
+
+// Strips trademark clutter (DiRT™, DIRT5™, ...) so it doesn't throw off
+// either the exact-match check or the alphabetical tiebreak below.
+function normalizeForMatch(title: string): string {
+  return title.toLowerCase().replace(/[™®©]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+// Plain substring search ranks purely alphabetically, which buries a
+// short exact title under its own numbered sequels ("DiRT" search
+// filling up with "DiRT 2".."DiRT Showdown" before "DiRT" itself gets a
+// turn) — and once the whole title's been typed there's no more query
+// left to narrow it further. Ranking exact/prefix/word-boundary matches
+// ahead of a bare substring hit fixes that without needing more input.
+function matchRank(title: string, query: string): number {
+  const norm = normalizeForMatch(title);
+  if (norm === query) return 0;
+  if (norm.startsWith(query)) return 1;
+  const idx = norm.indexOf(query);
+  if (idx > 0 && !/[a-z0-9]/i.test(norm[idx - 1])) return 2;
+  return 3;
+}
 
 // Per-device preference, not real state — worth remembering across a
 // reload, not worth syncing anywhere. Mirrors the picker's own
@@ -88,9 +112,34 @@ const RAREST_DISPLAY_LIMIT = 200;
 
 export default function LeaderboardView() {
   const { data, loading } = useLeaderboard();
+  const { games: searchIndex } = useGameSearchIndex();
   const [tab, setTab] = useState<Tab>('games');
   const [modalTarget, setModalTarget] = useState<LeaderboardModalTarget | null>(null);
   const [enabledPlatforms, setEnabledPlatforms] = useState<ShardPlatform[]>(readStoredPlatforms);
+  const [query, setQuery] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
+
+  // Independent of the leaderboard lists below — those only carry each
+  // platform's top N (see GAMES_LIMIT_PER_PLATFORM in
+  // build-leaderboard.mjs), so a game outside that cut just isn't in
+  // `data` at all. This searches every scored game instead, straight out
+  // of achievements.json, and opens the same modal on a pick — which
+  // computes its score live from the shard, so it works whether or not
+  // the game made the leaderboard cut.
+  const trimmedQuery = query.trim().toLowerCase();
+  const searchMatches = useMemo(() => {
+    if (!trimmedQuery) return [];
+    return searchIndex
+      .filter((g) => enabledPlatforms.includes(g.platform) && normalizeForMatch(g.title).includes(trimmedQuery))
+      .sort((a, b) => {
+        const rankDiff = matchRank(a.title, trimmedQuery) - matchRank(b.title, trimmedQuery);
+        if (rankDiff !== 0) return rankDiff;
+        if (a.title.length !== b.title.length) return a.title.length - b.title.length;
+        return a.title.localeCompare(b.title);
+      })
+      .slice(0, SEARCH_RESULTS_LIMIT + 1);
+  }, [searchIndex, enabledPlatforms, trimmedQuery]);
+  const showSearchDropdown = searchFocused && trimmedQuery.length > 0;
 
   const togglePlatform = (platform: ShardPlatform) => {
     setEnabledPlatforms((prev) => {
@@ -175,6 +224,51 @@ export default function LeaderboardView() {
               </button>
             );
           })}
+        </div>
+
+        <div className="leaderboard-search-wrap">
+          <input
+            className="leaderboard-search"
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+            placeholder="Find a game's score…"
+            aria-label="Find a game"
+          />
+          {showSearchDropdown && (
+            <ul className="leaderboard-search-dropdown" role="listbox">
+              {searchMatches.length === 0 && (
+                <li className="leaderboard-search-empty">No games match &ldquo;{query.trim()}&rdquo;.</li>
+              )}
+              {searchMatches.slice(0, SEARCH_RESULTS_LIMIT).map((g) => (
+                <li
+                  key={`${g.platform}/${g.id}`}
+                  role="option"
+                  aria-selected={false}
+                  className="leaderboard-search-option"
+                  // Keeps the input focused through the click so the
+                  // blur handler above doesn't close the dropdown first.
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setModalTarget({ platform: g.platform, id: g.id, title: g.title });
+                    setQuery('');
+                    setSearchFocused(false);
+                  }}
+                >
+                  <PlatformPill platform={g.platform} />
+                  <span className="leaderboard-search-option-title">{g.title}</span>
+                  <span className="leaderboard-search-option-meta">
+                    {g.earned}/{g.total}
+                  </span>
+                </li>
+              ))}
+              {searchMatches.length > SEARCH_RESULTS_LIMIT && (
+                <li className="leaderboard-search-empty">Keep typing to narrow it down…</li>
+              )}
+            </ul>
+          )}
         </div>
       </div>
 
