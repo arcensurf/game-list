@@ -19,6 +19,20 @@
   color: var(--text);
 }
 
+.leaderboard-dev-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: -0.5rem;
+}
+
+.leaderboard-dev-hint code {
+  font-family: monospace;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0.05rem 0.3rem;
+}
+
 .leaderboard-tabs {
   display: flex;
   gap: 0.5rem;
@@ -354,6 +368,37 @@
 
 .leaderboard-modal-close:hover {
   color: var(--text);
+}
+
+.leaderboard-modal-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.7rem 1.1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.leaderboard-modal-platform-btn {
+  font-family: 'Share Tech', sans-serif;
+  padding: 0.3rem 0.7rem;
+  border-radius: 2px;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+}
+
+.leaderboard-modal-platform-btn:hover {
+  color: var(--text);
+}
+
+.leaderboard-modal-platform-btn--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 .leaderboard-modal-list {

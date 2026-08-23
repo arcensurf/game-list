@@ -1,25 +1,48 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAchievementList } from '../hooks/useAchievementList';
 import type { ShardPlatform } from '../hooks/useAchievementList';
+import type { LeaderboardGame } from '../types/game';
 import { achievementScore } from '../utils/achievementScore';
 import { buildGameScoreContext, projectUnearned } from '../utils/leaderboardCompletion';
-import { PlatformPill, formatDate } from './LeaderboardView';
+import { PlatformPill, PLATFORM_LABELS, formatDate } from './LeaderboardView';
 
 export interface LeaderboardModalTarget {
   platform: ShardPlatform;
   id: string;
   title: string;
+  // Set from the row's own dupeKey so the modal can offer the rest of
+  // its cross-platform group (see `group` below) — null/absent for a
+  // game with no duplicates, or when opened from a list that doesn't
+  // carry dupeKey (e.g. the Rarest Unlocks tab).
+  dupeKey?: string | null;
 }
 
 export default function LeaderboardGameModal({
   target,
+  group,
   onClose,
 }: {
   target: LeaderboardModalTarget | null;
+  // Every member of target's dupe group (including target itself),
+  // highest score first — lets you flip to a platform copy that got
+  // collapsed out of the list by "Hide duplicates" to check progress
+  // you made there before switching to whichever copy you're playing
+  // now. Omitted/undefined when target has no group.
+  group?: LeaderboardGame[];
   onClose: () => void;
 }) {
-  const { list, loading } = useAchievementList(target?.platform ?? null, target?.id ?? null);
+  // Which member of the group is currently shown — resets to `target`
+  // itself whenever the modal is (re)opened for a different game, same
+  // reset-on-open pattern as MarksOverlay/DuplicateGroupsOverlay.
+  const [active, setActive] = useState<LeaderboardModalTarget | null>(null);
+
+  useEffect(() => {
+    setActive(null);
+  }, [target]);
+
+  const shown = active ?? target;
+  const { list, loading } = useAchievementList(shown?.platform ?? null, shown?.id ?? null);
 
   useEffect(() => {
     if (!target) return;
@@ -30,7 +53,9 @@ export default function LeaderboardGameModal({
     return () => window.removeEventListener('keydown', onKey);
   }, [target, onClose]);
 
-  if (!target) return null;
+  if (!target || !shown) return null;
+
+  const members = group && group.length > 1 ? group : null;
 
   // Rarest first, regardless of earned status — unknown rarity (no
   // public stats) sorts last since there's nothing to rank it by.
@@ -50,7 +75,7 @@ export default function LeaderboardGameModal({
   // since earning it also nudges completion for everything else
   // already earned. Computed from the shard directly so it's correct
   // regardless of which tab the game was opened from.
-  const ctx = list ? buildGameScoreContext(target.platform, list.achievements) : null;
+  const ctx = list ? buildGameScoreContext(shown.platform, list.achievements) : null;
   const completionPercent = ctx != null ? Math.round(ctx.completion * 1000) / 10 : null;
   const totalScore = ctx?.totalScore ?? null;
 
@@ -61,11 +86,11 @@ export default function LeaderboardGameModal({
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label={target.title}
+        aria-label={shown.title}
       >
         <div className="leaderboard-modal-head">
-          <PlatformPill platform={target.platform} />
-          <span className="leaderboard-modal-title">{target.title}</span>
+          <PlatformPill platform={shown.platform} />
+          <span className="leaderboard-modal-title">{shown.title}</span>
           {totalScore != null && (
             <span className="leaderboard-modal-score">
               {Math.round(totalScore).toLocaleString()} pts
@@ -81,6 +106,27 @@ export default function LeaderboardGameModal({
             ×
           </button>
         </div>
+
+        {members && (
+          <div className="leaderboard-modal-platforms" role="tablist" aria-label="Platform copies">
+            {members.map((m) => {
+              const isActive = shown.platform === m.platform && shown.id === m.id;
+              return (
+                <button
+                  key={`${m.platform}/${m.id}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  className={`leaderboard-modal-platform-btn${isActive ? ' leaderboard-modal-platform-btn--active' : ''}`}
+                  onClick={() => setActive({ platform: m.platform, id: m.id, title: m.title })}
+                >
+                  {PLATFORM_LABELS[m.platform]} · {Math.round(m.score).toLocaleString()} pts
+                  {m.earned === m.total ? ' ✓' : ''}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         <div className="leaderboard-modal-list">
           {loading && <p className="leaderboard-modal-empty">Loading achievements...</p>}

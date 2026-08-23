@@ -5,6 +5,7 @@ import { pickerCoverUrl, steamCoverFallback } from '../utils/pickerCover';
 import { ACHIEVEMENT_PLATFORM_COLORS } from '../utils/platformColors';
 import xboxLogo from '../icons/svg/outline/xbox.svg';
 import type { ShardPlatform } from '../hooks/useAchievementList';
+import type { LeaderboardGame } from '../types/game';
 import { PLATFORMS } from '../hooks/useTrophyPicker';
 import LeaderboardGameModal from './LeaderboardGameModal';
 import type { LeaderboardModalTarget } from './LeaderboardGameModal';
@@ -177,6 +178,36 @@ export default function LeaderboardView() {
   }, [searchIndex, enabledPlatforms, trimmedQuery]);
   const showSearchDropdown = searchFocused && trimmedQuery.length > 0;
 
+  // Keyed off the full, unfiltered game list (not the platform-toggled
+  // `games` below) so a group's other copies are still switchable from
+  // the modal even if their platform is currently hidden — e.g. you're
+  // viewing Steam-only but want to check the PSN progress you built up
+  // before switching platforms.
+  const dupeGroups = useMemo(() => {
+    const map = new Map<string, LeaderboardGame[]>();
+    for (const g of data?.games ?? []) {
+      if (!g.dupeKey) continue;
+      const list = map.get(g.dupeKey) ?? [];
+      list.push(g);
+      map.set(g.dupeKey, list);
+    }
+    for (const list of map.values()) list.sort((a, b) => b.score - a.score);
+    return map;
+  }, [data]);
+
+  // Search results come from achievements.json directly (see
+  // useGameSearchIndex) and don't carry a dupeKey of their own, so look
+  // it up by platform/id against the same game list dupeGroups was built
+  // from — lets a search-picked game open the modal with its group's
+  // switcher too, not just games clicked straight off the list.
+  const dupeKeyByGame = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const g of data?.games ?? []) {
+      if (g.dupeKey) map.set(`${g.platform}/${g.id}`, g.dupeKey);
+    }
+    return map;
+  }, [data]);
+
   const togglePlatform = (platform: ShardPlatform) => {
     setEnabledPlatforms((prev) => {
       const on = prev.includes(platform);
@@ -251,6 +282,11 @@ export default function LeaderboardView() {
     <div className="leaderboard-view">
       <div className="leaderboard-header">
         <h2>Leaderboard</h2>
+        {import.meta.env.DEV && (
+          <p className="leaderboard-dev-hint">
+            Local data is a snapshot from the last <code>npm run pull-data</code> — run it again if this looks stale.
+          </p>
+        )}
         <div className="leaderboard-tabs" role="tablist">
           <button
             role="tab"
@@ -331,7 +367,12 @@ export default function LeaderboardView() {
                   // blur handler above doesn't close the dropdown first.
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
-                    setModalTarget({ platform: g.platform, id: g.id, title: g.title });
+                    setModalTarget({
+                      platform: g.platform,
+                      id: g.id,
+                      title: g.title,
+                      dupeKey: dupeKeyByGame.get(`${g.platform}/${g.id}`) ?? null,
+                    });
                     setQuery('');
                     setSearchFocused(false);
                   }}
@@ -363,11 +404,11 @@ export default function LeaderboardView() {
                 className={`leaderboard-row${complete ? ' leaderboard-row--complete' : ''}`}
                 role="button"
                 tabIndex={0}
-                onClick={() => setModalTarget({ platform: g.platform, id: g.id, title: g.title })}
+                onClick={() => setModalTarget({ platform: g.platform, id: g.id, title: g.title, dupeKey: g.dupeKey })}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    setModalTarget({ platform: g.platform, id: g.id, title: g.title });
+                    setModalTarget({ platform: g.platform, id: g.id, title: g.title, dupeKey: g.dupeKey });
                   }
                 }}
               >
@@ -424,7 +465,11 @@ export default function LeaderboardView() {
         </ol>
       )}
 
-      <LeaderboardGameModal target={modalTarget} onClose={() => setModalTarget(null)} />
+      <LeaderboardGameModal
+        target={modalTarget}
+        group={modalTarget?.dupeKey ? dupeGroups.get(modalTarget.dupeKey) : undefined}
+        onClose={() => setModalTarget(null)}
+      />
       {import.meta.env.DEV && (
         <DuplicateGroupsOverlay
           open={groupsOpen}

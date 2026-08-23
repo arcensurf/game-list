@@ -109,7 +109,7 @@ export default function DuplicateGroupsOverlay({
     return [...byKey.values()]
       .filter((members) => members.length > 1)
       .map((members) => members.slice().sort((a, b) => b.score - a.score))
-      .sort((a, b) => b[0].score - a[0].score);
+      .sort((a, b) => a[0].title.localeCompare(b[0].title));
   }, [games, hidden]);
 
   async function splitMember(group: LeaderboardGame[], member: LeaderboardGame) {
