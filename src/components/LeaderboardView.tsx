@@ -8,6 +8,7 @@ import type { ShardPlatform } from '../hooks/useAchievementList';
 import { PLATFORMS } from '../hooks/useTrophyPicker';
 import LeaderboardGameModal from './LeaderboardGameModal';
 import type { LeaderboardModalTarget } from './LeaderboardGameModal';
+import DuplicateGroupsOverlay from './DuplicateGroupsOverlay';
 
 const SEARCH_RESULTS_LIMIT = 8;
 
@@ -48,6 +49,21 @@ function readStoredPlatforms(): ShardPlatform[] {
   } catch {
     // Private windows and blocked site data both throw on access.
     return PLATFORMS;
+  }
+}
+
+// Same idea, for the "hide duplicates" toggle — see dupeKey on
+// LeaderboardGame / assignDupeKeys in scripts/build-leaderboard.mjs.
+// Defaults on: the point of the feature is a decluttered view by
+// default, and every duplicate is still one click away via the toggle.
+const HIDE_DUPES_KEY = 'game-list:leaderboard-hide-dupes';
+
+function readStoredHideDupes(): boolean {
+  try {
+    const raw = localStorage.getItem(HIDE_DUPES_KEY);
+    return raw === null ? true : raw === '1';
+  } catch {
+    return true;
   }
 }
 
@@ -134,6 +150,8 @@ export default function LeaderboardView() {
   const [tab, setTab] = useState<Tab>('games');
   const [modalTarget, setModalTarget] = useState<LeaderboardModalTarget | null>(null);
   const [enabledPlatforms, setEnabledPlatforms] = useState<ShardPlatform[]>(readStoredPlatforms);
+  const [hideDupes, setHideDupes] = useState<boolean>(readStoredHideDupes);
+  const [groupsOpen, setGroupsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
@@ -175,6 +193,18 @@ export default function LeaderboardView() {
     });
   };
 
+  const toggleHideDupes = () => {
+    setHideDupes((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(HIDE_DUPES_KEY, next ? '1' : '0');
+      } catch {
+        // Not worth interrupting anyone over.
+      }
+      return next;
+    });
+  };
+
   if (loading) {
     return (
       <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '4rem 0' }}>
@@ -194,10 +224,24 @@ export default function LeaderboardView() {
   // pre-sorted global list, so filtering down needs a re-sort — and a
   // re-slice, since e.g. two platforms selected together can offer more
   // than the display cap once merged.
-  const games = data.games
+  let games = data.games
     .filter((g) => enabledPlatforms.includes(g.platform))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, GAMES_DISPLAY_LIMIT);
+    .sort((a, b) => b.score - a.score);
+  if (hideDupes) {
+    // Sorted descending, so the first row seen for a given dupeKey is
+    // always its highest scorer — nothing left to recompute. A game
+    // whose duplicate got filtered out by the platform toggle above
+    // just never collides with anything here, which is the right
+    // behavior: dedup only ever collapses what's currently visible.
+    const seen = new Set<string>();
+    games = games.filter((g) => {
+      if (!g.dupeKey) return true;
+      if (seen.has(g.dupeKey)) return false;
+      seen.add(g.dupeKey);
+      return true;
+    });
+  }
+  games = games.slice(0, GAMES_DISPLAY_LIMIT);
   const rarestAchievements = data.rarestAchievements
     .filter((a) => enabledPlatforms.includes(a.platform))
     .sort((a, b) => a.rarity - b.rarity)
@@ -242,6 +286,23 @@ export default function LeaderboardView() {
               </button>
             );
           })}
+          {tab === 'games' && <span className="picker-divider" aria-hidden="true" />}
+          {tab === 'games' && (
+            <button
+              type="button"
+              className={`leaderboard-platform-toggle${hideDupes ? ' leaderboard-platform-toggle--on' : ''}`}
+              style={hideDupes ? { background: 'var(--accent)' } : undefined}
+              onClick={toggleHideDupes}
+              title={hideDupes ? 'Show every platform copy' : 'Collapse each game to its highest-scoring platform copy'}
+            >
+              Hide duplicates
+            </button>
+          )}
+          {import.meta.env.DEV && tab === 'games' && (
+            <button type="button" className="leaderboard-platform-toggle" onClick={() => setGroupsOpen(true)}>
+              Review duplicates
+            </button>
+          )}
         </div>
 
         <div className="leaderboard-search-wrap">
@@ -364,6 +425,13 @@ export default function LeaderboardView() {
       )}
 
       <LeaderboardGameModal target={modalTarget} onClose={() => setModalTarget(null)} />
+      {import.meta.env.DEV && (
+        <DuplicateGroupsOverlay
+          open={groupsOpen}
+          onClose={() => setGroupsOpen(false)}
+          searchIndex={searchIndex}
+        />
+      )}
     </div>
   );
 }

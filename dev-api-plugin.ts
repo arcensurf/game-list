@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, statSyn
 import { resolve, extname, basename } from 'path';
 import { readdirSync } from 'fs';
 import { createHash } from 'crypto';
+import { pathToFileURL } from 'url';
 
 function gitBlobHash(content: Buffer): string {
   const header = `blob ${content.length}\0`;
@@ -133,6 +134,10 @@ export default function devApiPlugin(): Plugin {
   // files — the picker needs to know every ban up front to filter its
   // pool, and it can't fetch 657 per-game files to find out.
   const bannedPath = resolve(overridesDir, 'banned.json');
+  // Manual corrections to the leaderboard's cross-platform duplicate
+  // grouping (see assignDupeKeys in scripts/build-leaderboard.mjs) —
+  // one flat file, same shape/lifecycle as bannedPath above.
+  const gameLinksPath = resolve(overridesDir, 'game-links.json');
 
   // Whatever the control window last rolled. OBS runs its own browser
   // process, so a browser source shares nothing with the window you're
@@ -197,6 +202,35 @@ export default function devApiPlugin(): Plugin {
               }
             }
           }
+          res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+          });
+          res.end(JSON.stringify({ games }));
+          return;
+        }
+
+        // Full (unsliced) scored-games list with dupeKey grouping, for
+        // the "Review duplicates" overlay. leaderboard.json only ships
+        // each platform's top N (see GAMES_LIMIT_PER_PLATFORM in
+        // build-leaderboard.mjs), which is fine for the public
+        // leaderboard but would make a real duplicate whose weaker copy
+        // scores too low to make that cut invisible to this review
+        // tool — so this recomputes the same thing straight from
+        // achievements.json + the shards instead of reading the capped
+        // file. Reuses build-leaderboard.mjs's own logic rather than a
+        // third copy of the matching/scoring code.
+        if (req.method === 'GET' && req.url?.split('?')[0] === '/api/dupe-groups') {
+          // An absolute file:// URL, not a relative specifier: Vite
+          // bundles this plugin (as a vite.config.ts dependency) into
+          // node_modules/.vite-temp/ before running it, so a relative
+          // './scripts/...' path resolves against that temp file's
+          // location instead of the real project root.
+          const specifier = pathToFileURL(resolve(root, 'scripts/build-leaderboard.mjs')).href;
+          const { computeLeaderboardData } = (await import(specifier)) as {
+            computeLeaderboardData: () => { games: unknown[] };
+          };
+          const { games } = computeLeaderboardData();
           res.writeHead(200, {
             'Content-Type': 'application/json',
             'Cache-Control': 'no-store',
@@ -746,6 +780,57 @@ export default function devApiPlugin(): Plugin {
             return;
           }
 
+          // Manual correction to the leaderboard's duplicate-game
+          // grouping — see assignDupeKeys in scripts/build-leaderboard.mjs,
+          // which is the only thing that actually reads this file (on
+          // its next run, local or nightly). `action: null` removes the
+          // pair from whichever list it's currently in.
+          if (req.url === '/api/game-links') {
+            const body = JSON.parse(await parseBody(req));
+            const { a, b, action } = body as {
+              a: { platform: string; id: string };
+              b: { platform: string; id: string };
+              action: 'merge' | 'split' | null;
+            };
+
+            const validMember = (m: { platform?: string; id?: string }) =>
+              m && /^(steam|psn|xbox|ra)$/.test(m.platform ?? '') && m.id;
+            if (!validMember(a) || !validMember(b)) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'a and b must each have a valid platform and id' }));
+              return;
+            }
+
+            const keyA = `${a.platform}/${a.id}`;
+            const keyB = `${b.platform}/${b.id}`;
+            const pairKey: [string, string] = keyA < keyB ? [keyA, keyB] : [keyB, keyA];
+
+            const store = existsSync(gameLinksPath)
+              ? readJson(gameLinksPath) as { merges?: [string, string][]; splits?: [string, string][] }
+              : {};
+            const samePair = (p: [string, string]) => p[0] === pairKey[0] && p[1] === pairKey[1];
+            let merges = (store.merges ?? []).filter((p) => !samePair(p));
+            let splits = (store.splits ?? []).filter((p) => !samePair(p));
+
+            if (action === 'merge') merges.push(pairKey);
+            else if (action === 'split') splits.push(pairKey);
+
+            if (merges.length === 0 && splits.length === 0) {
+              if (existsSync(gameLinksPath)) unlinkSync(gameLinksPath);
+            } else {
+              if (!existsSync(overridesDir)) mkdirSync(overridesDir, { recursive: true });
+              // Sorted so the committed file has a stable order and a
+              // single link is a one-line diff.
+              merges = merges.sort((x, y) => (x[0] + x[1]).localeCompare(y[0] + y[1]));
+              splits = splits.sort((x, y) => (x[0] + x[1]).localeCompare(y[0] + y[1]));
+              writeJson(gameLinksPath, { merges, splits });
+            }
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true, merges, splits }));
+            return;
+          }
+
           if (req.url === '/api/publish') {
             const token = process.env.GITHUB_TOKEN;
             if (!token) {
@@ -790,6 +875,11 @@ export default function devApiPlugin(): Plugin {
               const repoPath = `${OVERRIDES_PREFIX}banned.json`;
               localOverridePaths.add(repoPath);
               filesToPush.push({ repoPath, localPath: bannedPath });
+            }
+            if (existsSync(gameLinksPath)) {
+              const repoPath = `${OVERRIDES_PREFIX}game-links.json`;
+              localOverridePaths.add(repoPath);
+              filesToPush.push({ repoPath, localPath: gameLinksPath });
             }
             if (existsSync(overridesDir)) {
               for (const platform of readdirSync(overridesDir)) {

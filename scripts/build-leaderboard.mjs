@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 // Precomputes the achievement leaderboard from the data the nightly
 // fetch already wrote — achievements.json plus the per-game shards —
@@ -28,6 +28,110 @@ const dataDir = process.env.DATA_DIR
   : resolve(__dirname, '..', 'public', 'data');
 const achievementsPath = resolve(dataDir, 'achievements.json');
 const leaderboardPath = resolve(dataDir, 'leaderboard.json');
+const gameLinksPath = resolve(dataDir, 'overrides', 'game-links.json');
+
+// Mirrors src/utils/achievementMatch.ts normalizeTitle exactly — the two
+// must stay in sync. Scripts can't import the .ts file directly, so this
+// is a deliberate duplicate rather than a shared module.
+const DIGIT_GLYPHS = {
+  'ⅰ': '1', 'ⅱ': '2', 'ⅲ': '3', 'ⅳ': '4', 'ⅴ': '5', 'ⅵ': '6',
+  'ⅶ': '7', 'ⅷ': '8', 'ⅸ': '9', 'ⅹ': '10', 'ⅺ': '11', 'ⅻ': '12',
+  '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+  '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+};
+
+function normalizeTitle(title) {
+  return title
+    .toLowerCase()
+    .replace(/^the\s+/, '')
+    .replace(/[®™©]/g, '')
+    .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹ⅰⅱⅲⅳⅴⅵⅶⅷⅸⅹⅺⅻ]/g, (ch) => DIGIT_GLYPHS[ch])
+    .replace(/[^a-z0-9]/g, '');
+}
+
+// Union-find over "platform/id" keys, used to group same-title games
+// (regardless of platform) into duplicate clusters — see buildDupeKeys.
+function makeUnionFind(keys) {
+  const parent = new Map(keys.map((k) => [k, k]));
+  function find(k) {
+    while (parent.get(k) !== k) {
+      parent.set(k, parent.get(parent.get(k)));
+      k = parent.get(k);
+    }
+    return k;
+  }
+  function union(a, b) {
+    const ra = find(a);
+    const rb = find(b);
+    if (ra !== rb) parent.set(ra, rb);
+  }
+  return { find, union };
+}
+
+// Games played on more than one platform (or under more than one ID on
+// the same platform — e.g. a disc release and its GFWL/Steam re-listing)
+// show up as separate rows with separate scores. Grouping them lets the
+// leaderboard view offer a "hide duplicates" toggle that keeps only the
+// highest-scoring member of each group. Matching is strict normalized-
+// title equality — deliberately not fuzzy, so e.g. "Final Fantasy VII"
+// and "Final Fantasy VII Remake" never collide — with a small manual
+// override file for the cases that need a human call either way:
+// public/data/overrides/game-links.json, written through the dev-only
+// /api/game-links route (see dev-api-plugin.ts) and published the same
+// way as banned.json.
+function assignDupeKeys(games) {
+  const keyOf = (g) => `${g.platform}/${g.id}`;
+  const byKey = new Map(games.map((g) => [keyOf(g), g]));
+  const keys = games.map(keyOf);
+
+  let links = { merges: [], splits: [] };
+  if (existsSync(gameLinksPath)) {
+    try {
+      links = JSON.parse(readFileSync(gameLinksPath, 'utf8'));
+    } catch {
+      // Malformed override file: proceed with title-matching alone
+      // rather than failing the whole nightly build over it.
+    }
+  }
+  const splitPairs = new Set(
+    (links.splits ?? []).map(([a, b]) => [a, b].sort().join('|')),
+  );
+
+  const uf = makeUnionFind(keys);
+
+  const buckets = new Map();
+  for (const g of games) {
+    const norm = normalizeTitle(g.title);
+    const list = buckets.get(norm) ?? [];
+    list.push(keyOf(g));
+    buckets.set(norm, list);
+  }
+  for (const bucket of buckets.values()) {
+    for (let i = 0; i < bucket.length; i++) {
+      for (let j = i + 1; j < bucket.length; j++) {
+        const pairKey = [bucket[i], bucket[j]].sort().join('|');
+        if (splitPairs.has(pairKey)) continue;
+        uf.union(bucket[i], bucket[j]);
+      }
+    }
+  }
+
+  // Manual merges always win, even over a split on the same pair — a
+  // merge is a deliberate, more specific action than a split.
+  for (const [a, b] of links.merges ?? []) {
+    if (byKey.has(a) && byKey.has(b)) uf.union(a, b);
+  }
+
+  const groupSize = new Map();
+  for (const k of keys) {
+    const root = uf.find(k);
+    groupSize.set(root, (groupSize.get(root) ?? 0) + 1);
+  }
+  for (const k of keys) {
+    const root = uf.find(k);
+    byKey.get(k).dupeKey = groupSize.get(root) >= 2 ? root : null;
+  }
+}
 
 const PLATFORMS = ['steam', 'psn', 'xbox', 'ra'];
 const BASE_POINTS = 10;
@@ -78,7 +182,14 @@ function weightedCompletion(platform, all) {
   return earned / total;
 }
 
-function main() {
+// The full, unsliced game list (every earned game with a positive score,
+// deduped) plus rarest achievements — exported so dev-api-plugin.ts can
+// reuse it for the "Review duplicates" overlay. leaderboard.json itself
+// only ships each platform's top N (topPerPlatform, below), which is
+// fine for the public leaderboard but means a real duplicate can go
+// invisible to that review tool if one side scores too low to make the
+// cut — this gives it the full picture instead.
+export function computeLeaderboardData() {
   const summary = JSON.parse(readFileSync(achievementsPath, 'utf8'));
   const games = [];
   const rarestAchievements = [];
@@ -133,6 +244,13 @@ function main() {
 
   games.sort((a, b) => b.score - a.score);
   rarestAchievements.sort((a, b) => a.rarity - b.rarity);
+  assignDupeKeys(games);
+
+  return { games, rarestAchievements };
+}
+
+function main() {
+  const { games, rarestAchievements } = computeLeaderboardData();
 
   const output = {
     updatedAt: new Date().toISOString(),
@@ -144,4 +262,10 @@ function main() {
   console.log(`Wrote ${output.games.length} of ${games.length} scored games and ${output.rarestAchievements.length} of ${rarestAchievements.length} rarest achievements to ${leaderboardPath}`);
 }
 
-main();
+// Only run when executed directly (`node build-leaderboard.mjs` / npm
+// script) — not when dev-api-plugin.ts imports computeLeaderboardData,
+// which would otherwise re-run the whole build (and overwrite
+// leaderboard.json) as a side effect of every dev-server request.
+// process.argv[1] is unset in some invocation shapes (e.g. `node -e`),
+// so guard rather than let pathToFileURL throw on undefined.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();

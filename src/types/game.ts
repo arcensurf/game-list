@@ -150,6 +150,14 @@ export interface LeaderboardGame {
   /** Percent, 1 decimal. Weighted by achievement value where the platform publishes one — see build-leaderboard.mjs. */
   completion: number;
   score: number;
+  /**
+   * Shared by every game build-leaderboard.mjs considers the same
+   * title (strict normalized-title match, plus manual overrides in
+   * public/data/overrides/game-links.json) — null when this game has
+   * no duplicate. Lets the leaderboard view collapse a group down to
+   * its highest-scoring member.
+   */
+  dupeKey: string | null;
 }
 
 export interface LeaderboardAchievement {

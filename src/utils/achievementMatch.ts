@@ -31,11 +31,27 @@ export const PLATFORM_FAMILIES: Record<'steam' | 'psn' | 'xbox', Set<string>> = 
   ]),
 };
 
+// Some platforms style a sequel number as a single Unicode glyph rather
+// than a plain digit — PSN's own trophy list has "FINAL FANTASY Ⅱ"
+// (U+2172, not the letters "I"+"I"), and Xbox has "Geometry Wars
+// Evolved²" (the superscript-two glyph, U+00B2). Left alone, the final
+// [^a-z0-9] strip below deletes those entirely, silently collapsing
+// e.g. "FINAL FANTASY Ⅱ" down to the same string as base "FINAL
+// FANTASY" — so transliterate the ones that show up in practice (Roman
+// numerals i-xii, superscript 0-9) to plain digits first instead.
+const DIGIT_GLYPHS: Record<string, string> = {
+  'ⅰ': '1', 'ⅱ': '2', 'ⅲ': '3', 'ⅳ': '4', 'ⅴ': '5', 'ⅵ': '6',
+  'ⅶ': '7', 'ⅷ': '8', 'ⅸ': '9', 'ⅹ': '10', 'ⅺ': '11', 'ⅻ': '12',
+  '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+  '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+};
+
 export function normalizeTitle(title: string): string {
   return title
     .toLowerCase()
     .replace(/^the\s+/, '')
     .replace(/[®™©]/g, '')
+    .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹ⅰⅱⅲⅳⅴⅵⅶⅷⅸⅹⅺⅻ]/g, (ch) => DIGIT_GLYPHS[ch])
     .replace(/[^a-z0-9]/g, '');
 }
 
