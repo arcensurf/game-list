@@ -171,10 +171,9 @@
 /* ───────────────────────── Foil variant ─────────────────────────
    Alternative to the compact banner. The cover fills the full card
    (no reserved top strip), and a subtle holographic sheen plays over
-   the cover on hover — like a foil trading card. A small gold star
-   in the top-right corner carries the "this one's special" signal
-   at rest. Gold border + pulse are retained but softened so the foil
-   sheen has room to read. */
+   the cover on hover — like a foil trading card. The frame and the
+   sheen carry the "this one's special" signal on their own; there's
+   no badge or marker on the card besides them. */
 .game-card.game-of-games--foil {
   aspect-ratio: 2 / 3;
   position: relative;
