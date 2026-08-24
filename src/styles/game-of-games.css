@@ -24,6 +24,82 @@
   initial-value: 1;
 }
 
+/* Per-context dial for how hot the ray fan burns. A full-bleed cover
+   can take the rays at full strength; a thin strip with no artwork
+   under it (the leaderboard's completed rows) needs them far quieter.
+   @property so it interpolates alongside --gog-foil-strength. */
+@property --gog-ray-alpha {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.14;
+}
+
+/* The three pieces of the foil that carry no geometry of their own —
+   they're pure angular/radial math around the light source, so the
+   shape of the thing wearing them doesn't matter. Hoisted to :root so
+   the GoG cards below and the leaderboard's completed rows (see
+   leaderboard.css) draw the same foil instead of keeping two copies of
+   24 hand-tuned stops in sync. Each var() inside resolves against the
+   element using it, so a row's own strength/alpha still apply. */
+:root {
+  /* Iridescent frame: bright spot anchored to the light source, so as
+     it drifts the frame's highlight travels around the border. */
+  --gog-border-conic: conic-gradient(
+    from 0deg at var(--gog-light-x) var(--gog-light-y),
+    rgba(255, 110, 110, 0.85)   0deg,
+    rgba(255, 200, 110, 0.85)  60deg,
+    rgba(200, 255, 130, 0.85) 120deg,
+    rgba(110, 230, 200, 0.85) 180deg,
+    rgba(130, 170, 255, 0.85) 240deg,
+    rgba(210, 130, 255, 0.85) 300deg,
+    rgba(255, 110, 110, 0.85) 360deg
+  );
+
+  /* 24 rainbow stops at irregular angular gaps (11-19deg) so ray widths
+     vary organically. Four full spectrum cycles cover the 360deg so
+     every direction from the source is lit with a different hue — this
+     is what creates the "many narrow pointed rays" look real foil has
+     under a point light. */
+  --gog-rays: conic-gradient(
+    from 0deg at var(--gog-light-x) var(--gog-light-y),
+    rgba(255, 110, 110, calc(var(--gog-foil-strength) * var(--gog-ray-alpha)))   0deg,
+    rgba(255, 200, 110, calc(var(--gog-foil-strength) * var(--gog-ray-alpha)))  13deg,
+    rgba(200, 255, 130, calc(var(--gog-foil-strength) * var(--gog-ray-alpha)))  28deg,
+    rgba(110, 230, 200, calc(var(--gog-foil-strength) * var(--gog-ray-alpha)))  41deg,
+    rgba(130, 170, 255, calc(var(--gog-foil-strength) * var(--gog-ray-alpha)))  58deg,
+    rgba(210, 130, 255, calc(var(--gog-foil-strength) * var(--gog-ray-alpha)))  74deg,
+    rgba(255, 110, 110, calc(var(--gog-foil-strength) * var(--gog-ray-alpha)))  92deg,
+    rgba(255, 200, 110, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 107deg,
+    rgba(200, 255, 130, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 125deg,
+    rgba(110, 230, 200, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 139deg,
+    rgba(130, 170, 255, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 156deg,
+    rgba(210, 130, 255, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 172deg,
+    rgba(255, 110, 110, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 191deg,
+    rgba(255, 200, 110, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 205deg,
+    rgba(200, 255, 130, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 223deg,
+    rgba(110, 230, 200, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 238deg,
+    rgba(130, 170, 255, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 254deg,
+    rgba(210, 130, 255, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 272deg,
+    rgba(255, 110, 110, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 287deg,
+    rgba(255, 200, 110, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 303deg,
+    rgba(200, 255, 130, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 319deg,
+    rgba(110, 230, 200, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 334deg,
+    rgba(130, 170, 255, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 349deg,
+    rgba(210, 130, 255, calc(var(--gog-foil-strength) * var(--gog-ray-alpha))) 360deg
+  );
+
+  /* Hides the conic's vertex — the point where all rays mathematically
+     meet would otherwise read as a mechanical "X" that moves with the
+     light source. Masking out a soft disc at the source dissolves the
+     rays before they converge. */
+  --gog-vertex-mask: radial-gradient(
+    circle at var(--gog-light-x) var(--gog-light-y),
+    rgba(0, 0, 0, 0)    0%,
+    rgba(0, 0, 0, 0.4)  8%,
+    rgba(0, 0, 0, 1)   22%
+  );
+}
+
 /* Game of Games */
 .game-card.game-of-games {
   border: 2px solid transparent;
@@ -117,16 +193,7 @@
      interior rays instead of looking like a separate gold frame. */
   background-image:
     linear-gradient(var(--bg-card), var(--bg-card)),
-    conic-gradient(
-      from 0deg at var(--gog-light-x) var(--gog-light-y),
-      rgba(255, 110, 110, 0.85)   0deg,
-      rgba(255, 200, 110, 0.85)  60deg,
-      rgba(200, 255, 130, 0.85) 120deg,
-      rgba(110, 230, 200, 0.85) 180deg,
-      rgba(130, 170, 255, 0.85) 240deg,
-      rgba(210, 130, 255, 0.85) 300deg,
-      rgba(255, 110, 110, 0.85) 360deg
-    );
+    var(--gog-border-conic);
   /* Drop the gold pulse — the foil already signals "this one's
      special," and a gold box-shadow glow layered on top reads as
      chintzy. The static gold border from .game-card.game-of-games
@@ -181,38 +248,8 @@
   pointer-events: none;
   z-index: 1;
   background:
-    /* Primary: 24 rainbow stops at irregular angular gaps (11-19°)
-       so ray widths vary organically. Four full spectrum cycles
-       cover the 360° so every direction from the source is lit
-       with a different hue — this is what creates the "many narrow
-       pointed rays" look real foil has under a point light. */
-    conic-gradient(
-      from 0deg at var(--gog-light-x) var(--gog-light-y),
-      rgba(255, 110, 110, calc(var(--gog-foil-strength) * 0.14))   0deg,
-      rgba(255, 200, 110, calc(var(--gog-foil-strength) * 0.14))  13deg,
-      rgba(200, 255, 130, calc(var(--gog-foil-strength) * 0.14))  28deg,
-      rgba(110, 230, 200, calc(var(--gog-foil-strength) * 0.14))  41deg,
-      rgba(130, 170, 255, calc(var(--gog-foil-strength) * 0.14))  58deg,
-      rgba(210, 130, 255, calc(var(--gog-foil-strength) * 0.14))  74deg,
-      rgba(255, 110, 110, calc(var(--gog-foil-strength) * 0.14))  92deg,
-      rgba(255, 200, 110, calc(var(--gog-foil-strength) * 0.14)) 107deg,
-      rgba(200, 255, 130, calc(var(--gog-foil-strength) * 0.14)) 125deg,
-      rgba(110, 230, 200, calc(var(--gog-foil-strength) * 0.14)) 139deg,
-      rgba(130, 170, 255, calc(var(--gog-foil-strength) * 0.14)) 156deg,
-      rgba(210, 130, 255, calc(var(--gog-foil-strength) * 0.14)) 172deg,
-      rgba(255, 110, 110, calc(var(--gog-foil-strength) * 0.14)) 191deg,
-      rgba(255, 200, 110, calc(var(--gog-foil-strength) * 0.14)) 205deg,
-      rgba(200, 255, 130, calc(var(--gog-foil-strength) * 0.14)) 223deg,
-      rgba(110, 230, 200, calc(var(--gog-foil-strength) * 0.14)) 238deg,
-      rgba(130, 170, 255, calc(var(--gog-foil-strength) * 0.14)) 254deg,
-      rgba(210, 130, 255, calc(var(--gog-foil-strength) * 0.14)) 272deg,
-      rgba(255, 110, 110, calc(var(--gog-foil-strength) * 0.14)) 287deg,
-      rgba(255, 200, 110, calc(var(--gog-foil-strength) * 0.14)) 303deg,
-      rgba(200, 255, 130, calc(var(--gog-foil-strength) * 0.14)) 319deg,
-      rgba(110, 230, 200, calc(var(--gog-foil-strength) * 0.14)) 334deg,
-      rgba(130, 170, 255, calc(var(--gog-foil-strength) * 0.14)) 349deg,
-      rgba(210, 130, 255, calc(var(--gog-foil-strength) * 0.14)) 360deg
-    ),
+    /* Primary: the shared ray fan (see :root at the top). */
+    var(--gog-rays),
     /* Secondary hotspot: concentrates chroma near the light source
        and fades with distance. Gives the foil a sense of depth —
        rays feel "brighter near the source" rather than uniform. */
@@ -226,24 +263,11 @@
      base's saturation and luminance — saturated covers stay
      saturated, we just shift their hue in rainbow rays. */
   mix-blend-mode: hue;
-  /* Hide the conic's vertex — the point where all rays mathematically
-     meet would otherwise read as a mechanical "X" that moves with
-     the light source. Masking out a soft disc at the source dissolves
-     the rays before they converge; the shine layer above fills that
-     void with a bright-white "sun" so the eye reads a glowing source
-     rather than a geometric center. */
-  mask-image: radial-gradient(
-    circle at var(--gog-light-x) var(--gog-light-y),
-    rgba(0, 0, 0, 0)    0%,
-    rgba(0, 0, 0, 0.4)  8%,
-    rgba(0, 0, 0, 1)   22%
-  );
-  -webkit-mask-image: radial-gradient(
-    circle at var(--gog-light-x) var(--gog-light-y),
-    rgba(0, 0, 0, 0)    0%,
-    rgba(0, 0, 0, 0.4)  8%,
-    rgba(0, 0, 0, 1)   22%
-  );
+  /* Dissolve the rays before they converge (see --gog-vertex-mask);
+     the shine layer below fills the void it leaves with a bright-white
+     "sun" so the eye reads a glowing source, not a geometric center. */
+  mask-image: var(--gog-vertex-mask);
+  -webkit-mask-image: var(--gog-vertex-mask);
 }
 
 /* Shine layer — specular highlight from the SAME light source as

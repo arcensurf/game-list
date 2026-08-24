@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import type React from 'react';
 import { useLeaderboard } from '../hooks/useLeaderboard';
 import { useGameSearchIndex } from '../hooks/useGameSearchIndex';
 import { pickerCoverUrl, steamCoverFallback } from '../utils/pickerCover';
@@ -402,6 +403,10 @@ export default function LeaderboardView() {
               <li
                 key={`${g.platform}/${g.id}`}
                 className={`leaderboard-row${complete ? ' leaderboard-row--complete' : ''}`}
+                // Staggers the foil's light-drift so a run of
+                // completions doesn't shimmer in lockstep; see
+                // .leaderboard-row--complete in leaderboard.css.
+                style={complete ? ({ ['--row-index' as string]: i } as React.CSSProperties) : undefined}
                 role="button"
                 tabIndex={0}
                 onClick={() => setModalTarget({ platform: g.platform, id: g.id, title: g.title, dupeKey: g.dupeKey })}

@@ -198,13 +198,74 @@
   outline: none;
 }
 
+/* Completions wear the Game of Games foil rather than a gold tint of
+   their own — a 100% run is the same "this one's special" signal a GoG
+   card carries, so it gets the same light source, the same drift, and
+   the same iridescent frame (all defined in game-of-games.css). Only
+   the geometry changes: a row is a thin strip, so the rainbow rides the
+   1px border and pools behind the content instead of playing across
+   cover art, and --gog-ray-alpha drops well under the card's value
+   because there's no busy artwork here to absorb it. */
 .leaderboard-row--complete {
-  border-color: var(--accent-dim);
-  background: linear-gradient(
-    90deg,
-    rgba(var(--accent-glow), 0.12),
-    rgba(var(--accent-glow), 0.03) 40%
-  );
+  position: relative;
+  /* Makes the row a stacking context so the ::before below — parked at
+     z-index -1, above the row's own background but under its text —
+     blends against that background and nothing further back. */
+  isolation: isolate;
+  --gog-foil-strength: 1.6;
+  --gog-ray-alpha: 0.05;
+  border-color: transparent;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-image:
+    linear-gradient(var(--bg-card), var(--bg-card)),
+    var(--gog-border-conic);
+  animation: gog-light-drift 32s linear infinite;
+  /* Scatter the phase so a run of completions doesn't shimmer in
+     lockstep — same trick the card grid plays with --card-index. */
+  animation-delay: calc(var(--row-index, 0) * -2.5s);
+  transition: --gog-foil-strength 0.35s ease;
+}
+
+.leaderboard-row--complete::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 5px; /* the row's 6px, less its 1px border */
+  background:
+    var(--gog-rays),
+    /* Hotspot sized for a strip: narrow across, tall enough to reach
+       both edges, so the chroma pools around the source instead of
+       banding across the whole row. */
+    radial-gradient(
+      ellipse 45% 160% at var(--gog-light-x) var(--gog-light-y),
+      rgba(255, 220, 140, calc(var(--gog-foil-strength) * 0.10))  0%,
+      rgba(210, 130, 255, calc(var(--gog-foil-strength) * 0.05)) 45%,
+      rgba(110, 200, 230, 0) 85%
+    );
+  /* `screen` rather than the cards' `hue`: hue preserves the backdrop's
+     saturation, and a flat --bg-card plate has almost none to work
+     with, so it would come out grey. Screening the rays onto the dark
+     plate reads as light catching the surface. */
+  mix-blend-mode: screen;
+  mask-image: var(--gog-vertex-mask);
+  -webkit-mask-image: var(--gog-vertex-mask);
+}
+
+/* The base row's hover swaps in an accent border, which would paint
+   over the foil frame — completions answer the hover by catching more
+   light instead. */
+.leaderboard-row--complete:hover,
+.leaderboard-row--complete:focus-visible {
+  --gog-foil-strength: 2.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leaderboard-row--complete {
+    animation: none;
+  }
 }
 
 .leaderboard-rank {
@@ -279,8 +340,10 @@
   white-space: nowrap;
 }
 
+/* Neutral, not gold: the foil around the row is already carrying the
+   colour, and a gold line inside a rainbow frame muddies both. */
 .leaderboard-completion--complete {
-  color: var(--accent-light);
+  color: var(--text);
 }
 
 .leaderboard-platform {
