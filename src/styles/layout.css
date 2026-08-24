@@ -89,29 +89,6 @@
   background: var(--border);
 }
 
-.stats-trigger {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
-  background: none;
-  border: none;
-  color: var(--accent);
-  cursor: pointer;
-  transition: color var(--transition);
-}
-
-.stats-trigger svg {
-  fill: currentColor;
-}
-
-.stats-trigger:hover {
-  color: var(--accent-light);
-}
-
 /* Games of Games filter chip. Marked with the foil itself rather than an
    icon — the iridescent frame is how a GoG card announces itself (see
    game-of-games.css), so the control that summons them wears the same

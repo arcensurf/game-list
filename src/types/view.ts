@@ -5,8 +5,8 @@ export type View = 'list' | 'backlog' | 'stats' | 'picker' | 'leaderboard';
 // The leaderboard is read-only and derived from already-public data, so
 // unlike the picker it ships everywhere.
 export const VIEW_ORDER: View[] = import.meta.env.DEV
-  ? ['list', 'backlog', 'leaderboard', 'picker']
-  : ['list', 'backlog', 'leaderboard'];
+  ? ['list', 'backlog', 'leaderboard', 'stats', 'picker']
+  : ['list', 'backlog', 'leaderboard', 'stats'];
 
 const VIEW_KEY = 'game-list:view';
 

@@ -1,7 +1,9 @@
 import type { PlatformStat } from '../hooks/useGames';
+import { useTimeline } from '../hooks/useTimeline';
 import PlatformBadge from './PlatformBadge';
+import AchievementYears from './AchievementYears';
 
-const TOP_COUNT = 10;
+const TOP_COUNT = 5;
 
 export default function StatsView({
   stats,
@@ -10,7 +12,7 @@ export default function StatsView({
 }) {
   const top = stats.slice(0, TOP_COUNT);
   const rest = stats.slice(TOP_COUNT);
-  const maxCount = top[0]?.count || 1;
+  const { data: timeline } = useTimeline();
 
   return (
     <div className="stats-view">
@@ -19,19 +21,11 @@ export default function StatsView({
           <h2>Games Per Platform</h2>
         </div>
       </div>
-      <div className="stats-list">
+      <div className="stats-platform-top">
         {top.map(({ platform, count }) => (
-          <div key={platform} className="stats-row">
-            <div className="stats-row-label">
-              <PlatformBadge platform={platform} />
-            </div>
-            <span className="stats-row-count">{count}</span>
-            <div className="stats-bar-track">
-              <div
-                className="stats-bar-fill"
-                style={{ width: `${(count / maxCount) * 100}%` }}
-              />
-            </div>
+          <div key={platform} className="stats-platform-top-item">
+            <span className="stats-platform-top-count">{count}</span>
+            <PlatformBadge platform={platform} />
           </div>
         ))}
       </div>
@@ -45,6 +39,7 @@ export default function StatsView({
           ))}
         </div>
       )}
+      {timeline && <AchievementYears months={timeline.months} years={timeline.years} />}
     </div>
   );
 }

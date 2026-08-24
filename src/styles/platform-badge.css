@@ -9,6 +9,12 @@
   white-space: nowrap;
 }
 
+/* No icon for this platform (CD-i, Game & Watch) — drop the space
+   reserved for one instead of leaving the name off-center. */
+.platform-badge--no-icon {
+  padding-left: 0.4rem;
+}
+
 .platform-badge-icon {
   position: absolute;
   left: -0.2rem;

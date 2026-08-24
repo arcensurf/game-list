@@ -1,70 +1,6 @@
-/* Inline stats view */
+/* Full-page stats tab */
 .stats-view {
   padding: 2rem 0;
-}
-
-/* Modal-style overlay launched from the masthead trigger */
-.stats-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  animation: stats-overlay-fade 0.2s ease-out;
-}
-
-.stats-overlay-panel {
-  position: relative;
-  width: min(560px, 100%);
-  max-height: calc(100vh - 3rem);
-  overflow-y: auto;
-  padding: 1.5rem 2rem 2rem;
-  background: var(--bg-card, rgba(28, 25, 23, 0.95));
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-  animation: stats-overlay-rise 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.stats-overlay-panel .stats-view {
-  padding: 0.5rem 0 0;
-}
-
-.stats-overlay-close {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
-  width: 2rem;
-  height: 2rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  line-height: 1;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: color var(--transition);
-}
-
-.stats-overlay-close:hover {
-  color: var(--accent-light);
-}
-
-@keyframes stats-overlay-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes stats-overlay-rise {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Stats */
@@ -83,48 +19,35 @@
   color: var(--text);
 }
 
-.stats-list {
+/* Top 5 — a stat bar, not a card grid: hairline rules do the framing,
+   the numbers do the talking. Matches the masthead divider / system
+   heading rule treatment used elsewhere rather than boxing anything. */
+.stats-platform-top {
+  display: flex;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.stats-platform-top-item {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-}
-
-.stats-row {
-  display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  padding: 1.1rem 0.5rem;
+  border-left: 1px solid var(--border);
 }
 
-.stats-row-label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-width: 180px;
-  flex-shrink: 0;
+.stats-platform-top-item:first-child {
+  border-left: none;
 }
 
-.stats-row-count {
+.stats-platform-top-count {
   font-family: 'Share Tech', sans-serif;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-weight: 600;
-  min-width: 1.75rem;
-  text-align: right;
-}
-
-.stats-bar-track {
-  flex: 1;
-  height: 6px;
-  background: var(--bg-card);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.stats-bar-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 3px;
-  transition: width 0.3s ease;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
 }
 
 .stats-rest {
@@ -147,4 +70,370 @@
   font-size: 0.8rem;
   color: var(--text-muted);
   font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .stats-platform-top {
+    flex-wrap: wrap;
+  }
+
+  .stats-platform-top-item {
+    flex: 1 1 33%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .stats-platform-top-item:nth-child(-n + 3) {
+    border-top: none;
+  }
+}
+
+/* Achievements By Year — the bar chart is the navigation (click a year),
+   the recap below is a single hero + supporting detail for whichever
+   year is selected, not a repeating list. */
+.stats-years {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.stats-years-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stats-years h3 {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.stats-metric-toggle {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.stats-metric-tab {
+  font-family: 'Share Tech', sans-serif;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.stats-metric-tab--active {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.stats-metric-tab:not(.stats-metric-tab--active):hover {
+  color: var(--text);
+}
+
+.stats-year-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.stats-year-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  max-width: 3rem;
+  cursor: pointer;
+}
+
+.stats-year-bar-count {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.stats-year-bar {
+  display: flex;
+  flex-direction: column-reverse;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-card);
+  transition: outline-color var(--transition);
+  outline: 1px solid transparent;
+  outline-offset: 1px;
+}
+
+.stats-year-bar-col:hover .stats-year-bar {
+  outline-color: var(--border);
+}
+
+.stats-year-bar-col--selected .stats-year-bar {
+  outline-color: var(--accent);
+}
+
+.stats-year-bar-segment {
+  width: 100%;
+}
+
+.stats-year-bar-label {
+  margin-top: 0.4rem;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.stats-year-bar-col--selected .stats-year-bar-label {
+  color: var(--accent-light);
+  font-weight: 700;
+}
+
+/* Recap — one year at a time */
+.stats-year-recap {
+  margin-top: 2rem;
+}
+
+.stats-year-recap-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.stats-year-recap-year {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.stats-year-recap-totals {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+}
+
+/* Quiet supporting strip — when in the year it happened, not what.
+   Neutral (not accent-colored) and labeled, so it reads as structure
+   rather than another chart competing for attention. */
+.stats-year-spark-block {
+  margin-bottom: 1.75rem;
+}
+
+.stats-year-spark-caption {
+  display: block;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.stats-year-spark {
+  display: flex;
+  gap: 3px;
+}
+
+.stats-year-spark-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stats-year-spark-track {
+  width: 100%;
+  height: 22px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.stats-year-spark-bar {
+  width: 100%;
+  min-height: 2px;
+  background: var(--text-muted);
+  opacity: 0.4;
+}
+
+.stats-year-spark-label {
+  margin-top: 0.3rem;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* Hero — the year's top game, in the same blurred-cover-wash language
+   the backlog bands use (see backlog.css), so this reads as a moment
+   from the same collection rather than a new pattern. */
+.stats-year-hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 90px;
+  padding: 1rem 1.25rem;
+  overflow: hidden;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.stats-year-hero-art {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.4;
+  filter: blur(30px) saturate(1.4);
+  transform: scale(1.3);
+  pointer-events: none;
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.35) 30%, rgba(0, 0, 0, 1) 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.35) 30%, rgba(0, 0, 0, 1) 100%);
+}
+
+.stats-year-hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.stats-year-hero-label {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-light);
+}
+
+.stats-year-hero-title {
+  font-family: 'Share Tech', sans-serif;
+  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+  letter-spacing: 0.02em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.stats-year-hero-count {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.stats-year-more-games {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stats-year-more-game {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.stats-year-more-rank {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  min-width: 1rem;
+}
+
+.stats-year-more-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats-year-more-count {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* Rarest pulls — three of the earlier single-pull callout, side by
+   side rather than stacked. */
+.stats-year-rarest-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  margin-top: 1.75rem;
+}
+
+.stats-year-rarest {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.stats-year-rarest-rarity {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent-light);
+  line-height: 1;
+  flex-shrink: 0;
+  /* Fixed width + tabular digits so switching years — "0.8%" vs "12%"
+     vs "100%" — never shifts the body text next to it. */
+  min-width: 4.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-year-rarest-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.stats-year-rarest-label {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.stats-year-rarest-name {
+  font-size: 0.95rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats-year-rarest-game {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

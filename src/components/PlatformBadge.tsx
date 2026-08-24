@@ -6,7 +6,7 @@ export default function PlatformBadge({ platform }: { platform: string }) {
   const lightColor = getLightColor(platform);
 
   return (
-    <span className="platform-badge">
+    <span className={`platform-badge${icon ? '' : ' platform-badge--no-icon'}`}>
       {icon && (
         <span
           className="platform-badge-icon"

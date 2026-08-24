@@ -178,6 +178,67 @@ export interface LeaderboardData {
   rarestAchievements: LeaderboardAchievement[];
 }
 
+// ── Achievement timeline ──
+//
+// Precomputed by scripts/build-timeline.mjs from achievements.json +
+// every shard, and published as public/data/timeline.json. Buckets
+// every earned achievement with a known earnedAt date (not every
+// platform publishes one for every achievement — see the script) by
+// month and by year.
+export interface TimelinePlatformStat {
+  count: number;
+  score: number;
+}
+
+export interface TimelineMonth {
+  /** "YYYY-MM" */
+  month: string;
+  count: number;
+  score: number;
+  platforms: Partial<Record<'steam' | 'psn' | 'xbox' | 'ra', TimelinePlatformStat>>;
+}
+
+export interface TimelineYearTopGame {
+  platform: 'steam' | 'psn' | 'xbox' | 'ra';
+  id: string;
+  title: string;
+  icon: string | null;
+  /** Achievements earned in this game during this year specifically. */
+  count: number;
+  score: number;
+}
+
+export interface TimelineYearRarestAchievement {
+  platform: 'steam' | 'psn' | 'xbox' | 'ra';
+  gameId: string;
+  gameTitle: string;
+  icon: string | null;
+  name: string;
+  rarity: number;
+  earnedAt: string;
+}
+
+export interface TimelineYear {
+  year: number;
+  count: number;
+  score: number;
+  platforms: Partial<Record<'steam' | 'psn' | 'xbox' | 'ra', TimelinePlatformStat>>;
+  /** Up to 10, ranked by achievements earned that year (ties by score). */
+  topGamesByCount: TimelineYearTopGame[];
+  /** Up to 10, ranked by points scored that year (ties by count) — an independent ranking, not a re-sort of topGamesByCount. */
+  topGamesByScore: TimelineYearTopGame[];
+  /** Up to 3 rarest achievements earned that year, sorted rarest first. Empty if none had a published rarity. */
+  rarestAchievements: TimelineYearRarestAchievement[];
+}
+
+export interface TimelineData {
+  updatedAt: string;
+  /** Sorted ascending, months with zero earned achievements omitted. */
+  months: TimelineMonth[];
+  /** Sorted ascending by year. */
+  years: TimelineYear[];
+}
+
 export interface GameWithCover extends Game {
   coverUrl: string | null;
   achievements: GameAchievements | null;

@@ -1,0 +1,221 @@
+import { useMemo, useState } from 'react';
+import type { TimelineMonth, TimelineYear, TimelineYearTopGame } from '../types/game';
+import { ACHIEVEMENT_PLATFORM_COLORS } from '../utils/platformColors';
+
+const PLATFORM_ORDER = ['steam', 'psn', 'xbox', 'ra'] as const;
+const YEAR_BAR_HEIGHT = 90;
+const RAREST_LABELS = ['Rarest Pull', 'Second Rarest Pull', 'Third Rarest Pull'];
+
+type Metric = 'achievements' | 'points';
+
+function fmtScore(score: number): string {
+  return Math.round(score).toLocaleString();
+}
+
+function YearBars({
+  years,
+  selectedYear,
+  metric,
+  onSelect,
+}: {
+  years: TimelineYear[];
+  selectedYear: number | null;
+  metric: Metric;
+  onSelect: (year: number) => void;
+}) {
+  const value = (v: { count: number; score: number }) => (metric === 'points' ? v.score : v.count);
+  const maxValue = Math.max(1, ...years.map((y) => value(y)));
+
+  return (
+    <div className="stats-year-bars">
+      {years.map((y) => (
+        <div
+          key={y.year}
+          className={`stats-year-bar-col${y.year === selectedYear ? ' stats-year-bar-col--selected' : ''}`}
+          title={`${y.year}: ${y.count} achievement${y.count === 1 ? '' : 's'}, ${y.score.toFixed(0)} pts`}
+          onClick={() => onSelect(y.year)}
+          role="button"
+        >
+          <span className="stats-year-bar-count">
+            {metric === 'points' ? fmtScore(y.score) : y.count}
+          </span>
+          <div className="stats-year-bar" style={{ height: YEAR_BAR_HEIGHT }}>
+            {PLATFORM_ORDER.map((platform) => {
+              const stat = y.platforms[platform];
+              if (!stat || stat.count === 0) return null;
+              return (
+                <div
+                  key={platform}
+                  className="stats-year-bar-segment"
+                  style={{
+                    height: `${(value(stat) / maxValue) * YEAR_BAR_HEIGHT}px`,
+                    background: ACHIEVEMENT_PLATFORM_COLORS[platform],
+                  }}
+                />
+              );
+            })}
+          </div>
+          <span className="stats-year-bar-label">{y.year}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+const MONTH_INITIALS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+
+function MonthSparkline({ months, metric }: { months: TimelineMonth[]; metric: Metric }) {
+  const value = (m: TimelineMonth) => (metric === 'points' ? m.score : m.count);
+  const maxValue = Math.max(1, ...months.map(value));
+
+  return (
+    <div className="stats-year-spark-block">
+      <span className="stats-year-spark-caption">Month by Month</span>
+      <div className="stats-year-spark">
+        {months.map((m, i) => (
+          <div
+            key={m.month}
+            className="stats-year-spark-col"
+            title={`${MONTH_NAMES[i]}: ${m.count} achievement${m.count === 1 ? '' : 's'}, ${m.score.toFixed(0)} pts`}
+          >
+            <div className="stats-year-spark-track">
+              <div
+                className="stats-year-spark-bar"
+                style={{ height: `${(value(m) / maxValue) * 100}%` }}
+              />
+            </div>
+            <span className="stats-year-spark-label">{MONTH_INITIALS[i]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function YearRecap({
+  year,
+  months,
+  metric,
+}: {
+  year: TimelineYear;
+  months: TimelineMonth[];
+  metric: Metric;
+}) {
+  const topGames: TimelineYearTopGame[] =
+    metric === 'points' ? year.topGamesByScore : year.topGamesByCount;
+  const [hero, ...rest] = topGames;
+  const { rarestAchievements } = year;
+  const gameValue = (g: TimelineYearTopGame) => (metric === 'points' ? fmtScore(g.score) : g.count);
+
+  return (
+    <div className="stats-year-recap">
+      <div className="stats-year-recap-header">
+        <span className="stats-year-recap-year">{year.year}</span>
+        <span className="stats-year-recap-totals">
+          {year.count} achievements &middot; {fmtScore(year.score)} pts
+        </span>
+      </div>
+
+      <MonthSparkline months={months} metric={metric} />
+
+      {hero && (
+        <div className="stats-year-hero">
+          {hero.icon && (
+            <img className="stats-year-hero-art" src={hero.icon} alt="" aria-hidden="true" loading="lazy" />
+          )}
+          <div className="stats-year-hero-content">
+            <span className="stats-year-hero-label">Top Game</span>
+            <span className="stats-year-hero-title">{hero.title}</span>
+          </div>
+          <span className="stats-year-hero-count">{gameValue(hero)}</span>
+        </div>
+      )}
+
+      {rest.length > 0 && (
+        <ol className="stats-year-more-games">
+          {rest.map((g, i) => (
+            <li key={`${g.platform}/${g.id}`} className="stats-year-more-game">
+              <span className="stats-year-more-rank">{i + 2}</span>
+              <span className="stats-year-more-title">{g.title}</span>
+              <span className="stats-year-more-count">{gameValue(g)}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      {rarestAchievements.length > 0 && (
+        <div className="stats-year-rarest-group">
+          {rarestAchievements.map((r, i) => (
+            <div key={i} className="stats-year-rarest">
+              <span className="stats-year-rarest-rarity">{r.rarity}%</span>
+              <div className="stats-year-rarest-body">
+                <span className="stats-year-rarest-label">{RAREST_LABELS[i] ?? 'Rarest Pull'}</span>
+                <span className="stats-year-rarest-name">{r.name}</span>
+                <span className="stats-year-rarest-game">{r.gameTitle}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function AchievementYears({
+  months,
+  years,
+}: {
+  months: TimelineMonth[];
+  years: TimelineYear[];
+}) {
+  const [selectedYear, setSelectedYear] = useState<number | null>(
+    () => years[years.length - 1]?.year ?? null,
+  );
+  const [metric, setMetric] = useState<Metric>('points');
+
+  const selected = useMemo(
+    () => years.find((y) => y.year === selectedYear) ?? null,
+    [years, selectedYear],
+  );
+
+  const selectedMonths = useMemo(() => {
+    if (selectedYear == null) return [];
+    const byMonth = new Map(months.map((m) => [m.month, m]));
+    return Array.from({ length: 12 }, (_, i) => {
+      const monthKey = `${selectedYear}-${String(i + 1).padStart(2, '0')}`;
+      return byMonth.get(monthKey) ?? { month: monthKey, count: 0, score: 0, platforms: {} };
+    });
+  }, [months, selectedYear]);
+
+  if (years.length === 0) return null;
+
+  return (
+    <div className="stats-years">
+      <div className="stats-years-heading">
+        <h3>{metric === 'points' ? 'Points' : 'Achievements'} By Year</h3>
+        <div className="stats-metric-toggle" role="group" aria-label="Show by">
+          <button
+            type="button"
+            className={`stats-metric-tab${metric === 'achievements' ? ' stats-metric-tab--active' : ''}`}
+            onClick={() => setMetric('achievements')}
+          >
+            Achievements
+          </button>
+          <button
+            type="button"
+            className={`stats-metric-tab${metric === 'points' ? ' stats-metric-tab--active' : ''}`}
+            onClick={() => setMetric('points')}
+          >
+            Points
+          </button>
+        </div>
+      </div>
+      <YearBars years={years} selectedYear={selectedYear} metric={metric} onSelect={setSelectedYear} />
+      {selected && <YearRecap year={selected} months={selectedMonths} metric={metric} />}
+    </div>
+  );
+}

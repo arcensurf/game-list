@@ -85,6 +85,11 @@ jobs:
         env:
           DATA_DIR: ${{ github.workspace }}/data-branch/public/data
 
+      - name: Build timeline
+        run: node scripts/build-timeline.mjs
+        env:
+          DATA_DIR: ${{ github.workspace }}/data-branch/public/data
+
       - name: Commit achievement data to data branch
         working-directory: data-branch
         run: |
@@ -92,7 +97,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # Explicit file list — never stage refresh tokens or anything
           # else that might end up in the work tree.
-          git add public/data/achievements.json public/data/platform-libraries.json public/data/leaderboard.json
+          git add public/data/achievements.json public/data/platform-libraries.json public/data/leaderboard.json public/data/timeline.json
           # -A so pruned shards (delisted games) are staged as deletions,
           # not just left behind in the tree.
           git add -A public/data/achievements

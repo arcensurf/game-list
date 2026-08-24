@@ -15,7 +15,6 @@ import PublishButton from './PublishButton';
 import TrophyPickerView from './TrophyPickerView';
 import LeaderboardView from './LeaderboardView';
 import StatsView from './StatsView';
-import StatsOverlay from './StatsOverlay';
 import BottomNav from './BottomNav';
 import { getInitialView, rememberView } from '../types/view';
 import type { View } from '../types/view';
@@ -24,7 +23,6 @@ export default function App() {
   const [view, setView] = useState<View>(getInitialView);
   const lightsOn = false;
   const [inTransition, setInTransition] = useState(false);
-  const [statsOpen, setStatsOpen] = useState(false);
 
   const { gogOnly, toggleGog } = useGogFilter(view);
   const backlogView = view === 'backlog';
@@ -93,23 +91,6 @@ export default function App() {
                   </>
                 )}
                 <GogFilterToggle on={gogOnly} onToggle={toggleGog} />
-                <div className="masthead-divider" aria-hidden="true" />
-                <button
-                  className="stats-trigger"
-                  onClick={() => setStatsOpen(true)}
-                  aria-label="Open platform stats"
-                >
-                  <svg
-                    viewBox="0 0 16 16"
-                    width="14"
-                    height="14"
-                    aria-hidden="true"
-                  >
-                    <rect x="2" y="9" width="3" height="5" />
-                    <rect x="6.5" y="6" width="3" height="8" />
-                    <rect x="11" y="3" width="3" height="11" />
-                  </svg>
-                </button>
               </>
             )}
           </div>
@@ -141,11 +122,6 @@ export default function App() {
       </main>
 
       <BottomNav view={view} onChange={changeView} />
-      <StatsOverlay
-        open={statsOpen}
-        onClose={() => setStatsOpen(false)}
-        stats={platformStats}
-      />
     </div>
   );
 }

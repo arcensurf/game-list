@@ -14,6 +14,7 @@
     "fetch-ffxiv": "node scripts/fetch-ffxiv.mjs",
     "fetch-ffxiv-lodestone": "node scripts/fetch-ffxiv-lodestone.mjs",
     "build-leaderboard": "node scripts/build-leaderboard.mjs",
+    "build-timeline": "node scripts/build-timeline.mjs",
     "xbox-get-refresh-token": "node scripts/xbox-get-refresh-token.mjs",
     "psn-get-npsso-token": "node scripts/psn-get-npsso-token.mjs"
   },
