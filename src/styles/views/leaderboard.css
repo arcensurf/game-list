@@ -47,20 +47,6 @@
   border-color: var(--accent);
 }
 
-.leaderboard-dev-hint {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: -0.5rem;
-}
-
-.leaderboard-dev-hint code {
-  font-family: monospace;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  padding: 0.05rem 0.3rem;
-}
-
 .leaderboard-tabs {
   display: flex;
   gap: 0.5rem;

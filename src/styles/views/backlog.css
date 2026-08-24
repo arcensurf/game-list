@@ -174,18 +174,6 @@
   align-items: center;
   gap: 0.4rem;
 }
-
-/* Reset external-edit-btn flow so it sits inline with the other band
-   actions instead of blocking full-width like in the grid layout. */
-.backlog-band-actions .dev-edit-btn--external {
-  display: inline-flex;
-  width: auto;
-  margin-top: 0;
-  font-size: 0.7rem;
-  padding: 0.4rem 0.6rem;
-  letter-spacing: 0.06em;
-}
-
 .backlog-cover-btn {
   display: flex;
   align-items: center;

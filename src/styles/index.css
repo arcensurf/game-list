@@ -1,15 +1,32 @@
-@import './theme.css';
-@import './frame.css';
-@import './layout.css';
-@import './alphabet-nav.css';
-@import './game-card.css';
-@import './card-hud.css';
-@import './card-back.css';
-@import './game-of-games.css';
-@import './achievement.css';
-@import './platform-badge.css';
-@import './stats.css';
-@import './leaderboard.css';
-@import './backlog.css';
-@import './trophy-picker.css';
-@import './dev.css';
+/* Import order is both the dependency direction and the override order.
+   Each tier may use anything above it and nothing below it:
+
+     tokens      the design contract — custom properties only
+     base        reset and document-level behaviour
+     primitives  reusable devices with no feature knowledge (frame.css)
+     components  one UI object each, reusable across views
+     views       one screen each; composes the above, owns no primitives
+
+   Within components the order is load-bearing: card-hud.css deliberately
+   overrides rules from game-card.css (the shared .game-card-info element),
+   and game-of-games.css layers on top of both.
+
+   Dev-only styles are NOT imported here — see main.tsx. */
+
+@import './tokens.css';
+@import './base.css';
+
+@import './primitives/frame.css';
+
+@import './components/alphabet-nav.css';
+@import './components/game-card.css';
+@import './components/card-hud.css';
+@import './components/card-back.css';
+@import './components/game-of-games.css';
+@import './components/achievement.css';
+@import './components/platform-badge.css';
+
+@import './views/layout.css';
+@import './views/stats.css';
+@import './views/leaderboard.css';
+@import './views/backlog.css';

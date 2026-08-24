@@ -1,0 +1,5 @@
+/* Dev-only styles, loaded dynamically from main.tsx so none of this
+   reaches the public bundle. Both surfaces here are already DEV-gated in
+   App.tsx; their CSS was shipping to every visitor regardless. */
+@import './trophy-picker.css';
+@import './dev.css';

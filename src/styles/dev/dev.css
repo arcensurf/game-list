@@ -847,3 +847,32 @@
   object-fit: cover;
   display: block;
 }
+
+/* Moved out of views/backlog.css: this only ever applies to the dev-only
+   edit button, so it belongs with the dev styles rather than shipping to
+   every visitor as a rule that can never match. */
+/* Reset external-edit-btn flow so it sits inline with the other band
+   actions instead of blocking full-width like in the grid layout. */
+.backlog-band-actions .dev-edit-btn--external {
+  display: inline-flex;
+  width: auto;
+  margin-top: 0;
+  font-size: 0.7rem;
+  padding: 0.4rem 0.6rem;
+  letter-spacing: 0.06em;
+}
+
+/* Moved out of views/leaderboard.css — the stale-snapshot hint it styles
+   is rendered behind import.meta.env.DEV in LeaderboardView. */
+.leaderboard-dev-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: -0.5rem;
+}
+.leaderboard-dev-hint code {
+  font-family: monospace;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0.05rem 0.3rem;
+}
