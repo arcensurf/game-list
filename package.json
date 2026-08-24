@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "pull-data": "git fetch origin data && git checkout origin/data -- public/data && git reset -- public/data",
+    "pull-data": "git fetch origin data && git checkout origin/data -- public/data public/covers && git reset -- public/data public/covers",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
