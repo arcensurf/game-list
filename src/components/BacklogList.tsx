@@ -3,6 +3,7 @@ import type React from 'react';
 import type { GameWithCover } from '../types/game';
 import PlatformBadge from './PlatformBadge';
 import SystemHeading from './SystemHeading';
+import { getLightColor } from '../utils/platformColors';
 import DevEditControls from './DevEditControls';
 import CoverPicker from './CoverPicker';
 
@@ -49,8 +50,15 @@ export default function BacklogList({ games }: { games: GameWithCover[] }) {
 
   return (
     <div className="backlog-manifest">
+      {/* --system-color scopes to the whole section, not just the heading,
+          so the spine down the list runs in the platform's colour too
+          (backlog.css maps it onto --trace-color). */}
       {systems.map((system) => (
-        <section className="backlog-system" key={system.platform}>
+        <section
+          className="backlog-system"
+          key={system.platform}
+          style={{ ['--system-color' as string]: getLightColor(system.platform) } as React.CSSProperties}
+        >
           <SystemHeading platform={system.platform} count={system.games.length} />
           <ul className="backlog-system-list">
             {system.games.map((game) => (

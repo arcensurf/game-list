@@ -10,17 +10,27 @@
 
 .backlog-system {
   margin-top: 2.75rem;
+  /* Every trace inside this section runs in the platform's colour. */
+  --trace-color: var(--system-color);
 }
 
 .backlog-system:first-child {
   margin-top: 0;
 }
 
+/* No mark on this list. Tried a spine per section first; on a page that
+   already carries a hue per heading and a wash per band it just read as
+   more colour, and the bands were never hard to tell apart — the heading
+   opens the run and each band's art tints it. Bands separate on a
+   hairline of background showing through, which is negative space doing
+   the work rather than a drawn line. */
 .backlog-system-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-tight);
 }
 
 /* System heading — see SystemHeading.tsx for how this differs from the
@@ -62,12 +72,15 @@
   color: var(--system-color);
 }
 
+/* Geometry only — the mark itself is .trace-line (primitives/frame.css),
+   tinted by the section's --trace-color. This rule predated the trace and
+   was already the same idea drawn by hand; adopting the primitive makes
+   it literally the same object rather than a convincing lookalike. */
 .system-heading-rule {
   flex: 1;
   min-width: 1rem;
   height: 1px;
-  background: linear-gradient(90deg, var(--system-color), transparent);
-  opacity: 0.4;
+  opacity: 0.55;
 }
 
 .system-heading-count {
@@ -88,7 +101,6 @@
   min-height: 72px;
   padding: 0.7rem 1.25rem;
   overflow: hidden;
-  border-bottom: 1px solid var(--border);
   /* The queue assembles top-down on arrival — 13 entries is short
      enough that the whole cascade lands well under a second. */
   animation: backlog-band-in 0.5s ease both;

@@ -20,55 +20,17 @@
   --border-rgb: 46, 41, 36;
   --text-on-dark: #1c1917;
 
-  /* Trace — the app's section rule; see frame.css for the device and
-     the .trace-t / .trace-b classes that assemble it.
+  /* Trace — the app's section rule; see primitives/frame.css for the
+     device, the .trace-t / .trace-b / .trace-l classes that assemble it,
+     and the colour curves.
 
-     The core travels hot amber → structural grey along its length, so a
-     rule begins as light and cools into structure. The falloff is the
-     mask that kills it off before the far edge, so it never lands a
-     second hard corner. Both are tokens rather than literals because
-     the brackets are tuned against the same curve — the two devices
-     have to agree about how light dies or they read as unrelated. */
-  --trace-core: linear-gradient(
-    90deg,
-    rgba(var(--accent-glow), 0.85) 0%,
-    rgba(var(--accent-glow), 0.3) 14%,
-    rgba(var(--border-rgb), 1) 42%,
-    rgba(var(--border-rgb), 1) 100%
-  );
-  --trace-falloff: linear-gradient(
-    90deg,
-    #000 0%,
-    rgba(0, 0, 0, 0.92) 16%,
-    rgba(0, 0, 0, 0.55) 46%,
-    rgba(0, 0, 0, 0.18) 78%,
-    transparent 100%
-  );
-
-  /* The same device rotated onto the vertical axis — a spine rather
-     than a rule. Identical physics (ignite at the origin, cool along
-     the run, bloom sideways, die before the far end) so it is plainly
-     the same language, but a different axis is the only thing that
-     actually cures repetition: a column of horizontal marks reads as
-     one mark repeated, however well each is drawn. One spine down a
-     list also binds it into a single run instead of separating it into
-     rows, which is usually what a list wants anyway. */
-  --trace-core-v: linear-gradient(
-    180deg,
-    rgba(var(--accent-glow), 0.85) 0%,
-    rgba(var(--accent-glow), 0.3) 14%,
-    rgba(var(--border-rgb), 1) 42%,
-    rgba(var(--border-rgb), 1) 100%
-  );
-  --trace-falloff-v: linear-gradient(
-    180deg,
-    #000 0%,
-    rgba(0, 0, 0, 0.92) 16%,
-    rgba(0, 0, 0, 0.55) 46%,
-    rgba(0, 0, 0, 0.18) 78%,
-    transparent 100%
-  );
-
+     Only the falloff masks live here, because they carry no colour: they
+     are the shared statement of how a mark dies, and the brackets are
+     tuned against the same curve. The coloured cores are declared on the
+     .trace-* rules instead — a custom property containing var() resolves
+     against the element it is DECLARED on, so defining them at :root
+     would bake in the accent and silently ignore any --trace-color set
+     further down the tree. */
   /* Gold (Game of Games — independent of theme) */
   --gold: #d4a017;
   --gold-bright: #f5d060;

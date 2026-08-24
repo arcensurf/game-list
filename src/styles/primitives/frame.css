@@ -1,8 +1,13 @@
 /* ── Framing primitives ──
-   Shared vocabulary for marking out a region. The app deliberately does
-   not box things: no panel gets a full 1px border and a radius, because
-   that treatment does no work here beyond making the page look like
-   every other dark dashboard.
+   A set of devices for marking out a region, not a rulebook. Which one
+   suits a surface is a judgement about that surface's content, and the
+   answer is often none of them — several places in the app carry their
+   own framing already (a blurred art wash, a large accent figure, a
+   heading) and adding a mark on top just doubles up.
+
+   The one thing these devices exist to avoid: boxing something in a 1px
+   border and a radius, which does no work here beyond making the page
+   look like every other dark dashboard.
 
    Both devices below are built from one idea rather than two: a mark
    ignites at a point and falls off away from it, in BOTH axes. Falloff
@@ -100,8 +105,52 @@
    trace-b at the bottom-left, blooming up. An element carrying both is
    lit inward by its own frame. */
 .trace-t,
-.trace-b {
+.trace-b,
+.trace-l,
+.trace-line {
+
+  /* Hue is inherited: set --trace-color once on a container and every
+     trace inside it retints. The backlog does this per platform section,
+     so a system's spine runs in that system's own colour.
+
+     Declared here rather than in tokens.css on purpose — a custom
+     property whose value contains var() is resolved against the element
+     it is declared on, so a :root definition would freeze the accent in
+     and ignore overrides further down. */
+  --trace-ink: color-mix(in srgb, var(--trace-color, var(--accent)) 85%, transparent);
+  --trace-ink-soft: color-mix(in srgb, var(--trace-color, var(--accent)) 30%, transparent);
+  --trace-glow: color-mix(in srgb, var(--trace-color, var(--accent)) 20%, transparent);
+
+  --trace-core: linear-gradient(
+    90deg,
+    var(--trace-ink) 0%,
+    var(--trace-ink-soft) 14%,
+    var(--border) 42%,
+    var(--border) 100%
+  );
+  --trace-core-v: linear-gradient(
+    180deg,
+    var(--trace-ink) 0%,
+    var(--trace-ink-soft) 14%,
+    var(--border) 42%,
+    var(--border) 100%
+  );
+}
+
+.trace-t,
+.trace-b,
+.trace-l {
   position: relative;
+}
+
+/* trace-line — for an element that IS the mark, rather than one drawn on
+   a container's edge. Same core and falloff as the rest, so a rule laid
+   inline in a heading is the same object as a rule opening a section;
+   the element supplies its own box. */
+.trace-line {
+  background-image: var(--trace-core);
+  -webkit-mask-image: var(--trace-falloff);
+  mask-image: var(--trace-falloff);
 }
 
 .trace-t::before,
@@ -123,8 +172,8 @@
   background-image:
     radial-gradient(
       22rem 100% at 0% 0%,
-      rgba(var(--accent-glow), 0.2) 0%,
-      rgba(var(--accent-glow), 0) 100%
+      var(--trace-glow) 0%,
+      transparent 100%
     ),
     var(--trace-core);
   background-position: top, top;
@@ -135,23 +184,24 @@
   background-image:
     radial-gradient(
       22rem 100% at 0% 100%,
-      rgba(var(--accent-glow), 0.2) 0%,
-      rgba(var(--accent-glow), 0) 100%
+      var(--trace-glow) 0%,
+      transparent 100%
     ),
     var(--trace-core);
   background-position: bottom, bottom;
 }
 
 /* trace-l — the spine. Ignites at the top-left, cools downward, blooms
-   to the right into the content it runs alongside. Use it where a list
-   or run wants to be bound into one object; use trace-t/-b only where a
-   section genuinely opens. Four rows with four rules is four times the
-   same mark, and no amount of tuning fixes that — the axis has to
-   change. */
-.trace-l {
-  position: relative;
-}
+   to the right into the content it runs alongside.
 
+   It reads as binding a list into one run rather than separating it into
+   rows, which is worth reaching for when a stack of per-row rules is
+   repeating the same mark down a column — changing the axis does more
+   there than tuning the rule. It is not what every list wants: rows that
+   already distinguish themselves, or a list under a heading strong
+   enough to open it, are usually better with nothing. Backlog went that
+   way after trying a spine per section and finding it just added colour
+   to a page that had plenty. */
 .trace-l::before {
   content: '';
   position: absolute;
@@ -166,8 +216,8 @@
   background-image:
     radial-gradient(
       100% 22rem at 0% 0%,
-      rgba(var(--accent-glow), 0.2) 0%,
-      rgba(var(--accent-glow), 0) 100%
+      var(--trace-glow) 0%,
+      transparent 100%
     ),
     var(--trace-core-v);
   -webkit-mask-image: var(--trace-falloff-v);

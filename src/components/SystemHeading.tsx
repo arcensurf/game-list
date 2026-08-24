@@ -1,7 +1,7 @@
-import type React from 'react';
 import { PLATFORM_ICON } from '../utils/platformIcons';
-import { getLightColor } from '../utils/platformColors';
 
+// --system-color is inherited from the .backlog-system section that
+// wraps this heading and its list, so both share one hue.
 // A chapter marker for the backlog's per-system sections. The platform
 // logos appear elsewhere in the app as small rotated silhouettes tucked
 // behind their own label (see PlatformBadge); here the logo leads the
@@ -17,10 +17,7 @@ export default function SystemHeading({
   const icon = PLATFORM_ICON[platform];
 
   return (
-    <h2
-      className="system-heading"
-      style={{ ['--system-color' as string]: getLightColor(platform) } as React.CSSProperties}
-    >
+    <h2 className="system-heading">
       {icon && (
         <span
           className={`system-heading-icon${icon.solid ? ' system-heading-icon--solid' : ''}`}
@@ -32,7 +29,7 @@ export default function SystemHeading({
         />
       )}
       <span className="system-heading-name">{platform}</span>
-      <span className="system-heading-rule" aria-hidden="true" />
+      <span className="system-heading-rule trace-line" aria-hidden="true" />
       <span className="system-heading-count">
         {count} {count === 1 ? 'game' : 'games'}
       </span>
