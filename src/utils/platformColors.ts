@@ -32,3 +32,23 @@ export const ACHIEVEMENT_PLATFORM_COLORS_LIGHT: Record<string, string> = {
   ra: '#e0b84d',
   ffxiv: '#f06a6a',
 };
+
+// Lightened console colours, for platform names set as text on the dark
+// surfaces — PlayStation blue and Xbox green go muddy at small sizes in
+// their brand form above. Shared by the platform badges and the
+// backlog's system headings.
+export const PLATFORM_COLORS_LIGHT: Record<string, string> = {
+  PSX: '#4a7fd4', PS2: '#4a7fd4', PS3: '#4a7fd4', PS4: '#4a7fd4', PS5: '#4a7fd4',
+  PSP: '#4a7fd4', 'PS Vita': '#4a7fd4',
+  Famicom: '#ff6b6b', NES: '#ff6b6b', 'Super Famicom': '#ff6b6b', SNES: '#ff6b6b',
+  GB: '#ff6b6b', GBC: '#ff6b6b', GBA: '#ff6b6b', N64: '#ff6b6b', Gamecube: '#ff6b6b',
+  DS: '#ff6b6b', '3DS': '#ff6b6b', Wii: '#ff6b6b', 'Wii U': '#ff6b6b',
+  Switch: '#ff6b6b', 'Switch 2': '#ff6b6b', 'Game & Watch': '#ff6b6b',
+  'NES + Famicom': '#ff6b6b', 'SNES + Super Famicom': '#ff6b6b',
+  'Xbox 360': '#4ade80',
+  PC: '#a1a8b4', Mac: '#a1a8b4', iPhone: '#a1a8b4', 'CD-i': '#a1a8b4',
+};
+
+export function getLightColor(platform: string): string {
+  return PLATFORM_COLORS_LIGHT[platform] ?? '#a1a8b4';
+}
