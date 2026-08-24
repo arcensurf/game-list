@@ -11,6 +11,7 @@ import { PLATFORMS } from '../hooks/useTrophyPicker';
 import LeaderboardGameModal from './LeaderboardGameModal';
 import type { LeaderboardModalTarget } from './LeaderboardGameModal';
 import DuplicateGroupsOverlay from './DuplicateGroupsOverlay';
+import ScoringInfoModal from './ScoringInfoModal';
 
 const SEARCH_RESULTS_LIMIT = 8;
 
@@ -169,6 +170,7 @@ export default function LeaderboardView() {
   const [hideDupes, setHideDupes] = useState<boolean>(readStoredHideDupes);
   const [completionsOnly, setCompletionsOnly] = useState<boolean>(readStoredCompletionsOnly);
   const [groupsOpen, setGroupsOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
@@ -314,7 +316,18 @@ export default function LeaderboardView() {
   return (
     <div className="leaderboard-view">
       <div className="leaderboard-header">
-        <h2>Leaderboard</h2>
+        <div className="leaderboard-title-row">
+          <h2>Leaderboard</h2>
+          <button
+            type="button"
+            className="leaderboard-info-btn"
+            onClick={() => setInfoOpen(true)}
+            aria-label="How scoring works"
+            title="How scoring works"
+          >
+            ?
+          </button>
+        </div>
         {import.meta.env.DEV && (
           <p className="leaderboard-dev-hint">
             Local data is a snapshot from the last <code>npm run pull-data</code> — run it again if this looks stale.
@@ -520,6 +533,7 @@ export default function LeaderboardView() {
         group={modalTarget?.dupeKey ? dupeGroups.get(modalTarget.dupeKey) : undefined}
         onClose={() => setModalTarget(null)}
       />
+      <ScoringInfoModal open={infoOpen} onClose={() => setInfoOpen(false)} />
       {import.meta.env.DEV && (
         <DuplicateGroupsOverlay
           open={groupsOpen}

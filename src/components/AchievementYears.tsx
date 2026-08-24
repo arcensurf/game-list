@@ -196,7 +196,7 @@ export default function AchievementYears({
   return (
     <div className="stats-years">
       <div className="stats-years-heading">
-        <h3>{metric === 'points' ? 'Points' : 'Achievements'} By Year</h3>
+        <h3>{metric === 'points' ? 'Rarity Points' : 'Achievements'} By Year</h3>
         <div className="stats-metric-toggle" role="group" aria-label="Show by">
           <button
             type="button"
@@ -210,7 +210,7 @@ export default function AchievementYears({
             className={`stats-metric-tab${metric === 'points' ? ' stats-metric-tab--active' : ''}`}
             onClick={() => setMetric('points')}
           >
-            Points
+            Rarity Points
           </button>
         </div>
       </div>

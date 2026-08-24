@@ -19,6 +19,34 @@
   color: var(--text);
 }
 
+.leaderboard-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.leaderboard-info-btn {
+  width: 1.3rem;
+  height: 1.3rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.75rem;
+  border-radius: 50%;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.leaderboard-info-btn:hover {
+  color: var(--accent-light);
+  border-color: var(--accent);
+}
+
 .leaderboard-dev-hint {
   font-size: 0.75rem;
   color: var(--text-muted);
@@ -470,6 +498,61 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+}
+
+/* Scoring explainer modal — reuses the modal shell above, own body. */
+.scoring-info-panel {
+  max-width: 480px;
+}
+
+.scoring-info-body {
+  overflow-y: auto;
+  padding: 1.1rem 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.scoring-info-section h3 {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-light);
+  margin-bottom: 0.4rem;
+}
+
+.scoring-info-section p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.scoring-info-section code {
+  font-family: monospace;
+  font-size: 0.82rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0.05rem 0.3rem;
+}
+
+.scoring-info-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.scoring-info-list li {
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.scoring-info-list strong {
+  color: var(--text);
 }
 
 .leaderboard-modal-empty {
