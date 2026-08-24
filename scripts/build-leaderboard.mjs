@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { dominantColor } from './lib/dominant-color.mjs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
@@ -255,7 +256,87 @@ export function computeLeaderboardData() {
   return { games, rarestAchievements };
 }
 
-function main() {
+// Cover tints for the leaderboard's completion wash.
+//
+// The view used to blur the cover behind a finished row to colour it.
+// Blur averages whatever is in frame, so the tint came out of the
+// composition rather than the art — dark skies and letterboxing pulled it
+// to mud, and a wide crop of a portrait cover samples a middle band that
+// often misses the subject entirely. Choosing the colour deliberately
+// fixes both, and it moves the work off the page: one hex per game
+// instead of a hundred blurred images decoded on every visit.
+//
+// Cached by platform/id, because resolving a tint means fetching the
+// cover. Only games the cache has never seen cost a request, so a
+// re-run after a nightly fetch touches the handful that are new.
+async function attachTints(games, dataDir) {
+  const cachePath = resolve(dataDir, 'cover-tints.json');
+  // Bump when dominant-color.mjs changes how it picks, so a stored tint is
+  // never a result the current algorithm would not produce. Cheap to get
+  // wrong silently and annoying to debug: the code looks fixed and the
+  // page still shows the old colour.
+  const TINT_ALGO_VERSION = 5;
+  const stored = existsSync(cachePath)
+    ? JSON.parse(readFileSync(cachePath, 'utf8'))
+    : {};
+  const cache =
+    stored.version === TINT_ALGO_VERSION && stored.tints ? stored.tints : {};
+  if (!Object.keys(cache).length && Object.keys(stored).length) {
+    console.log('[leaderboard] tint algorithm changed; recomputing every cover');
+  }
+
+  let sharp;
+  try {
+    ({ default: sharp } = await import('sharp'));
+  } catch {
+    // Tints are an enhancement, not a requirement — the view falls back
+    // to the blurred cover when one is missing.
+    console.warn('[leaderboard] sharp unavailable; skipping cover tints');
+    return;
+  }
+
+  let fetched = 0;
+  let failed = 0;
+  for (const game of games) {
+    const key = `${game.platform}/${game.id}`;
+    if (!(key in cache)) {
+      const url = coverUrlFor(game);
+      if (!url) {
+        cache[key] = null;
+      } else {
+        try {
+          const res = await fetch(url);
+          cache[key] = res.ok
+            ? await dominantColor(Buffer.from(await res.arrayBuffer()), sharp)
+            : null;
+          fetched++;
+        } catch {
+          // A null is cached deliberately: a cover that 404s today will
+          // 404 tomorrow, and re-fetching it every build is the whole
+          // cost this cache exists to avoid.
+          cache[key] = null;
+          failed++;
+        }
+      }
+    }
+    if (cache[key]) game.tint = cache[key];
+  }
+
+  writeFileSync(cachePath, JSON.stringify({ version: TINT_ALGO_VERSION, tints: cache }, null, 2));
+  const hit = games.filter((g) => g.tint).length;
+  console.log(`[leaderboard] tints: ${hit}/${games.length} (${fetched} fetched, ${failed} failed)`);
+}
+
+// Mirrors src/utils/pickerCover.ts — Steam art is derived from the appid,
+// every other platform ships an icon URL with the achievement data.
+function coverUrlFor(game) {
+  if (game.platform === 'steam') {
+    return `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${game.id}/library_600x900.jpg`;
+  }
+  return game.icon ?? null;
+}
+
+async function main() {
   const { games, rarestAchievements } = computeLeaderboardData();
 
   const output = {
@@ -269,6 +350,9 @@ function main() {
     rarestAchievements: topPerPlatform(rarestAchievements, RAREST_LIMIT_PER_PLATFORM),
   };
 
+  // After the cut, so a build only resolves tints for games that ship.
+  await attachTints(output.games, dataDir);
+
   writeFileSync(leaderboardPath, JSON.stringify(output));
   console.log(`Wrote ${output.games.length} of ${games.length} scored games and ${output.rarestAchievements.length} of ${rarestAchievements.length} rarest achievements to ${leaderboardPath}`);
 }
@@ -279,4 +363,11 @@ function main() {
 // leaderboard.json) as a side effect of every dev-server request.
 // process.argv[1] is unset in some invocation shapes (e.g. `node -e`),
 // so guard rather than let pathToFileURL throw on undefined.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  // main() is async now (the tint pass fetches covers), so an unhandled
+  // rejection would otherwise exit 0 and silently ship a stale file.
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

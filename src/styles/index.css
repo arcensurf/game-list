@@ -17,6 +17,7 @@
 @import './base.css';
 
 @import './primitives/frame.css';
+@import './primitives/grain.css';
 
 @import './components/alphabet-nav.css';
 @import './components/game-card.css';

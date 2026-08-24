@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getInViewObserver } from '../hooks/useInView';
 import type { GameWithCover } from '../types/game';
 import GameCardHud from './GameCardHud';
 import CardBackFace from './CardBackFace';
@@ -44,41 +45,6 @@ function nextBatchIndex() {
     });
   }
   return i;
-}
-
-// Marks cards as on-screen so CSS can pause the looping animations (grain
-// overlay, GoG pulse and foil drift) on the ones you can't see. See the
-// [data-in-view] rule in game-card.css.
-//
-// One observer shared by every card, not one per card. The reveal observer
-// below disconnects the moment it fires, so its cost is bounded; this one has
-// to stay live for the whole page, and a single instance batches all its
-// targets into one callback instead of running 224 of them.
-let inViewObserver: IntersectionObserver | null = null;
-
-function getInViewObserver() {
-  if (!inViewObserver) {
-    inViewObserver = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const el = entry.target as HTMLElement;
-          // A data attribute rather than a class, because React owns
-          // className on this element and rewrites it on every re-render
-          // (info-open, flip, reveal) — a class set imperatively here would
-          // get silently dropped the first time the card re-rendered, and
-          // the card would go still. Nothing in the JSX touches
-          // data-in-view, so React leaves it alone.
-          if (entry.isIntersecting) el.dataset.inView = '';
-          else delete el.dataset.inView;
-        }
-      },
-      // Wider than the reveal observer's 100px so a card is already animating
-      // before it's visible, and so data-in-view always lands before
-      // .revealed — otherwise the reveal fade would start out paused.
-      { rootMargin: '200px' },
-    );
-  }
-  return inViewObserver;
 }
 
 export default function GameCard({

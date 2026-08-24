@@ -1,0 +1,16 @@
+/* ── Grain ──
+   The tuned-out-channel texture. The tile itself is --grain-tile in
+   tokens.css; this is the motion that makes it read as analog static
+   rather than a fixed speckle.
+
+Hops the grain tile to discrete offsets each frame so it reads as
+   analog TV static rather than smooth motion. steps() ensures the
+   position snaps rather than interpolates. */
+@keyframes grain-static {
+  0%   { background-position: 0 0; }
+  20%  { background-position: -43px 29px; }
+  40%  { background-position: 31px -51px; }
+  60%  { background-position: -17px 67px; }
+  80%  { background-position: 55px 13px; }
+  100% { background-position: 0 0; }
+}

@@ -117,8 +117,6 @@
   padding-top: var(--space-1);
 }
 
-
-
 /* Search — a terminal prompt rather than a form field. The boxed version
    was the one control on the page still wearing a filled, rounded,
    bordered rectangle, which is exactly the treatment the rest of this
@@ -148,7 +146,7 @@
   line-height: 1;
   color: var(--accent);
   opacity: 0.55;
-  transition: opacity var(--transition);
+  transition: filter var(--transition);
 }
 
 .leaderboard-search-wrap:focus-within::before {
@@ -158,7 +156,7 @@
 /* trace-b draws the rule; this only sets how hard it burns. */
 .leaderboard-search-wrap::after {
   opacity: 0.5;
-  transition: opacity var(--transition);
+  transition: filter var(--transition);
 }
 
 .leaderboard-search-wrap:focus-within::after {
@@ -255,28 +253,41 @@
   padding: 3rem 0;
 }
 
+/* A small gutter, not a rule. Flat rows needed nothing — the column of
+   40px covers gave them all the rhythm they wanted, and running them
+   contiguous made the hover surface read as a row highlight rather than
+   a floating card. But completions carry a colour wash, and two of those
+   adjacent with no gutter merge into a single band with a hard seam
+   through it. Just enough space to keep each wash its own object. */
 .leaderboard-list {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--space-1);
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
+/* Rows are not cards. A hundred bordered, rounded, filled rectangles is
+   the most generic thing this page could do, and the columns already give
+   each row its shape — rank, cover, title, score line up without anything
+   drawn around them.
+
+   The surface exists only while you are on the row. That is the honest
+   version of what the border was for: it was never structure, it was an
+   affordance saying "this is clickable", and an affordance only needs to
+   be there when you are pointing at it. */
 .leaderboard-row {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0.6rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
   cursor: pointer;
-  transition: border-color var(--transition);
-  /* Cascading rise on entrance, same shape as the backlog's band-in —
-     see --row-index above for the per-row delay (shared with the
-     completion foil's drift phase below). */
   animation: leaderboard-row-in 0.35s ease-out both;
   animation-delay: calc(var(--row-index, 0) * 35ms);
 }
@@ -292,86 +303,336 @@
   }
 }
 
-.leaderboard-row:hover,
-.leaderboard-row:focus-visible {
-  border-color: var(--accent);
-  outline: none;
-}
+/* Hover is scanlines: the glass, not the signal.
 
-/* Completions wear the Game of Games foil rather than a gold tint of
-   their own — a 100% run is the same "this one's special" signal a GoG
-   card carries, so it gets the same light source, the same drift, and
-   the same iridescent frame (all defined in game-of-games.css). Only
-   the geometry changes: a row is a thin strip, so the rainbow rides the
-   1px border and pools behind the content instead of playing across
-   cover art, and --gog-ray-alpha drops well under the card's value
-   because there's no busy artwork here to absorb it. */
-.leaderboard-row--complete {
-  position: relative;
-  /* Makes the row a stacking context so the ::before below — parked at
-     z-index -1, above the row's own background but under its text —
-     blends against that background and nothing further back. */
-  isolation: isolate;
-  --gog-foil-strength: 1.6;
-  --gog-ray-alpha: 0.05;
-  border-color: transparent;
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-  background-image:
-    linear-gradient(var(--bg-card), var(--bg-card)),
-    var(--gog-border-conic);
-  /* Entrance rise (shared with the base .leaderboard-row rule above)
-     plus the foil's continuous light-drift, running together. */
-  animation: leaderboard-row-in 0.35s ease-out both, gog-light-drift 32s linear infinite;
-  /* Scatter the drift phase so a run of completions doesn't shimmer in
-     lockstep — same trick the card grid plays with --card-index. The
-     entrance keeps its own stagger from the base rule. */
-  animation-delay: calc(var(--row-index, 0) * 35ms), calc(var(--row-index, 0) * -2.5s);
-  transition: --gog-foil-strength 0.35s ease;
-}
+   Everything else in this view is about reception — static means no
+   signal, a lit cover and a colour wash mean a strong one. Hover is not a
+   statement about reception at all, so it should not borrow that
+   vocabulary; when it did, a hovered row and a completed one were saying
+   the same thing in the same colour and you could not tell which was
+   which.
 
-.leaderboard-row--complete::before {
+   Scanlines are the other half of a CRT and are unused anywhere in the
+   shipped views. They are pure luminance, so they cannot be mistaken for a
+   colour state, and they sit over everything the way phosphor lines sit on
+   the glass rather than in the picture. Static and scanlines end up
+   siblings: one is a channel that isn't there, the other is the screen
+   you're leaning into. */
+.leaderboard-row::before {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 3;
   pointer-events: none;
-  border-radius: 5px; /* the row's 6px, less its 1px border */
-  background:
-    var(--gog-rays),
-    /* Hotspot sized for a strip: narrow across, tall enough to reach
-       both edges, so the chroma pools around the source instead of
-       banding across the whole row. */
-    radial-gradient(
-      ellipse 45% 160% at var(--gog-light-x) var(--gog-light-y),
-      rgba(255, 220, 140, calc(var(--gog-foil-strength) * 0.10))  0%,
-      rgba(210, 130, 255, calc(var(--gog-foil-strength) * 0.05)) 45%,
-      rgba(110, 200, 230, 0) 85%
-    );
-  /* `screen` rather than the cards' `hue`: hue preserves the backdrop's
-     saturation, and a flat --bg-card plate has almost none to work
-     with, so it would come out grey. Screening the rays onto the dark
-     plate reads as light catching the surface. */
-  mix-blend-mode: screen;
-  mask-image: var(--gog-vertex-mask);
-  -webkit-mask-image: var(--gog-vertex-mask);
+  opacity: 0;
+  transition: opacity var(--transition);
+  /* Exactly the pitch and alpha the card HUD, the card back and the
+     picker stage use. Pushing it to 0.13 to make it "read" was the wrong
+     move in the wrong direction: past about 0.06 the lines stop being a
+     texture on the glass and become a stripe pattern drawn over the row,
+     which is precisely what it looked like. Scanlines are supposed to sit
+     under the threshold of "lines" and register as screen. */
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.05) 0px,
+    rgba(255, 255, 255, 0.05) 1px,
+    transparent 1px,
+    transparent 3px
+  );
 }
 
-/* The base row's hover swaps in an accent border, which would paint
-   over the foil frame — completions answer the hover by catching more
-   light instead. */
-.leaderboard-row--complete:hover,
-.leaderboard-row--complete:focus-visible {
-  --gog-foil-strength: 2.6;
+.leaderboard-row:hover::before {
+  opacity: 1;
+}
+
+/* The lift is what makes hover felt; the scanlines are what make it read
+   as a screen rather than a highlight. Asking the lines to do both is what
+   forced them up to stripe territory. Brightness, not a background: it
+   lights what is already in the row instead of laying a panel behind it. */
+.leaderboard-row:hover {
+  filter: brightness(1.22) saturate(1.08);
+}
+
+/* Keyboard focus still needs an explicit marker: a sibling-dimming effect
+   is ambience, and ambience is not a focus indicator. This is the only
+   place in the row that draws a mark, and it is there for a reason. */
+.leaderboard-row:focus-visible {
+  outline: none;
+}
+
+.leaderboard-row:focus-visible::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--accent-glow), 1) 0%,
+    rgba(var(--accent-glow), 0.55) 45%,
+    rgba(var(--accent-glow), 0) 100%
+  );
+}
+
+/* The frame is the cover's positioning context and carries the static. */
+.leaderboard-thumb-frame {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  flex-shrink: 0;
+  /* 1 = tuned out, 0 = tuned in. Same dial the card grid runs on.
+     Defaults to tuned in: a dimmed, snowy cover is a statement that the
+     game is unfinished, and only the ranked games list is making that
+     statement. Rarest Unlocks is a list of achievements, where "not
+     complete" means nothing, so its covers stay plain. */
+  --thumb-dim: 0;
+}
+
+.leaderboard-list--progress .leaderboard-row:not(.leaderboard-row--complete) .leaderboard-thumb-frame {
+  --thumb-dim: 1;
+}
+
+/* Completions are simply the ones that are ON.
+
+   The foil this replaced needed surface area to play across, and a 40px
+   thumbnail has none — the ray fan was sub-pixel and the sheen invisible.
+   Dimming and grain don't care about size, so they survive the scale.
+
+   It also inverts the work: instead of decorating the handful of finished
+   games, the unfinished ones tune out, which is the language the card grid
+   already speaks — a card outside the spotlight goes dark and picks up
+   static like a channel that isn't receiving. A finished game is receiving. */
+.leaderboard-row--complete .leaderboard-thumb-frame {
+  --thumb-dim: 0;
+}
+
+/* Completions carry their own cover as a colour wash spreading down the
+   row. The shared iridescent gradient this replaces had two problems, and
+   the screenshot showed both: it bled into the rows above and below, and
+   every completion was the identical gradient in the identical position,
+   which reads immediately as one effect stamped repeatedly.
+
+   Cover art solves the second by construction — no two rows can match,
+   because no two covers do. It is also why the foil worked on the card
+   grid in the first place: the iridescence played over artwork that was
+   different every time. Here the artwork itself is the colour source.
+
+   This is the treatment the backlog wanted and could not justify: there
+   the cover was blurred past recognition with nothing to explain it, so
+   the colour was arbitrary. Here the thumbnail sits on top of the wash,
+   so the colour has a visible source. */
+.leaderboard-row--complete {
+  position: relative;
+  isolation: isolate;
+}
+
+.leaderboard-row--complete .leaderboard-row-art {
+  opacity: 0.7;
+}
+
+/* Skeletons have no cover to light. */
+.leaderboard-row--skeleton .leaderboard-row-art {
+  display: none;
+}
+
+.leaderboard-row-art {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  /* Only completions light it. Hover deliberately does not touch colour —
+     see the scanline rule above. */
+  opacity: 0;
+  transition: opacity var(--transition);
+  /* Scaled past its own box so the blur never leaves a soft bare edge —
+     same trick the backlog bands use.
+
+     Heavily saturated and driven brighter on purpose. Blur is an
+     averaging operation: it collapses a cover into its mean colour, and
+     the mean of most box art is a muddy mid-tone. Pushing saturation well
+     past 1 pulls the hue back out of that average, and the brightness lift
+     stops the result reading as a dark smear on an already dark page.
+
+     The blur radius is the other half of that. Tighter than the backlog's
+     34px because the row is short: less blur leaves more of the cover's
+     own colour variation intact instead of flattening it to one tint, so
+     the wash reads as light coming off the artwork rather than as a
+     rectangle of average colour. Too tight and the picture starts to
+     resolve and competes with the thumbnail. */
+  filter: blur(18px) saturate(2.6) brightness(1.25);
+  transform: scale(1.6);
+  /* Brightest behind the cover it comes from, dying out before the score
+     column. Horizontal because the row is a strip: the light has nowhere
+     to go vertically and a long way to travel sideways. */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.8) 14%,
+    rgba(0, 0, 0, 0.3) 45%,
+    transparent 78%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.8) 14%,
+    rgba(0, 0, 0, 0.3) 45%,
+    transparent 78%
+  );
+}
+
+/* Tinted variant: a gradient built from the cover's dominant colour
+   (scripts/lib/dominant-color.mjs) instead of the blurred cover itself.
+   Preferred wherever the build resolved one, because blur takes its colour
+   from composition — dark skies and letterbox bars drag the average to
+   mud, and a wide crop of a portrait cover samples a middle band that can
+   miss the art entirely. It also costs nothing to render: no image decode,
+   no blur, just a gradient.
+
+   Must sit after the base rule: it resets the blur, scale and mask that
+   only make sense for a photograph, and those declarations carry the same
+   specificity, so order is what decides. */
+.leaderboard-row-art--tint {
+  /* Not a gradient with a texture laid over it — that was an earlier
+     version and it was still a gradient underneath. The colour has no
+     continuous field anywhere: it exists only as scan bars, and it falls
+     off in hard steps.
+
+     Both axes are quantised, which is what composite colour actually is.
+     Chroma carries a fraction of luma's bandwidth, so colour arrives
+     coarse — banded down the picture and stepping down in blocks rather
+     than easing away. A smooth ramp is the one thing analog colour never
+     does, which is why a gradient kept reading as generic whatever was
+     put on top of it.
+
+     The gaps between bars carry the tint at low alpha rather than going
+     transparent. Composite banding is a modulation, not an on/off mask,
+     and letting the row's near-black show through every other line made
+     the whole wash read darker than the colour it is meant to be. */
+  background: repeating-linear-gradient(
+    180deg,
+    var(--row-tint) 0,
+    var(--row-tint) 2px,
+    color-mix(in srgb, var(--row-tint) 38%, transparent) 2px,
+    color-mix(in srgb, var(--row-tint) 38%, transparent) 5px
+  );
+  /* Spreads from the middle of the row and steps down to its faintest
+     level at the row edges — not to nothing short of them. Ending the
+     wash inside the row put a hard transparent edge partway across, which
+     landed mid-score and read as the effect being clipped rather than
+     fading.
+
+     The curve stops well short of zero — the outermost band sits at 0.28,
+     not 0.07. Reaching the edge is not the same as being visible there,
+     and a tail that fades to nothing means the last third of the row
+     carries no colour whatever the stops say. This is a falloff between
+     two lit states, not a fade-out. Symmetric and linear rather than radial: a radial falloff draws
+     concentric ellipses, which is a blob shape with its own generic
+     associations, and in a strip this short the vertical component of it
+     does nothing anyway. Bands stepping outward keep the whole thing on
+     one axis, which is the axis the scan bars already establish. */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.28) 0% 7%,
+    rgba(0, 0, 0, 0.38) 7% 13%,
+    rgba(0, 0, 0, 0.48) 13% 20%,
+    rgba(0, 0, 0, 0.58) 20% 26%,
+    rgba(0, 0, 0, 0.68) 26% 33%,
+    rgba(0, 0, 0, 0.79) 33% 39%,
+    rgba(0, 0, 0, 0.9) 39% 46%,
+    #000 46% 54%,
+    rgba(0, 0, 0, 0.9) 54% 61%,
+    rgba(0, 0, 0, 0.79) 61% 67%,
+    rgba(0, 0, 0, 0.68) 67% 74%,
+    rgba(0, 0, 0, 0.58) 74% 80%,
+    rgba(0, 0, 0, 0.48) 80% 87%,
+    rgba(0, 0, 0, 0.38) 87% 93%,
+    rgba(0, 0, 0, 0.28) 93% 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.28) 0% 7%,
+    rgba(0, 0, 0, 0.38) 7% 13%,
+    rgba(0, 0, 0, 0.48) 13% 20%,
+    rgba(0, 0, 0, 0.58) 20% 26%,
+    rgba(0, 0, 0, 0.68) 26% 33%,
+    rgba(0, 0, 0, 0.79) 33% 39%,
+    rgba(0, 0, 0, 0.9) 39% 46%,
+    #000 46% 54%,
+    rgba(0, 0, 0, 0.9) 54% 61%,
+    rgba(0, 0, 0, 0.79) 61% 67%,
+    rgba(0, 0, 0, 0.68) 67% 74%,
+    rgba(0, 0, 0, 0.58) 74% 80%,
+    rgba(0, 0, 0, 0.48) 80% 87%,
+    rgba(0, 0, 0, 0.38) 87% 93%,
+    rgba(0, 0, 0, 0.28) 93% 100%
+  );
+  /* The base rule blurs and scales because it is treating a photograph,
+     and an 18px blur would smear these bars into precisely the smooth
+     gradient this variant exists to avoid — so those go. Its saturation
+     and brightness lift should NOT have gone with them: clearing the whole
+     filter dropped the grading too, which is what made this read flatter
+     than the blurred version it replaced. Lower values than the photo
+     needs, since a chosen tint starts vivid rather than averaged. */
+  filter: saturate(1.35) brightness(1.12);
+  transform: none;
+}
+
+/* Not merely un-dimmed — driven above baseline, so a finished game reads
+   as receiving a strong signal rather than as the one row that happens to
+   have no snow on it. */
+.leaderboard-row--complete .leaderboard-thumb-frame .leaderboard-thumb {
+  filter: brightness(1.1) saturate(1.15);
+}
+
+/* Much gentler than the card grid's dim, and deliberately so. There, a
+   dark card is a passing state — you scroll it into the spotlight and it
+   comes back. Here it is the resting state of most of the list, and
+   nobody tunes in ninety rows. Pushed to the grid's depth it stops
+   reading as "not finished yet" and starts reading as broken.
+   Grid values, for reference: brightness 0.25, saturate 0.4, grain 0.75. */
+.leaderboard-thumb-frame .leaderboard-thumb {
+  filter:
+    brightness(calc(1 - var(--thumb-dim) * 0.3))
+    saturate(calc(1 - var(--thumb-dim) * 0.45));
+  transition: filter 0.15s linear;
+}
+
+.leaderboard-thumb-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: calc(var(--thumb-dim) * 0.28);
+  background-image: var(--grain-tile);
+  transition: opacity 0.15s linear;
+  /* The same hop the card grid runs, so this is the app's static and not
+     a still lookalike of it. Gated exactly as the grid gates its own: the
+     texture repaints five times a second, and game-card.css records that
+     224 of those going at once was the single biggest thing making that
+     page crawl. A hundred rows is the same problem, so rows off screen
+     hold their frame — see useInView, shared by both. */
+  animation: grain-static 0.6s steps(5) infinite;
+}
+
+.leaderboard-thumb-frame:not([data-in-view])::after {
+  animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .leaderboard-row {
+  .leaderboard-thumb-frame::after {
     animation: none;
   }
+}
 
-  .leaderboard-row--complete {
-    animation: none;
+@media (prefers-reduced-motion: reduce) {
+  .leaderboard-thumb-frame .leaderboard-thumb {
+    transition: none;
   }
 }
 
@@ -457,10 +718,11 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Neutral, not gold: the foil around the row is already carrying the
-   colour, and a gold line inside a rainbow frame muddies both. */
+/* Gold, matching the glow on the cover. The lit thumbnail alone was too
+   quiet once the dim was pulled back, and a colour shift on the count
+   reads at text scale where a surface effect does not. */
 .leaderboard-completion--complete {
-  color: var(--text);
+  color: var(--gold-bright);
 }
 
 /* Row platform marker. Was a filled colour chip, which stopped working
@@ -497,7 +759,8 @@
 }
 
 .leaderboard-row--skeleton:hover {
-  border-color: var(--border);
+  background: none;
+  box-shadow: none;
 }
 
 .leaderboard-skeleton {

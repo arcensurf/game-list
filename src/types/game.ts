@@ -158,6 +158,14 @@ export interface LeaderboardGame {
    * its highest-scoring member.
    */
   dupeKey: string | null;
+  /**
+   * Dominant colour of the cover, as a hex string — precomputed by
+   * scripts/lib/dominant-color.mjs and cached in
+   * public/data/cover-tints.json. Optional because a build may predate
+   * the tint pass, or a cover may be unfetchable; the leaderboard falls
+   * back to blurring the cover itself when it is absent.
+   */
+  tint?: string;
 }
 
 export interface LeaderboardAchievement {

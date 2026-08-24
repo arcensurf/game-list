@@ -9,6 +9,7 @@ import type { ShardPlatform } from '../hooks/useAchievementList';
 import type { LeaderboardGame } from '../types/game';
 import { PLATFORMS } from '../hooks/useTrophyPicker';
 import LeaderboardGameModal from './LeaderboardGameModal';
+import { useInView } from '../hooks/useInView';
 import LampToggle from './LampToggle';
 import type { LeaderboardModalTarget } from './LeaderboardGameModal';
 import DuplicateGroupsOverlay from './DuplicateGroupsOverlay';
@@ -74,6 +75,7 @@ function Thumb({
   gameId: string;
   icon: string | null;
 }) {
+  const frameRef = useInView<HTMLSpanElement>();
   const [src, setSrc] = useState(pickerCoverUrl(platform, gameId, icon));
   if (!src) {
     // Xbox is the one platform where titleHub sometimes just omits box art
@@ -83,28 +85,36 @@ function Thumb({
     // other platforms that it isn't worth sourcing matching logos for them.
     if (platform === 'xbox') {
       return (
-        <div className="leaderboard-thumb leaderboard-thumb--fallback">
+        <span className="leaderboard-thumb-frame" ref={frameRef}>
+          <div className="leaderboard-thumb leaderboard-thumb--fallback">
           <span
             className="leaderboard-thumb--fallback-icon"
             style={{ maskImage: `url(${xboxLogo})`, WebkitMaskImage: `url(${xboxLogo})` }}
-          />
-        </div>
+            />
+          </div>
+        </span>
       );
     }
-    return <div className="leaderboard-thumb leaderboard-thumb--empty" />;
+    return (
+      <span className="leaderboard-thumb-frame" ref={frameRef}>
+        <div className="leaderboard-thumb leaderboard-thumb--empty" />
+      </span>
+    );
   }
   return (
-    <img
-      className="leaderboard-thumb"
-      src={src}
-      alt=""
-      onError={() => {
-        const fallback = steamCoverFallback(gameId);
-        if (platform === 'steam' && src !== fallback) setSrc(fallback);
-        else if (icon && src !== icon) setSrc(icon);
-        else setSrc(null);
-      }}
-    />
+    <span className="leaderboard-thumb-frame" ref={frameRef}>
+      <img
+        className="leaderboard-thumb"
+        src={src}
+        alt=""
+        onError={() => {
+          const fallback = steamCoverFallback(gameId);
+          if (platform === 'steam' && src !== fallback) setSrc(fallback);
+          else if (icon && src !== icon) setSrc(icon);
+          else setSrc(null);
+        }}
+      />
+    </span>
   );
 }
 
@@ -441,7 +451,7 @@ export default function LeaderboardView({
           {completionsOnly ? 'No completions on the selected platforms yet.' : 'No games match this platform filter.'}
         </p>
       ) : tab === 'games' ? (
-        <ol className="leaderboard-list">
+        <ol className="leaderboard-list leaderboard-list--progress">
           {games.map((g, i) => {
             const complete = g.earned === g.total;
             return (
@@ -463,6 +473,28 @@ export default function LeaderboardView({
                   }
                 }}
               >
+                {/* The row's colour, from the cover's dominant hue where the
+                    build resolved one, and from blurring the cover itself
+                    where it did not. Lit
+                    on completions. Every row is a different colour
+                    because every cover is — the thing a shared gradient
+                    could never do. The thumbnail on top of it is what
+                    makes the colour legible rather than arbitrary. */}
+                {g.tint ? (
+                  <span
+                    className="leaderboard-row-art leaderboard-row-art--tint"
+                    style={{ ['--row-tint' as string]: g.tint } as React.CSSProperties}
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <img
+                    className="leaderboard-row-art"
+                    src={pickerCoverUrl(g.platform, g.id, g.icon) ?? undefined}
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                  />
+                )}
                 <span className="leaderboard-rank">{i + 1}</span>
                 <Thumb platform={g.platform} gameId={g.id} icon={g.icon} />
                 <div className="leaderboard-main">
