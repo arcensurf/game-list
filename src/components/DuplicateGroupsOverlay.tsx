@@ -78,6 +78,11 @@ export default function DuplicateGroupsOverlay({
 
   useEffect(() => {
     if (!open) return;
+    // Resets on open AND kicks off the group refetch below — the fetch
+    // is what makes this a genuine effect rather than derivable state,
+    // so the reset rides along in the same effect rather than being
+    // split out into a separate render-time adjustment.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHidden(new Set());
     setLinking(false);
     setPickedA(null);

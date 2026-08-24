@@ -253,10 +253,15 @@ export default function TrophyPickerView() {
   // Starts as the roll's own guess and gets refined by Cover as it
   // works through the fallback chain — kept separate from `shown` so
   // the backdrop doesn't need its own copy of that resolution logic.
+  // Reset during render (not an effect) when the roll's own guess
+  // changes, rather than one render behind it.
+  const coverResetKey = shown ? `${shown.platform}|${shown.gameId}|${shown.coverUrl ?? ''}` : null;
   const [resolvedCoverUrl, setResolvedCoverUrl] = useState<string | null>(null);
-  useEffect(() => {
+  const [resolvedForKey, setResolvedForKey] = useState<string | null>(null);
+  if (coverResetKey !== resolvedForKey) {
+    setResolvedForKey(coverResetKey);
     setResolvedCoverUrl(shown?.coverUrl ?? null);
-  }, [shown?.platform, shown?.gameId, shown?.coverUrl]);
+  }
 
   return (
     <div className="picker-view">

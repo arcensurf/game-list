@@ -43,6 +43,10 @@ export default function MarksOverlay({ open, onClose }: { open: boolean; onClose
   // shouldn't leave stale rows behind.
   useEffect(() => {
     if (!open) return;
+    // Resets on open AND kicks off the overrides fetch below — the
+    // fetch is what makes this a genuine effect, so the reset rides
+    // along rather than being split into a render-time adjustment.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPicked(null);
     setQuery('');
     setLoading(true);
@@ -67,6 +71,9 @@ export default function MarksOverlay({ open, onClose }: { open: boolean; onClose
   useEffect(() => {
     if (!picked) return;
     let cancelled = false;
+    // Loading flag precedes the fetch it's for — a standard
+    // data-fetching effect, not derived state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNamesLoading(true);
     loadAchievementList(picked.platform, picked.id).then((list) => {
       if (cancelled) return;
