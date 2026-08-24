@@ -112,6 +112,58 @@
   color: var(--accent-light);
 }
 
+/* Games of Games filter chip. Marked with the foil itself rather than an
+   icon — the iridescent frame is how a GoG card announces itself (see
+   game-of-games.css), so the control that summons them wears the same
+   thing at chip scale. */
+.gog-filter-toggle {
+  flex-shrink: 0;
+  /* Keeps the chip and the stats button together at the right once the
+     alphabet nav is hidden; a no-op while the nav is there to fill the
+     row on its own. */
+  margin-left: auto;
+  height: 2rem;
+  padding: 0 0.7rem;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.gog-filter-toggle:hover {
+  color: var(--text);
+  border-color: var(--accent-dim);
+}
+
+/* Active: the same border conic and the same drifting light source the
+   foil cards use, so the chip catches the light exactly as they do. */
+.gog-filter-toggle--on {
+  color: var(--text);
+  border-color: transparent;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-image:
+    linear-gradient(var(--bg), var(--bg)),
+    var(--gog-border-conic);
+  animation: gog-light-drift 32s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gog-filter-toggle--on {
+    animation: none;
+  }
+}
+
+.gog-filter-toggle-short {
+  display: none;
+}
+
 .masthead h1 {
   font-family: 'Share Tech', sans-serif;
   font-size: 1.35rem;
@@ -172,6 +224,15 @@
 @media (max-width: 500px) {
   .game-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* The full label crowds the alphabet nav into its scroll arrows. */
+  .gog-filter-toggle-long {
+    display: none;
+  }
+
+  .gog-filter-toggle-short {
+    display: inline;
   }
 }
 

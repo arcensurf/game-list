@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useGames } from '../hooks/useGames';
+import { useGogFilter } from '../hooks/useGogFilter';
 import { useCardSpotlight } from '../hooks/useCardSpotlight';
 import { useViewSwipe } from '../hooks/useViewSwipe';
 import { useScrollReset } from '../hooks/useScrollReset';
 import { useMastheadFlip } from '../hooks/useMastheadFlip';
 import AlphabetNav from './AlphabetNav';
+import GogFilterToggle from './GogFilterToggle';
 import GameGrid from './GameGrid';
 import BacklogList from './BacklogList';
 import AddGameForm from './AddGameForm';
@@ -24,7 +26,7 @@ export default function App() {
   const [inTransition, setInTransition] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
 
-  const gogOnly = view === 'gog';
+  const { gogOnly, toggleGog } = useGogFilter(view);
   const backlogView = view === 'backlog';
   const statsView = view === 'stats';
   // Gated on DEV at the point of use, not just kept out of VIEW_ORDER:
@@ -58,7 +60,7 @@ export default function App() {
   }, [effectiveLightsOn]);
 
   useCardSpotlight(!effectiveLightsOn);
-  useScrollReset(view);
+  useScrollReset(`${view}${gogOnly ? ':gog' : ''}`);
   const mastheadFlipped = useMastheadFlip(view);
   const { onTouchStart, onTouchEnd } = useViewSwipe(view, changeView);
 
@@ -82,7 +84,15 @@ export default function App() {
           <div className="masthead-face masthead-face--letters">
             {view === 'list' && (
               <>
-                <AlphabetNav activeLetters={activeLetters} />
+                {/* A filtered grid is a flat handful of cards with no
+                    letter sections to jump to, so the nav gives way. */}
+                {!gogOnly && (
+                  <>
+                    <AlphabetNav activeLetters={activeLetters} />
+                    <div className="masthead-divider" aria-hidden="true" />
+                  </>
+                )}
+                <GogFilterToggle on={gogOnly} onToggle={toggleGog} />
                 <div className="masthead-divider" aria-hidden="true" />
                 <button
                   className="stats-trigger"
