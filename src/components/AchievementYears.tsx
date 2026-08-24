@@ -28,18 +28,22 @@ function YearBars({
 
   return (
     <div className="stats-year-bars">
-      {years.map((y) => (
+      {years.map((y, i) => (
         <div
           key={y.year}
           className={`stats-year-bar-col${y.year === selectedYear ? ' stats-year-bar-col--selected' : ''}`}
           title={`${y.year}: ${y.count} achievement${y.count === 1 ? '' : 's'}, ${y.score.toFixed(0)} pts`}
           onClick={() => onSelect(y.year)}
           role="button"
+          style={{ animationDelay: `${i * 25}ms` }}
         >
           <span className="stats-year-bar-count">
             {metric === 'points' ? fmtScore(y.score) : y.count}
           </span>
-          <div className="stats-year-bar" style={{ height: YEAR_BAR_HEIGHT }}>
+          <div
+            className="stats-year-bar"
+            style={{ height: YEAR_BAR_HEIGHT, animationDelay: `${i * 25}ms` }}
+          >
             {PLATFORM_ORDER.map((platform) => {
               const stat = y.platforms[platform];
               if (!stat || stat.count === 0) return null;

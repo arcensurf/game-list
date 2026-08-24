@@ -105,6 +105,11 @@
   color: var(--text-muted);
 }
 
+.leaderboard-platform-toggle:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .leaderboard-platform-toggle--on {
   border-color: transparent;
   color: #fff;
@@ -218,6 +223,22 @@
   border-radius: 6px;
   cursor: pointer;
   transition: border-color var(--transition);
+  /* Cascading rise on entrance, same shape as the backlog's band-in —
+     see --row-index above for the per-row delay (shared with the
+     completion foil's drift phase below). */
+  animation: leaderboard-row-in 0.35s ease-out both;
+  animation-delay: calc(var(--row-index, 0) * 35ms);
+}
+
+@keyframes leaderboard-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .leaderboard-row:hover,
@@ -248,10 +269,13 @@
   background-image:
     linear-gradient(var(--bg-card), var(--bg-card)),
     var(--gog-border-conic);
-  animation: gog-light-drift 32s linear infinite;
-  /* Scatter the phase so a run of completions doesn't shimmer in
-     lockstep — same trick the card grid plays with --card-index. */
-  animation-delay: calc(var(--row-index, 0) * -2.5s);
+  /* Entrance rise (shared with the base .leaderboard-row rule above)
+     plus the foil's continuous light-drift, running together. */
+  animation: leaderboard-row-in 0.35s ease-out both, gog-light-drift 32s linear infinite;
+  /* Scatter the drift phase so a run of completions doesn't shimmer in
+     lockstep — same trick the card grid plays with --card-index. The
+     entrance keeps its own stagger from the base rule. */
+  animation-delay: calc(var(--row-index, 0) * 35ms), calc(var(--row-index, 0) * -2.5s);
   transition: --gog-foil-strength 0.35s ease;
 }
 
@@ -291,6 +315,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .leaderboard-row {
+    animation: none;
+  }
+
   .leaderboard-row--complete {
     animation: none;
   }
@@ -394,6 +422,65 @@
   flex-shrink: 0;
   min-width: 3.5rem;
   text-align: right;
+}
+
+/* Skeleton rows for the initial leaderboard.json load — same shape as
+   a real row (rank/thumb/title/meta/score), pulsing rather than a
+   plain "Loading..." line. */
+.leaderboard-row--skeleton {
+  cursor: default;
+}
+
+.leaderboard-row--skeleton:hover {
+  border-color: var(--border);
+}
+
+.leaderboard-skeleton {
+  display: block;
+  background: var(--border);
+  border-radius: 3px;
+  animation: leaderboard-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.leaderboard-skeleton--rank {
+  width: 1.1rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+}
+
+.leaderboard-skeleton--thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.leaderboard-skeleton--title {
+  width: 60%;
+  height: 0.9rem;
+}
+
+.leaderboard-skeleton--meta {
+  width: 40%;
+  height: 0.7rem;
+}
+
+.leaderboard-skeleton--score {
+  width: 3rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+@keyframes leaderboard-skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.9; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leaderboard-skeleton {
+    animation: none;
+    opacity: 0.6;
+  }
 }
 
 .leaderboard-modal-overlay {

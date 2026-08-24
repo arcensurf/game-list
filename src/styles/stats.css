@@ -19,6 +19,29 @@
   color: var(--text);
 }
 
+.stats-preview-loading-btn {
+  font-family: 'Share Tech', sans-serif;
+  padding: 0.22rem 0.6rem 0.16rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.stats-preview-loading-btn:not(:disabled):hover {
+  color: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.stats-preview-loading-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 /* Top 5 — a stat bar, not a card grid: hairline rules do the framing,
    the numbers do the talking. Matches the masthead divider / system
    heading rule treatment used elsewhere rather than boxing anything. */
@@ -122,6 +145,12 @@
     animation: none;
     opacity: 0.5;
   }
+
+  .stats-year-bar-col,
+  .stats-year-bar,
+  .stats-year-recap {
+    animation: none;
+  }
 }
 
 .stats-years-loading {
@@ -188,6 +217,12 @@
   min-width: 0;
   max-width: 3rem;
   cursor: pointer;
+  animation: stats-year-col-in 0.3s ease-out both;
+}
+
+@keyframes stats-year-col-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .stats-year-bar-count {
@@ -206,6 +241,16 @@
   transition: outline-color var(--transition);
   outline: 1px solid transparent;
   outline-offset: 1px;
+  /* Grows up from the baseline on first load, staggered left to right
+     (see the inline animationDelay) — a chart animating in, rather
+     than the whole section fading in as one flat block. */
+  transform-origin: bottom;
+  animation: stats-year-bar-in 0.4s ease-out both;
+}
+
+@keyframes stats-year-bar-in {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
 }
 
 .stats-year-bar-col:hover .stats-year-bar {
@@ -235,6 +280,22 @@
 /* Recap — one year at a time */
 .stats-year-recap {
   margin-top: 2rem;
+  /* Fires once, on first mount — the panel doesn't remount when
+     switching years (see AchievementYears), so this is purely the
+     load-in transition, not a per-year replay. */
+  animation: stats-year-recap-in 0.4s ease-out both;
+  animation-delay: 150ms;
+}
+
+@keyframes stats-year-recap-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .stats-year-recap-header {

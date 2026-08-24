@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { PlatformStat } from '../hooks/useGames';
 import { useTimeline } from '../hooks/useTimeline';
 import PlatformBadge from './PlatformBadge';
@@ -17,6 +18,11 @@ export default function StatsView({
   const top = stats.slice(0, TOP_COUNT);
   const rest = stats.slice(TOP_COUNT);
   const { data: timeline, loading: timelineLoading } = useTimeline();
+  // Dev-only: lets the loading skeleton and its entrance animation be
+  // re-triggered on demand while iterating on them, instead of needing
+  // a full reload every time.
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const showLoading = timelineLoading || previewLoading;
 
   return (
     <div className="stats-view">
@@ -24,6 +30,19 @@ export default function StatsView({
         <div>
           <h2>Games Per Platform</h2>
         </div>
+        {import.meta.env.DEV && (
+          <button
+            type="button"
+            className="stats-preview-loading-btn"
+            onClick={() => {
+              setPreviewLoading(true);
+              setTimeout(() => setPreviewLoading(false), 2000);
+            }}
+            disabled={previewLoading}
+          >
+            Preview loading
+          </button>
+        )}
       </div>
       <div className="stats-platform-top">
         {top.map(({ platform, count }) => (
@@ -43,11 +62,11 @@ export default function StatsView({
           ))}
         </div>
       )}
-      {timeline ? (
+      {timeline && !previewLoading ? (
         <AchievementYears months={timeline.months} years={timeline.years} />
       ) : (
         <div className="stats-years">
-          {timelineLoading && (
+          {showLoading && (
             <div className="stats-years-skeleton" aria-hidden="true">
               {SKELETON_BAR_HEIGHTS.map((h, i) => (
                 <span
@@ -59,7 +78,7 @@ export default function StatsView({
             </div>
           )}
           <p className="stats-years-loading">
-            {timelineLoading ? 'Loading achievement history…' : 'Could not load achievement history.'}
+            {showLoading ? 'Loading achievement history…' : 'Could not load achievement history.'}
           </p>
         </div>
       )}

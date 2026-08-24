@@ -12,8 +12,14 @@ import LeaderboardGameModal from './LeaderboardGameModal';
 import type { LeaderboardModalTarget } from './LeaderboardGameModal';
 import DuplicateGroupsOverlay from './DuplicateGroupsOverlay';
 import ScoringInfoModal from './ScoringInfoModal';
+import PlatformPill from './PlatformPill';
+import { PLATFORM_LABELS, formatDate } from '../utils/leaderboardFormat';
 
 const SEARCH_RESULTS_LIMIT = 8;
+const SKELETON_ROWS = Array.from({ length: 8 }, (_, i) => i);
+// Caps how far the entrance stagger climbs — without this, row 150 of
+// a 200-row list would start rising in nearly six seconds after mount.
+const MAX_STAGGER_INDEX = 14;
 
 // Strips trademark clutter (DiRT™, DIRT5™, ...) so it doesn't throw off
 // either the exact-match check or the alphabetical tiebreak below.
@@ -84,24 +90,6 @@ function readStoredCompletionsOnly(): boolean {
   }
 }
 
-export const PLATFORM_LABELS: Record<ShardPlatform, string> = {
-  steam: 'Steam',
-  psn: 'PSN',
-  xbox: 'Xbox',
-  ra: 'RA',
-};
-
-export function PlatformPill({ platform }: { platform: ShardPlatform }) {
-  return (
-    <span
-      className="leaderboard-platform"
-      style={{ background: ACHIEVEMENT_PLATFORM_COLORS[platform] }}
-    >
-      {PLATFORM_LABELS[platform]}
-    </span>
-  );
-}
-
 // Same fallback chain as the picker's Cover component, minus the SGDB
 // live lookup — that goes through a dev-only API route with nothing
 // backing it on the deployed site, and this view is public.
@@ -148,11 +136,6 @@ function Thumb({
   );
 }
 
-export function formatDate(iso: string | null): string {
-  if (!iso) return '';
-  return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-}
-
 type Tab = 'games' | 'rarest';
 
 // Matches the per-platform caps in scripts/build-leaderboard.mjs — the
@@ -175,6 +158,10 @@ export default function LeaderboardView() {
   const [completionsOnly, setCompletionsOnly] = useState<boolean>(readStoredCompletionsOnly);
   const [groupsOpen, setGroupsOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+  // Dev-only: lets the loading skeleton and its entrance animation be
+  // re-triggered on demand while iterating on them, instead of needing
+  // a full reload every time.
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [query, setQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
@@ -270,11 +257,32 @@ export default function LeaderboardView() {
     });
   };
 
-  if (loading) {
+  if (loading || previewLoading) {
     return (
-      <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '4rem 0' }}>
-        Loading...
-      </p>
+      <div className="leaderboard-view">
+        <div className="leaderboard-header">
+          <div className="leaderboard-title-row">
+            <h2>Leaderboard</h2>
+          </div>
+        </div>
+        <ol className="leaderboard-list" aria-hidden="true">
+          {SKELETON_ROWS.map((i) => (
+            <li
+              key={i}
+              className="leaderboard-row leaderboard-row--skeleton"
+              style={{ ['--row-index' as string]: i } as React.CSSProperties}
+            >
+              <span className="leaderboard-skeleton leaderboard-skeleton--rank" />
+              <span className="leaderboard-skeleton leaderboard-skeleton--thumb" />
+              <div className="leaderboard-main">
+                <span className="leaderboard-skeleton leaderboard-skeleton--title" />
+                <span className="leaderboard-skeleton leaderboard-skeleton--meta" />
+              </div>
+              <span className="leaderboard-skeleton leaderboard-skeleton--score" />
+            </li>
+          ))}
+        </ol>
+      </div>
     );
   }
   if (!data) {
@@ -407,6 +415,19 @@ export default function LeaderboardView() {
               Review duplicates
             </button>
           )}
+          {import.meta.env.DEV && (
+            <button
+              type="button"
+              className="leaderboard-platform-toggle"
+              onClick={() => {
+                setPreviewLoading(true);
+                setTimeout(() => setPreviewLoading(false), 2000);
+              }}
+              disabled={previewLoading}
+            >
+              Preview loading
+            </button>
+          )}
         </div>
 
         <div className="leaderboard-search-wrap">
@@ -478,10 +499,11 @@ export default function LeaderboardView() {
               <li
                 key={`${g.platform}/${g.id}`}
                 className={`leaderboard-row${complete ? ' leaderboard-row--complete' : ''}`}
-                // Staggers the foil's light-drift so a run of
-                // completions doesn't shimmer in lockstep; see
+                // Staggers both the entrance rise (every row) and, for
+                // completions, the foil's light-drift so a run of them
+                // doesn't shimmer in lockstep — see .leaderboard-row and
                 // .leaderboard-row--complete in leaderboard.css.
-                style={complete ? ({ ['--row-index' as string]: i } as React.CSSProperties) : undefined}
+                style={{ ['--row-index' as string]: Math.min(i, MAX_STAGGER_INDEX) } as React.CSSProperties}
                 role="button"
                 tabIndex={0}
                 onClick={() => setModalTarget({ platform: g.platform, id: g.id, title: g.title, dupeKey: g.dupeKey })}
@@ -517,6 +539,7 @@ export default function LeaderboardView() {
             <li
               key={`${a.platform}/${a.gameId}/${a.name}/${i}`}
               className="leaderboard-row"
+              style={{ ['--row-index' as string]: Math.min(i, MAX_STAGGER_INDEX) } as React.CSSProperties}
               role="button"
               tabIndex={0}
               onClick={() => setModalTarget({ platform: a.platform, id: a.gameId, title: a.gameTitle })}

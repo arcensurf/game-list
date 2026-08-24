@@ -5,7 +5,8 @@ import type { ShardPlatform } from '../hooks/useAchievementList';
 import type { LeaderboardGame } from '../types/game';
 import { achievementScore } from '../utils/achievementScore';
 import { buildGameScoreContext, projectUnearned } from '../utils/leaderboardCompletion';
-import { PlatformPill, PLATFORM_LABELS, formatDate } from './LeaderboardView';
+import PlatformPill from './PlatformPill';
+import { PLATFORM_LABELS, formatDate } from '../utils/leaderboardFormat';
 
 export interface LeaderboardModalTarget {
   platform: ShardPlatform;
@@ -33,13 +34,17 @@ export default function LeaderboardGameModal({
   onClose: () => void;
 }) {
   // Which member of the group is currently shown — resets to `target`
-  // itself whenever the modal is (re)opened for a different game, same
-  // reset-on-open pattern as MarksOverlay/DuplicateGroupsOverlay.
+  // itself whenever the modal is (re)opened for a different game.
+  // Adjusted during render rather than in an effect (React's own
+  // recommended pattern for "reset state when a prop changes") so the
+  // reset lands in the same commit as the new target instead of one
+  // render behind it.
   const [active, setActive] = useState<LeaderboardModalTarget | null>(null);
-
-  useEffect(() => {
+  const [activeFor, setActiveFor] = useState<LeaderboardModalTarget | null>(null);
+  if (target !== activeFor) {
+    setActiveFor(target);
     setActive(null);
-  }, [target]);
+  }
 
   const shown = active ?? target;
   const { list, loading } = useAchievementList(shown?.platform ?? null, shown?.id ?? null);
