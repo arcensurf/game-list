@@ -72,29 +72,45 @@ const MONTH_NAMES = [
 ];
 const MONTH_INITIALS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 
-function MonthSparkline({ months, metric }: { months: TimelineMonth[]; metric: Metric }) {
+function MonthSparkline({
+  months,
+  metric,
+  visibleCount,
+}: {
+  months: TimelineMonth[];
+  metric: Metric;
+  // Months at or past this index haven't happened yet — the column
+  // still occupies its grid slot (so earlier months don't stretch to
+  // fill the gap), it just has no bar or tooltip.
+  visibleCount: number;
+}) {
   const value = (m: TimelineMonth) => (metric === 'points' ? m.score : m.count);
-  const maxValue = Math.max(1, ...months.map(value));
+  const maxValue = Math.max(1, ...months.slice(0, visibleCount).map(value));
 
   return (
     <div className="stats-year-spark-block">
       <span className="stats-year-spark-caption">Month by Month</span>
       <div className="stats-year-spark">
-        {months.map((m, i) => (
-          <div
-            key={m.month}
-            className="stats-year-spark-col"
-            title={`${MONTH_NAMES[i]}: ${m.count} achievement${m.count === 1 ? '' : 's'}, ${m.score.toFixed(0)} pts`}
-          >
-            <div className="stats-year-spark-track">
-              <div
-                className="stats-year-spark-bar"
-                style={{ height: `${(value(m) / maxValue) * 100}%` }}
-              />
+        {months.map((m, i) => {
+          const future = i >= visibleCount;
+          return (
+            <div
+              key={m.month}
+              className="stats-year-spark-col"
+              title={future ? undefined : `${MONTH_NAMES[i]}: ${m.count} achievement${m.count === 1 ? '' : 's'}, ${m.score.toFixed(0)} pts`}
+            >
+              <div className="stats-year-spark-track">
+                {!future && (
+                  <div
+                    className="stats-year-spark-bar"
+                    style={{ height: `${(value(m) / maxValue) * 100}%` }}
+                  />
+                )}
+              </div>
+              <span className="stats-year-spark-label">{MONTH_INITIALS[i]}</span>
             </div>
-            <span className="stats-year-spark-label">{MONTH_INITIALS[i]}</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -115,6 +131,13 @@ function YearRecap({
   const { rarestAchievements } = year;
   const gameValue = (g: TimelineYearTopGame) => (metric === 'points' ? fmtScore(g.score) : g.count);
 
+  // Matches the build script's UTC bucketing (see build-timeline.mjs)
+  // so the cutoff lands on the same month boundary the data uses. Past
+  // years always show all 12 — only the year still in progress has
+  // months that haven't happened yet.
+  const now = new Date();
+  const monthsElapsed = year.year === now.getUTCFullYear() ? now.getUTCMonth() + 1 : 12;
+
   return (
     <div className="stats-year-recap">
       <div className="stats-year-recap-header">
@@ -124,7 +147,7 @@ function YearRecap({
         </span>
       </div>
 
-      <MonthSparkline months={months} metric={metric} />
+      <MonthSparkline months={months} metric={metric} visibleCount={monthsElapsed} />
 
       {hero && (
         <div className="stats-year-hero">
