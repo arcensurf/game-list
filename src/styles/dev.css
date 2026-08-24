@@ -515,12 +515,12 @@
   background-clip: padding-box, border-box;
   border: 1px solid transparent;
   border-radius: 8px;
-  filter: saturate(0.4) brightness(0.85);
+  filter: saturate(0.35) brightness(0.55);
   transition: filter 0.3s ease, box-shadow 0.3s ease;
 }
 
 .gog-row:hover {
-  filter: saturate(0.65) brightness(0.95);
+  filter: saturate(0.55) brightness(0.75);
 }
 
 .gog-row--active {
