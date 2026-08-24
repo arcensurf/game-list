@@ -16,11 +16,6 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 8px;
-  transition: border-color var(--transition), background var(--transition);
-}
-
-.backlog-row:hover {
-  border-color: rgba(var(--accent-glow), 0.4);
 }
 
 .backlog-cover {
