@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { LeaderboardGame } from '../types/game';
 import type { SearchableGame } from '../hooks/useGameSearchIndex';
@@ -61,6 +61,21 @@ export default function DuplicateGroupsOverlay({
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<string | null>(null);
 
+  // Shared by the initial open and every write below — a merge/split
+  // changes which dupeKey groups exist server-side (assignDupeKeys reruns
+  // against the updated game-links.json on each /api/dupe-groups call),
+  // so re-fetching after a write is what promotes a fresh manual merge
+  // into the main groups list (with its own "+ Add copy" button) without
+  // requiring the overlay to be closed and reopened first.
+  const refreshGames = useCallback(async () => {
+    const [dupeGroups, linksData] = await Promise.all([
+      fetch(`/api/dupe-groups?t=${Date.now()}`).then((res) => (res.ok ? res.json() : { games: [] })),
+      loadGameLinks(),
+    ]) as [{ games?: LeaderboardGame[] }, GameLinks];
+    setGames(dupeGroups.games ?? []);
+    setLinks(linksData);
+  }, []);
+
   useEffect(() => {
     if (!open) return;
     setHidden(new Set());
@@ -69,15 +84,8 @@ export default function DuplicateGroupsOverlay({
     setQuery('');
     setStatus(null);
     setLoading(true);
-    Promise.all([
-      fetch(`/api/dupe-groups?t=${Date.now()}`).then((res) => (res.ok ? res.json() : { games: [] })),
-      loadGameLinks(),
-    ]).then(([dupeGroups, linksData]: [{ games?: LeaderboardGame[] }, GameLinks]) => {
-      setGames(dupeGroups.games ?? []);
-      setLinks(linksData);
-      setLoading(false);
-    });
-  }, [open]);
+    void refreshGames().then(() => setLoading(false));
+  }, [open, refreshGames]);
 
   useEffect(() => {
     if (!open) return;
@@ -115,13 +123,15 @@ export default function DuplicateGroupsOverlay({
   async function splitMember(group: LeaderboardGame[], member: LeaderboardGame) {
     const memberKey = shardKey(member.platform, member.id);
     const others = group.filter((g) => shardKey(g.platform, g.id) !== memberKey);
+    // Hide it immediately rather than waiting on the refresh round-trip —
+    // refreshGames() below then reconciles with the server's actual
+    // grouping once it lands.
+    setHidden((prev) => new Set(prev).add(memberKey));
     try {
-      let updated = links;
       for (const other of others) {
-        updated = await saveGameLink(member, other, 'split');
+        await saveGameLink(member, other, 'split');
       }
-      setLinks(updated);
-      setHidden((prev) => new Set(prev).add(memberKey));
+      await refreshGames();
       setStatus(`Split "${member.title}" out — takes effect on the next leaderboard build.`);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Failed to split');
@@ -130,8 +140,8 @@ export default function DuplicateGroupsOverlay({
 
   async function removeLink(pair: GameLinkPair, kind: 'merges' | 'splits') {
     try {
-      const updated = await saveGameLink(memberFromKey(pair[0]), memberFromKey(pair[1]), null);
-      setLinks(updated);
+      await saveGameLink(memberFromKey(pair[0]), memberFromKey(pair[1]), null);
+      await refreshGames();
       setStatus(`Removed ${kind === 'merges' ? 'merge' : 'split'} — takes effect on the next leaderboard build.`);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Failed to remove link');
@@ -150,8 +160,8 @@ export default function DuplicateGroupsOverlay({
   async function pickSecond(b: SearchableGame) {
     if (!pickedA) return;
     try {
-      const updated = await saveGameLink(pickedA, b, 'merge');
-      setLinks(updated);
+      await saveGameLink(pickedA, b, 'merge');
+      await refreshGames();
       setStatus(`Linked "${pickedA.title}" (${pickedA.platform}) with "${b.title}" (${b.platform}) — takes effect on the next leaderboard build.`);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Failed to link');
