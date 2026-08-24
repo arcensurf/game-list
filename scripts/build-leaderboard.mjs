@@ -275,7 +275,11 @@ async function attachTints(games, dataDir) {
   // never a result the current algorithm would not produce. Cheap to get
   // wrong silently and annoying to debug: the code looks fixed and the
   // page still shows the old colour.
-  const TINT_ALGO_VERSION = 5;
+  // 6: coverUrlsFor gained the Steam header fallback. The version has to
+  // move for a source change too, not just an algorithm one — the cached
+  // nulls are "no cover found", and without a bump the games the new
+  // fallback exists to rescue would keep serving their stored null.
+  const TINT_ALGO_VERSION = 6;
   const stored = existsSync(cachePath)
     ? JSON.parse(readFileSync(cachePath, 'utf8'))
     : {};
@@ -300,24 +304,22 @@ async function attachTints(games, dataDir) {
   for (const game of games) {
     const key = `${game.platform}/${game.id}`;
     if (!(key in cache)) {
-      const url = coverUrlFor(game);
-      if (!url) {
-        cache[key] = null;
-      } else {
+      let tint = null;
+      for (const url of coverUrlsFor(game)) {
         try {
           const res = await fetch(url);
-          cache[key] = res.ok
-            ? await dominantColor(Buffer.from(await res.arrayBuffer()), sharp)
-            : null;
+          if (!res.ok) continue;
+          tint = await dominantColor(Buffer.from(await res.arrayBuffer()), sharp);
           fetched++;
+          if (tint) break;
         } catch {
-          // A null is cached deliberately: a cover that 404s today will
-          // 404 tomorrow, and re-fetching it every build is the whole
-          // cost this cache exists to avoid.
-          cache[key] = null;
           failed++;
         }
       }
+      // A null is cached deliberately: a cover that 404s today will
+      // 404 tomorrow, and re-fetching it every build is the whole
+      // cost this cache exists to avoid.
+      cache[key] = tint;
     }
     if (cache[key]) game.tint = cache[key];
   }
@@ -329,11 +331,21 @@ async function attachTints(games, dataDir) {
 
 // Mirrors src/utils/pickerCover.ts — Steam art is derived from the appid,
 // every other platform ships an icon URL with the achievement data.
-function coverUrlFor(game) {
+//
+// Steam gets two candidates, tried in order. The portrait library capsule
+// is the better source and what the app itself shows, but Steam only ever
+// generated it for titles that were current when the format landed: of the
+// covers this build could not resolve, every single Steam one 404s on
+// library_600x900 while most still serve the old landscape header. Since a
+// tint is colour statistics rather than a picture — dominant-color.mjs
+// resizes with fit:'fill', so aspect ratio is irrelevant — the header is a
+// perfectly good second source for the one thing it's used for here.
+function coverUrlsFor(game) {
   if (game.platform === 'steam') {
-    return `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${game.id}/library_600x900.jpg`;
+    const base = `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${game.id}`;
+    return [`${base}/library_600x900.jpg`, `${base}/header.jpg`];
   }
-  return game.icon ?? null;
+  return game.icon ? [game.icon] : [];
 }
 
 async function main() {
