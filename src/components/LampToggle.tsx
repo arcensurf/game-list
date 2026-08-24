@@ -9,6 +9,8 @@
 
    `color` is the lit colour; it defaults to the accent for filters that
    have no identity of their own. */
+import type { ReactNode } from 'react';
+
 export default function LampToggle({
   on,
   color,
@@ -20,7 +22,9 @@ export default function LampToggle({
 }: {
   on: boolean;
   color?: string;
-  label: string;
+  /** Usually a string; a node so a caller can ship two labels and swap
+      them by width (see GogFilterToggle). */
+  label: ReactNode;
   title?: string;
   onClick: () => void;
   disabled?: boolean;

@@ -89,55 +89,57 @@
   background: var(--border);
 }
 
-/* Games of Games filter chip. Marked with the foil itself rather than an
-   icon — the iridescent frame is how a GoG card announces itself (see
-   game-of-games.css), so the control that summons them wears the same
-   thing at chip scale. */
-.gog-filter-toggle {
+/* Games of Games filter, on the shared cable-box key (lamp-toggle.css).
+   The chip this replaced was a bordered, rounded pill — the generic shape
+   the rest of the app has been getting rid of. What was worth keeping is
+   that it wore the foil rather than an icon, and that survives here as
+   the lit state of the key.
+
+   Sizing/placement only; everything else comes from .lamp-toggle. */
+.gog-lamp {
   flex-shrink: 0;
-  /* Keeps the chip and the stats button together at the right once the
+  /* Keeps the key and the stats button together at the right once the
      alphabet nav is hidden; a no-op while the nav is there to fill the
      row on its own. */
   margin-left: auto;
-  height: 2rem;
-  padding: 0 0.7rem;
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: color var(--transition), border-color var(--transition);
+  --lamp-size: 0.85rem;
 }
 
-.gog-filter-toggle:hover {
-  color: var(--text);
-  border-color: var(--accent-dim);
-}
+/* Lit: the same border conic and the same drifting light source the foil
+   cards use, so the key catches the light exactly as they do. A key this
+   small can't show the full ray fan, but it can show the travelling
+   bright spot, which is the part that reads as foil rather than as a
+   rainbow swatch.
 
-/* Active: the same border conic and the same drifting light source the
-   foil cards use, so the chip catches the light exactly as they do. */
-.gog-filter-toggle--on {
-  color: var(--text);
-  border-color: transparent;
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-  background-image:
-    linear-gradient(var(--bg), var(--bg)),
-    var(--gog-border-conic);
+   The bloom is white rather than the accent — the key isn't emitting one
+   colour, so tinting its spill amber would fight the conic underneath. */
+.gog-lamp.lamp-toggle--on .lamp-toggle-key {
+  background-color: transparent;
+  background-image: var(--gog-border-conic);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 0 4px rgba(255, 255, 255, 0.3),
+    0 0 11px rgba(255, 255, 255, 0.16);
   animation: gog-light-drift 32s linear infinite;
 }
 
+/* Hovering an unlit key previews the foil rather than the accent the
+   base control would show — the same preview, in this control's colour. */
+/* Specificity matched to the base preview rule in lamp-toggle.css, which
+   uses the `background` shorthand and would otherwise reset the conic. */
+.gog-lamp.lamp-toggle:not(.lamp-toggle--on):not(:disabled):hover .lamp-toggle-key {
+  background-color: transparent;
+  background-image: var(--gog-border-conic);
+  filter: saturate(0.55) brightness(0.45);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .gog-filter-toggle--on {
+  .gog-lamp.lamp-toggle--on .lamp-toggle-key {
     animation: none;
   }
 }
 
-.gog-filter-toggle-short {
+.gog-lamp-short {
   display: none;
 }
 
@@ -204,11 +206,11 @@
   }
 
   /* The full label crowds the alphabet nav into its scroll arrows. */
-  .gog-filter-toggle-long {
+  .gog-lamp-long {
     display: none;
   }
 
-  .gog-filter-toggle-short {
+  .gog-lamp-short {
     display: inline;
   }
 }
