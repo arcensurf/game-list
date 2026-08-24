@@ -512,13 +512,16 @@
      The gaps between bars carry the tint at low alpha rather than going
      transparent. Composite banding is a modulation, not an on/off mask,
      and letting the row's near-black show through every other line made
-     the whole wash read darker than the colour it is meant to be. */
+     the whole wash read darker than the colour it is meant to be. The
+     gap sits a little over half the lit bar's strength: enough separation
+     to read as banding, not so much that the dark line is what you see
+     first. */
   background: repeating-linear-gradient(
     180deg,
     var(--row-tint) 0,
     var(--row-tint) 2px,
-    color-mix(in srgb, var(--row-tint) 38%, transparent) 2px,
-    color-mix(in srgb, var(--row-tint) 38%, transparent) 5px
+    color-mix(in srgb, var(--row-tint) 56%, transparent) 2px,
+    color-mix(in srgb, var(--row-tint) 56%, transparent) 5px
   );
   /* Spreads from the middle of the row and steps down to its faintest
      level at the row edges — not to nothing short of them. Ending the
