@@ -172,7 +172,8 @@ Swipe left/right (or use the bottom nav) to switch between:
 
 - **All Games** — Full alphabetical grid with spotlight
 - **Games of Games** — Curated best-of subset
-- **Perfect Games** — 100% achievement completion only
+- **Backlog** — Games still queued up
+- **Leaderboard** — Top games by achievement score, rarest unlocks, and a completions-only filter
 - **Stats** — Platform breakdown with bar charts
 - **Trophy Picker** — Dev only; see below
 

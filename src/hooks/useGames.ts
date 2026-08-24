@@ -18,7 +18,6 @@ export type PlatformStat = { platform: string; count: number };
 export function useGames(
   filter?: string,
   gogOnly?: boolean,
-  perfectOnly?: boolean,
   status: GameStatus = 'beaten',
 ): {
   groups: LetterGroup[];
@@ -60,7 +59,7 @@ export function useGames(
 
   const result = useMemo(() => {
     // Status filter runs first — backlog games never participate in
-    // gog/perfect/stats. Games without a status default to 'beaten'.
+    // gog/stats. Games without a status default to 'beaten'.
     let filtered = games.filter((g) => (g.status ?? 'beaten') === status);
 
     if (gogOnly) {
@@ -76,22 +75,11 @@ export function useGames(
       );
     }
 
-    let withCovers: GameWithCover[] = filtered.map((g) => ({
+    const withCovers: GameWithCover[] = filtered.map((g) => ({
       ...g,
       coverUrl: getCoverUrl(g, covers),
       achievements: resolveGameAchievements(g, achievementData, titleIndex),
     }));
-
-    // Perfect-game filter runs after achievement resolution because it
-    // reads the resolved `best` entry rather than any raw field. "Best"
-    // already picks the highest-completion platform, so a game that's
-    // 100% on PSN and 50% on Steam counts as a perfect game.
-    if (perfectOnly) {
-      withCovers = withCovers.filter((g) => {
-        const best = g.achievements?.best;
-        return best != null && best.total > 0 && best.earned === best.total;
-      });
-    }
 
     const groupMap = new Map<string, GameWithCover[]>();
     for (const game of withCovers) {
@@ -134,7 +122,7 @@ export function useGames(
       .sort((a, b) => b.count - a.count);
 
     return { groups, totalCount: withCovers.length, platformStats };
-  }, [games, covers, achievementData, titleIndex, filter, gogOnly, perfectOnly, status]);
+  }, [games, covers, achievementData, titleIndex, filter, gogOnly, status]);
 
   return { ...result, loading };
 }

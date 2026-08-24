@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 // `ref` is what we measure (the cover, so taller Game of Games cards don't
 // compute a lower center than their row-mates); `target` is what the value
 // lands on (the wrapper, so siblings like .achievement-slot inherit it).
-// Both fall back to the card itself — flat views (gog/perfect) render cards
+// Both fall back to the card itself — the flat Games of Games view renders cards
 // without a .card-wrapper, and a card can be measured before its cover exists.
 type TrackedCard = {
   card: HTMLElement;

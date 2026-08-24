@@ -4,7 +4,6 @@ import type { View } from '../types/view';
 const LABELS: Record<View, string> = {
   list: 'All Games',
   gog: 'Games of Games',
-  perfect: 'Perfect Games',
   backlog: 'Backlog',
   stats: 'Stats',
   picker: 'Trophy Picker',

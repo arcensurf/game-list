@@ -25,7 +25,6 @@ export default function App() {
   const [statsOpen, setStatsOpen] = useState(false);
 
   const gogOnly = view === 'gog';
-  const perfectOnly = view === 'perfect';
   const backlogView = view === 'backlog';
   const statsView = view === 'stats';
   // Gated on DEV at the point of use, not just kept out of VIEW_ORDER:
@@ -33,16 +32,14 @@ export default function App() {
   // whole picker (and its dev-API calls) to the public bundle.
   const pickerView = import.meta.env.DEV && view === 'picker';
   const leaderboardView = view === 'leaderboard';
-  const flatLayout = gogOnly || perfectOnly;
 
   const { groups, totalCount, platformStats, loading } = useGames(
     undefined,
     gogOnly,
-    perfectOnly,
     backlogView ? 'backlog' : 'beaten',
   );
   const activeLetters = new Set(groups.map((g) => g.letter));
-  const effectiveLightsOn = lightsOn || flatLayout || statsView || backlogView || pickerView || leaderboardView;
+  const effectiveLightsOn = lightsOn || gogOnly || statsView || backlogView || pickerView || leaderboardView;
 
   const changeView = useCallback((next: View) => {
     rememberView(next);
@@ -77,11 +74,9 @@ export default function App() {
               {totalCount}{' '}
               {gogOnly
                 ? 'Games of Games'
-                : perfectOnly
-                  ? 'Perfect Games'
-                  : backlogView
-                    ? 'in the backlog'
-                    : 'games completed'}
+                : backlogView
+                  ? 'in the backlog'
+                  : 'games completed'}
             </p>
           </div>
           <div className="masthead-face masthead-face--letters">
@@ -131,7 +126,7 @@ export default function App() {
         ) : backlogView ? (
           <BacklogList games={groups.flatMap((g) => g.games)} />
         ) : (
-          <GameGrid groups={groups} flat={flatLayout} />
+          <GameGrid groups={groups} flat={gogOnly} />
         )}
       </main>
 
