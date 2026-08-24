@@ -1,0 +1,175 @@
+/* ── Framing primitives ──
+   Shared vocabulary for marking out a region. The app deliberately does
+   not box things: no panel gets a full 1px border and a radius, because
+   that treatment does no work here beyond making the page look like
+   every other dark dashboard.
+
+   Both devices below are built from one idea rather than two: a mark
+   ignites at a point and falls off away from it, in BOTH axes. Falloff
+   along the length is what stops a mark reading as a drawn line;
+   falloff perpendicular to it — the bloom — is what gives it depth,
+   since a lit trace on a dark tube bleeds into the dark around it. A
+   mark with only the first is still a hairline, just a nicer one. */
+
+/* ── Corner brackets ──
+   Rendered by Brackets.tsx; sized by the container via the vars below,
+   so the HUD's 10px corners and a full-width section frame are the same
+   object at two scales.
+
+   Arms are backgrounds rather than borders: a border can only be one
+   flat colour, which is exactly what made these read as bland stuck-on
+   Ls. Each arm is a 1px gradient brightest at the corner vertex and
+   dying toward the tip, so the bracket reads as light catching an edge
+   rather than as a drawn glyph.
+
+   Hold near-full brightness across the first third of each arm before
+   decaying — a straight linear falloff reads as an arm half its actual
+   length, which makes the frame feel smaller than the region it marks. */
+.frame-bracket {
+  position: absolute;
+  width: var(--bracket-size, 10px);
+  height: var(--bracket-size, 10px);
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: 100% 1px, 1px 100%;
+  opacity: var(--bracket-opacity, 0.9);
+  /* Off by default. drop-shadow is not free and the card grid puts 896
+     of these on screen at once (four per HUD, ~224 cards), so bloom is
+     opt-in for the section-scale brackets that actually need it — at
+     10px over a dark cover the arms carry themselves. */
+  filter: var(--bracket-bloom, none);
+
+  --bracket-arm-h: linear-gradient(
+    90deg,
+    rgba(var(--bracket-glow, var(--accent-glow)), 1) 0%,
+    rgba(var(--bracket-glow, var(--accent-glow)), 0.85) 32%,
+    rgba(var(--bracket-glow, var(--accent-glow)), 0) 100%
+  );
+  --bracket-arm-v: linear-gradient(
+    180deg,
+    rgba(var(--bracket-glow, var(--accent-glow)), 1) 0%,
+    rgba(var(--bracket-glow, var(--accent-glow)), 0.85) 32%,
+    rgba(var(--bracket-glow, var(--accent-glow)), 0) 100%
+  );
+
+  background-image: var(--bracket-arm-h), var(--bracket-arm-v);
+  background-position: left top, left top;
+}
+
+/* Each corner is the top-left bracket reflected into place, so all four
+   keep the hot end at the vertex without four sets of gradient stops. */
+.frame-bracket--tl {
+  top: var(--bracket-inset, 5px);
+  left: var(--bracket-inset, 5px);
+}
+
+.frame-bracket--tr {
+  top: var(--bracket-inset, 5px);
+  right: var(--bracket-inset, 5px);
+  transform: scaleX(-1);
+}
+
+.frame-bracket--bl {
+  bottom: var(--bracket-inset, 5px);
+  left: var(--bracket-inset, 5px);
+  transform: scaleY(-1);
+}
+
+.frame-bracket--br {
+  bottom: var(--bracket-inset, 5px);
+  right: var(--bracket-inset, 5px);
+  transform: scale(-1, -1);
+}
+
+/* ── Trace ──
+   The app's section rule, in place of a 1px hairline. A hairline
+   terminates in two hard corners, so it reads as the edge of a box even
+   when there is no box; stacking a few is what makes a layout look like
+   a settings page.
+
+   Three layers do the work. The core travels amber → structural grey
+   along its length, so the rule starts as light and cools into
+   structure. The bloom is a radial pooled at the same ignition point,
+   which spreads glow into the section AND decays along the run for
+   free — grey ink doesn't glow, so tying the bloom to the hot end keeps
+   the cool half of the rule flat, as it should be. The mask kills the
+   whole thing off before it reaches the far edge, so the rule never
+   lands a second hard corner.
+
+   trace-t ignites at the top-left and blooms downward into the section;
+   trace-b at the bottom-left, blooming up. An element carrying both is
+   lit inward by its own frame. */
+.trace-t,
+.trace-b {
+  position: relative;
+}
+
+.trace-t::before,
+.trace-b::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--trace-depth, 7px);
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 100% 1px;
+  -webkit-mask-image: var(--trace-falloff);
+  mask-image: var(--trace-falloff);
+}
+
+.trace-t::before {
+  top: 0;
+  background-image:
+    radial-gradient(
+      22rem 100% at 0% 0%,
+      rgba(var(--accent-glow), 0.2) 0%,
+      rgba(var(--accent-glow), 0) 100%
+    ),
+    var(--trace-core);
+  background-position: top, top;
+}
+
+.trace-b::after {
+  bottom: 0;
+  background-image:
+    radial-gradient(
+      22rem 100% at 0% 100%,
+      rgba(var(--accent-glow), 0.2) 0%,
+      rgba(var(--accent-glow), 0) 100%
+    ),
+    var(--trace-core);
+  background-position: bottom, bottom;
+}
+
+/* trace-l — the spine. Ignites at the top-left, cools downward, blooms
+   to the right into the content it runs alongside. Use it where a list
+   or run wants to be bound into one object; use trace-t/-b only where a
+   section genuinely opens. Four rows with four rules is four times the
+   same mark, and no amount of tuning fixes that — the axis has to
+   change. */
+.trace-l {
+  position: relative;
+}
+
+.trace-l::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--trace-depth, 7px);
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 1px 100%;
+  background-position: left, left;
+  background-image:
+    radial-gradient(
+      100% 22rem at 0% 0%,
+      rgba(var(--accent-glow), 0.2) 0%,
+      rgba(var(--accent-glow), 0) 100%
+    ),
+    var(--trace-core-v);
+  -webkit-mask-image: var(--trace-falloff-v);
+  mask-image: var(--trace-falloff-v);
+}

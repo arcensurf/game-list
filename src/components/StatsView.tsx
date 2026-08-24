@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { PlatformStat } from '../hooks/useGames';
 import { useTimeline } from '../hooks/useTimeline';
 import PlatformBadge from './PlatformBadge';
+import Brackets from './Brackets';
 import AchievementYears from './AchievementYears';
 
 const TOP_COUNT = 5;
@@ -45,6 +46,7 @@ export default function StatsView({
         )}
       </div>
       <div className="stats-platform-top">
+        <Brackets />
         {top.map(({ platform, count }) => (
           <div key={platform} className="stats-platform-top-item">
             <span className="stats-platform-top-count">{count}</span>
@@ -65,7 +67,7 @@ export default function StatsView({
       {timeline && !previewLoading ? (
         <AchievementYears months={timeline.months} years={timeline.years} />
       ) : (
-        <div className="stats-years">
+        <div className="stats-years trace-t">
           {showLoading && (
             <div className="stats-years-skeleton" aria-hidden="true">
               {SKELETON_BAR_HEIGHTS.map((h, i) => (

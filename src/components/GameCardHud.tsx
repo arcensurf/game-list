@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { GameWithCover } from '../types/game';
 import PlatformBadge from './PlatformBadge';
+import Brackets from './Brackets';
 import ExtrasList from './DlcPopover';
 import meteorIcon from '../icons/svg/outline/meteor.svg';
 
@@ -33,10 +34,7 @@ export default function GameCardHud({
 
   return (
     <div className="game-card-info card-hud">
-      <span className="hud-bracket hud-bracket--tl" aria-hidden />
-      <span className="hud-bracket hud-bracket--tr" aria-hidden />
-      <span className="hud-bracket hud-bracket--bl" aria-hidden />
-      <span className="hud-bracket hud-bracket--br" aria-hidden />
+      <Brackets variant="hud" />
       {canFlip && onFlip && (
         <button
           type="button"

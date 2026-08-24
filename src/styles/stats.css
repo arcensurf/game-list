@@ -1,6 +1,6 @@
 /* Full-page stats tab */
 .stats-view {
-  padding: 2rem 0;
+  padding: var(--space-6) 0;
 }
 
 /* Stats */
@@ -8,22 +8,22 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-5);
 }
 
 .stats-header h2 {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 1.6rem;
-  letter-spacing: 0.06em;
+  font-family: var(--font-display);
+  font-size: var(--type-title);
+  letter-spacing: var(--track-title);
   text-transform: uppercase;
   color: var(--text);
 }
 
 .stats-preview-loading-btn {
-  font-family: 'Share Tech', sans-serif;
-  padding: 0.22rem 0.6rem 0.16rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
+  font-family: var(--font-display);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   background: transparent;
   border: 1px solid var(--border);
@@ -42,13 +42,20 @@
   cursor: default;
 }
 
-/* Top 5 — a stat bar, not a card grid: hairline rules do the framing,
-   the numbers do the talking. Matches the masthead divider / system
-   heading rule treatment used elsewhere rather than boxing anything. */
+/* Top 5 — a stat bar, not a card grid: the numbers do the talking.
+   Framed by corner brackets (the card HUD's device at section scale)
+   rather than penned in by rules top, bottom and between every column.
+   Five hairlines around five numbers was structure the content did not
+   need — the columns are already discrete, so spacing separates them
+   and the brackets say where the readout begins and ends. */
 .stats-platform-top {
+  position: relative;
   display: flex;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  padding: var(--space-1) 0;
+  --bracket-size: 22px;
+  --bracket-inset: 0;
+  --bracket-opacity: 0.75;
+  --bracket-bloom: drop-shadow(0 0 4px rgba(var(--accent-glow), 0.4));
 }
 
 .stats-platform-top-item {
@@ -56,43 +63,42 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding: 1.1rem 0.5rem;
-  border-left: 1px solid var(--border);
-}
-
-.stats-platform-top-item:first-child {
-  border-left: none;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-2);
 }
 
 .stats-platform-top-count {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 2rem;
+  font-family: var(--font-figure);
+  font-size: var(--type-figure);
   font-weight: 700;
   color: var(--text);
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .stats-rest {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.25rem;
-  margin-top: 1.25rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--border);
+  /* No rule between this and the bracketed top-5 above — the brackets
+     already close that region off, and a divider under them just has
+     the frame stating its edge twice. Space does the separating, so it
+     carries the whole 2.5rem the rule used to sit inside of. */
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-6);
 }
 
 .stats-rest-item {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-1);
 }
 
 .stats-rest-count {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.8rem;
+  font-family: var(--font-figure);
+  font-size: var(--type-meta);
   color: var(--text-muted);
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 600px) {
@@ -102,12 +108,6 @@
 
   .stats-platform-top-item {
     flex: 1 1 33%;
-    border-left: none;
-    border-top: 1px solid var(--border);
-  }
-
-  .stats-platform-top-item:nth-child(-n + 3) {
-    border-top: none;
   }
 }
 
@@ -115,9 +115,8 @@
    the recap below is a single hero + supporting detail for whichever
    year is selected, not a repeating list. */
 .stats-years {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
 }
 
 .stats-years-skeleton {
@@ -156,36 +155,39 @@
 .stats-years-loading {
   text-align: center;
   color: var(--text-muted);
-  padding: 1rem 0 0;
+  padding: var(--space-4) 0 0;
 }
 
 .stats-years-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
-.stats-years h3 {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 1.1rem;
-  letter-spacing: 0.04em;
+/* Peer of the "Games Per Platform" heading above it, not a level below —
+   these are the two sections of one page, so they are titled identically
+   and the tag matches. The recap year beneath is what sits a level down. */
+.stats-years h2 {
+  font-family: var(--font-display);
+  font-size: var(--type-title);
+  letter-spacing: var(--track-title);
   text-transform: uppercase;
   color: var(--text);
 }
 
 .stats-metric-toggle {
   display: flex;
-  gap: 0.4rem;
+  gap: var(--space-1);
   flex-shrink: 0;
 }
 
 .stats-metric-tab {
-  font-family: 'Share Tech', sans-serif;
-  padding: 0.3rem 0.7rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
+  font-family: var(--font-display);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-chrome);
   text-transform: uppercase;
   background: transparent;
   border: 1px solid var(--border);
@@ -226,10 +228,11 @@
 }
 
 .stats-year-bar-count {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.6rem;
+  font-family: var(--font-figure);
+  font-size: var(--type-micro);
   color: var(--text-muted);
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--space-1);
+  font-variant-numeric: tabular-nums;
 }
 
 .stats-year-bar {
@@ -266,9 +269,9 @@
 }
 
 .stats-year-bar-label {
-  margin-top: 0.4rem;
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.7rem;
+  margin-top: var(--space-1);
+  font-family: var(--font-figure);
+  font-size: var(--type-micro);
   color: var(--text-muted);
 }
 
@@ -277,9 +280,52 @@
   font-weight: 700;
 }
 
+/* Column labels — collision handling.
+
+   The count above each bar is the widest element in a column and the only
+   variable one: in points mode it is toLocaleString'd, so "12,450" is six
+   characters against a year's fixed four. The same chart is therefore safe
+   in achievements mode and colliding in points mode at identical width,
+   which is why this is keyed on data-metric rather than a single
+   breakpoint. Dropping the count is cheap — the value stays in the
+   column's tooltip, and the recap header below states it in full for the
+   selected year.
+
+   nowrap on both: a label that wraps to two lines would push its column
+   taller than its neighbours, and since the row aligns on flex-end that
+   shows up as one bar sitting lower than the rest. */
+.stats-year-bar-count,
+.stats-year-bar-label {
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .stats-year-bars[data-metric='points'] .stats-year-bar-count {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .stats-year-bar-count {
+    display: none;
+  }
+}
+
+/* Years are fixed-width so they survive much further down, but below
+   ~620px a column is narrower than four characters. Thin from the end so
+   the most recent year always survives, and hide with visibility rather
+   than display: dropping a label from some columns and not others would
+   let those bars sit higher, because the row aligns on flex-end and the
+   column would be shorter. visibility keeps the space. */
+@media (max-width: 620px) {
+  .stats-year-bar-col:nth-last-child(even) .stats-year-bar-label {
+    visibility: hidden;
+  }
+}
+
 /* Recap — one year at a time */
 .stats-year-recap {
-  margin-top: 2rem;
+  margin-top: var(--space-6);
   /* Fires once, on first mount — the panel doesn't remount when
      switching years (see AchievementYears), so this is purely the
      load-in transition, not a per-year replay. */
@@ -301,38 +347,30 @@
 .stats-year-recap-header {
   display: flex;
   align-items: baseline;
-  gap: 0.9rem;
-  margin-bottom: 0.75rem;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
 }
 
 .stats-year-recap-year {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 2rem;
+  font-family: var(--font-figure);
+  font-size: var(--type-heading);
   font-weight: 700;
-  color: var(--text);
+  color: var(--accent-light);
   line-height: 1;
+  letter-spacing: var(--track-chrome);
+  font-variant-numeric: tabular-nums;
 }
 
 .stats-year-recap-totals {
-  font-size: 1.05rem;
+  font-size: var(--type-meta);
   color: var(--text-muted);
+  font-family: var(--font-figure);
+  letter-spacing: var(--track-chrome);
+  font-variant-numeric: tabular-nums;
 }
 
-/* Quiet supporting strip — when in the year it happened, not what.
-   Neutral (not accent-colored) and labeled, so it reads as structure
-   rather than another chart competing for attention. */
 .stats-year-spark-block {
-  margin-bottom: 1.75rem;
-}
-
-.stats-year-spark-caption {
-  display: block;
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-6);
 }
 
 .stats-year-spark {
@@ -362,28 +400,38 @@
 }
 
 .stats-year-spark-label {
-  margin-top: 0.3rem;
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.6rem;
+  margin-top: var(--space-1);
+  font-family: var(--font-figure);
+  font-size: var(--type-micro);
   color: var(--text-muted);
   opacity: 0.7;
 }
 
+/* The ranked run — hero plus runners-up under one spine. Grouped so the
+   spine can ignite at No. 1: the top game heads the list, and starting
+   the mark below it implied the hero sat outside the ranking. */
+.stats-year-ranking {
+  margin-top: 0;
+}
+
 /* Hero — the year's top game, in the same blurred-cover-wash language
    the backlog bands use (see backlog.css), so this reads as a moment
-   from the same collection rather than a new pattern. */
+   from the same collection rather than a new pattern.
+
+   Carries no rule of its own. The wash IS the framing device — it gives
+   the band a visible extent and its own colour — so ruling it top and
+   bottom was the frame stating its edge a second time, in the middle of
+   a column that already had too many horizontal marks. */
 .stats-year-hero {
   position: relative;
   isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--space-4);
   min-height: 90px;
-  padding: 1rem 1.25rem;
+  padding: var(--space-4) var(--space-5);
   overflow: hidden;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
 }
 
 .stats-year-hero-art {
@@ -404,33 +452,33 @@
 .stats-year-hero-content {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: var(--space-tight);
   min-width: 0;
 }
 
 .stats-year-hero-label {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.7rem;
-  letter-spacing: 0.14em;
+  font-family: var(--font-display);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--accent-light);
 }
 
 .stats-year-hero-title {
-  font-family: 'Share Tech', sans-serif;
-  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
-  letter-spacing: 0.02em;
+  font-family: var(--font-display);
+  font-size: var(--type-title);
   color: var(--text);
   text-wrap: balance;
 }
 
 .stats-year-hero-count {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 2.4rem;
+  font-family: var(--font-figure);
+  font-size: var(--type-display);
   font-weight: 700;
   color: var(--text);
   line-height: 1;
   flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .stats-year-more-games {
@@ -442,32 +490,39 @@
 .stats-year-more-game {
   display: flex;
   align-items: baseline;
-  gap: 0.75rem;
-  padding: 0.5rem 1.25rem;
-  border-bottom: 1px solid var(--border);
+  gap: var(--space-3);
+  /* Rows are separated by rhythm and by the rank number, not by a rule
+     each — the spine on the list binds them instead. Slightly roomier
+     than when a line did the separating, since spacing now carries it
+     alone. */
+  padding: var(--space-3) var(--space-5);
 }
 
 .stats-year-more-rank {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.75rem;
+  font-family: var(--font-figure);
+  font-size: var(--type-meta);
   color: var(--text-muted);
   min-width: 1rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .stats-year-more-title {
   flex: 1;
   min-width: 0;
-  font-size: 0.85rem;
+  font-size: var(--type-body);
   color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-family: var(--font-display);
 }
 
 .stats-year-more-count {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.78rem;
-  color: var(--text-muted);
+  font-family: var(--font-figure);
+  font-size: var(--type-body);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
 }
 
 /* Rarest pulls — three of the earlier single-pull callout, side by
@@ -475,21 +530,21 @@
 .stats-year-rarest-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem 2rem;
-  margin-top: 1.75rem;
+  gap: var(--space-5) var(--space-6);
+  margin-top: var(--space-6);
 }
 
 .stats-year-rarest {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
+  gap: var(--space-3);
   flex: 1 1 220px;
   min-width: 0;
 }
 
 .stats-year-rarest-rarity {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 1.8rem;
+  font-family: var(--font-figure);
+  font-size: var(--type-figure);
   font-weight: 700;
   color: var(--accent-light);
   line-height: 1;
@@ -504,30 +559,32 @@
 .stats-year-rarest-body {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: var(--space-tight);
   min-width: 0;
 }
 
 .stats-year-rarest-label {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
+  font-family: var(--font-display);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--text-muted);
 }
 
 .stats-year-rarest-name {
-  font-size: 0.95rem;
+  font-size: var(--type-body);
   color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-family: var(--font-display);
 }
 
 .stats-year-rarest-game {
-  font-size: 0.78rem;
+  font-size: var(--type-meta);
   color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-family: var(--font-display);
 }

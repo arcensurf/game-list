@@ -144,20 +144,13 @@
 }
 
 /* Four L-shaped bracket corners — HUD frame markers. */
-.hud-bracket {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  pointer-events: none;
-  border-color: var(--accent);
-  border-style: solid;
-  border-width: 0;
-  opacity: 0.9;
+/* Geometry now lives on .frame-bracket (frame.css) — the HUD corner is
+   the origin of that device, so its values are the primitive's defaults
+   and only the scale needs restating here for clarity. */
+.card-hud {
+  --bracket-size: 10px;
+  --bracket-inset: 5px;
 }
-.hud-bracket--tl { top: 5px; left: 5px; border-top-width: 1px; border-left-width: 1px; }
-.hud-bracket--tr { top: 5px; right: 5px; border-top-width: 1px; border-right-width: 1px; }
-.hud-bracket--bl { bottom: 5px; left: 5px; border-bottom-width: 1px; border-left-width: 1px; }
-.hud-bracket--br { bottom: 5px; right: 5px; border-bottom-width: 1px; border-right-width: 1px; }
 
 /* On flippable cards the meteor button occupies the top-right
    corner where the bracket would normally sit — the meteor IS the

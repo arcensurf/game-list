@@ -27,7 +27,10 @@ function YearBars({
   const maxValue = Math.max(1, ...years.map((y) => value(y)));
 
   return (
-    <div className="stats-year-bars">
+    /* data-metric lets the CSS drop the counts earlier in points mode,
+       where they are formatted with a thousands separator and run to six
+       characters, than in achievements mode where they rarely pass three. */
+    <div className="stats-year-bars" data-metric={metric}>
       {years.map((y, i) => (
         <div
           key={y.year}
@@ -89,7 +92,6 @@ function MonthSparkline({
 
   return (
     <div className="stats-year-spark-block">
-      <span className="stats-year-spark-caption">Month by Month</span>
       <div className="stats-year-spark">
         {months.map((m, i) => {
           const future = i >= visibleCount;
@@ -149,29 +151,37 @@ function YearRecap({
 
       <MonthSparkline months={months} metric={metric} visibleCount={monthsElapsed} />
 
-      {hero && (
-        <div className="stats-year-hero">
-          {hero.icon && (
-            <img className="stats-year-hero-art" src={hero.icon} alt="" aria-hidden="true" loading="lazy" />
+      {/* Hero and the runners-up are one ranked run, so the spine spans
+          both and ignites at No. 1 rather than starting at No. 2 — the
+          top game is the head of the list, not a separate thing sitting
+          above it. */}
+      {(hero || rest.length > 0) && (
+        <div className="stats-year-ranking trace-l">
+          {hero && (
+            <div className="stats-year-hero">
+              {hero.icon && (
+                <img className="stats-year-hero-art" src={hero.icon} alt="" aria-hidden="true" loading="lazy" />
+              )}
+              <div className="stats-year-hero-content">
+                <span className="stats-year-hero-label">Top Game</span>
+                <span className="stats-year-hero-title">{hero.title}</span>
+              </div>
+              <span className="stats-year-hero-count">{gameValue(hero)}</span>
+            </div>
           )}
-          <div className="stats-year-hero-content">
-            <span className="stats-year-hero-label">Top Game</span>
-            <span className="stats-year-hero-title">{hero.title}</span>
-          </div>
-          <span className="stats-year-hero-count">{gameValue(hero)}</span>
-        </div>
-      )}
 
-      {rest.length > 0 && (
-        <ol className="stats-year-more-games">
-          {rest.map((g, i) => (
-            <li key={`${g.platform}/${g.id}`} className="stats-year-more-game">
-              <span className="stats-year-more-rank">{i + 2}</span>
-              <span className="stats-year-more-title">{g.title}</span>
-              <span className="stats-year-more-count">{gameValue(g)}</span>
-            </li>
-          ))}
-        </ol>
+          {rest.length > 0 && (
+            <ol className="stats-year-more-games">
+              {rest.map((g, i) => (
+                <li key={`${g.platform}/${g.id}`} className="stats-year-more-game">
+                  <span className="stats-year-more-rank">{i + 2}</span>
+                  <span className="stats-year-more-title">{g.title}</span>
+                  <span className="stats-year-more-count">{gameValue(g)}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
       )}
 
       {rarestAchievements.length > 0 && (
@@ -221,9 +231,9 @@ export default function AchievementYears({
   if (years.length === 0) return null;
 
   return (
-    <div className="stats-years">
+    <div className="stats-years trace-t">
       <div className="stats-years-heading">
-        <h3>{metric === 'points' ? 'Rarity Points' : 'Achievements'} By Year</h3>
+        <h2>{metric === 'points' ? 'Rarity Points' : 'Achievements'} By Year</h2>
         <div className="stats-metric-toggle" role="group" aria-label="Show by">
           <button
             type="button"
