@@ -147,13 +147,19 @@ const RAREST_LIMIT_PER_PLATFORM = 200;
 const GAMES_LIMIT_PER_PLATFORM = 100;
 
 // Rows must already be sorted into the desired order — this preserves
-// that order within each platform's slice, it doesn't re-sort.
-function topPerPlatform(rows, limit) {
+// that order within each platform's slice, it doesn't re-sort. `keep`
+// marks rows that ride along past the limit without counting against
+// it; see the games call below.
+function topPerPlatform(rows, limit, keep) {
   const byPlatform = new Map();
+  const counts = new Map();
   for (const row of rows) {
+    const ranked = (counts.get(row.platform) ?? 0) < limit;
+    if (!ranked && !keep?.(row)) continue;
     const list = byPlatform.get(row.platform) ?? [];
-    if (list.length < limit) list.push(row);
+    list.push(row);
     byPlatform.set(row.platform, list);
+    if (ranked) counts.set(row.platform, (counts.get(row.platform) ?? 0) + 1);
   }
   return PLATFORMS.flatMap((p) => byPlatform.get(p) ?? []);
 }
@@ -254,7 +260,12 @@ function main() {
 
   const output = {
     updatedAt: new Date().toISOString(),
-    games: topPerPlatform(games, GAMES_LIMIT_PER_PLATFORM),
+    // Completions ride along past the cap: the leaderboard's
+    // "completions only" filter is meant to be the whole trophy case,
+    // and every 100% game currently clears the cut on score alone —
+    // but a short game with common achievements needn't, and a filter
+    // that silently drops one is worse than no filter.
+    games: topPerPlatform(games, GAMES_LIMIT_PER_PLATFORM, (g) => g.earned === g.total),
     rarestAchievements: topPerPlatform(rarestAchievements, RAREST_LIMIT_PER_PLATFORM),
   };
 

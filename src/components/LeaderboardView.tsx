@@ -69,6 +69,20 @@ function readStoredHideDupes(): boolean {
   }
 }
 
+// And for the "completions only" toggle. Defaults off: the leaderboard
+// is a ranking first, and a completion is already visible in place —
+// this narrows it to the trophy case on demand, including any 100% game
+// that scores too low to make the display cut below.
+const COMPLETIONS_ONLY_KEY = 'game-list:leaderboard-completions-only';
+
+function readStoredCompletionsOnly(): boolean {
+  try {
+    return localStorage.getItem(COMPLETIONS_ONLY_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 export const PLATFORM_LABELS: Record<ShardPlatform, string> = {
   steam: 'Steam',
   psn: 'PSN',
@@ -153,6 +167,7 @@ export default function LeaderboardView() {
   const [modalTarget, setModalTarget] = useState<LeaderboardModalTarget | null>(null);
   const [enabledPlatforms, setEnabledPlatforms] = useState<ShardPlatform[]>(readStoredPlatforms);
   const [hideDupes, setHideDupes] = useState<boolean>(readStoredHideDupes);
+  const [completionsOnly, setCompletionsOnly] = useState<boolean>(readStoredCompletionsOnly);
   const [groupsOpen, setGroupsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
@@ -237,6 +252,18 @@ export default function LeaderboardView() {
     });
   };
 
+  const toggleCompletionsOnly = () => {
+    setCompletionsOnly((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(COMPLETIONS_ONLY_KEY, next ? '1' : '0');
+      } catch {
+        // Not worth interrupting anyone over.
+      }
+      return next;
+    });
+  };
+
   if (loading) {
     return (
       <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '4rem 0' }}>
@@ -256,8 +283,13 @@ export default function LeaderboardView() {
   // pre-sorted global list, so filtering down needs a re-sort — and a
   // re-slice, since e.g. two platforms selected together can offer more
   // than the display cap once merged.
+  // Completions are filtered out before the dedup below, not after:
+  // a game finished on one platform and abandoned on another would
+  // otherwise collapse to whichever copy scored higher — hiding the
+  // 100% run behind the unfinished one.
   let games = data.games
     .filter((g) => enabledPlatforms.includes(g.platform))
+    .filter((g) => !completionsOnly || g.earned === g.total)
     .sort((a, b) => b.score - a.score);
   if (hideDupes) {
     // Sorted descending, so the first row seen for a given dupeKey is
@@ -335,6 +367,17 @@ export default function LeaderboardView() {
               Hide duplicates
             </button>
           )}
+          {tab === 'games' && (
+            <button
+              type="button"
+              className={`leaderboard-platform-toggle${completionsOnly ? ' leaderboard-platform-toggle--on' : ''}`}
+              style={completionsOnly ? { background: 'var(--accent)' } : undefined}
+              onClick={toggleCompletionsOnly}
+              title={completionsOnly ? 'Show every ranked game' : 'Show only games finished at 100%'}
+            >
+              Completions only
+            </button>
+          )}
           {import.meta.env.DEV && tab === 'games' && (
             <button type="button" className="leaderboard-platform-toggle" onClick={() => setGroupsOpen(true)}>
               Review duplicates
@@ -394,7 +437,9 @@ export default function LeaderboardView() {
       </div>
 
       {tab === 'games' && games.length === 0 ? (
-        <p className="leaderboard-empty">No games match this platform filter.</p>
+        <p className="leaderboard-empty">
+          {completionsOnly ? 'No completions on the selected platforms yet.' : 'No games match this platform filter.'}
+        </p>
       ) : tab === 'games' ? (
         <ol className="leaderboard-list">
           {games.map((g, i) => {
