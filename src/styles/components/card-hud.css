@@ -537,11 +537,21 @@
   line-height: 1.2;
 }
 
+/* Flicker lands on the wrapper because it animates opacity, which the
+   wrapper can carry for everything inside it. */
 .game-card.game-of-games:hover .card-hud .card-hud-gog-label,
 .game-card.game-of-games.info-open .card-hud .card-hud-gog-label {
-  animation:
-    gog-label-flicker-in 0.3s steps(6, end) 1.3s forwards,
-    iridescent-flow 5s linear 1.6s infinite;
+  animation: gog-label-flicker-in 0.3s steps(6, end) 1.3s forwards;
+}
+
+/* The drift has to land on the element that actually holds the gradient.
+   It sat on the wrapper above for a long time, where it animated
+   background-position on an element with no background and so did
+   nothing at all — the label was iridescent but frozen, while the title
+   beside it drifted. */
+.game-card.game-of-games:hover .card-hud .card-hud-gog-title,
+.game-card.game-of-games.info-open .card-hud .card-hud-gog-title {
+  animation: iridescent-flow 5s linear 1.6s infinite;
 }
 
 /* Flicker-in: staccato opacity steps simulate the label materializing
@@ -656,8 +666,10 @@
      immediately on hover without flicker or gradient drift. */
   .game-card.game-of-games:hover .card-hud .game-card-title,
   .game-card.game-of-games:hover .card-hud .card-hud-gog-label,
+  .game-card.game-of-games:hover .card-hud .card-hud-gog-title,
   .game-card.game-of-games.info-open .card-hud .game-card-title,
-  .game-card.game-of-games.info-open .card-hud .card-hud-gog-label {
+  .game-card.game-of-games.info-open .card-hud .card-hud-gog-label,
+  .game-card.game-of-games.info-open .card-hud .card-hud-gog-title {
     animation: none;
     opacity: 1;
   }
