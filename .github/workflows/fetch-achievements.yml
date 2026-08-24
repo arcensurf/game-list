@@ -80,6 +80,21 @@ jobs:
       # Reads achievements.json + every shard (not just what this run
       # touched) to (re)build the score/rarity leaderboard, so a stale
       # shard from an earlier run still counts.
+      # sharp is deliberately not a tracked dependency and the postinstall
+      # hook opts out on CI entirely, because its per-platform native
+      # packages break `npm ci` on the Linux runner (see
+      # scripts/lib/load-sharp.mjs). The leaderboard's cover tints need it,
+      # though, and without it every nightly run published a leaderboard
+      # with no tints at all while degrading silently.
+      #
+      # --no-save keeps the lockfile untouched, so `npm ci` above is
+      # unaffected and the deploy workflow's install stays platform-neutral.
+      # Non-fatal on purpose: if this ever fails, the build still produces a
+      # correct leaderboard, just without tints.
+      - name: Install sharp for cover tints
+        continue-on-error: true
+        run: npm install --no-save sharp
+
       - name: Build leaderboard
         run: node scripts/build-leaderboard.mjs
         env:
@@ -97,7 +112,10 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # Explicit file list — never stage refresh tokens or anything
           # else that might end up in the work tree.
-          git add public/data/achievements.json public/data/platform-libraries.json public/data/leaderboard.json public/data/timeline.json
+          # cover-tints.json is a cache, but it has to persist across runs or
+          # every night re-fetches all ~316 covers to rebuild what it already
+          # knew. Committed for the same reason xbox-icons is.
+          git add public/data/achievements.json public/data/platform-libraries.json public/data/leaderboard.json public/data/timeline.json public/data/cover-tints.json
           # -A so pruned shards (delisted games) are staged as deletions,
           # not just left behind in the tree.
           git add -A public/data/achievements
