@@ -97,6 +97,39 @@
   border-top: 1px solid var(--border);
 }
 
+.stats-years-skeleton {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 90px;
+}
+
+.stats-years-skeleton-bar {
+  flex: 1;
+  min-width: 0;
+  max-width: 3rem;
+  background: var(--bg-card);
+  animation: stats-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes stats-skeleton-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stats-years-skeleton-bar {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+.stats-years-loading {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 1rem 0 0;
+}
+
 .stats-years-heading {
   display: flex;
   align-items: center;

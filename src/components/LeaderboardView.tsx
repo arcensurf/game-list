@@ -163,7 +163,11 @@ const RAREST_DISPLAY_LIMIT = 200;
 
 export default function LeaderboardView() {
   const { data, loading } = useLeaderboard();
-  const { games: searchIndex } = useGameSearchIndex();
+  // Activated on first search focus or on opening the dev duplicate
+  // review tool — the only two consumers of the game search index —
+  // rather than fetched unconditionally on mount (see the hook).
+  const [searchIndexActive, setSearchIndexActive] = useState(false);
+  const { games: searchIndex, loading: searchIndexLoading } = useGameSearchIndex(searchIndexActive);
   const [tab, setTab] = useState<Tab>('games');
   const [modalTarget, setModalTarget] = useState<LeaderboardModalTarget | null>(null);
   const [enabledPlatforms, setEnabledPlatforms] = useState<ShardPlatform[]>(readStoredPlatforms);
@@ -392,7 +396,14 @@ export default function LeaderboardView() {
             </button>
           )}
           {import.meta.env.DEV && tab === 'games' && (
-            <button type="button" className="leaderboard-platform-toggle" onClick={() => setGroupsOpen(true)}>
+            <button
+              type="button"
+              className="leaderboard-platform-toggle"
+              onClick={() => {
+                setSearchIndexActive(true);
+                setGroupsOpen(true);
+              }}
+            >
               Review duplicates
             </button>
           )}
@@ -404,14 +415,20 @@ export default function LeaderboardView() {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
+            onFocus={() => {
+              setSearchFocused(true);
+              setSearchIndexActive(true);
+            }}
             onBlur={() => setSearchFocused(false)}
             placeholder="Find a game's score…"
             aria-label="Find a game"
           />
           {showSearchDropdown && (
             <ul className="leaderboard-search-dropdown" role="listbox">
-              {searchMatches.length === 0 && (
+              {searchIndexLoading && searchMatches.length === 0 && (
+                <li className="leaderboard-search-empty">Loading…</li>
+              )}
+              {!searchIndexLoading && searchMatches.length === 0 && (
                 <li className="leaderboard-search-empty">No games match &ldquo;{query.trim()}&rdquo;.</li>
               )}
               {searchMatches.slice(0, SEARCH_RESULTS_LIMIT).map((g) => (

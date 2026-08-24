@@ -5,6 +5,10 @@ import AchievementYears from './AchievementYears';
 
 const TOP_COUNT = 5;
 
+// Rough silhouette of a year-bars chart (see AchievementYears) — varied
+// heights so it reads as a chart shape, not a row of identical ticks.
+const SKELETON_BAR_HEIGHTS = [40, 65, 30, 80, 55, 45, 90, 35, 60, 50, 75, 42, 68, 38, 58, 48, 82, 33, 62, 47];
+
 export default function StatsView({
   stats,
 }: {
@@ -12,7 +16,7 @@ export default function StatsView({
 }) {
   const top = stats.slice(0, TOP_COUNT);
   const rest = stats.slice(TOP_COUNT);
-  const { data: timeline } = useTimeline();
+  const { data: timeline, loading: timelineLoading } = useTimeline();
 
   return (
     <div className="stats-view">
@@ -39,7 +43,26 @@ export default function StatsView({
           ))}
         </div>
       )}
-      {timeline && <AchievementYears months={timeline.months} years={timeline.years} />}
+      {timeline ? (
+        <AchievementYears months={timeline.months} years={timeline.years} />
+      ) : (
+        <div className="stats-years">
+          {timelineLoading && (
+            <div className="stats-years-skeleton" aria-hidden="true">
+              {SKELETON_BAR_HEIGHTS.map((h, i) => (
+                <span
+                  key={i}
+                  className="stats-years-skeleton-bar"
+                  style={{ height: `${h}%`, animationDelay: `${i * 60}ms` }}
+                />
+              ))}
+            </div>
+          )}
+          <p className="stats-years-loading">
+            {timelineLoading ? 'Loading achievement history…' : 'Could not load achievement history.'}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

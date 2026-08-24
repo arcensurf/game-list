@@ -33,10 +33,15 @@ export default function App() {
   const pickerView = import.meta.env.DEV && view === 'picker';
   const leaderboardView = view === 'leaderboard';
 
+  // Only the grid views (list/backlog) render individual game cards, so
+  // only they need covers.json + achievements.json merged in — Stats
+  // reads just platformStats, which comes straight off games.json. See
+  // the `detailed` param on useGames.
   const { groups, totalCount, platformStats, loading } = useGames(
     undefined,
     gogOnly,
     backlogView ? 'backlog' : 'beaten',
+    view === 'list' || backlogView,
   );
   const activeLetters = new Set(groups.map((g) => g.letter));
   const effectiveLightsOn = lightsOn || gogOnly || statsView || backlogView || pickerView || leaderboardView;

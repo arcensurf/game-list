@@ -18,11 +18,21 @@ const PLATFORMS: ShardPlatform[] = ['steam', 'psn', 'xbox', 'ra'];
 // per-platform top N that leaderboard.json ships. Backs the leaderboard's
 // game search so finding a specific game's score doesn't depend on
 // raising that cap.
-export function useGameSearchIndex(): { games: SearchableGame[]; loading: boolean } {
+//
+// Deferred behind `enabled` rather than fetched on mount: achievements.json
+// runs ~200KB, and the leaderboard renders fine without it — nothing needs
+// this list until someone actually focuses the search box, so making it
+// wait avoids a second large fetch competing with leaderboard.json for
+// bandwidth on every leaderboard visit.
+export function useGameSearchIndex(enabled: boolean): { games: SearchableGame[]; loading: boolean } {
   const [games, setGames] = useState<SearchableGame[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Whether a fetch has resolved (success or failure) — `loading` is
+  // derived from this plus `enabled` rather than tracked as its own
+  // state set synchronously at the top of the effect.
+  const [attempted, setAttempted] = useState(false);
 
   useEffect(() => {
+    if (!enabled) return;
     let cancelled = false;
     fetch(`${DATA_BASE}data/achievements.json`)
       .then((res) => (res.ok ? (res.json() as Promise<AchievementData>) : null))
@@ -47,15 +57,15 @@ export function useGameSearchIndex(): { games: SearchableGame[]; loading: boolea
           list.sort((a, b) => a.title.localeCompare(b.title));
           setGames(list);
         }
-        setLoading(false);
+        setAttempted(true);
       })
       .catch(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setAttempted(true);
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [enabled]);
 
-  return { games, loading };
+  return { games, loading: enabled && !attempted };
 }
