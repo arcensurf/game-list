@@ -375,7 +375,7 @@ export default function LeaderboardView({
               {tab === 'games' && (
                 <button
                   type="button"
-                  className="leaderboard-review-btn"
+                  className="dev-btn"
                   onClick={() => {
                     setSearchIndexActive(true);
                     setGroupsOpen(true);
@@ -386,7 +386,7 @@ export default function LeaderboardView({
               )}
               <button
                 type="button"
-                className="leaderboard-review-btn"
+                className="dev-btn"
                 onClick={() => {
                   setPreviewLoading(true);
                   setTimeout(() => setPreviewLoading(false), 2000);

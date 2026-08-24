@@ -4,7 +4,11 @@ import type { ShardPlatform } from '../hooks/useAchievementList';
 import { useStageMode } from '../hooks/useStageMode';
 import { usePickerBroadcast, usePickerFollower } from '../hooks/usePickerSync';
 import { DEFAULT_SKIP_DAYS } from '../types/overrides';
-import { ACHIEVEMENT_PLATFORM_COLORS } from '../utils/platformColors';
+import {
+  ACHIEVEMENT_PLATFORM_COLORS,
+  ACHIEVEMENT_PLATFORM_COLORS_LIGHT,
+} from '../utils/platformColors';
+import LampToggle from './LampToggle';
 import { loadArtFallback, steamCoverFallback } from '../utils/pickerCover';
 import BanListOverlay from './BanListOverlay';
 import ManualPickerOverlay from './ManualPickerOverlay';
@@ -337,14 +341,14 @@ export default function TrophyPickerView() {
       <div className="picker-controls">
         <div className="picker-buttons">
           <button
-            className="picker-btn picker-btn--primary"
+            className="dev-btn dev-btn--primary"
             onClick={() => void rollTrophy()}
             disabled={rolling || loading}
           >
             {rolling ? 'Rolling...' : 'Roll again (R)'}
           </button>
           <button
-            className="picker-btn"
+            className="dev-btn"
             onClick={() => void rerollSameGame()}
             disabled={!roll || rolling}
             title="Roll another achievement from this same game"
@@ -352,7 +356,7 @@ export default function TrophyPickerView() {
             Same game
           </button>
           <button
-            className="picker-btn"
+            className="dev-btn"
             onClick={() => void undo()}
             disabled={!canUndo || rolling}
             title="Back to the previous roll, undoing any mark that moved it"
@@ -363,7 +367,7 @@ export default function TrophyPickerView() {
           <span className="picker-divider" aria-hidden="true" />
 
           <button
-            className={`picker-btn${currentMarkStatus === 'earned' ? ' picker-btn--marked' : ''}`}
+            className={`dev-btn${currentMarkStatus === 'earned' ? ' dev-btn--marked' : ''}`}
             onClick={() => void markCurrent('earned')}
             disabled={!roll || rolling}
             title="Already earned — the nightly run hasn't caught up yet"
@@ -372,7 +376,7 @@ export default function TrophyPickerView() {
           </button>
           <span className="picker-skip-group">
             <button
-              className={`picker-btn${currentMarkStatus === 'skipped' ? ' picker-btn--marked' : ''}`}
+              className={`dev-btn${currentMarkStatus === 'skipped' ? ' dev-btn--marked' : ''}`}
               onClick={() => void markCurrent('skipped', skipDays)}
               disabled={!roll || rolling}
               title={`Hide this one for ${skipDays} days`}
@@ -394,7 +398,7 @@ export default function TrophyPickerView() {
           <span className="picker-divider" aria-hidden="true" />
 
           <button
-            className={`picker-btn picker-btn--danger${currentMarkStatus === 'unachievable' ? ' picker-btn--marked' : ''}`}
+            className={`dev-btn dev-btn--danger${currentMarkStatus === 'unachievable' ? ' dev-btn--marked' : ''}`}
             onClick={() => void markCurrent('unachievable')}
             disabled={!roll || rolling}
             title="Dead servers, delisted DLC — never offer this again"
@@ -402,7 +406,7 @@ export default function TrophyPickerView() {
             {currentMarkStatus === 'unachievable' ? '✓ Marked' : "Can't be earned"}
           </button>
           <button
-            className="picker-btn picker-btn--danger"
+            className="dev-btn dev-btn--danger"
             onClick={() => void banCurrentGame()}
             disabled={!roll || rolling}
             title="Drop this whole game from the pool"
@@ -434,20 +438,22 @@ export default function TrophyPickerView() {
               const on = enabledPlatforms.includes(p);
               const label = PLATFORM_LABELS[p] ?? p;
               return (
-                <button
+                <LampToggle
                   key={p}
-                  type="button"
-                  className={`picker-platform-toggle${on ? ' picker-platform-toggle--on' : ''}`}
-                  style={on ? { background: ACHIEVEMENT_PLATFORM_COLORS[p] } : undefined}
-                  onClick={() => togglePlatform(p)}
+                  className="picker-platform-toggle"
+                  on={on}
+                  // Lit with the light-map colour, not the brand one — base
+                  // PSN is 1.46:1 against an unlit key, i.e. a lamp you
+                  // can't tell is on. Same reasoning as the Leaderboard's.
+                  color={ACHIEVEMENT_PLATFORM_COLORS_LIGHT[p]}
+                  label={label}
                   title={
                     on
                       ? `Stop rolling ${label} achievements`
                       : `Include ${label} achievements again`
                   }
-                >
-                  {label}
-                </button>
+                  onClick={() => togglePlatform(p)}
+                />
               );
             })}
           </div>
@@ -473,7 +479,7 @@ export default function TrophyPickerView() {
               // achievement list is a straight substitution — somewhere
               // to go read the text that has to be typed in above.
               <a
-                className="picker-btn picker-btn--ghost picker-note-link"
+                className="dev-btn dev-btn--ghost picker-note-link"
                 href={`https://steamcommunity.com/stats/${roll.gameId}/achievements/`}
                 target="_blank"
                 rel="noreferrer"
@@ -485,17 +491,17 @@ export default function TrophyPickerView() {
         )}
 
         <div className="picker-footer">
-          <button className="picker-btn picker-btn--ghost" onClick={toggleStage}>
+          <button className="dev-btn dev-btn--ghost" onClick={toggleStage}>
             {stageOnly ? 'Show controls' : 'Stage only'}
           </button>
           <button
-            className="picker-btn picker-btn--ghost"
+            className="dev-btn dev-btn--ghost"
             onClick={() => setBanListOpen(true)}
           >
             Manage bans ({Object.keys(banned).length})
           </button>
           <button
-            className="picker-btn picker-btn--ghost"
+            className="dev-btn dev-btn--ghost"
             onClick={() => setManualOpen(true)}
             disabled={rolling}
             title="Load a specific achievement instead of rolling for one"
@@ -503,7 +509,7 @@ export default function TrophyPickerView() {
             Pick manually
           </button>
           <button
-            className="picker-btn picker-btn--ghost"
+            className="dev-btn dev-btn--ghost"
             onClick={() => setMarksOpen(true)}
             title="Review and clear individual earned/skipped/unachievable marks"
           >

@@ -308,76 +308,17 @@
   align-items: center;
 }
 
-.picker-btn {
-  background: var(--bg-surface);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.45rem 0.9rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: border-color var(--transition), color var(--transition), opacity var(--transition);
-}
+/* The buttons themselves are .dev-btn (dev.css) — the shared dev action
+   control, with --primary / --danger / --marked / --ghost on top of it.
+   Nothing button-shaped lives in this file any more. */
 
-.picker-btn:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent-light);
-}
-
-.picker-btn:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-.picker-btn--primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--text-on-dark);
-  font-weight: 600;
-}
-
-.picker-btn--primary:hover:not(:disabled) {
-  background: var(--accent-light);
-  border-color: var(--accent-light);
-  color: var(--text-on-dark);
-}
-
-.picker-btn--danger:hover:not(:disabled) {
-  border-color: #b4544a;
-  color: #e0857c;
-}
-
-/* Marking no longer moves the roll off screen, so this is the only
-   confirmation a click landed — a persistent state, not just a hover,
-   since the whole point is it's still visible after the mouse moves
-   away. Wins over --danger (Can't be earned combines both). */
-.picker-btn--marked {
-  background: rgba(74, 222, 128, 0.14);
-  border-color: #4ade80;
-  color: #4ade80;
-}
-
-.picker-btn--marked:hover:not(:disabled) {
-  border-color: #4ade80;
-  color: #4ade80;
-}
-
-.picker-btn--ghost {
-  background: transparent;
-  font-size: 0.78rem;
-  padding: 0.3rem 0.7rem;
-}
-
-/* Separates the row into clusters (roll / mark / danger) without the
-   heavier weight of a full border — same recipe as .masthead-divider.
-   Side margin on top of the row's own gap, so clusters read as
-   separate groups rather than a line squeezed between two buttons. */
+/* Separates the row into clusters (roll / mark / danger). Was a 1px
+   hairline; it is a gap now, which is the answer the rest of the app
+   arrived at — a cluster boundary is an absence of things, and drawing
+   a line to represent one adds ink to say "nothing here". */
 .picker-divider {
   flex-shrink: 0;
-  width: 1px;
-  height: 1.5rem;
-  margin: 0 0.3rem;
-  background: var(--border);
+  width: var(--space-4);
 }
 
 /* Skip and its day count read as one control, not a button followed by
@@ -447,36 +388,12 @@
   gap: 0.4rem;
 }
 
+/* Same filter set as the Leaderboard's, over the same platforms, so it
+   takes the same cable-box keys (LampToggle / lamp-toggle.css) rather
+   than a second design for the identical decision. Only the sizing
+   belongs here. */
 .picker-platform-toggle {
-  font-family: 'Share Tech', sans-serif;
-  padding: 0.22rem 0.6rem 0.16rem;
-  border-radius: 2px;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: opacity var(--transition), border-color var(--transition), color var(--transition);
-  /* Off state: same shape as the on-state badge, hollowed out — so the
-     row reads as one control with two states rather than a badge next
-     to an unrelated button. */
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-}
-
-.picker-platform-toggle--on {
-  border-color: transparent;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-}
-
-.picker-platform-toggle:not(.picker-platform-toggle--on):hover {
-  border-color: var(--accent);
-  color: var(--accent-light);
-}
-
-.picker-platform-toggle--on:hover {
-  opacity: 0.85;
+  --lamp-size: 0.7rem;
 }
 
 /* Rarity floor and platform toggles both narrow the pool; this is

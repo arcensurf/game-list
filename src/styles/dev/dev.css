@@ -877,9 +877,22 @@
   padding: 0.05rem 0.3rem;
 }
 
-/* Moved out of views/stats.css — rendered behind import.meta.env.DEV
-   in StatsView, so it has no business in the shipped bundle. */
-.stats-preview-loading-btn {
+/* ── Dev action button ──
+   The tooling's one button. Square, unfilled, a thin border and tracked
+   caps in the display face; state is ink and border colour, never a fill.
+   It reads as a labelled switch on a panel rather than as a web button,
+   which is the same reasoning the either/or tabs and the cable-box keys
+   were built on — those two carry selection and on/off, and this carries
+   "do the thing".
+
+   Three surfaces had grown their own copy of it: the Stats preview
+   button and the Leaderboard review button, which were already
+   byte-identical to each other under two names, and the trophy picker's
+   row, which was still on rounded boxes with a filled amber primary.
+   One class rather than three names sharing a rule — a selector list
+   still leaves three names in the codebase for a fourth surface to add
+   itself to, or to quietly diverge from. */
+.dev-btn {
   font-family: var(--font-display);
   padding: var(--space-1) var(--space-3);
   font-size: var(--type-label);
@@ -891,13 +904,60 @@
   cursor: pointer;
   transition: color var(--transition), border-color var(--transition);
 }
-.stats-preview-loading-btn:not(:disabled):hover {
+
+.dev-btn:not(:disabled):hover {
   color: var(--accent-light);
   border-color: var(--accent);
 }
-.stats-preview-loading-btn:disabled {
+
+.dev-btn:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* The one action in a cluster that the row is actually for. Lit rather
+   than filled: a solid amber slab is the generic primary button, and it
+   would be the only filled control left anywhere in the app. Ink, border
+   and a bloom is how everything else here says "on". */
+.dev-btn--primary {
+  color: var(--accent-light);
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-glow), 0.18);
+}
+
+.dev-btn--primary:not(:disabled):hover {
+  box-shadow: 0 0 10px rgba(var(--accent-glow), 0.32);
+}
+
+.dev-btn--danger:not(:disabled):hover {
+  color: #e0857c;
+  border-color: #b4544a;
+}
+
+/* Marking no longer moves the roll off screen, so this is the only
+   confirmation a click landed — a persistent state, not just a hover,
+   since the whole point is it's still visible after the mouse moves
+   away. Wins over --danger (Can't be earned combines both).
+
+   Same lit treatment as --primary in the confirmation green, so "this
+   is the action" and "this action has been taken" are the same kind of
+   signal in two colours rather than two unrelated visual ideas. */
+.dev-btn--marked,
+.dev-btn--marked:not(:disabled):hover {
+  color: #4ade80;
+  border-color: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
+}
+
+/* Secondary row: same control with the border dropped, for the actions
+   that open something rather than change something. */
+.dev-btn--ghost {
+  border-color: transparent;
+  padding: var(--space-1) var(--space-2);
+}
+
+.dev-btn--ghost:not(:disabled):hover {
+  border-color: transparent;
 }
 
 /* Dev tools on the leaderboard, clustered top-right of the view the way
@@ -909,28 +969,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-}
-
-.leaderboard-review-btn {
-  padding: var(--space-1) var(--space-3);
-  background: none;
-  border: 1px solid var(--border);
-  font-family: var(--font-display);
-  font-size: var(--type-label);
-  letter-spacing: var(--track-label);
-  text-transform: uppercase;
-  color: var(--text-muted);
-  cursor: pointer;
-}
-
-.leaderboard-review-btn:not(:disabled):hover {
-  color: var(--accent-light);
-  border-color: var(--accent);
-}
-
-.leaderboard-review-btn:disabled {
-  opacity: 0.5;
-  cursor: default;
 }
 
 /* The dev switch itself, beside the scoring-info button. Smaller lamp than

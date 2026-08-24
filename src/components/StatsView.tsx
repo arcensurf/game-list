@@ -34,7 +34,7 @@ export default function StatsView({
         {import.meta.env.DEV && (
           <button
             type="button"
-            className="stats-preview-loading-btn"
+            className="dev-btn"
             onClick={() => {
               setPreviewLoading(true);
               setTimeout(() => setPreviewLoading(false), 2000);
