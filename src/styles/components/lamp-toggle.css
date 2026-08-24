@@ -1,0 +1,81 @@
+/* ── Lamp toggle ──
+   A cable-box key: a square lamp with its label printed alongside it
+   rather than inside it.
+
+   That split is the point. On a physical panel the legend is printed on
+   the case and only the lamp changes, so the label never dims to express
+   state. The version this replaced was a filled pill whose off-state
+   dimmed the whole chip — text included — which collapsed contrast on
+   the lighter platform colours and still read as a generic rounded
+   button whatever the state. Restyling that shape was never going to
+   fix it; the shape was the problem.
+
+   Square, and no radius. A rounded filled control is the default of
+   every framework there is; a square key reads as hardware, which is the
+   language the card grid already speaks.
+
+   --lamp-color is the lit colour, supplied per instance (platform
+   colours on the leaderboard); it falls back to the accent for filters
+   with no identity of their own. */
+.lamp-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: var(--font-display);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.lamp-toggle:hover,
+.lamp-toggle--on {
+  color: var(--text);
+}
+
+/* Unlit: a dark inert cap. The inset highlight along the top edge and
+   the shadow beneath are what stop it reading as an empty checkbox —
+   it should look like something with a face that could be pressed. */
+.lamp-toggle-key {
+  flex-shrink: 0;
+  width: var(--lamp-size, 0.8rem);
+  height: var(--lamp-size, 0.8rem);
+  background: var(--bg-card);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: background var(--transition), box-shadow var(--transition);
+}
+
+/* Lit: the key's own colour, with the glow spilling onto the panel
+   around it the way a real indicator bleeds into its bezel. */
+.lamp-toggle--on .lamp-toggle-key {
+  background: var(--lamp-color, var(--accent));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 3px color-mix(in srgb, var(--lamp-color, var(--accent)) 90%, transparent),
+    0 0 10px color-mix(in srgb, var(--lamp-color, var(--accent)) 55%, transparent);
+}
+
+/* Hovering an unlit key previews the colour it would take. */
+.lamp-toggle:not(.lamp-toggle--on):not(:disabled):hover .lamp-toggle-key {
+  background: color-mix(in srgb, var(--lamp-color, var(--accent)) 28%, var(--bg-card));
+}
+
+/* No data for this platform — the key is dead rather than merely unlit,
+   so it neither lights nor responds. */
+.lamp-toggle:disabled {
+  cursor: default;
+  color: color-mix(in srgb, var(--text-muted) 45%, transparent);
+}
+
+.lamp-toggle:disabled .lamp-toggle-key {
+  opacity: 0.3;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}

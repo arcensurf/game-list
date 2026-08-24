@@ -3,12 +3,13 @@ import type React from 'react';
 import { useLeaderboard } from '../hooks/useLeaderboard';
 import { useGameSearchIndex } from '../hooks/useGameSearchIndex';
 import { pickerCoverUrl, steamCoverFallback } from '../utils/pickerCover';
-import { ACHIEVEMENT_PLATFORM_COLORS } from '../utils/platformColors';
+import { ACHIEVEMENT_PLATFORM_COLORS_LIGHT } from '../utils/platformColors';
 import xboxLogo from '../icons/svg/outline/xbox.svg';
 import type { ShardPlatform } from '../hooks/useAchievementList';
 import type { LeaderboardGame } from '../types/game';
 import { PLATFORMS } from '../hooks/useTrophyPicker';
 import LeaderboardGameModal from './LeaderboardGameModal';
+import LampToggle from './LampToggle';
 import type { LeaderboardModalTarget } from './LeaderboardGameModal';
 import DuplicateGroupsOverlay from './DuplicateGroupsOverlay';
 import ScoringInfoModal from './ScoringInfoModal';
@@ -58,35 +59,6 @@ function readStoredPlatforms(): ShardPlatform[] {
   } catch {
     // Private windows and blocked site data both throw on access.
     return PLATFORMS;
-  }
-}
-
-// Same idea, for the "hide duplicates" toggle — see dupeKey on
-// LeaderboardGame / assignDupeKeys in scripts/build-leaderboard.mjs.
-// Defaults on: the point of the feature is a decluttered view by
-// default, and every duplicate is still one click away via the toggle.
-const HIDE_DUPES_KEY = 'game-list:leaderboard-hide-dupes';
-
-function readStoredHideDupes(): boolean {
-  try {
-    const raw = localStorage.getItem(HIDE_DUPES_KEY);
-    return raw === null ? true : raw === '1';
-  } catch {
-    return true;
-  }
-}
-
-// And for the "completions only" toggle. Defaults off: the leaderboard
-// is a ranking first, and a completion is already visible in place —
-// this narrows it to the trophy case on demand, including any 100% game
-// that scores too low to make the display cut below.
-const COMPLETIONS_ONLY_KEY = 'game-list:leaderboard-completions-only';
-
-function readStoredCompletionsOnly(): boolean {
-  try {
-    return localStorage.getItem(COMPLETIONS_ONLY_KEY) === '1';
-  } catch {
-    return false;
   }
 }
 
@@ -144,7 +116,13 @@ type Tab = 'games' | 'rarest';
 const GAMES_DISPLAY_LIMIT = 100;
 const RAREST_DISPLAY_LIMIT = 200;
 
-export default function LeaderboardView() {
+export default function LeaderboardView({
+  hideDupes,
+  completionsOnly,
+}: {
+  hideDupes: boolean;
+  completionsOnly: boolean;
+}) {
   const { data, loading } = useLeaderboard();
   // Activated on first search focus or on opening the dev duplicate
   // review tool — the only two consumers of the game search index —
@@ -154,14 +132,15 @@ export default function LeaderboardView() {
   const [tab, setTab] = useState<Tab>('games');
   const [modalTarget, setModalTarget] = useState<LeaderboardModalTarget | null>(null);
   const [enabledPlatforms, setEnabledPlatforms] = useState<ShardPlatform[]>(readStoredPlatforms);
-  const [hideDupes, setHideDupes] = useState<boolean>(readStoredHideDupes);
-  const [completionsOnly, setCompletionsOnly] = useState<boolean>(readStoredCompletionsOnly);
   const [groupsOpen, setGroupsOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   // Dev-only: lets the loading skeleton and its entrance animation be
   // re-triggered on demand while iterating on them, instead of needing
   // a full reload every time.
   const [previewLoading, setPreviewLoading] = useState(false);
+  // Collapses every dev affordance on this view behind one switch, so the
+  // page can be previewed as a visitor sees it without a rebuild.
+  const [devOpen, setDevOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
@@ -226,30 +205,6 @@ export default function LeaderboardView() {
       const next = on ? prev.filter((p) => p !== platform) : [...prev, platform];
       try {
         localStorage.setItem(PLATFORMS_KEY, JSON.stringify(next));
-      } catch {
-        // Not worth interrupting anyone over.
-      }
-      return next;
-    });
-  };
-
-  const toggleHideDupes = () => {
-    setHideDupes((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem(HIDE_DUPES_KEY, next ? '1' : '0');
-      } catch {
-        // Not worth interrupting anyone over.
-      }
-      return next;
-    });
-  };
-
-  const toggleCompletionsOnly = () => {
-    setCompletionsOnly((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem(COMPLETIONS_ONLY_KEY, next ? '1' : '0');
       } catch {
         // Not worth interrupting anyone over.
       }
@@ -339,152 +294,146 @@ export default function LeaderboardView() {
           >
             ?
           </button>
+          {import.meta.env.DEV && (
+            <LampToggle
+              className="leaderboard-dev-lamp"
+              on={devOpen}
+              label="Dev"
+              title={devOpen ? 'Hide dev controls' : 'Show dev controls'}
+              onClick={() => setDevOpen((v) => !v)}
+            />
+          )}
+          <div className="leaderboard-search-wrap trace-b">
+            <input
+              className="leaderboard-search"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => {
+                setSearchFocused(true);
+                setSearchIndexActive(true);
+              }}
+              onBlur={() => setSearchFocused(false)}
+              placeholder="Find a game's score…"
+              aria-label="Find a game"
+            />
+            {showSearchDropdown && (
+              <ul className="leaderboard-search-dropdown" role="listbox">
+                {searchIndexLoading && searchMatches.length === 0 && (
+                  <li className="leaderboard-search-empty">Loading…</li>
+                )}
+                {!searchIndexLoading && searchMatches.length === 0 && (
+                  <li className="leaderboard-search-empty">No games match &ldquo;{query.trim()}&rdquo;.</li>
+                )}
+                {searchMatches.slice(0, SEARCH_RESULTS_LIMIT).map((g) => (
+                  <li
+                    key={`${g.platform}/${g.id}`}
+                    role="option"
+                    aria-selected={false}
+                    className="leaderboard-search-option"
+                    // Keeps the input focused through the click so the
+                    // blur handler above doesn't close the dropdown first.
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      setModalTarget({
+                        platform: g.platform,
+                        id: g.id,
+                        title: g.title,
+                        dupeKey: dupeKeyByGame.get(`${g.platform}/${g.id}`) ?? null,
+                      });
+                      setQuery('');
+                      setSearchFocused(false);
+                    }}
+                  >
+                    <PlatformPill platform={g.platform} />
+                    <span className="leaderboard-search-option-title">{g.title}</span>
+                    <span className="leaderboard-search-option-meta">
+                      {g.earned}/{g.total}
+                    </span>
+                  </li>
+                ))}
+                {searchMatches.length > SEARCH_RESULTS_LIMIT && (
+                  <li className="leaderboard-search-empty">Keep typing to narrow it down…</li>
+                )}
+              </ul>
+            )}
+          </div>
+          {/* Dev tools sit top-right of the view, out of the filter row —
+              same placement as the Stats view's preview control. */}
+          {import.meta.env.DEV && devOpen && (
+            <div className="leaderboard-dev-tools">
+              {tab === 'games' && (
+                <button
+                  type="button"
+                  className="leaderboard-review-btn"
+                  onClick={() => {
+                    setSearchIndexActive(true);
+                    setGroupsOpen(true);
+                  }}
+                >
+                  Review duplicates
+                </button>
+              )}
+              <button
+                type="button"
+                className="leaderboard-review-btn"
+                onClick={() => {
+                  setPreviewLoading(true);
+                  setTimeout(() => setPreviewLoading(false), 2000);
+                }}
+                disabled={previewLoading}
+              >
+                Preview loading
+              </button>
+            </div>
+          )}
         </div>
-        {import.meta.env.DEV && (
+        {import.meta.env.DEV && devOpen && (
           <p className="leaderboard-dev-hint">
             Local data is a snapshot from the last <code>npm run pull-data</code> — run it again if this looks stale.
           </p>
         )}
-        <div className="leaderboard-tabs" role="tablist">
-          <button
-            role="tab"
-            aria-selected={tab === 'games'}
-            className={`leaderboard-tab${tab === 'games' ? ' leaderboard-tab--active' : ''}`}
-            onClick={() => setTab('games')}
-          >
-            Top Games
-          </button>
-          <button
-            role="tab"
-            aria-selected={tab === 'rarest'}
-            className={`leaderboard-tab${tab === 'rarest' ? ' leaderboard-tab--active' : ''}`}
-            onClick={() => setTab('rarest')}
-          >
-            Rarest Unlocks
-          </button>
+        <div className="leaderboard-controls">
+          <div className="leaderboard-tabs" role="tablist">
+            <button
+              role="tab"
+              aria-selected={tab === 'games'}
+              className={`leaderboard-tab${tab === 'games' ? ' leaderboard-tab--active' : ''}`}
+              onClick={() => setTab('games')}
+            >
+              Top Games
+            </button>
+            <button
+              role="tab"
+              aria-selected={tab === 'rarest'}
+              className={`leaderboard-tab${tab === 'rarest' ? ' leaderboard-tab--active' : ''}`}
+              onClick={() => setTab('rarest')}
+            >
+              Rarest Unlocks
+            </button>
+          </div>
+
+          <div className="leaderboard-platform-toggles" role="group" aria-label="Platforms to show">
+            {PLATFORMS.map((p) => {
+              const on = enabledPlatforms.includes(p);
+              return (
+                <LampToggle
+                  key={p}
+                  className="leaderboard-platform-toggle"
+                  on={on}
+                  // The light map: a lit key has to be distinguishable from an
+                // unlit one, and base PSN (#003087) is 1.46:1 against the
+                // unlit key's --bg-card — a lamp you cannot tell is on.
+                color={ACHIEVEMENT_PLATFORM_COLORS_LIGHT[p]}
+                  label={PLATFORM_LABELS[p]}
+                  title={on ? `Hide ${PLATFORM_LABELS[p]}` : `Show ${PLATFORM_LABELS[p]}`}
+                  onClick={() => togglePlatform(p)}
+                />
+              );
+            })}
+          </div>
         </div>
 
-        <div className="leaderboard-platform-toggles" role="group" aria-label="Platforms to show">
-          {PLATFORMS.map((p) => {
-            const on = enabledPlatforms.includes(p);
-            return (
-              <button
-                key={p}
-                type="button"
-                className={`leaderboard-platform-toggle${on ? ' leaderboard-platform-toggle--on' : ''}`}
-                style={on ? { background: ACHIEVEMENT_PLATFORM_COLORS[p] } : undefined}
-                onClick={() => togglePlatform(p)}
-                title={on ? `Hide ${PLATFORM_LABELS[p]}` : `Show ${PLATFORM_LABELS[p]}`}
-              >
-                {PLATFORM_LABELS[p]}
-              </button>
-            );
-          })}
-          {tab === 'games' && <span className="picker-divider" aria-hidden="true" />}
-          {tab === 'games' && (
-            <button
-              type="button"
-              className={`leaderboard-platform-toggle${hideDupes ? ' leaderboard-platform-toggle--on' : ''}`}
-              style={hideDupes ? { background: 'var(--accent)' } : undefined}
-              onClick={toggleHideDupes}
-              title={hideDupes ? 'Show every platform copy' : 'Collapse each game to its highest-scoring platform copy'}
-            >
-              Hide duplicates
-            </button>
-          )}
-          {tab === 'games' && (
-            <button
-              type="button"
-              className={`leaderboard-platform-toggle${completionsOnly ? ' leaderboard-platform-toggle--on' : ''}`}
-              style={completionsOnly ? { background: 'var(--accent)' } : undefined}
-              onClick={toggleCompletionsOnly}
-              title={completionsOnly ? 'Show every ranked game' : 'Show only games finished at 100%'}
-            >
-              Completions only
-            </button>
-          )}
-          {import.meta.env.DEV && tab === 'games' && (
-            <button
-              type="button"
-              className="leaderboard-platform-toggle"
-              onClick={() => {
-                setSearchIndexActive(true);
-                setGroupsOpen(true);
-              }}
-            >
-              Review duplicates
-            </button>
-          )}
-          {import.meta.env.DEV && (
-            <button
-              type="button"
-              className="leaderboard-platform-toggle"
-              onClick={() => {
-                setPreviewLoading(true);
-                setTimeout(() => setPreviewLoading(false), 2000);
-              }}
-              disabled={previewLoading}
-            >
-              Preview loading
-            </button>
-          )}
-        </div>
-
-        <div className="leaderboard-search-wrap">
-          <input
-            className="leaderboard-search"
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => {
-              setSearchFocused(true);
-              setSearchIndexActive(true);
-            }}
-            onBlur={() => setSearchFocused(false)}
-            placeholder="Find a game's score…"
-            aria-label="Find a game"
-          />
-          {showSearchDropdown && (
-            <ul className="leaderboard-search-dropdown" role="listbox">
-              {searchIndexLoading && searchMatches.length === 0 && (
-                <li className="leaderboard-search-empty">Loading…</li>
-              )}
-              {!searchIndexLoading && searchMatches.length === 0 && (
-                <li className="leaderboard-search-empty">No games match &ldquo;{query.trim()}&rdquo;.</li>
-              )}
-              {searchMatches.slice(0, SEARCH_RESULTS_LIMIT).map((g) => (
-                <li
-                  key={`${g.platform}/${g.id}`}
-                  role="option"
-                  aria-selected={false}
-                  className="leaderboard-search-option"
-                  // Keeps the input focused through the click so the
-                  // blur handler above doesn't close the dropdown first.
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => {
-                    setModalTarget({
-                      platform: g.platform,
-                      id: g.id,
-                      title: g.title,
-                      dupeKey: dupeKeyByGame.get(`${g.platform}/${g.id}`) ?? null,
-                    });
-                    setQuery('');
-                    setSearchFocused(false);
-                  }}
-                >
-                  <PlatformPill platform={g.platform} />
-                  <span className="leaderboard-search-option-title">{g.title}</span>
-                  <span className="leaderboard-search-option-meta">
-                    {g.earned}/{g.total}
-                  </span>
-                </li>
-              ))}
-              {searchMatches.length > SEARCH_RESULTS_LIMIT && (
-                <li className="leaderboard-search-empty">Keep typing to narrow it down…</li>
-              )}
-            </ul>
-          )}
-        </div>
       </div>
 
       {tab === 'games' && games.length === 0 ? (

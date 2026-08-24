@@ -876,3 +876,67 @@
   border-radius: 2px;
   padding: 0.05rem 0.3rem;
 }
+
+/* Moved out of views/stats.css — rendered behind import.meta.env.DEV
+   in StatsView, so it has no business in the shipped bundle. */
+.stats-preview-loading-btn {
+  font-family: var(--font-display);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+.stats-preview-loading-btn:not(:disabled):hover {
+  color: var(--accent-light);
+  border-color: var(--accent);
+}
+.stats-preview-loading-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Dev tools on the leaderboard, clustered top-right of the view the way
+   the Stats view places its own. Both used to borrow
+   .leaderboard-platform-toggle from the filter row; that class is now a
+   cable-box key, which renders a lamp span these buttons do not have, so
+   they picked up no styling at all. */
+.leaderboard-dev-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.leaderboard-review-btn {
+  padding: var(--space-1) var(--space-3);
+  background: none;
+  border: 1px solid var(--border);
+  font-family: var(--font-display);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.leaderboard-review-btn:not(:disabled):hover {
+  color: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.leaderboard-review-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* The dev switch itself, beside the scoring-info button. Smaller lamp than
+   the leaderboard filters so it reads as tooling rather than as one of the
+   view controls. */
+.leaderboard-dev-lamp {
+  --lamp-size: 0.6rem;
+  flex-shrink: 0;
+}

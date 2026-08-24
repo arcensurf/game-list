@@ -25,6 +25,7 @@
 @import './components/game-of-games.css';
 @import './components/achievement.css';
 @import './components/platform-badge.css';
+@import './components/lamp-toggle.css';
 
 @import './views/layout.css';
 @import './views/stats.css';

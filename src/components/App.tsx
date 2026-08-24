@@ -2,12 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useGames } from '../hooks/useGames';
 import { useGogFilter } from '../hooks/useGogFilter';
+import { useLeaderboardFilters } from '../hooks/useLeaderboardFilters';
 import { useCardSpotlight } from '../hooks/useCardSpotlight';
 import { useViewSwipe } from '../hooks/useViewSwipe';
 import { useScrollReset } from '../hooks/useScrollReset';
 import { useMastheadFlip } from '../hooks/useMastheadFlip';
 import AlphabetNav from './AlphabetNav';
 import GogFilterToggle from './GogFilterToggle';
+import LeaderboardFilterToggles from './LeaderboardFilterToggles';
 import GameGrid from './GameGrid';
 import BacklogList from './BacklogList';
 import AddGameForm from './AddGameForm';
@@ -25,6 +27,7 @@ export default function App() {
   const [inTransition, setInTransition] = useState(false);
 
   const { gogOnly, toggleGog } = useGogFilter(view);
+  const leaderboardFilters = useLeaderboardFilters(view);
   const backlogView = view === 'backlog';
   const statsView = view === 'stats';
   // Gated on DEV at the point of use, not just kept out of VIEW_ORDER:
@@ -83,6 +86,10 @@ export default function App() {
                   ? 'in the backlog'
                   : 'games completed'}
             </p>
+            {/* The masthead only flips on the list view, so the leaderboard's
+                modifiers live on the title face where they are always
+                reachable — not behind a flip that never happens. */}
+            {view === 'leaderboard' && <LeaderboardFilterToggles {...leaderboardFilters} />}
           </div>
           <div className="masthead-face masthead-face--letters">
             {view === 'list' && (
@@ -112,7 +119,10 @@ export default function App() {
         {inTransition ? null : pickerView ? (
           <TrophyPickerView />
         ) : leaderboardView ? (
-          <LeaderboardView />
+          <LeaderboardView
+            hideDupes={leaderboardFilters.hideDupes}
+            completionsOnly={leaderboardFilters.completionsOnly}
+          />
         ) : statsView ? (
           <StatsView stats={platformStats} />
         ) : loading ? (

@@ -12,9 +12,9 @@
 }
 
 .leaderboard-header h2 {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 1.6rem;
-  letter-spacing: 0.06em;
+  font-family: var(--font-display);
+  font-size: var(--type-title);
+  letter-spacing: var(--track-title);
   text-transform: uppercase;
   color: var(--text);
 }
@@ -22,7 +22,8 @@
 .leaderboard-title-row {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  flex-wrap: wrap;
+  gap: var(--space-3);
 }
 
 .leaderboard-info-btn {
@@ -32,8 +33,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.75rem;
+  font-family: var(--font-display);
+  font-size: var(--type-label);
   border-radius: 50%;
   background: none;
   border: 1px solid var(--border);
@@ -47,102 +48,164 @@
   border-color: var(--accent);
 }
 
-.leaderboard-tabs {
+/* Tabs and platform keys on one line — the tabs never needed the full
+   width, and stacking them put two control rows between the title and the
+   table for no reason. Keys align to the tabs' text rather than their
+   underline, which sits below the baseline. */
+.leaderboard-controls {
   display: flex;
-  gap: 0.5rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
 }
 
+.leaderboard-tabs {
+  display: flex;
+  gap: var(--space-5);
+  flex-shrink: 0;
+}
+
+/* Either/or — one of these is true, so the lit bar marks which. Same
+   treatment as the Stats metric tabs and the bottom nav; the boxed
+   version was two bordered rectangles saying nothing the ink could not.
+   A step larger than the platform keys below, since this switches what
+   the whole table is showing rather than filtering it. */
 .leaderboard-tab {
-  font-family: 'Share Tech', sans-serif;
-  padding: 0.4rem 0.9rem;
-  border-radius: 2px;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
+  position: relative;
+  padding: var(--space-1) 0 var(--space-2);
+  background: none;
+  border: none;
+  font-family: var(--font-display);
+  font-size: var(--type-meta);
+  letter-spacing: var(--track-chrome);
   text-transform: uppercase;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
   color: var(--text-muted);
   cursor: pointer;
-  transition: color var(--transition), border-color var(--transition);
+  transition: color var(--transition);
+}
+
+.leaderboard-tab:hover {
+  color: var(--text);
 }
 
 .leaderboard-tab--active {
-  color: var(--text);
-  border-color: var(--accent);
-}
-
-.leaderboard-platform-toggles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.leaderboard-platform-toggle {
-  font-family: 'Share Tech', sans-serif;
-  padding: 0.22rem 0.6rem 0.16rem;
-  border-radius: 2px;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: opacity var(--transition), border-color var(--transition), color var(--transition);
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-}
-
-.leaderboard-platform-toggle:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.leaderboard-platform-toggle--on {
-  border-color: transparent;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-}
-
-.leaderboard-platform-toggle:not(.leaderboard-platform-toggle--on):hover {
-  border-color: var(--accent);
   color: var(--accent-light);
 }
 
-.leaderboard-platform-toggle--on:hover {
-  opacity: 0.85;
+.leaderboard-tab--active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-glow), 0.6);
 }
 
+/* Platform keys — styling lives in components/lamp-toggle.css. Wider
+   gap than a chip row wanted, because each control is now a key plus a
+   separate label and they need room to not read as one run of text. */
+.leaderboard-platform-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
+  margin-left: auto;
+  /* Nudged down to sit on the tabs' text baseline, since the tabs carry
+     bottom padding to clear their active underline. */
+  padding-top: var(--space-1);
+}
+
+
+
+/* Search — a terminal prompt rather than a form field. The boxed version
+   was the one control on the page still wearing a filled, rounded,
+   bordered rectangle, which is exactly the treatment the rest of this
+   redesign has been removing; sitting it next to the cable-box keys made
+   that obvious.
+
+   The affordance still has to say "you can type here", and a bare label
+   would not. It comes from the prompt glyph and the lit rule underneath
+   instead of from an outline — the same marker the card HUD opens its
+   Game of Games line with, over the app's own trace. Focus brightens
+   both rather than recolouring a border. */
 .leaderboard-search-wrap {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 0 1 20rem;
+  min-width: 8rem;
+  margin-left: auto;
+}
+
+.leaderboard-search-wrap::before {
+  content: '▸';
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-meta);
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.55;
+  transition: opacity var(--transition);
+}
+
+.leaderboard-search-wrap:focus-within::before {
+  opacity: 1;
+}
+
+/* trace-b draws the rule; this only sets how hard it burns. */
+.leaderboard-search-wrap::after {
+  opacity: 0.5;
+  transition: opacity var(--transition);
+}
+
+.leaderboard-search-wrap:focus-within::after {
+  opacity: 1;
 }
 
 .leaderboard-search {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: var(--space-1) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--type-meta);
+  letter-spacing: var(--track-chrome);
   color: var(--text);
-  padding: 0.45rem 0.65rem;
-  font-size: 0.85rem;
-  width: 100%;
+}
+
+.leaderboard-search::placeholder {
+  color: var(--text-muted);
+  letter-spacing: var(--track-chrome);
+}
+
+/* The type-search widget's own clear button is a rounded grey pill in
+   every browser and there is no styling it into this language. */
+.leaderboard-search::-webkit-search-cancel-button {
+  display: none;
 }
 
 .leaderboard-search:focus {
   outline: none;
-  border-color: var(--accent);
 }
 
 .leaderboard-search-dropdown {
   position: absolute;
-  top: calc(100% + 0.3rem);
+  top: calc(100% + var(--space-1));
   left: 0;
   right: 0;
   z-index: 10;
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  border: none;
+  border-radius: 0;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
   list-style: none;
   margin: 0;
-  padding: 0.3rem;
+  padding: var(--space-1);
   max-height: 320px;
   overflow-y: auto;
 }
@@ -150,9 +213,9 @@
 .leaderboard-search-option {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.4rem 0.5rem;
-  border-radius: 4px;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 0;
   cursor: pointer;
 }
 
@@ -163,7 +226,8 @@
 .leaderboard-search-option-title {
   flex: 1;
   min-width: 0;
-  font-size: 0.85rem;
+  font-family: var(--font-display);
+  font-size: var(--type-body);
   color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -171,15 +235,16 @@
 }
 
 .leaderboard-search-option-meta {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.75rem;
+  font-family: var(--font-figure);
+  font-size: var(--type-meta);
   color: var(--text-muted);
   flex-shrink: 0;
 }
 
 .leaderboard-search-empty {
-  padding: 0.5rem;
-  font-size: 0.8rem;
+  padding: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--type-meta);
   color: var(--text-muted);
   text-align: center;
 }
@@ -311,12 +376,13 @@
 }
 
 .leaderboard-rank {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 0.85rem;
+  font-family: var(--font-figure);
+  font-size: var(--type-meta);
   color: var(--text-muted);
   min-width: 1.75rem;
   text-align: center;
   flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .leaderboard-thumb {
@@ -359,8 +425,15 @@
   gap: 0.2rem;
 }
 
+/* The row's subject, so it gets a clear step over the meta line beneath
+   it — at --type-body it was 1.15x the meta size, which reads as "two
+   slightly different sizes" rather than as a hierarchy. Tight line-height
+   keeps the title + meta stack at roughly the 40px thumbnail height so
+   the row does not grow around it. */
 .leaderboard-title {
-  font-size: 0.92rem;
+  font-family: var(--font-display);
+  font-size: var(--type-heading);
+  line-height: 1.25;
   color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -375,11 +448,13 @@
 }
 
 .leaderboard-completion {
-  font-size: 0.78rem;
+  font-size: var(--type-meta);
   color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-family: var(--font-figure);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Neutral, not gold: the foil around the row is already carrying the
@@ -388,26 +463,30 @@
   color: var(--text);
 }
 
+/* Row platform marker. Was a filled colour chip, which stopped working
+   once the filters above became cable-box keys — two different colour
+   blocks doing two different jobs. It is not a control, so it should not
+   borrow the keys' treatment either: the keys hold their colour in the
+   lamp and keep their label neutral, and this does the opposite. No box,
+   no fill, no radius; the colour is the type. */
 .leaderboard-platform {
-  font-family: 'Share Tech', sans-serif;
-  padding: 0.18rem 0.5rem 0.14rem;
-  border-radius: 2px;
-  font-size: 0.66rem;
-  letter-spacing: 0.12em;
+  font-family: var(--font-display);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
-  color: #fff;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .leaderboard-score {
-  font-family: 'Share Tech', sans-serif;
-  font-size: 1rem;
+  font-family: var(--font-figure);
+  font-size: var(--type-heading);
   font-weight: 600;
   color: var(--accent-light, var(--accent));
   flex-shrink: 0;
   min-width: 3.5rem;
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Skeleton rows for the initial leaderboard.json load — same shape as

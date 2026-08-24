@@ -19,29 +19,6 @@
   color: var(--text);
 }
 
-.stats-preview-loading-btn {
-  font-family: var(--font-display);
-  padding: var(--space-1) var(--space-3);
-  font-size: var(--type-label);
-  letter-spacing: var(--track-label);
-  text-transform: uppercase;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: color var(--transition), border-color var(--transition);
-}
-
-.stats-preview-loading-btn:not(:disabled):hover {
-  color: var(--accent-light);
-  border-color: var(--accent);
-}
-
-.stats-preview-loading-btn:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
 /* Top 5 — a stat bar, not a card grid: the numbers do the talking.
    Framed by corner brackets (the card HUD's device at section scale)
    rather than penned in by rules top, bottom and between every column.
@@ -183,26 +160,45 @@
   flex-shrink: 0;
 }
 
+/* Metric toggle — no box. Follows .bottom-nav-tab (views/layout.css),
+   which was already the least generic control in the app: the label is
+   the control, and state is carried by ink plus a lit underline instead
+   of by an outline. Worth trying elsewhere, though not everywhere — a
+   text field still needs to read as something you can type into, and an
+   icon-only button has no label to carry the state. */
 .stats-metric-tab {
+  position: relative;
   font-family: var(--font-display);
-  padding: var(--space-1) var(--space-3);
+  padding: var(--space-1) var(--space-2) var(--space-2);
   font-size: var(--type-label);
   letter-spacing: var(--track-chrome);
   text-transform: uppercase;
   background: transparent;
-  border: 1px solid var(--border);
+  border: none;
   color: var(--text-muted);
   cursor: pointer;
-  transition: color var(--transition), border-color var(--transition);
+  transition: color var(--transition);
+}
+
+.stats-metric-tab:hover {
+  color: var(--text);
 }
 
 .stats-metric-tab--active {
-  color: var(--text);
-  border-color: var(--accent);
+  color: var(--accent-light);
 }
 
-.stats-metric-tab:not(.stats-metric-tab--active):hover {
-  color: var(--text);
+/* Same lit bar the bottom nav uses to mark its active tab, full-width
+   here because the label is much shorter. */
+.stats-metric-tab--active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-glow), 0.6);
 }
 
 .stats-year-bars {

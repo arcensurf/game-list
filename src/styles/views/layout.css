@@ -318,3 +318,27 @@
   border-radius: 2px 2px 0 0;
   box-shadow: 0 0 8px rgba(var(--accent-glow), 0.6);
 }
+
+/* Leaderboard view modifiers, sharing the masthead slot the Games of
+   Games chip uses on the list view. Slightly smaller key than the
+   leaderboard body so it sits as chrome rather than competing with the
+   platform row below. */
+.masthead-lamp-toggle {
+  flex-shrink: 0;
+  --lamp-size: 0.7rem;
+}
+
+.masthead-face--title .masthead-lamp-toggle:first-of-type {
+  margin-left: auto;
+}
+
+/* The masthead is a fixed 56px row with overflow hidden, so on narrow
+   screens the title, the count and two toggles do not all fit and the
+   toggles are what gets clipped. The count is the least load-bearing of
+   the three — it restates what the list below already shows — so it
+   stands down when the toggles are present. */
+@media (max-width: 620px) {
+  .masthead-face--title:has(.masthead-lamp-toggle) .game-count {
+    display: none;
+  }
+}
