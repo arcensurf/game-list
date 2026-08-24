@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import Brackets from './Brackets';
 
 export default function ScoringInfoModal({
   open,
@@ -28,11 +29,17 @@ export default function ScoringInfoModal({
         aria-modal="true"
         aria-label="How scoring works"
       >
+        <Brackets />
+
         <div className="leaderboard-modal-head">
-          <span className="leaderboard-modal-title">How Scoring Works</span>
-          <button className="leaderboard-modal-close" onClick={onClose} aria-label="Close">
-            ×
-          </button>
+          <div className="leaderboard-modal-head-top">
+            <div className="leaderboard-modal-title-stack">
+              <span className="leaderboard-modal-title">How Scoring Works</span>
+            </div>
+            <button className="leaderboard-modal-close" onClick={onClose} aria-label="Close">
+              ×
+            </button>
+          </div>
         </div>
 
         <div className="scoring-info-body">

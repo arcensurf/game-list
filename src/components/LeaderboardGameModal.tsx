@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import Brackets from './Brackets';
 import { useAchievementList } from '../hooks/useAchievementList';
 import type { ShardPlatform } from '../hooks/useAchievementList';
 import type { LeaderboardGame } from '../types/game';
@@ -93,9 +95,34 @@ export default function LeaderboardGameModal({
         aria-modal="true"
         aria-label={shown.title}
       >
+        <Brackets />
+
         <div className="leaderboard-modal-head">
-          <PlatformPill platform={shown.platform} />
-          <span className="leaderboard-modal-title">{shown.title}</span>
+          <div className="leaderboard-modal-head-top">
+            <PlatformPill platform={shown.platform} />
+            {/* The banner is stacked with the title rather than placed in
+                the head, so it lines up with the title's left edge however
+                wide the platform pill happens to be. */}
+            <div className="leaderboard-modal-title-stack">
+              {ctx != null && ctx.completion >= 1 && (
+                <span className="leaderboard-modal-cleared">▸ 100% Complete</span>
+              )}
+              {/* A fully cleared game gets the Game of Games title treatment —
+                  the glitch resolving into iridescence. Same event: the app
+                  already reserves that for the things it considers finished
+                  and special, and a 100% clear is this view's version of it. */}
+              <span
+                className={`leaderboard-modal-title${ctx != null && ctx.completion >= 1 ? ' leaderboard-modal-title--complete' : ''}`}
+              >
+                {shown.title}
+              </span>
+            </div>
+            <button className="leaderboard-modal-close" onClick={onClose} aria-label="Close">
+              ×
+            </button>
+          </div>
+          {/* Its own line. Sharing the title's row meant a readout that can
+              run to three clauses was squeezing the name it describes. */}
           {totalScore != null && (
             <span className="leaderboard-modal-score">
               {Math.round(totalScore).toLocaleString()} pts
@@ -107,9 +134,6 @@ export default function LeaderboardGameModal({
               )}
             </span>
           )}
-          <button className="leaderboard-modal-close" onClick={onClose} aria-label="Close">
-            ×
-          </button>
         </div>
 
         {members && (
@@ -134,12 +158,16 @@ export default function LeaderboardGameModal({
         )}
 
         <div className="leaderboard-modal-list">
-          {loading && <p className="leaderboard-modal-empty">Loading achievements...</p>}
+          {loading && (
+            <p className="leaderboard-modal-empty leaderboard-modal-empty--loading">
+              Loading achievements
+            </p>
+          )}
           {!loading && rows.length === 0 && (
             <p className="leaderboard-modal-empty">No achievement data for this game.</p>
           )}
           {!loading &&
-            rows.map((a) => {
+            rows.map((a, i) => {
               const raw = achievementScore(a.rarity);
               // Earned: what it's actually contributing right now (its
               // raw value discounted to the game's completion rate),
@@ -171,11 +199,16 @@ export default function LeaderboardGameModal({
                 <div
                   key={a.id}
                   className={`leaderboard-modal-row${a.earned ? ' leaderboard-modal-row--earned' : ''}`}
+                  style={{ '--row-index': i } as CSSProperties}
                 >
-                  <span className="leaderboard-modal-check">{a.earned ? '✓' : ''}</span>
+                  <span className="leaderboard-modal-check" aria-hidden="true">
+                    {a.earned ? '✓' : ''}
+                  </span>
                   <div className="leaderboard-modal-main">
                     <div className="leaderboard-modal-name">{a.name}</div>
                     {a.description && <div className="leaderboard-modal-desc">{a.description}</div>}
+                    {/* Always present, so every row is the same height
+                        whether or not it's been earned. */}
                     <div className="leaderboard-modal-meta">
                       {a.rarity != null ? `${a.rarity}% of players` : 'rarity unknown'}
                       {a.earned && a.earnedAt ? ` · earned ${formatDate(a.earnedAt)}` : ''}

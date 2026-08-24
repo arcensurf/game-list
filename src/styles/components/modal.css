@@ -1,0 +1,628 @@
+/* ── Modal ──
+   Shared by the achievement list and the scoring explainer. Classes keep
+   their .leaderboard-modal- prefix from when this lived in that view's
+   sheet; the scoping is historical, not real, and renaming is a separate
+   mechanical change.
+
+   Adapted from the card HUD rather than reskinned from it. The HUD is a
+   panel that IS a tube powering on: an ignition beam strikes the
+   centerline, the picture unfolds vertically from it, and the surface
+   carries scanlines over a dark amber ground. All of that translates
+   directly, because a modal is the same event at a larger scale — the
+   only change the scale forces is timing (a bigger tube fills slower).
+
+   What does NOT translate is the HUD's typewriter title. That gesture
+   works on two words flashed during a hover you hold for a second; on a
+   panel you open deliberately and then sit and read, retyping the game's
+   name every time is a wait, and it gets old by the third open.
+
+   What the HUD has no answer for is this surface's real content: a
+   hundred rows on two axes at once — earned or not, and how rare. Those
+   get the two additions below, the emission rule and the signal meter.
+
+   Type is mono throughout, which is the HUD's choice too (VT323 title
+   against Share Tech Mono body). A running sentence would normally route
+   to --font-text, but an achievement description here is a line on a
+   readout, not prose on a page, and the surface is more coherent for
+   holding one voice. */
+
+.leaderboard-modal-overlay {
+  position: fixed;
+  inset: 0;
+  /* Warmer and deeper than a neutral scrim — the panel behind it is lit
+     amber, and a grey veil over that reads as two unrelated surfaces. */
+  background: rgba(6, 4, 2, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  z-index: 1000;
+  animation: modal-overlay-in 0.14s ease both;
+}
+
+@keyframes modal-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Ignition beam. Lives on the overlay, not the panel, for the same
+   reason the HUD's lives on the cover rather than inside the hud: the
+   panel's unfold is a clip-path from zero height, and anything drawn
+   inside it is clipped away at exactly the moment the beam needs to be
+   visible.
+
+   Sized to the wider of the two panels. The radial's visible core is
+   about 55% of that width, so it still sits comfortably inside the
+   narrower scoring panel rather than overhanging it. */
+.leaderboard-modal-overlay::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(560px, calc(100% - var(--space-5) * 2));
+  height: 18px;
+  background: radial-gradient(
+    ellipse 55% 100% at center,
+    rgba(255, 248, 225, 1)   0%,
+    rgba(255, 215, 140, 0.9) 25%,
+    rgba(250, 180, 60, 0.55) 50%,
+    rgba(245, 158, 11, 0)   100%
+  );
+  filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  animation: modal-ignite 0.3s cubic-bezier(0.2, 0.85, 0.3, 1) both;
+}
+
+@keyframes modal-ignite {
+  0%   { transform: translate(-50%, -50%) scaleX(0.05); opacity: 0; }
+  22%  { transform: translate(-50%, -50%) scaleX(1);    opacity: 1; }
+  46%  { transform: translate(-50%, -50%) scaleX(1);    opacity: 1; }
+  100% { transform: translate(-50%, -50%) scaleX(1);    opacity: 0; }
+}
+
+/* No border, no radius. The panel is marked out by corner brackets and
+   held by its own light against the scrim — a 1px outline and an 8px
+   radius is the dark-dashboard default this app is trying not to be.
+
+   Scanlines sit in the panel's own background, so the list scrolls past
+   them rather than dragging them along. That's the right way round: the
+   lines belong to the glass, not to what's on it. */
+.leaderboard-modal-panel {
+  position: relative;
+  max-width: 560px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(22, 16, 8, 0.97) 0%,
+      rgba(14, 10, 4, 0.99) 100%
+    );
+  --bracket-size: 18px;
+  --bracket-inset: 7px;
+  --bracket-bloom: drop-shadow(0 0 3px rgba(var(--accent-glow), 0.5));
+  /* 0.26s against the HUD's 0.18s. Same easing and the same physical
+     event; a tube this much larger simply takes longer to fill, and the
+     HUD's timing at this size reads as a jump cut rather than a
+     power-on. */
+  animation: modal-unfold 0.26s cubic-bezier(0.2, 0.85, 0.3, 1) both;
+}
+
+@keyframes modal-unfold {
+  from { clip-path: inset(50% 0% 50% 0%); }
+  to   { clip-path: inset(0% 0% 0% 0%); }
+}
+
+/* Two rows: the name, then the readout under it. They were one row, and
+   the score won — it can run to three clauses, never wraps, and so it
+   ate the width the title needed, ellipsing long names against a figure
+   that isn't the reason you opened the panel. Stacking gives the title
+   the full width and puts the numbers where a readout belongs, on their
+   own line under the thing they describe. */
+.leaderboard-modal-head {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  /* The extra top step is the cleared banner's room. Carried on every
+     panel rather than added only when there is one, so a cleared game
+     and an unfinished one open to the same geometry — and it gives the
+     title clearance from the top brackets either way. */
+  padding: var(--space-5) var(--space-4) var(--space-3);
+}
+
+.leaderboard-modal-head-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* ── Cleared banner ──
+   A GoG card announces itself with a label that opens above the title
+   as the glitch fires (.card-hud-gog-label, card-hud.css), expanding a
+   grid row from 0fr so the title is pushed down during the corruption.
+
+   Same announcement, and the same ▸ marking it, but a different
+   mechanism: this one sits in the head's top padding rather than
+   expanding a row. On a card the shift IS part of the reveal — it
+   happens under your cursor, on one card among many. A modal is a fixed
+   frame you open deliberately, and having a cleared game's title sit a
+   line lower than every other game's would read as the panel being built
+   differently rather than as an event.
+
+   Iridescent by the same means as the title it sits over, and timed to
+   land just after the glitch resolves, so the sequence is: name types
+   in, corrupts, resolves — then the banner materialises out of the
+   static that made it. */
+.leaderboard-modal-cleared {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 0.28rem;
+  white-space: nowrap;
+  font-family: 'VT323', 'Share Tech Mono', monospace;
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
+  line-height: 1;
+  text-transform: uppercase;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 110, 110, 1)   0%,
+    rgba(255, 200, 110, 1)  20%,
+    rgba(200, 255, 130, 1)  40%,
+    rgba(110, 230, 200, 1)  60%,
+    rgba(130, 170, 255, 1)  80%,
+    rgba(210, 130, 255, 1) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0;
+  animation:
+    gog-label-flicker-in 0.3s steps(6, end) 1.1s forwards,
+    iridescent-flow 5s linear 1.4s infinite;
+}
+
+/* VT323 at --type-title lands at roughly the optical size of a normal
+   face at 1.05rem, which is where this title already sat — so the change
+   here is character, not scale.
+
+   Types in behind the unfold, the HUD's reveal in full. It starts as the
+   panel finishes opening rather than with it, so the two read as one
+   sequence — tube fills, then the name comes up on it — instead of two
+   things happening at once. */
+/* Holds the title and the cleared banner above it. Exists so the banner
+   can anchor to the title's own left edge — the platform pill beside it
+   is a different width per platform, so anything positioned off the
+   head's padding would line up on some games and not others. */
+.leaderboard-modal-title-stack {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.leaderboard-modal-title {
+  display: block;
+  min-width: 0;
+  font-family: 'VT323', 'Share Tech Mono', monospace;
+  font-size: var(--type-title);
+  line-height: 1.05;
+  letter-spacing: var(--track-title);
+  color: var(--accent-light);
+  text-shadow: 0 0 6px rgba(var(--accent-glow), 0.45);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  animation: modal-title-type 0.42s steps(26, end) 0.26s both;
+}
+
+@keyframes modal-title-type {
+  from { clip-path: inset(0% 100% 0% 0%); }
+  to   { clip-path: inset(0% 0% 0% 0%); }
+}
+
+/* The prompt stays live after the name lands. Empty box rather than a
+   glyph, which is what keeps it out of the background-clip mask on the
+   complete-title rule below — see the long note on the HUD's cursor in
+   card-hud.css. Delay lines up with the end of the type. */
+.leaderboard-modal-title::after {
+  content: '';
+  display: inline-block;
+  width: 0.5em;
+  height: 0.92em;
+  margin-left: 0.1em;
+  vertical-align: -0.12em;
+  background: var(--accent-light);
+  box-shadow: 0 0 5px rgba(var(--accent-glow), 0.45);
+  animation: hud-cursor-blink 0.9s steps(2) 0.68s infinite;
+}
+
+/* 100% cleared — the Game of Games title treatment, borrowed whole:
+   the name corrupts and resolves into iridescence (gog-title-glitch and
+   iridescent-flow, card-hud.css). The app already reserves that for what
+   it considers finished and special, and a full clear is this panel's
+   version of the same claim, so it should be the same event and not a
+   lookalike.
+
+   Sequenced after the type rather than under it: the name arrives, holds
+   for a beat, and then goes. */
+.leaderboard-modal-title--complete {
+  animation:
+    modal-title-type 0.42s steps(26, end) 0.26s both,
+    gog-title-glitch 0.28s steps(8, end) 0.78s forwards,
+    iridescent-flow 5s linear 1.06s infinite;
+}
+
+/* Free to wrap now that it has its own line — on a narrow panel the
+   three clauses take two lines rather than forcing a horizontal
+   scrollbar or truncating a number. */
+.leaderboard-modal-score {
+  font-family: var(--font-figure);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-chrome);
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.leaderboard-modal-close {
+  flex-shrink: 0;
+  padding: 0 var(--space-1);
+  font-family: var(--font-figure);
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition), text-shadow var(--transition);
+}
+
+.leaderboard-modal-close:hover,
+.leaderboard-modal-close:focus-visible {
+  color: var(--accent-light);
+  text-shadow: 0 0 6px rgba(var(--accent-glow), 0.55);
+}
+
+/* Platform copies — an either/or set, so they take the app's either/or
+   control: the label IS the control, and state is a lit underline rather
+   than a box (.bottom-nav-tab in layout.css, .stats-metric-tab in
+   stats.css). The panel's CRT surface doesn't earn this one an exception;
+   a control that behaves the same everywhere should look the same
+   everywhere, and the underline's bloom is already the same light the
+   rest of this panel emits.
+
+   Share Tech rather than the mono the panel's content runs in, matching
+   the other two tabs. The mono is a decision about this surface's
+   *content*; chrome belongs to the app, not to the screen it's on. */
+.leaderboard-modal-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-4);
+  padding: 0 var(--space-4) var(--space-2);
+}
+
+.leaderboard-modal-platform-btn {
+  position: relative;
+  padding: var(--space-1) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-chrome);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.leaderboard-modal-platform-btn:hover {
+  color: var(--text);
+}
+
+.leaderboard-modal-platform-btn--active {
+  color: var(--accent-light);
+}
+
+/* The same lit bar the bottom nav and the stats metric toggle use. */
+.leaderboard-modal-platform-btn--active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-glow), 0.6);
+}
+
+.leaderboard-modal-list {
+  overflow-y: auto;
+  padding: var(--space-1) var(--space-4) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.leaderboard-modal-empty {
+  padding: var(--space-6) 0;
+  text-align: center;
+  font-family: var(--font-figure);
+  font-size: var(--type-meta);
+  letter-spacing: var(--track-chrome);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Only while it's actually waiting — a cursor on "no data for this game"
+   would say the panel is still working on it. Same block cursor and
+   cadence as the HUD title's (hud-cursor-blink, card-hud.css); it is the
+   same object, so it borrows the keyframes rather than restating them. */
+.leaderboard-modal-empty--loading::after {
+  content: '';
+  display: inline-block;
+  width: 0.5em;
+  height: 0.92em;
+  margin-left: 0.25em;
+  vertical-align: -0.12em;
+  background: var(--accent-light);
+  box-shadow: 0 0 5px rgba(var(--accent-glow), 0.45);
+  animation: hud-cursor-blink 0.9s steps(2) infinite;
+}
+
+/* ── Rows ──
+   The old row was a rounded box with a hairline and a 3%-white fill for
+   earned, and opacity 0.55 for unearned. Both are gone.
+
+   What replaces them is the model the card grid runs on: a row is either
+   in the spotlight or tuned out of it. An earned row is simply at full
+   strength — check lit, name at full phosphor, points amber and blooming.
+   An unearned one is dimmed as a whole, exactly the way a card outside
+   the spotlight is.
+
+   Dimming the row rather than restyling its parts is the point. It's one
+   mechanism instead of four colour rules, it takes the points figure
+   down with everything else so an unearned row can't out-shout an earned
+   one, and it's the same statement the rest of the app makes about state
+   — which is what makes this read as the same product rather than as a
+   list that happens to be dark.
+
+   Brightness and saturation only. The card grid pairs its dim with
+   animated grain, and that's where this stops copying: grain over a
+   0.78rem description is unreadable, and the texture is carrying "no
+   signal on a screen", not "you haven't done this yet".
+
+   No box, no border, no radius either way. */
+.leaderboard-modal-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  /* steps(3) rather than a smooth ramp — three frames is enough to read
+     as arriving without becoming a strobe over text. Capped at 14 so a
+     200-achievement list doesn't stagger for four seconds. */
+  animation: modal-row-in 0.22s steps(3, end) both;
+  animation-delay: calc(min(var(--row-index, 0), 14) * 22ms);
+}
+
+/* Tuned out. Gentler than the card grid's 0.25/0.40 — a cover survives
+   being crushed that far because it still reads as a picture, while type
+   has to stay comfortably readable at the bottom of the range. This is
+   as far down as it goes while every unearned row is still something you
+   can read without leaning in. */
+.leaderboard-modal-row:not(.leaderboard-modal-row--earned) {
+  filter: brightness(0.62) saturate(0.7);
+}
+
+@keyframes modal-row-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.leaderboard-modal-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-tight);
+}
+
+/* Full phosphor in both states — the row's dim carries the difference,
+   so restating it here would double the step and push unearned names
+   past legible. */
+.leaderboard-modal-name {
+  font-family: var(--font-figure);
+  font-size: var(--type-body);
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.leaderboard-modal-desc {
+  font-family: var(--font-figure);
+  font-size: var(--type-meta);
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+/* Tracked caps against the description's sentence case — a stamp on a
+   record rather than more of the sentence. */
+.leaderboard-modal-meta {
+  font-family: var(--font-figure);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-chrome);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text-muted) 72%, transparent);
+}
+
+.leaderboard-modal-points-col {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-tight);
+}
+
+.leaderboard-modal-points-col--inline {
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-1);
+}
+
+.leaderboard-modal-points {
+  font-family: var(--font-figure);
+  font-size: var(--type-heading);
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.leaderboard-modal-row--earned .leaderboard-modal-points {
+  color: var(--accent-light);
+  text-shadow: 0 0 6px rgba(var(--accent-glow), 0.4);
+}
+
+.leaderboard-modal-points-note {
+  font-family: var(--font-figure);
+  font-size: var(--type-micro);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* The state column. A mark in a fixed position is what made this
+   readable before anything else was tried here: it needs no comparison
+   against a neighbouring row, which is the flaw in carrying state on
+   type colour alone.
+
+   Kept as a glyph rather than a drawn object on purpose. The lit square
+   is the filter toggles' key (lamp-toggle.css) and it means "a control
+   that is switched on" — reusing it for "a fact that is true" would put
+   two meanings on one object. A checkmark set in the app's own mono at
+   the accent is typography, not a second device. */
+.leaderboard-modal-check {
+  flex-shrink: 0;
+  width: 1.1rem;
+  align-self: flex-start;
+  margin-top: 0.1rem;
+  text-align: center;
+  font-family: var(--font-figure);
+  font-size: var(--type-meta);
+  color: var(--accent-light);
+  text-shadow: 0 0 6px rgba(var(--accent-glow), 0.5);
+}
+
+/* Scoring explainer — reuses the shell above, own body. */
+.scoring-info-panel {
+  max-width: 480px;
+}
+
+.scoring-info-body {
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.scoring-info-section h3 {
+  margin-bottom: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--accent-light);
+}
+
+.scoring-info-section p {
+  font-size: var(--type-meta);
+  line-height: 1.55;
+  color: var(--text);
+}
+
+/* The one place a boxed inline element earns its keep — a formula needs
+   to be marked off from the sentence around it. Square, and lit from
+   within rather than outlined. */
+.scoring-info-section code {
+  padding: 0.05rem 0.3rem;
+  font-family: var(--font-figure);
+  font-size: var(--type-meta);
+  color: var(--accent-light);
+  background: rgba(var(--accent-glow), 0.1);
+}
+
+.scoring-info-list {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.scoring-info-list li {
+  font-size: var(--type-meta);
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.scoring-info-list strong {
+  color: var(--text);
+}
+
+/* The unfold and the ignition beam are the effect, and there's nothing
+   worth keeping in a gentled strobe — drop to a plain appearance. */
+@media (prefers-reduced-motion: reduce) {
+  .leaderboard-modal-overlay::after {
+    animation: none;
+    display: none;
+  }
+  .leaderboard-modal-panel {
+    animation: none;
+  }
+  .leaderboard-modal-row {
+    animation: none;
+  }
+  .leaderboard-modal-empty--loading::after {
+    animation: none;
+  }
+  /* The title still needs to end up iridescent on a full clear — that's
+     state, not decoration — so the glitch is replaced by its own last
+     keyframe rather than dropped. */
+  .leaderboard-modal-title,
+  .leaderboard-modal-title--complete {
+    animation: none;
+  }
+  .leaderboard-modal-title::after {
+    animation: none;
+    opacity: 0;
+  }
+  /* Same reasoning as the title: the banner is state, so it stays — it
+     just arrives rather than materialising out of static. */
+  .leaderboard-modal-cleared {
+    animation: none;
+    opacity: 1;
+  }
+  .leaderboard-modal-title--complete {
+    color: transparent;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 110, 110, 1)   0%,
+      rgba(255, 200, 110, 1)  20%,
+      rgba(200, 255, 130, 1)  40%,
+      rgba(110, 230, 200, 1)  60%,
+      rgba(130, 170, 255, 1)  80%,
+      rgba(210, 130, 255, 1) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
