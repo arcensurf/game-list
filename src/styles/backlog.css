@@ -1,116 +1,209 @@
-/* Backlog — vertical list with thumbnail covers */
-.backlog-list {
-  list-style: none;
+/* Backlog — a typographic manifest.
+   All Games leads with art and the Leaderboard leads with numbers, so
+   this view leads with type: full-width bands, the title set large, and
+   the cover demoted to a blurred wash that lends each band its colour.
+   Bands are deliberately not interactive in the public build — no
+   hover highlight, since there's nothing to click. */
+.backlog-manifest {
   margin: 1.5rem 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 }
 
-.backlog-row {
+.backlog-system {
+  margin-top: 2.75rem;
+}
+
+.backlog-system:first-child {
+  margin-top: 0;
+}
+
+.backlog-system-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+
+/* System heading — see SystemHeading.tsx for how this differs from the
+   logo treatment the platform badges use. */
+.system-heading {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.6rem 0.85rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  gap: 0.9rem;
+  padding: 0 1.25rem 0.7rem;
 }
 
-.backlog-cover {
-  position: relative;
+.system-heading-icon {
   flex-shrink: 0;
-  width: 44px;
-  height: 64px;
-  border-radius: 4px;
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.4);
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: var(--system-color);
+  opacity: 0.9;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
 }
 
-.backlog-cover-edit {
+/* Filled controllercons carry far more ink than the outline set, so
+   they sit back to match its weight. */
+.system-heading-icon--solid {
+  opacity: 0.65;
+}
+
+.system-heading-name {
+  flex-shrink: 0;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--system-color);
+}
+
+.system-heading-rule {
+  flex: 1;
+  min-width: 1rem;
+  height: 1px;
+  background: linear-gradient(90deg, var(--system-color), transparent);
+  opacity: 0.4;
+}
+
+.system-heading-count {
+  flex-shrink: 0;
+  font-family: 'Share Tech', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.backlog-band {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 72px;
+  padding: 0.7rem 1.25rem;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  /* The queue assembles top-down on arrival — 13 entries is short
+     enough that the whole cascade lands well under a second. */
+  animation: backlog-band-in 0.5s ease both;
+  animation-delay: calc(var(--band-index, 0) * 45ms);
+}
+
+@keyframes backlog-band-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Scaled past its own box (the band clips it) so the blur never leaves
+   a soft bare edge, and masked away on the left so the type it sits
+   behind stays on clean background. */
+.backlog-band-art {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.55);
-  color: var(--accent-light);
-  border: none;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity var(--transition);
-}
-
-.backlog-row:hover .backlog-cover-edit,
-.backlog-cover-edit:focus-visible {
-  opacity: 1;
-}
-
-.backlog-cover img {
+  z-index: -1;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
-}
-
-.backlog-cover-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.04),
-    rgba(255, 255, 255, 0.01)
+  opacity: 0.38;
+  filter: blur(34px) saturate(1.5);
+  transform: scale(1.35);
+  pointer-events: none;
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 32%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 32%,
+    rgba(0, 0, 0, 1) 100%
   );
 }
 
-.backlog-meta {
+.backlog-band-name {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
-.backlog-title {
+.backlog-band-title {
   font-family: 'Share Tech', sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0.04em;
+  font-size: clamp(1.3rem, 2.8vw, 2.05rem);
+  line-height: 1.05;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
   color: var(--text);
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  text-wrap: balance;
 }
 
-.backlog-subtitle {
+.backlog-band-subtitle {
+  font-family: 'Share Tech', sans-serif;
   font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--text-muted);
-  font-weight: 400;
 }
 
-.backlog-platforms {
+.backlog-band-platforms {
+  flex-shrink: 0;
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 0.4rem 0.75rem;
 }
 
-.backlog-actions {
+.backlog-band-actions {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
 
-/* Reset external-edit-btn flow so it sits inline with the Beat button
-   instead of blocking full-width like in the grid layout. */
-.backlog-actions .dev-edit-btn--external {
+/* Reset external-edit-btn flow so it sits inline with the other band
+   actions instead of blocking full-width like in the grid layout. */
+.backlog-band-actions .dev-edit-btn--external {
   display: inline-flex;
   width: auto;
   margin-top: 0;
   font-size: 0.7rem;
   padding: 0.4rem 0.6rem;
   letter-spacing: 0.06em;
+}
+
+.backlog-cover-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.backlog-cover-btn:hover,
+.backlog-cover-btn:focus-visible {
+  color: var(--accent-light);
+  border-color: var(--accent-dim);
 }
 
 .backlog-beat-btn {
@@ -121,7 +214,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent);
-  background: transparent;
+  background: rgba(0, 0, 0, 0.35);
   border: 1px solid var(--accent);
   border-radius: 6px;
   cursor: pointer;
@@ -141,17 +234,52 @@
   letter-spacing: 0.06em;
 }
 
-@media (max-width: 500px) {
-  .backlog-row {
-    gap: 0.75rem;
-    padding: 0.5rem 0.6rem;
+@media (prefers-reduced-motion: reduce) {
+  .backlog-band {
+    animation: none;
   }
-  .backlog-cover {
-    width: 36px;
-    height: 52px;
+}
+
+@media (max-width: 700px) {
+  .backlog-band {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    min-height: 0;
+    padding: 0.8rem 0.9rem;
   }
-  .backlog-beat-btn {
-    padding: 0.3rem 0.55rem;
-    font-size: 0.65rem;
+  .backlog-band-name {
+    flex-basis: 100%;
+  }
+  .backlog-band-platforms {
+    justify-content: flex-start;
+  }
+  .system-heading {
+    gap: 0.7rem;
+    padding: 0 0.9rem 0.6rem;
+  }
+  .system-heading-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+  .system-heading-name {
+    font-size: 0.95rem;
+    letter-spacing: 0.18em;
+  }
+  /* The type runs the full width on a narrow screen, so the wash has
+     no clean margin to hide in — pull it back and fade it upward
+     instead of leftward. */
+  .backlog-band-art {
+    opacity: 0.3;
+    mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0, 0, 0, 1) 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0, 0, 0, 1) 100%
+    );
   }
 }

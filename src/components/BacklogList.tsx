@@ -1,18 +1,40 @@
 import { useState } from 'react';
+import type React from 'react';
 import type { GameWithCover } from '../types/game';
 import PlatformBadge from './PlatformBadge';
+import SystemHeading from './SystemHeading';
 import DevEditControls from './DevEditControls';
 import CoverPicker from './CoverPicker';
 
 const isDev = import.meta.env.DEV;
 
-export default function BacklogList({ games }: { games: GameWithCover[] }) {
-  const sorted = [...games].sort((a, b) => {
-    const norm = (t: string) => t.replace(/^the\s+/i, '').toLowerCase();
-    return norm(a.title).localeCompare(norm(b.title));
-  });
+type SystemGroup = { platform: string; games: GameWithCover[] };
 
-  if (sorted.length === 0) {
+function byTitle(a: GameWithCover, b: GameWithCover): number {
+  const norm = (t: string) => t.replace(/^the\s+/i, '').toLowerCase();
+  return norm(a.title).localeCompare(norm(b.title));
+}
+
+// Backlog entries are single-platform in practice — it's a list of
+// things to play, so it records the copy you'd actually play. A
+// multi-platform entry files under the first platform listed and keeps
+// its badges on the band, so the others stay visible.
+function groupBySystem(games: GameWithCover[]): SystemGroup[] {
+  const map = new Map<string, GameWithCover[]>();
+  for (const game of games) {
+    const key = game.platforms[0] ?? 'Other';
+    const list = map.get(key) ?? [];
+    list.push(game);
+    map.set(key, list);
+  }
+  return Array.from(map.entries())
+    .map(([platform, list]) => ({ platform, games: list.sort(byTitle) }))
+    // Biggest shelf first, matching how the stats view ranks platforms.
+    .sort((a, b) => b.games.length - a.games.length || a.platform.localeCompare(b.platform));
+}
+
+export default function BacklogList({ games }: { games: GameWithCover[] }) {
+  if (games.length === 0) {
     return (
       <p className="backlog-empty">
         No games in the backlog.
@@ -20,16 +42,28 @@ export default function BacklogList({ games }: { games: GameWithCover[] }) {
     );
   }
 
+  const systems = groupBySystem(games);
+  // The entrance cascade runs down the whole page rather than restarting
+  // per section, so section breaks don't stutter it.
+  let bandIndex = 0;
+
   return (
-    <ul className="backlog-list">
-      {sorted.map((game) => (
-        <BacklogRow key={game.title} game={game} />
+    <div className="backlog-manifest">
+      {systems.map((system) => (
+        <section className="backlog-system" key={system.platform}>
+          <SystemHeading platform={system.platform} count={system.games.length} />
+          <ul className="backlog-system-list">
+            {system.games.map((game) => (
+              <BacklogBand key={game.title} game={game} index={bandIndex++} />
+            ))}
+          </ul>
+        </section>
       ))}
-    </ul>
+    </div>
   );
 }
 
-function BacklogRow({ game }: { game: GameWithCover }) {
+function BacklogBand({ game, index }: { game: GameWithCover; index: number }) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const handleMarkBeaten = async () => {
@@ -45,16 +79,41 @@ function BacklogRow({ game }: { game: GameWithCover }) {
   };
 
   return (
-    <li className="backlog-row">
-      <div className="backlog-cover">
-        {game.coverUrl ? (
-          <img src={game.coverUrl} alt="" loading="lazy" />
-        ) : (
-          <div className="backlog-cover-placeholder" aria-hidden="true" />
+    <li
+      className="backlog-band"
+      style={{ ['--band-index' as string]: index } as React.CSSProperties}
+    >
+      {/* The cover is a colour source here, not a subject — blurred and
+          masked so each band takes its tint from its own art without
+          competing with the type it sits behind. */}
+      {game.coverUrl && (
+        <img
+          className="backlog-band-art"
+          src={game.coverUrl}
+          alt=""
+          loading="lazy"
+          aria-hidden="true"
+        />
+      )}
+      <div className="backlog-band-name">
+        <span className="backlog-band-title">{game.title}</span>
+        {game.subtitle && (
+          <span className="backlog-band-subtitle">{game.subtitle}</span>
         )}
-        {isDev && (
+      </div>
+      {/* The section heading already names the system, so a band only
+          spells its platforms out when it spans more than one. */}
+      {game.platforms.length > 1 && (
+        <div className="backlog-band-platforms">
+          {game.platforms.map((p) => (
+            <PlatformBadge key={p} platform={p} />
+          ))}
+        </div>
+      )}
+      {isDev && (
+        <div className="backlog-band-actions">
           <button
-            className="backlog-cover-edit"
+            className="backlog-cover-btn"
             onClick={() => setPickerOpen(true)}
             aria-label="Change cover"
             title="Change cover"
@@ -66,23 +125,6 @@ function BacklogRow({ game }: { game: GameWithCover }) {
               />
             </svg>
           </button>
-        )}
-      </div>
-      <div className="backlog-meta">
-        <div className="backlog-title">
-          <span>{game.title}</span>
-          {game.subtitle && (
-            <span className="backlog-subtitle">{game.subtitle}</span>
-          )}
-        </div>
-        <div className="backlog-platforms">
-          {game.platforms.map((p) => (
-            <PlatformBadge key={p} platform={p} />
-          ))}
-        </div>
-      </div>
-      {isDev && (
-        <div className="backlog-actions">
           <DevEditControls game={game} />
           <button
             className="backlog-beat-btn"
