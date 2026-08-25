@@ -11,7 +11,7 @@ export default function PublishButton() {
   }, []);
 
   const handlePublish = async () => {
-    if (!confirm('Build and publish to GitHub Pages?')) return;
+    if (!confirm('Publish changes to the live site?')) return;
 
     if (resetTimer.current) {
       clearTimeout(resetTimer.current);

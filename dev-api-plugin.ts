@@ -2,13 +2,7 @@ import type { Plugin } from 'vite';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, statSync, renameSync } from 'fs';
 import { resolve, extname, basename } from 'path';
 import { readdirSync } from 'fs';
-import { createHash } from 'crypto';
 import { pathToFileURL } from 'url';
-
-function gitBlobHash(content: Buffer): string {
-  const header = `blob ${content.length}\0`;
-  return createHash('sha1').update(header).update(content).digest('hex');
-}
 import { config } from 'dotenv';
 
 function slugify(title: string): string {
@@ -33,6 +27,39 @@ function writeJson(path: string, data: unknown) {
   renameSync(tmp, path);
 }
 
+
+// The publish path writes straight to the R2 bucket the deployed site
+// reads from, so a cover pick is live as soon as the button returns —
+// no deploy, no branch. Only the slice of scripts/lib/r2.mjs used here.
+// Loaded through a variable specifier for the same reason sharp is: the
+// module is plain JS with no declarations, and a static import would
+// make `tsc -b` fail looking for types that were never written.
+type R2Client = {
+  putObject(key: string, body: Buffer, contentType: string): Promise<void>;
+  deleteObject(key: string): Promise<void>;
+  listObjects(prefix?: string): Promise<Map<string, { size: number; etag: string }>>;
+  etagOf(body: Buffer): string;
+};
+
+async function loadR2(): Promise<R2Client> {
+  const specifier = pathToFileURL(resolve(process.cwd(), 'scripts/lib/r2.mjs')).href;
+  return (await import(specifier)) as unknown as R2Client;
+}
+
+// Set on upload and served back verbatim by the Worker, so getting this
+// wrong means a browser refusing to render a perfectly good cover.
+const CONTENT_TYPES: Record<string, string> = {
+  '.webp': 'image/webp',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.json': 'application/json',
+};
+
+function contentTypeFor(path: string): string {
+  return CONTENT_TYPES[extname(path).toLowerCase()] ?? 'application/octet-stream';
+}
 
 // Cover encoding, kept in step with scripts/fetch-covers.mjs so a cover
 // picked in the dev UI and one fetched by the script are encoded
@@ -930,54 +957,34 @@ export default function devApiPlugin(): Plugin {
           }
 
           if (req.url === '/api/publish') {
-            const token = process.env.GITHUB_TOKEN;
-            if (!token) {
-              res.writeHead(500, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'GITHUB_TOKEN not set in .env.local' }));
-              return;
-            }
+            const r2 = await loadR2();
 
-            const repo = 'arcensurf/game-list';
-            const branch = 'data';
-            const gh = (path: string, opts: RequestInit = {}) =>
-              fetch(`https://api.github.com${path}`, {
-                ...opts,
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  Accept: 'application/vnd.github+json',
-                  'X-GitHub-Api-Version': '2022-11-28',
-                  ...opts.headers as Record<string, string>,
-                },
-              });
-
-            // Collect files to push
-            const filesToPush: { repoPath: string; localPath: string }[] = [
-              { repoPath: 'public/data/games.json', localPath: gamesPath },
-              { repoPath: 'public/data/covers.json', localPath: coversPath },
+            // Local path -> bucket key. The bucket's layout mirrors
+            // public/ exactly, which is what lets DATA_BASE be a plain
+            // prefix swap between dev and production.
+            const toPublish: { key: string; localPath: string }[] = [
+              { key: 'data/games.json', localPath: gamesPath },
+              { key: 'data/covers.json', localPath: coversPath },
             ];
             if (existsSync(coversDir)) {
               for (const file of readdirSync(coversDir)) {
-                filesToPush.push({
-                  repoPath: `public/covers/${file}`,
-                  localPath: resolve(coversDir, file),
-                });
+                toPublish.push({ key: `covers/${file}`, localPath: resolve(coversDir, file) });
               }
             }
 
-            // Trophy-picker marks, one file per marked game. Unlike the
-            // achievement shards next door — which CI writes straight to
-            // the data branch — these only exist locally until a publish.
-            const OVERRIDES_PREFIX = 'public/data/overrides/';
-            const localOverridePaths = new Set<string>();
-            if (existsSync(bannedPath)) {
-              const repoPath = `${OVERRIDES_PREFIX}banned.json`;
-              localOverridePaths.add(repoPath);
-              filesToPush.push({ repoPath, localPath: bannedPath });
-            }
+            // Trophy-picker marks, one file per marked game, plus the two
+            // flat override files. Unlike the achievement shards next
+            // door — which the nightly writes straight to the bucket —
+            // these only exist locally until a publish.
+            const OVERRIDES_PREFIX = 'data/overrides/';
+            const localOverrideKeys = new Set<string>();
+            const addOverride = (key: string, localPath: string) => {
+              localOverrideKeys.add(key);
+              toPublish.push({ key, localPath });
+            };
+            if (existsSync(bannedPath)) addOverride(`${OVERRIDES_PREFIX}banned.json`, bannedPath);
             if (existsSync(gameLinksPath)) {
-              const repoPath = `${OVERRIDES_PREFIX}game-links.json`;
-              localOverridePaths.add(repoPath);
-              filesToPush.push({ repoPath, localPath: gameLinksPath });
+              addOverride(`${OVERRIDES_PREFIX}game-links.json`, gameLinksPath);
             }
             if (existsSync(overridesDir)) {
               for (const platform of readdirSync(overridesDir)) {
@@ -985,139 +992,80 @@ export default function devApiPlugin(): Plugin {
                 if (!statSync(platformDir).isDirectory()) continue;
                 for (const file of readdirSync(platformDir)) {
                   if (!file.endsWith('.json')) continue;
-                  const repoPath = `${OVERRIDES_PREFIX}${platform}/${file}`;
-                  localOverridePaths.add(repoPath);
-                  filesToPush.push({
-                    repoPath,
-                    localPath: resolve(platformDir, file),
-                  });
+                  addOverride(
+                    `${OVERRIDES_PREFIX}${platform}/${file}`,
+                    resolve(platformDir, file),
+                  );
                 }
               }
             }
 
-            // Get current commit SHA of the data branch
-            const refResp = await gh(`/repos/${repo}/git/ref/heads/${branch}`);
-            if (!refResp.ok) {
-              res.writeHead(500, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'Failed to get data branch: ' + await refResp.text() }));
-              return;
-            }
-            const refData = await refResp.json() as { object: { sha: string } };
-            const baseSha = refData.object.sha;
+            // One listing serves both jobs: skipping unchanged uploads,
+            // and finding the override files that were cleared locally.
+            // R2 sets a single-part upload's ETag to the body's MD5, so
+            // comparing against a local digest needs no extra request.
+            const remote = await r2.listObjects('');
 
-            // Get base tree
-            const commitResp = await gh(`/repos/${repo}/git/commits/${baseSha}`);
-            const commitData = await commitResp.json() as { tree: { sha: string } };
-
-            // Fetch the existing tree recursively to diff against
-            const existingTreeResp = await gh(`/repos/${repo}/git/trees/${commitData.tree.sha}?recursive=1`);
-            const existingTree = await existingTreeResp.json() as {
-              tree: { path: string; sha: string; type: string }[];
-            };
-            const remoteShas = new Map<string, string>();
-            for (const item of existingTree.tree) {
-              if (item.type === 'blob') remoteShas.set(item.path, item.sha);
-            }
-
-            // Only upload files that have changed
-            const treeItems: { path: string; mode: string; type: string; sha: string | null }[] = [];
-
-            for (const file of filesToPush) {
-              if (!existsSync(file.localPath)) continue;
-              const content = readFileSync(file.localPath);
-              const localSha = gitBlobHash(content);
-
-              // Skip if unchanged
-              if (remoteShas.get(file.repoPath) === localSha) continue;
-
-              const blobResp = await gh(`/repos/${repo}/git/blobs`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  content: content.toString('base64'),
-                  encoding: 'base64',
-                }),
-              });
-              if (!blobResp.ok) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: `Blob failed for ${file.repoPath}: ` + await blobResp.text() }));
-                return;
+            const uploaded: string[] = [];
+            const failures: string[] = [];
+            for (const { key, localPath } of toPublish) {
+              if (!existsSync(localPath)) continue;
+              const body = readFileSync(localPath);
+              if (remote.get(key)?.etag === r2.etagOf(body)) continue;
+              try {
+                await r2.putObject(key, body, contentTypeFor(localPath));
+                uploaded.push(key);
+              } catch (err) {
+                failures.push(`${key}: ${err instanceof Error ? err.message : String(err)}`);
               }
-              const blobData = await blobResp.json() as { sha: string };
-              treeItems.push({ path: file.repoPath, mode: '100644', type: 'blob', sha: blobData.sha });
             }
 
             // Clearing a game's last mark deletes its override file, so
-            // publish has to remove it on the branch too — otherwise the
-            // mark would come back on the next fresh clone. Scoped to the
+            // publish has to remove it from the bucket too — otherwise
+            // the mark comes back on the next fresh pull. Scoped to the
             // overrides prefix; nothing else here deletes.
             //
-            // Guarded on the directory existing, because public/data is
-            // gitignored: a fresh clone has no local overrides at all,
-            // and without this check the first publish from one would
-            // read that emptiness as "everything was cleared" and wipe
-            // every ban and unachievable mark off the data branch. An
-            // absent directory means "no local state to compare", which
-            // is not the same as "the user cleared their marks".
+            // Guarded on the directory existing, because a fresh clone
+            // has no local overrides at all: without this check the first
+            // publish from one would read that emptiness as "everything
+            // was cleared" and wipe every ban and mark from the bucket.
+            // An absent directory means "no local state to compare",
+            // which is not the same as "the user cleared their marks".
+            const removed: string[] = [];
             if (existsSync(overridesDir)) {
-              for (const repoPath of remoteShas.keys()) {
-                if (!repoPath.startsWith(OVERRIDES_PREFIX)) continue;
-                if (localOverridePaths.has(repoPath)) continue;
-                treeItems.push({ path: repoPath, mode: '100644', type: 'blob', sha: null });
+              for (const key of remote.keys()) {
+                if (!key.startsWith(OVERRIDES_PREFIX)) continue;
+                if (localOverrideKeys.has(key)) continue;
+                try {
+                  await r2.deleteObject(key);
+                  removed.push(key);
+                } catch (err) {
+                  failures.push(`${key}: ${err instanceof Error ? err.message : String(err)}`);
+                }
               }
             }
 
-            // Nothing changed
-            if (treeItems.length === 0) {
-              res.writeHead(200, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ ok: true, message: 'No changes to publish' }));
-              return;
-            }
-
-            // Create tree
-            const treeResp = await gh(`/repos/${repo}/git/trees`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ base_tree: commitData.tree.sha, tree: treeItems }),
-            });
-            if (!treeResp.ok) {
+            if (failures.length > 0) {
               res.writeHead(500, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'Tree failed: ' + await treeResp.text() }));
-              return;
-            }
-            const treeData = await treeResp.json() as { sha: string };
-
-            // Create commit on data branch
-            const newCommitResp = await gh(`/repos/${repo}/git/commits`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                message: 'Update game data',
-                tree: treeData.sha,
-                parents: [baseSha],
-              }),
-            });
-            if (!newCommitResp.ok) {
-              res.writeHead(500, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'Commit failed: ' + await newCommitResp.text() }));
-              return;
-            }
-            const newCommit = await newCommitResp.json() as { sha: string };
-
-            // Update data branch ref
-            const updateResp = await gh(`/repos/${repo}/git/refs/heads/${branch}`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ sha: newCommit.sha }),
-            });
-            if (!updateResp.ok) {
-              res.writeHead(500, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'Ref update failed: ' + await updateResp.text() }));
+              res.end(JSON.stringify({
+                error: `${failures.length} file(s) failed to publish`,
+                failures,
+                uploaded: uploaded.length,
+              }));
               return;
             }
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ ok: true, sha: newCommit.sha }));
+            res.end(JSON.stringify({
+              ok: true,
+              uploaded: uploaded.length,
+              removed: removed.length,
+              message:
+                uploaded.length + removed.length === 0
+                  ? 'No changes to publish'
+                  : `Published ${uploaded.length} file(s)` +
+                    (removed.length ? `, removed ${removed.length}` : ''),
+            }));
             return;
           }
 
