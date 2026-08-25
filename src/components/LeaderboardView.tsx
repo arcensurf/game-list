@@ -3,7 +3,7 @@ import type React from 'react';
 import { useLeaderboard } from '../hooks/useLeaderboard';
 import { useGameSearchIndex } from '../hooks/useGameSearchIndex';
 import { pickerCoverUrl, steamCoverFallback } from '../utils/pickerCover';
-import { ACHIEVEMENT_PLATFORM_COLORS_LIGHT } from '../utils/platformColors';
+import { ACHIEVEMENT_PLATFORM_COLORS_LIGHT, PLATFORM_TINT_FALLBACK } from '../utils/platformColors';
 import xboxLogo from '../icons/svg/outline/xbox.svg';
 import type { ShardPlatform } from '../hooks/useAchievementList';
 import type { LeaderboardGame } from '../types/game';
@@ -480,21 +480,16 @@ export default function LeaderboardView({
                     because every cover is — the thing a shared gradient
                     could never do. The thumbnail on top of it is what
                     makes the colour legible rather than arbitrary. */}
-                {g.tint ? (
-                  <span
-                    className="leaderboard-row-art leaderboard-row-art--tint"
-                    style={{ ['--row-tint' as string]: g.tint } as React.CSSProperties}
-                    aria-hidden="true"
-                  />
-                ) : (
-                  <img
-                    className="leaderboard-row-art"
-                    src={pickerCoverUrl(g.platform, g.id, g.icon) ?? undefined}
-                    alt=""
-                    aria-hidden="true"
-                    loading="lazy"
-                  />
-                )}
+                <span
+                  className="leaderboard-row-art leaderboard-row-art--tint"
+                  style={
+                    {
+                      ['--row-tint' as string]:
+                        g.tint ?? PLATFORM_TINT_FALLBACK[g.platform] ?? '#6f7684',
+                    } as React.CSSProperties
+                  }
+                  aria-hidden="true"
+                />
                 <span className="leaderboard-rank">{i + 1}</span>
                 <Thumb platform={g.platform} gameId={g.id} icon={g.icon} />
                 <div className="leaderboard-main">

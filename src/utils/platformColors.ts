@@ -22,6 +22,26 @@ export const ACHIEVEMENT_PLATFORM_COLORS: Record<string, string> = {
   ffxiv: '#d83434',
 };
 
+// Stand-in tints for a leaderboard row whose cover art never resolved,
+// so the wash stays the same device rather than switching to a blurred
+// photograph that clashed with every tinted row around it.
+//
+// Each keeps its platform's exact hue and takes the saturation and
+// lightness of a real cover tint — the medians of the 311 shipped ones,
+// S 71% / L 48%. The brand colours themselves can't be used directly:
+// PlayStation blue and Xbox green sit at L 27, well under the tint
+// range (p10 is L 36), and would read as a dark smear where every
+// neighbouring row reads as colour. Steam keeps its own near-zero
+// saturation — it is achromatic on purpose, and saturating it would
+// invent a brand colour Steam doesn't have.
+export const PLATFORM_TINT_FALLBACK: Record<string, string> = {
+  steam: '#6f7684',
+  psn: '#2361cf',
+  xbox: '#23cf23',
+  ra: '#cfa423',
+  ffxiv: '#cf3d3d',
+};
+
 // Lightened for use as text on the dark surfaces. PlayStation blue and
 // Xbox green are picked for filled bars and go muddy as small text, so
 // they get the same treatment the platform badges already use.
