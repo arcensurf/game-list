@@ -14,23 +14,17 @@ on:
         default: false
 
 permissions:
-  contents: write
+  # Read-only now: the run's output goes to R2, not to a branch. The
+  # only thing it still writes to GitHub is an issue when auth breaks.
+  contents: read
   issues: write
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      # main has the script; data has games.json / achievements.json
       - name: Checkout main (scripts)
         uses: actions/checkout@v4
-
-      - name: Checkout data branch
-        uses: actions/checkout@v4
-        with:
-          ref: data
-          path: data-branch
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -38,6 +32,22 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      # The previous run's state — achievements.json, every shard, the
+      # tint cache, the re-hosted Xbox icons — plus games.json and the
+      # overrides the app publishes. This used to be a checkout of the
+      # `data` branch; the data now lives in R2, which is a store built
+      # for blobs rather than a git history recording 3,000 versions of
+      # them.
+      #
+      # Fails the job if it can't complete. That's deliberate: every
+      # step below reads this tree, and a partial pull would look
+      # exactly like games having been deleted.
+      - name: Pull data from R2
+        run: node scripts/r2-pull.mjs data
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
 
       # Persist PSN / Xbox refresh tokens between runs so NPSSO / password
       # auth only needs to happen rarely. The cache key rotates weekly so
@@ -54,7 +64,7 @@ jobs:
       - name: Fetch achievement data
         run: node scripts/fetch-achievements.mjs
         env:
-          DATA_DIR: ${{ github.workspace }}/data-branch/public/data
+          DATA_DIR: ${{ github.workspace }}/public/data
           TOKEN_DIR: /home/runner/.game-list
           STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
           STEAM_USER_ID: ${{ secrets.STEAM_USER_ID }}
@@ -84,7 +94,7 @@ jobs:
         continue-on-error: true
         run: node scripts/fetch-ffxiv-lodestone.mjs
         env:
-          DATA_DIR: ${{ github.workspace }}/data-branch/public/data
+          DATA_DIR: ${{ github.workspace }}/public/data
           FFXIV_LODESTONE_ID: ${{ secrets.FFXIV_LODESTONE_ID }}
 
       # Reads achievements.json + every shard (not just what this run
@@ -108,49 +118,33 @@ jobs:
       - name: Build leaderboard
         run: node scripts/build-leaderboard.mjs
         env:
-          DATA_DIR: ${{ github.workspace }}/data-branch/public/data
+          DATA_DIR: ${{ github.workspace }}/public/data
 
       - name: Build timeline
         run: node scripts/build-timeline.mjs
         env:
-          DATA_DIR: ${{ github.workspace }}/data-branch/public/data
+          DATA_DIR: ${{ github.workspace }}/public/data
 
-      - name: Commit achievement data to data branch
-        working-directory: data-branch
+      # Push the run's output back to the bucket the site reads from.
+      #
+      # Scoped with --only to exactly what this workflow produces. The
+      # tree also holds games.json, covers.json and overrides/, which the
+      # app's publish path writes directly to R2 — syncing those back
+      # would overwrite a publish that landed after the pull, which is
+      # the race the old data-branch step needed pull --rebase to
+      # survive. Not touching them removes it instead.
+      #
+      # --prune so a delisted game's shard is deleted rather than left
+      # behind. r2-sync refuses a prune that would remove an
+      # implausible share of the bucket, so a short pull can't cascade
+      # into a mass delete.
+      - name: Sync data to R2
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Explicit file list — never stage refresh tokens or anything
-          # else that might end up in the work tree.
-          # cover-tints.json is a cache, but it has to persist across runs or
-          # every night re-fetches all ~316 covers to rebuild what it already
-          # knew. Committed for the same reason xbox-icons is.
-          git add public/data/achievements.json public/data/platform-libraries.json public/data/leaderboard.json public/data/timeline.json public/data/cover-tints.json
-          # -A so pruned shards (delisted games) are staged as deletions,
-          # not just left behind in the tree.
-          git add -A public/data/achievements
-          # Re-hosted box art for Xbox titles whose own CDN host has dead
-          # TLS — see resolveXboxIcon in fetch-achievements.mjs. Only ever
-          # grows (one file per affected title, fetched once and cached),
-          # but -A for consistency with the shards above.
-          git add -A public/data/xbox-icons
-          if git diff --cached --quiet; then
-            echo "No changes to achievement data"
-          else
-            git commit -m "Update achievement data"
-            # In-app edits push directly to data via the GitHub API, so the
-            # branch can move under us between checkout and push. Rebase +
-            # retry handles that race.
-            for attempt in 1 2 3; do
-              if git pull --rebase origin data && git push; then
-                exit 0
-              fi
-              echo "Push attempt $attempt failed, retrying..."
-              sleep 2
-            done
-            echo "Push failed after 3 attempts"
-            exit 1
-          fi
+          node scripts/r2-sync.mjs data --prune \
+            --only=achievements.json,platform-libraries.json,leaderboard.json,timeline.json,cover-tints.json,achievements,xbox-icons
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
 
       # ── PSN NPSSO renewal alert ──
       # The fetch script writes ~/.game-list/psn-status=expired when PSN auth

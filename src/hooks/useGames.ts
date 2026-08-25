@@ -42,10 +42,11 @@ export function useGames(
   const [refreshKey, setRefreshKey] = useState(0);
 
   // games.json gates the whole list, so a failure here has to clear
-  // `loading` — otherwise the view sits on "Loading..." forever. In
-  // production DATA_BASE is raw.githubusercontent.com, which rate-limits
-  // and answers 403 with HTML, so this is a live path, not a theoretical
-  // one: without the res.ok check that HTML reaches r.json() and rejects.
+  // `loading` — otherwise the view sits on "Loading..." forever. The
+  // res.ok check matters because a failing origin answers with a body:
+  // the Worker returns a plain-text 404, and Vite's dev server answers a
+  // missing file under public/ with index.html at status 200. Either
+  // reaches r.json() and rejects if it isn't caught here first.
   useEffect(() => {
     let cancelled = false;
     const bust = refreshKey ? `?t=${Date.now()}` : '';

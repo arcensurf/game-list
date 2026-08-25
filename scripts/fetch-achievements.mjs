@@ -526,15 +526,18 @@ async function initXbox() {
 // different: confirmed 2026-08-22 that host's TLS is actually broken
 // (cert CN mismatch), not just absent, so no scheme rewrite fixes it. For
 // that host specifically, download the art once here (server-side, so
-// plain http is fine) and re-host it under dataDir, where it's served over
-// a real cert via raw.githubusercontent.com same as the rest of public/data.
+// plain http is fine) and re-host it in our own bucket, where it's served
+// over a real cert same as the rest of the data.
 const DEAD_TLS_XBOX_HOSTS = new Set(['images-eds.xboxlive.com']);
 const XBOX_ICON_DIR = resolve(dataDir, 'xbox-icons');
-// Mirrors DATA_BASE in src/utils/dataBase.ts — dataDir *is* public/data on
-// the data branch, so a file written under XBOX_ICON_DIR is public/data/
-// xbox-icons/... there, i.e. DATA_BASE + 'data/xbox-icons/...'.
+// Must stay in step with DATA_BASE in src/utils/dataBase.ts, because this
+// URL is written *into* achievements.json and copied on into the
+// leaderboard and timeline — it outlives the run that produced it, so a
+// stale base here silently breaks ~84 icons rather than failing loudly.
+// A file written under XBOX_ICON_DIR syncs to the bucket as
+// data/xbox-icons/..., i.e. DATA_BASE + 'data/xbox-icons/...'.
 const XBOX_ICON_PUBLIC_BASE =
-  'https://raw.githubusercontent.com/arcensurf/game-list/data/public/data/xbox-icons/';
+  'https://game-list-data.arcen-17c.workers.dev/data/xbox-icons/';
 
 async function rehostDeadTlsXboxIcon(titleId, url) {
   const dest = resolve(XBOX_ICON_DIR, `${titleId}.jpg`);

@@ -4,11 +4,10 @@ import { DATA_BASE } from '../utils/dataBase';
 
 export type ShardPlatform = 'steam' | 'psn' | 'xbox' | 'ra';
 
-// Shards only change when the nightly fetch runs, and in production
-// they're served from raw.githubusercontent.com (five-minute cache,
-// soft rate limits), so a module-level cache is worth having: a random
-// picker that lands on the same game twice shouldn't hit the network
-// twice. `inFlight` collapses concurrent requests for the same shard
+// Shards only change when the nightly fetch runs, and they're served
+// with a five-minute TTL, so a module-level cache is worth having: a
+// random picker that lands on the same game twice shouldn't hit the
+// network twice. `inFlight` collapses concurrent requests for the same shard
 // into one — two cards mounting at once is otherwise two fetches.
 const cache = new Map<string, AchievementList | null>();
 const inFlight = new Map<string, Promise<AchievementList | null>>();
