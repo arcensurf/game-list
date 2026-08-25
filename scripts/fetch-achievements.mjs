@@ -444,6 +444,9 @@ async function fetchPsnTrophyList(entry) {
 let xboxAuth = null;
 const XBOX_REFRESH_TOKEN_FILE = resolve(tokenDir, 'xbox-refresh-token');
 const XBOX_STATUS_FILE = resolve(tokenDir, 'xbox-status');
+// Xbox titles whose achievement total is still the placeholder written on
+// first sighting — see the correction pass at the end of main().
+const XBOX_BOOTSTRAP_FILE = resolve(tokenDir, 'xbox-bootstrap-stuck');
 const XBOX_CLIENT_ID = '00000000402b5328'; // Minecraft launcher public client
 const XBOX_SCOPE = 'service::user.auth.xboxlive.com::MBI_SSL';
 const XBOX_TOKEN_URL = 'https://login.live.com/oauth20_token.srf';
@@ -1283,12 +1286,22 @@ async function main() {
     // failure still leaves the prior-known-good values on disk rather
     // than nothing.
     const unreliable = xboxLib.filter((e) => e.totalUnreliable);
+    // Titles the correction couldn't reach, because the shard it reads
+    // from isn't on disk. Their recorded total is still the bootstrap —
+    // equal to the earned count, so the game reads as 100% complete — and
+    // it does not resolve itself: next run takes that same number back in
+    // as `priorTotal` and cannot tell it from a real corrected total. So
+    // it's reported rather than left for someone to notice.
+    const stuck = [];
     if (unreliable.length > 0) {
       let corrected = 0;
       for (const e of unreliable) {
         const id = String(e.platformId);
         const shard = readShard('xbox', id);
-        if (!shard || !Array.isArray(shard.achievements) || shard.achievements.length === 0) continue;
+        if (!shard || !Array.isArray(shard.achievements) || shard.achievements.length === 0) {
+          stuck.push(`${e.platformTitle} (titleId ${e.platformId}) — recorded ${e.earned}/${e.total}`);
+          continue;
+        }
         const total = shard.achievements.length;
         const earnedCount = shard.achievements.filter((a) => a.earned).length;
         achievements.xbox[id] = { ...achievements.xbox[id], earned: earnedCount, total };
@@ -1303,6 +1316,21 @@ async function main() {
         writeFileSync(achievementsPath, JSON.stringify(achievements, null, 2) + '\n');
         console.log(`Xbox: corrected ${corrected} bootstrap total(s) to real counts from their fetched shards`);
       }
+    }
+
+    // Flag for the workflow so it can open an issue, the same way an
+    // expired PSN/Xbox token does. Written on every xbox run, including
+    // the clean case: the runner's token cache persists this directory
+    // between runs, so leaving a stale file behind would keep reporting
+    // titles that have since been fixed.
+    if (stuck.length > 0) {
+      console.warn(
+        `Xbox: ⚠ ${stuck.length} title(s) still at a bootstrap total after correction:`,
+      );
+      for (const line of stuck) console.warn(`    ${line}`);
+      writeFileSync(XBOX_BOOTSTRAP_FILE, stuck.join('\n'));
+    } else {
+      writeFileSync(XBOX_BOOTSTRAP_FILE, '');
     }
   }
 }

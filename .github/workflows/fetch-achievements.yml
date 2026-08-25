@@ -317,3 +317,109 @@ jobs:
             --label xbox-token-expired \
             --title "Xbox refresh token invalidated — renewal needed" \
             --body "$body"
+
+      # ── Stuck Xbox bootstrap totals ──
+      # titleHub reports totalAchievements:0 for current-gen titles, so a
+      # newly-seen Xbox game is recorded with a placeholder total equal to
+      # its earned count (i.e. reads as 100% complete) until the post-sync
+      # pass corrects it from the fetched achievement list. If that pass
+      # can't run — no shard on disk to read — the placeholder sticks, and
+      # it does NOT resolve later: the next run takes that number back in
+      # as `priorTotal` and can't tell it from a real total. The script
+      # writes the affected titles to ~/.game-list/, and we raise an issue
+      # rather than leave it to be spotted in a log nobody reads nightly.
+      - name: Check for stuck Xbox bootstrap totals
+        id: xbox-bootstrap
+        run: |
+          if [ -s ~/.game-list/xbox-bootstrap-stuck ]; then
+            echo "stuck=true" >> "$GITHUB_OUTPUT"
+            {
+              echo 'titles<<TITLES_EOF'
+              cat ~/.game-list/xbox-bootstrap-stuck
+              echo 'TITLES_EOF'
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open issue if Xbox totals are stuck
+        if: steps.xbox-bootstrap.outputs.stuck == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TITLES: ${{ steps.xbox-bootstrap.outputs.titles }}
+        run: |
+          gh label create xbox-total-stuck \
+            --color D93F0B \
+            --description "Xbox title stuck on a placeholder achievement total" \
+            2>/dev/null || true
+
+          existing=$(gh issue list \
+            --label xbox-total-stuck \
+            --state open \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$existing" ]; then
+            echo "Issue #$existing already open, skipping"
+            exit 0
+          fi
+
+          # Heredoc straight to a file, then --body-file. Deliberately NOT
+          # body=$(cat <<'EOF' ...): a heredoc nested inside command
+          # substitution mis-parses on any apostrophe in the body, so a
+          # single "can't" silently breaks the whole step. Writing the file
+          # first avoids the nesting and works on every bash.
+          cat > /tmp/issue-body.md <<'EOF'
+          The daily achievement fetch finished, but one or more Xbox titles
+          are still recorded with a **placeholder achievement total** rather
+          than their real one.
+
+          Affected titles (recorded earned/total):
+
+          ```
+          {{TITLES}}
+          ```
+
+          ## What this means
+
+          Xbox's titleHub API returns `totalAchievements: 0` for current-gen
+          titles, so the first time a game is seen its total is bootstrapped
+          to its earned count — which makes it read as **100% complete**. A
+          post-sync pass corrects that from the downloaded achievement list.
+
+          These titles never got corrected, which means the pass found no
+          achievement shard on disk to correct from. That state does not fix
+          itself: the next run reads the placeholder back as `priorTotal`
+          and can't tell it from a genuine total.
+
+          ## Likely symptoms
+
+          - The game shows as 100% complete when it isn't.
+          - The game is missing from the leaderboard, or ranked wrongly.
+          - Once you earn another achievement, earned exceeds total.
+
+          ## How to investigate
+
+          1. Check the run log for a line like
+             `xbox: N list(s) disagreed with the library counts and were not written`
+             — that means the shard write was refused.
+          2. Look for the title's shard under
+             `public/data/achievements/xbox/<titleId>.json` on the `data`
+             branch. If it's absent, the fetch never produced a usable list.
+          3. Re-running the workflow with **force_refresh** re-pulls every
+             list and will repair the title if the underlying fetch now
+             succeeds.
+          4. Close this issue once the next run reports the title corrected.
+          EOF
+
+          # Substitute the title list into the placeholder. python3 rather
+          # than sed: the titles contain slashes (19/57) and em dashes, and
+          # this needs no escaping of either.
+          TITLES="$TITLES" python3 - <<'PY'
+          import os, pathlib
+          p = pathlib.Path('/tmp/issue-body.md')
+          p.write_text(p.read_text().replace('{{TITLES}}', os.environ['TITLES']))
+          PY
+
+          gh issue create \
+            --label xbox-total-stuck \
+            --title "Xbox achievement totals stuck on placeholder values" \
+            --body-file /tmp/issue-body.md
