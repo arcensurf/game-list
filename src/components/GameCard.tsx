@@ -81,6 +81,26 @@ export default function GameCard({
     if (el?.complete && el.naturalWidth > 0) setCoverLoaded(true);
   }, [coverUrl]);
 
+  // Held so an unmount (a view change tears down the whole grid) doesn't
+  // leave a pending retry to fire into a card that no longer exists.
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Cards are keyed by title (GameGrid), so the same instance is reused
+  // when games-updated delivers a new cover for a game. Without this the
+  // failure state outlives the URL that caused it: a card that fell back
+  // to its title placeholder stays a placeholder even once a working
+  // cover arrives, and the retry counter keeps cache-busting a URL that
+  // was replaced.
+  const seenCoverUrl = useRef(game.coverUrl);
+  useEffect(() => {
+    if (seenCoverUrl.current === game.coverUrl) return;
+    seenCoverUrl.current = game.coverUrl;
+    clearTimeout(retryTimer.current);
+    setImgError(false);
+    setRetryCount(0);
+    setLocalCoverUrl(null);
+  }, [game.coverUrl]);
+
   const handleCoverChanged = (newUrl: string) => {
     const stripped = newUrl.split('?')[0];
     const baseUrl = import.meta.env.BASE_URL;
@@ -132,7 +152,10 @@ export default function GameCard({
   }, [infoOpen, openInfo]);
 
   useEffect(() => {
-    return () => clearTimeout(dismissTimer.current);
+    return () => {
+      clearTimeout(dismissTimer.current);
+      clearTimeout(retryTimer.current);
+    };
   }, []);
 
   const cardRef = useRef<HTMLDivElement>(null);
@@ -225,7 +248,8 @@ export default function GameCard({
               // don't flip to the placeholder mid-retry, so a cover
               // that recovers never flashes its title text.
               const delay = COVER_RETRY_BASE_MS * 2 ** retryCount;
-              setTimeout(() => setRetryCount((c) => c + 1), delay);
+              clearTimeout(retryTimer.current);
+              retryTimer.current = setTimeout(() => setRetryCount((c) => c + 1), delay);
               return;
             }
             setImgError(true);
