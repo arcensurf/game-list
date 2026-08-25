@@ -1,0 +1,25 @@
+# Serves the R2 data bucket to browsers. See worker/index.js for why this
+# exists rather than a custom domain on the bucket.
+#
+# Deploy:  npx wrangler deploy --config worker/wrangler.toml
+# Tail:    npx wrangler tail --config worker/wrangler.toml
+
+name = "game-list-data"
+main = "index.js"
+compatibility_date = "2026-08-25"
+
+account_id = "17c6f37a6199478cf45e14fbf30a0e4a"
+
+# workers.dev gives the public hostname without needing a domain on
+# Cloudflare DNS. Unlike the bucket's own r2.dev URL, workers.dev is
+# supported for production traffic.
+workers_dev = true
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "game-list-data"
+
+# Observability so the request count is visible in the dashboard — that's
+# the number that matters against the free plan's 100k/day ceiling.
+[observability]
+enabled = true
