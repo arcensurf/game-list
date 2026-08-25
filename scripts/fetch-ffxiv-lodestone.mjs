@@ -183,6 +183,22 @@ for (const r of results) {
 // but keeping the map shape means multi-character support is free
 // later, and the resolver code can mirror the other platforms.
 
+// A category that failed to scrape contributes 0/0 to the sums above,
+// which is indistinguishable from a category with nothing earned. If we
+// wrote that, the character's totals would silently drop by however
+// much the failed category was worth and the file would carry no trace
+// of it — so bail instead and leave the last good numbers in place. The
+// next scheduled run picks it up.
+const scrapeFailures = results.filter((r) => r.error);
+if (scrapeFailures.length > 0) {
+  console.error(
+    `\n✗ ${scrapeFailures.length} of ${results.length} categories failed to scrape:`,
+  );
+  for (const r of scrapeFailures) console.error(`    kind/${r.id} ${r.name} — ${r.error}`);
+  console.error('\nRefusing to write an undercounted total. Nothing was changed.');
+  process.exit(1);
+}
+
 if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true });
 
 const existing = existsSync(achievementsPath)
