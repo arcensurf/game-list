@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FfxivCategoryData, FfxivCharacterData } from '../types/game';
 import meteorIcon from '../icons/svg/outline/meteor.svg';
+import Brackets from './Brackets';
 
 // The back face is FFXIV-only for now — but the component is shaped
 // around "a game has richer data than fits on the HUD." If we ever
@@ -60,10 +61,7 @@ export default function CardBackFace({
     <div
       className={`card-back-face card-back-face--${mode}${sweeping ? ' card-back-face--sweeping' : ''}`}
     >
-      <span className="hud-bracket hud-bracket--tl" aria-hidden />
-      <span className="hud-bracket hud-bracket--tr" aria-hidden />
-      <span className="hud-bracket hud-bracket--bl" aria-hidden />
-      <span className="hud-bracket hud-bracket--br" aria-hidden />
+      <Brackets variant="hud" />
 
       <button
         type="button"
