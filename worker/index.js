@@ -63,19 +63,37 @@ export default {
     // The Cache API is per-data-centre and does not replicate, so this
     // helps a busy edge and does nothing for a cold one. Still worth it:
     // a cache hit skips the R2 read entirely.
+    //
+    // The key is the URL alone, so every entry is a full 200. That means
+    // it cannot answer a range request, and must not be handed back
+    // verbatim to a conditional one — both are checked before using it.
     const cache = caches.default;
     const cacheKey = new Request(url.toString(), { method: 'GET' });
-    const hit = await cache.match(cacheKey);
-    if (hit) {
-      // HEAD can be served from a cached GET by dropping the body.
-      return request.method === 'HEAD' ? new Response(null, hit) : hit;
+    const wantsRange = request.headers.has('range');
+    const ifNoneMatch = request.headers.get('if-none-match');
+
+    if (!wantsRange) {
+      const hit = await cache.match(cacheKey);
+      if (hit) {
+        // Answer the revalidation ourselves rather than sending the body
+        // again — that's the entire point of the client having asked.
+        if (ifNoneMatch && ifNoneMatch === hit.headers.get('etag')) {
+          return new Response(null, { status: 304, headers: hit.headers });
+        }
+        // HEAD can be served from a cached GET by dropping the body.
+        return request.method === 'HEAD' ? new Response(null, hit) : hit;
+      }
     }
 
+    // Only forward a range when one was actually asked for. Passing the
+    // headers unconditionally makes R2 report a range on every response,
+    // which turned ordinary GETs into 206s — and a 206 is not cacheable
+    // here, so nothing was ever stored and every request paid an R2 read.
     const object = await env.BUCKET.get(key, {
       // Lets R2 answer a conditional request itself — a browser holding a
       // stale copy gets a 304 with no body rather than the whole file.
       onlyIf: request.headers,
-      range: request.headers,
+      ...(wantsRange ? { range: request.headers } : {}),
     });
 
     if (object === null) {
@@ -89,6 +107,7 @@ export default {
     // The app is served from a different origin (GitHub Pages), so these
     // need to be readable cross-origin.
     headers.set('access-control-allow-origin', '*');
+    headers.set('accept-ranges', 'bytes');
 
     // `body` is absent when R2 answered a conditional or an unsatisfiable
     // range — status has to follow, or the client waits for bytes that
@@ -97,7 +116,14 @@ export default {
       return new Response(null, { status: 304, headers });
     }
 
-    const status = object.range ? 206 : 200;
+    const status = wantsRange && object.range ? 206 : 200;
+    if (status === 206) {
+      // A 206 without Content-Range is unusable — the client has no way to
+      // know which bytes it got.
+      const { offset = 0, length = object.size } = object.range;
+      headers.set('content-range', `bytes ${offset}-${offset + length - 1}/${object.size}`);
+      headers.set('content-length', String(length));
+    }
     const response = new Response(object.body, { status, headers });
 
     // Only full, successful GETs are worth caching — a 206 would poison
