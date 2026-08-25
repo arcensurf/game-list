@@ -1,0 +1,3316 @@
+[
+  {
+    "title": ".hack//INFECTION",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 0
+  },
+  {
+    "title": ".hack//MUTATION",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 1
+  },
+  {
+    "title": "Advance Wars",
+    "subtitle": null,
+    "platforms": [
+      "GBA"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 2
+  },
+  {
+    "title": "Aegis Wing",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 3
+  },
+  {
+    "title": "Art of Rally",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The Das Uberspeedvan game",
+    "order": 4
+  },
+  {
+    "title": "Assassin's Creed",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360",
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 5
+  },
+  {
+    "title": "Assassin's Creed II",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Sequence 12",
+          "Sequence 13"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 6
+  },
+  {
+    "title": "Assassin's Creed: Brotherhood",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "The DaVinci Disappearance"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 7
+  },
+  {
+    "title": "Assassin's Creed: Revelations",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 8
+  },
+  {
+    "title": "Assassin's Creed III",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 9
+  },
+  {
+    "title": "Assassin's Creed IV: Black Flag",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 10
+  },
+  {
+    "title": "Assassin's Creed Unity",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 11
+  },
+  {
+    "title": "Astral Chain",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 12
+  },
+  {
+    "title": "Astro Bot",
+    "subtitle": null,
+    "platforms": [
+      "PS5"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 13
+  },
+  {
+    "title": "Astro's Playroom",
+    "subtitle": null,
+    "platforms": [
+      "PS5"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 14
+  },
+  {
+    "title": "Axiom Verge",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 15,
+    "status": "backlog",
+    "steamAppId": 332200,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Bastion",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 16
+  },
+  {
+    "title": "Baten Kaitos: Eternal Wings and the Lost Ocean",
+    "subtitle": null,
+    "platforms": [
+      "Gamecube"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 17
+  },
+  {
+    "title": "Baten Kaitos: Origins",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 18,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Bioshock Infinite",
+    "subtitle": null,
+    "platforms": [
+      "PS3"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 19,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR01478_00",
+    "xboxTitleId": null
+  },
+  {
+    "title": "Borderlands",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "The Zombie Island of Dr. Ned"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 20
+  },
+  {
+    "title": "Borderlands 2",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Captain Scarlett and her Pirate's Booty",
+          "Mr. Torgue's Campaign of Carnage",
+          "Sir Hammerlock's Big Game Hunt",
+          "Tiny Tina's Assault on Dragon Keep"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 21
+  },
+  {
+    "title": "BS Zelda no Densetsu",
+    "subtitle": "Maps I and II",
+    "platforms": [
+      "Super Famicom"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 22
+  },
+  {
+    "title": "BS Zelda no Densetsu: Inishie no Sekiban",
+    "subtitle": null,
+    "platforms": [
+      "Super Famicom"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 23
+  },
+  {
+    "title": "Burnout 3: Takedown",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 24
+  },
+  {
+    "title": "Burnout Paradise",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 25
+  },
+  {
+    "title": "Burnout Revenge",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 26,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": "1161889756",
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Cadence of Hyrule",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Octavio's Ode",
+          "Symphony of the Mask"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 27
+  },
+  {
+    "title": "Castle Crashers",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 28
+  },
+  {
+    "title": "Castlevania: Symphony of the Night",
+    "subtitle": null,
+    "platforms": [
+      "PSX"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 29
+  },
+  {
+    "title": "Child of Light",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 30
+  },
+  {
+    "title": "Chrono Cross",
+    "subtitle": null,
+    "platforms": [
+      "PSX"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 31
+  },
+  {
+    "title": "Chrono Trigger",
+    "subtitle": null,
+    "platforms": [
+      "DS"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 32
+  },
+  {
+    "title": "Cocoon",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 33
+  },
+  {
+    "title": "Colin McRae Rally 05",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 34
+  },
+  {
+    "title": "Crisis Core -Final Fantasy VII-",
+    "subtitle": null,
+    "platforms": [
+      "PSP",
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 35,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR29622_00",
+    "xboxTitleId": null
+  },
+  {
+    "title": "Crosscode",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 36,
+    "status": "backlog",
+    "steamAppId": 368340,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Defense Grid: The Awakening",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 37,
+    "status": "backlog",
+    "steamAppId": 18500,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Deus Ex",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 38,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Dirge of Cerebus: Final Fantasy VII",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 39
+  },
+  {
+    "title": "Dirt",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 40
+  },
+  {
+    "title": "Dirt 2",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360",
+      "PS3"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"Hey, Watch It!\" game",
+    "order": 41
+  },
+  {
+    "title": "Dirt 3",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Monte Carlo Track Pack",
+          "X-Games Asia Track Pack"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The chill Swedish music game",
+    "order": 42
+  },
+  {
+    "title": "Dirt 4",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 43,
+    "steamAppId": 421020,
+    "psnNpCommId": "NPWR12336_00",
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Dirt 5",
+    "subtitle": null,
+    "platforms": [
+      "PS5"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Energy",
+          "Super Size",
+          "Uproar",
+          "Wild Spirits"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 44
+  },
+  {
+    "title": "Dirt Showdown",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 45
+  },
+  {
+    "title": "Dispatch",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"I'm a bitch, my name's Robert, such a bitch whose name is Robert\" game",
+    "order": 46
+  },
+  {
+    "title": "Dragon Age Inquisition",
+    "subtitle": null,
+    "platforms": [
+      "PS3"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Trespasser",
+          "The Descent"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 47,
+    "steamAppId": 1222690,
+    "psnNpCommId": "NPWR05671_00",
+    "xboxTitleId": null
+  },
+  {
+    "title": "Dragon Quest",
+    "subtitle": null,
+    "platforms": [
+      "Super Famicom",
+      "GBC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 48
+  },
+  {
+    "title": "Dragon Warrior II",
+    "subtitle": null,
+    "platforms": [
+      "GBC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 49
+  },
+  {
+    "title": "Dust: An Elysian Tail",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 50
+  },
+  {
+    "title": "Dynasty Warriors: Origins",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 51,
+    "status": "backlog",
+    "steamAppId": 2384580,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Earthbound",
+    "subtitle": null,
+    "platforms": [
+      "SNES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 52
+  },
+  {
+    "title": "Final Fantasy",
+    "subtitle": null,
+    "platforms": [
+      "NES",
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 53,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR21820_00",
+    "xboxTitleId": null
+  },
+  {
+    "title": "Final Fantasy II",
+    "subtitle": null,
+    "platforms": [
+      "GBA",
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 54
+  },
+  {
+    "title": "Final Fantasy III Pixel Remaster",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 55,
+    "steamAppId": 1173790,
+    "psnNpCommId": null,
+    "xboxTitleId": null
+  },
+  {
+    "title": "Final Fantasy IV",
+    "subtitle": null,
+    "platforms": [
+      "SNES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 56
+  },
+  {
+    "title": "Final Fantasy Type-0",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 57,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Final Fantasy V Pixel Remaster",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 58,
+    "steamAppId": 1173810,
+    "psnNpCommId": null,
+    "xboxTitleId": null
+  },
+  {
+    "title": "Final Fantasy VI",
+    "subtitle": null,
+    "platforms": [
+      "SNES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"Son of a Submariner\" game",
+    "order": 59
+  },
+  {
+    "title": "Final Fantasy VII",
+    "subtitle": null,
+    "platforms": [
+      "PSX"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 60
+  },
+  {
+    "title": "Final Fantasy VII Remake",
+    "subtitle": null,
+    "platforms": [
+      "PS4",
+      "PS5"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Intergrade - INTERmission"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"I'm not some princess who needs to be coddled...shit\" game",
+    "order": 61
+  },
+  {
+    "title": "Final Fantasy VII Rebirth",
+    "subtitle": null,
+    "platforms": [
+      "PS5",
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"About the jackass on the bike? He's....A jackass.\" game",
+    "order": 62,
+    "steamAppId": 2909400,
+    "psnNpCommId": "NPWR35316_00",
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Final Fantasy VIII Remastered",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 63
+  },
+  {
+    "title": "Final Fantasy IX",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 64
+  },
+  {
+    "title": "Final Fantasy X HD Remaster",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 65
+  },
+  {
+    "title": "Final Fantasy XII",
+    "subtitle": null,
+    "platforms": [
+      "PS2",
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 66,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR11367_00",
+    "xboxTitleId": null
+  },
+  {
+    "title": "Final Fantasy XIII",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360",
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"This dampness is damp\" game",
+    "order": 67
+  },
+  {
+    "title": "Final Fantasy XIII-2",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 68
+  },
+  {
+    "title": "Final Fantasy XIV: A Realm Reborn",
+    "subtitle": null,
+    "platforms": [
+      "PS4",
+      "PS5",
+      "PC"
+    ],
+    "extras": [
+      {
+        "label": "Expansions",
+        "items": [
+          "Heavensward",
+          "Stormblood",
+          "Shadowbringers",
+          "Endwalker",
+          "Dawntrail"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"La Hee\" game",
+    "order": 69,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR01649_00",
+    "xboxTitleId": null,
+    "ffxivLodestoneId": "21418122"
+  },
+  {
+    "title": "Final Fantasy XV",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Episode Gladious",
+          "Multiplayer Exansion Comrades"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 70
+  },
+  {
+    "title": "Final Fantasy XVI",
+    "subtitle": null,
+    "platforms": [
+      "PS5"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 71
+  },
+  {
+    "title": "Final Fantasy Adventure",
+    "subtitle": null,
+    "platforms": [
+      "GB"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 72
+  },
+  {
+    "title": "Final Fantasy Mystic Quest",
+    "subtitle": null,
+    "platforms": [
+      "SNES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 73
+  },
+  {
+    "title": "Final Fantasy Tactics",
+    "subtitle": null,
+    "platforms": [
+      "PSX",
+      "PSP"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"I don't know what's going on, but it's in the contract\" game",
+    "order": 74
+  },
+  {
+    "title": "Fire Emblem Awakening",
+    "subtitle": null,
+    "platforms": [
+      "3DS"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 75
+  },
+  {
+    "title": "Fire Emblem Engage",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Fell Xenologue"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 76
+  },
+  {
+    "title": "Fire Emblem Warriors",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 77
+  },
+  {
+    "title": "Fire Emblem Warriors: Three Hopes",
+    "subtitle": "Blue Lions Route",
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 78
+  },
+  {
+    "title": "Fire Emblem: Shadow Dragon and the Blade of Light",
+    "subtitle": null,
+    "platforms": [
+      "Famicom"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 79
+  },
+  {
+    "title": "Fire Emblem: Three Houses",
+    "subtitle": "Blue Lions, Golden Deer Routes",
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Side Story: Cindered Shadows"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"So what, we're all supposed to take turns saying we'll do our best till the very end?\" game",
+    "order": 80
+  },
+  {
+    "title": "Forza Horizon",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 81
+  },
+  {
+    "title": "Forza Horizon 6",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 82,
+    "status": "backlog",
+    "steamAppId": 2483190,
+    "psnNpCommId": null,
+    "xboxTitleId": "2079757188",
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Gears of War",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [
+      {
+        "label": "Campaigns",
+        "items": [
+          "Single Player",
+          "Co-op"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 83,
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": "1297287125"
+  },
+  {
+    "title": "Golden Sun",
+    "subtitle": null,
+    "platforms": [
+      "GBA"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 84
+  },
+  {
+    "title": "Golden Sun: The Lost Age",
+    "subtitle": null,
+    "platforms": [
+      "GBA"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 85
+  },
+  {
+    "title": "Grandia II",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 86
+  },
+  {
+    "title": "Grandia III",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 87
+  },
+  {
+    "title": "The Great Ace Attorney: Adventures",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"You think I won't be able to get you off\" game",
+    "order": 88
+  },
+  {
+    "title": "The Great Ace Attorney 2: Resolve",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"Why can't we have a normal, straightforward killing once in a while\" game",
+    "order": 89
+  },
+  {
+    "title": "Grid",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 90
+  },
+  {
+    "title": "Grid 2",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"You've been getting getting a reputation for your aggressive starts\" game",
+    "order": 91
+  },
+  {
+    "title": "Grid Legends",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 92,
+    "status": "backlog",
+    "steamAppId": 1307710,
+    "psnNpCommId": "NPWR25484_00",
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Guild Wars",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [
+      {
+        "label": "Expansion",
+        "items": [
+          "Factions"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 93
+  },
+  {
+    "title": "Hades",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 94,
+    "status": "backlog",
+    "steamAppId": 1145360,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Halo 2",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 95,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Halo Reach",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 96,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": "1297287259",
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Halo: Combat Evolved",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 97,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Halo 3",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 98
+  },
+  {
+    "title": "Halo 3: ODST",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 99,
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": "1297287287"
+  },
+  {
+    "title": "Harm's Way",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 100,
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": "1480657520"
+  },
+  {
+    "title": "Hob",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 101
+  },
+  {
+    "title": "Hyper Light Drifter",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 102
+  },
+  {
+    "title": "Hypnospace Outlaw",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 103,
+    "status": "backlog",
+    "steamAppId": 844590,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Hyrule Warriors",
+    "subtitle": null,
+    "platforms": [
+      "Wii U"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 104
+  },
+  {
+    "title": "Hyrule Warriors: Age of Calamity",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Guardian of Rememberance"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 105
+  },
+  {
+    "title": "Hyrule Warriors: Age of Imprisonment",
+    "subtitle": null,
+    "platforms": [
+      "Switch 2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 106
+  },
+  {
+    "title": "Infamous Second Son",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 107
+  },
+  {
+    "title": "Jak and Daxter: The Precursor Legacy",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 108
+  },
+  {
+    "title": "Jak II",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 109,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Jak III",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 110,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Jak X Racing",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 111,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "JDM: Japanese Drift Master",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 112,
+    "status": "backlog",
+    "steamAppId": 1153410,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Journey to the Savage Planet",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 113
+  },
+  {
+    "title": "Kamiko",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 114
+  },
+  {
+    "title": "Kirby Air Riders",
+    "subtitle": null,
+    "platforms": [
+      "Switch 2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 115
+  },
+  {
+    "title": "Kirby Super Star",
+    "subtitle": null,
+    "platforms": [
+      "SNES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 116
+  },
+  {
+    "title": "Kirby's Dream Land",
+    "subtitle": null,
+    "platforms": [
+      "GB"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 117
+  },
+  {
+    "title": "Koudelka",
+    "subtitle": null,
+    "platforms": [
+      "PSX"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 118
+  },
+  {
+    "title": "The Legend of Doom",
+    "subtitle": "DOOM II WAD",
+    "platforms": [
+      "Mac"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 119
+  },
+  {
+    "title": "The Legend of Zelda",
+    "subtitle": null,
+    "platforms": [
+      "NES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 120
+  },
+  {
+    "title": "The Legend of Zelda: A Link Between Worlds",
+    "subtitle": null,
+    "platforms": [
+      "3DS"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 121
+  },
+  {
+    "title": "The Legend of Zelda: A Link to the Past",
+    "subtitle": null,
+    "platforms": [
+      "SNES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 122
+  },
+  {
+    "title": "The Legend of Zelda: Breath of the Wild",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 123
+  },
+  {
+    "title": "The Legend of Zelda: Echoes of Wisdom",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 124
+  },
+  {
+    "title": "The Legend of Zelda: Four Swords Adventures",
+    "subtitle": null,
+    "platforms": [
+      "Gamecube"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 125
+  },
+  {
+    "title": "The Legend of Zelda: Four Swords Anniversary Edition",
+    "subtitle": null,
+    "platforms": [
+      "DS"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 126
+  },
+  {
+    "title": "The Legend of Zelda: Link's Awakening",
+    "subtitle": null,
+    "platforms": [
+      "GB",
+      "GBC",
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 127
+  },
+  {
+    "title": "The Legend of Zelda: Majora's Mask",
+    "subtitle": null,
+    "platforms": [
+      "N64"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"Your true face... what kind of face is it?\" game",
+    "order": 128
+  },
+  {
+    "title": "The Legend of Zelda: Ocarina of Time",
+    "subtitle": null,
+    "platforms": [
+      "N64"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 129
+  },
+  {
+    "title": "The Legend of Zelda: Oracle of Ages",
+    "subtitle": null,
+    "platforms": [
+      "GBC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 130
+  },
+  {
+    "title": "The Legend of Zelda: Oracle of Seasons",
+    "subtitle": null,
+    "platforms": [
+      "GBC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 131
+  },
+  {
+    "title": "The Legend of Zelda: Phantom Hourglass",
+    "subtitle": null,
+    "platforms": [
+      "DS"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 132
+  },
+  {
+    "title": "The Legend of Zelda: Skyward Sword",
+    "subtitle": null,
+    "platforms": [
+      "Wii"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 133
+  },
+  {
+    "title": "The Legend of Zelda: Spirit Tracks",
+    "subtitle": null,
+    "platforms": [
+      "DS"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 134
+  },
+  {
+    "title": "The Legend of Zelda: Tears of the Kingdom",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 135
+  },
+  {
+    "title": "The Legend of Zelda: The Minish Cap",
+    "subtitle": null,
+    "platforms": [
+      "GBA"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 136
+  },
+  {
+    "title": "The Legend of Zelda: Tri Force Heroes",
+    "subtitle": null,
+    "platforms": [
+      "3DS"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 137
+  },
+  {
+    "title": "The Legend of Zelda: Twilight Princess HD",
+    "subtitle": null,
+    "platforms": [
+      "Wii U"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 138
+  },
+  {
+    "title": "The Legend of Zelda: Wind Waker HD",
+    "subtitle": null,
+    "platforms": [
+      "Wii U"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 139
+  },
+  {
+    "title": "Link: Faces of Evil",
+    "subtitle": null,
+    "platforms": [
+      "CD-i"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 140
+  },
+  {
+    "title": "Link's Crossbow Training",
+    "subtitle": null,
+    "platforms": [
+      "Wii"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 141
+  },
+  {
+    "title": "The Little Mermaid",
+    "subtitle": null,
+    "platforms": [
+      "NES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 142
+  },
+  {
+    "title": "Lufia 2: Rise of the Sinstrials",
+    "subtitle": null,
+    "platforms": [
+      "SNES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"My love is my sword\" game",
+    "order": 143
+  },
+  {
+    "title": "Mario Tennis",
+    "subtitle": null,
+    "platforms": [
+      "GBC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"You sure are an aggressive player\" game",
+    "order": 144
+  },
+  {
+    "title": "Mario Tennis: Power Tour",
+    "subtitle": null,
+    "platforms": [
+      "GBA"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 145
+  },
+  {
+    "title": "Mass Effect",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Bring Down the Sky",
+          "Pinnacle Station"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 146
+  },
+  {
+    "title": "Mass Effect 2",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Arrival",
+          "Cereberus Network",
+          "Firewalker",
+          "Kasumi - Stolen Memory",
+          "Lair of the Shadow Broker",
+          "Overlord",
+          "Zaeed - The Price of Revenge"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 147
+  },
+  {
+    "title": "Mass Effect 3",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 148,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": "1161890141",
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Mass Effect Andromeda",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 149,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "The Messenger",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"Please don't touch the cabinet\" game",
+    "order": 150
+  },
+  {
+    "title": "Metroid Dread",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"Accept your helplessness\" game",
+    "order": 151
+  },
+  {
+    "title": "Metroid Fusion",
+    "subtitle": null,
+    "platforms": [
+      "GBA"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 152
+  },
+  {
+    "title": "Metroid II: Return of Samus",
+    "subtitle": null,
+    "platforms": [
+      "GB",
+      "3DS"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 153
+  },
+  {
+    "title": "Metroid Other M",
+    "subtitle": null,
+    "platforms": [
+      "Wii"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 154
+  },
+  {
+    "title": "Metroid Prime",
+    "subtitle": null,
+    "platforms": [
+      "Wii",
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"Science Team wisely decided to move on afterward\" game",
+    "order": 155
+  },
+  {
+    "title": "Metroid Prime 2: Echoes",
+    "subtitle": null,
+    "platforms": [
+      "Wii"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 156
+  },
+  {
+    "title": "Metroid Prime 3: Corruption",
+    "subtitle": null,
+    "platforms": [
+      "Wii"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 157
+  },
+  {
+    "title": "Metroid Prime 4: Beyond",
+    "subtitle": null,
+    "platforms": [
+      "Switch 2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 158
+  },
+  {
+    "title": "Metroid: Zero Mission",
+    "subtitle": null,
+    "platforms": [
+      "GBA"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 159
+  },
+  {
+    "title": "Monument Valley",
+    "subtitle": null,
+    "platforms": [
+      "iPhone"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 160
+  },
+  {
+    "title": "New Super Mario Bros.",
+    "subtitle": null,
+    "platforms": [
+      "DS"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 161
+  },
+  {
+    "title": "New Super Mario Bros. U",
+    "subtitle": null,
+    "platforms": [
+      "Wii U"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 162
+  },
+  {
+    "title": "New Super Mario Bros. Wii",
+    "subtitle": null,
+    "platforms": [
+      "Wii"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 163
+  },
+  {
+    "title": "Pac-Man Championship Edition DX",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 164
+  },
+  {
+    "title": "Parking Garage Rally Circuit",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The drift game",
+    "order": 165
+  },
+  {
+    "title": "Peggle",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 166
+  },
+  {
+    "title": "Persona 3 FES",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [
+      {
+        "label": "Expansion",
+        "items": [
+          "The Answer"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 167
+  },
+  {
+    "title": "Persona 3: Dancing in Moonlight",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 168
+  },
+  {
+    "title": "Persona 4 Arena",
+    "subtitle": "Story Mode",
+    "platforms": [
+      "PS3"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 169,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR02915_00",
+    "xboxTitleId": null
+  },
+  {
+    "title": "Persona 4 Arena Ultimax",
+    "subtitle": "Story Mode",
+    "platforms": [
+      "PS3"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 170,
+    "steamAppId": 1602010,
+    "psnNpCommId": "NPWR06200_00",
+    "xboxTitleId": null
+  },
+  {
+    "title": "Persona 4 Golden",
+    "subtitle": null,
+    "platforms": [
+      "PS Vita"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"You seem to be pretty good with your hands... Never mind\" game",
+    "order": 171
+  },
+  {
+    "title": "Persona 4: Dancing All Night",
+    "subtitle": null,
+    "platforms": [
+      "PS4",
+      "PS Vita"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 172
+  },
+  {
+    "title": "Persona 5 Royal",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 173
+  },
+  {
+    "title": "Persona 5 Strikers",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"Beep Boop\" game",
+    "order": 174
+  },
+  {
+    "title": "Persona 5: Dancing in Starlight",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 175
+  },
+  {
+    "title": "Phoenix Wright: Ace Attorney",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 176,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Please, Touch the Artwork 2",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 177,
+    "steamAppId": 2600140,
+    "psnNpCommId": null,
+    "xboxTitleId": null
+  },
+  {
+    "title": "Pokemon Pokopia",
+    "subtitle": null,
+    "platforms": [
+      "Switch 2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 178,
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Pokemon: Blue Version",
+    "subtitle": null,
+    "platforms": [
+      "GB"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 179
+  },
+  {
+    "title": "Portal",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 180
+  },
+  {
+    "title": "Portal 2",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 181
+  },
+  {
+    "title": "Rogue Legacy",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 182
+  },
+  {
+    "title": "Screamer (2026)",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 183,
+    "status": "backlog",
+    "steamAppId": 2814990,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Shadow Hearts",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 184,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Shadow Hearts: Covenant",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 185,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "The Stanley Parable",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 186
+  },
+  {
+    "title": "Star Ocean",
+    "subtitle": null,
+    "platforms": [
+      "Super Famicom",
+      "PSP",
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 187,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR19233_00",
+    "xboxTitleId": null
+  },
+  {
+    "title": "Star Ocean Blue Sphere",
+    "subtitle": null,
+    "platforms": [
+      "GBC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 188,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Star Ocean Integrity and Faithlessness",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 189,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR09715_00",
+    "xboxTitleId": null
+  },
+  {
+    "title": "Star Ocean The Divine Force",
+    "subtitle": "Raymond & Laeticia Routes",
+    "platforms": [
+      "PS5"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The Special Delivery, Coming in Hot! game",
+    "order": 190
+  },
+  {
+    "title": "Star Ocean The Last Hope",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 191,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR14334_00",
+    "xboxTitleId": "1397819357"
+  },
+  {
+    "title": "Star Ocean The Second Story",
+    "subtitle": "Claude Route",
+    "platforms": [
+      "PSX",
+      "PS5"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 192,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR35698_00",
+    "xboxTitleId": null
+  },
+  {
+    "title": "Star Ocean Till the End of Time",
+    "subtitle": null,
+    "platforms": [
+      "PS2",
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"The whips on this planet hurt, too\" game",
+    "order": 193,
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null
+  },
+  {
+    "title": "Star Wars: The Force Unleashed",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 194
+  },
+  {
+    "title": "Star Wars: The Force Unleased II",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 195,
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": "1279330290"
+  },
+  {
+    "title": "Strangers of Paradise: Final Fantasy Origin",
+    "subtitle": null,
+    "platforms": [
+      "PS5"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 196,
+    "steamAppId": null,
+    "psnNpCommId": "NPWR24550_00",
+    "xboxTitleId": null
+  },
+  {
+    "title": "Suikoden",
+    "subtitle": null,
+    "platforms": [
+      "PSX"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 197,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Suikoden 2",
+    "subtitle": null,
+    "platforms": [
+      "PSX"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 198,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Super Mario 3D Land",
+    "subtitle": null,
+    "platforms": [
+      "3DS"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 199
+  },
+  {
+    "title": "Super Mario 3D World",
+    "subtitle": null,
+    "platforms": [
+      "Wii U"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 200
+  },
+  {
+    "title": "Super Mario 64",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 201
+  },
+  {
+    "title": "Super Mario Bros. 3",
+    "subtitle": null,
+    "platforms": [
+      "NES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 202
+  },
+  {
+    "title": "Super Mario Land",
+    "subtitle": null,
+    "platforms": [
+      "GB"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 203
+  },
+  {
+    "title": "Super Mario Land 2: 6 Golden Coins",
+    "subtitle": null,
+    "platforms": [
+      "GB"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 204
+  },
+  {
+    "title": "Super Mario Maker 2",
+    "subtitle": "Story Mode",
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 205
+  },
+  {
+    "title": "Super Mario Odyssey",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 206
+  },
+  {
+    "title": "Super Mario RPG",
+    "subtitle": null,
+    "platforms": [
+      "SNES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 207
+  },
+  {
+    "title": "Super Mario Run",
+    "subtitle": null,
+    "platforms": [
+      "iPhone"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 208
+  },
+  {
+    "title": "Super Mario Wonder",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 209
+  },
+  {
+    "title": "Super Mario World",
+    "subtitle": null,
+    "platforms": [
+      "SNES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 210
+  },
+  {
+    "title": "Super Metroid",
+    "subtitle": null,
+    "platforms": [
+      "SNES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 211
+  },
+  {
+    "title": "Super Smash Bros. Ultimate",
+    "subtitle": "World of Light",
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 212
+  },
+  {
+    "title": "Super Woden: Rally Edge",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The Cinder Bunny game",
+    "order": 213
+  },
+  {
+    "title": "Tales of Arise",
+    "subtitle": null,
+    "platforms": [
+      "PS5"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 214
+  },
+  {
+    "title": "Tales of Vesperia",
+    "subtitle": null,
+    "platforms": [
+      "Xbox 360"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 215
+  },
+  {
+    "title": "Teenage Mutant Ninja Turtles: Shredder's Revenge",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 216
+  },
+  {
+    "title": "Terranigma",
+    "subtitle": null,
+    "platforms": [
+      "SNES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 217
+  },
+  {
+    "title": "Tetris Effect: Connected",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 218
+  },
+  {
+    "title": "Theathrhythm Final Fantasy Final Bar Line",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 219
+  },
+  {
+    "title": "Thomas was Alone",
+    "subtitle": null,
+    "platforms": [
+      "PS4"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 220
+  },
+  {
+    "title": "Tiny Toon Adventures: Babs' Big Break",
+    "subtitle": null,
+    "platforms": [
+      "GB"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 221
+  },
+  {
+    "title": "Turnip Boy does Tax Evasion",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 222
+  },
+  {
+    "title": "Uncharted: Drake's Fortune",
+    "subtitle": null,
+    "platforms": [
+      "PS3"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 223
+  },
+  {
+    "title": "Uncharted 2: Among Thieves",
+    "subtitle": null,
+    "platforms": [
+      "PS3"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 224
+  },
+  {
+    "title": "Vampire Survivors",
+    "subtitle": null,
+    "platforms": [
+      "PS5"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 225
+  },
+  {
+    "title": "VVVVVV",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 226
+  },
+  {
+    "title": "Warriors Abyss",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 227
+  },
+  {
+    "title": "Xenoblade Chronicles",
+    "subtitle": null,
+    "platforms": [
+      "Wii",
+      "Switch",
+      "Switch 2"
+    ],
+    "extras": [
+      {
+        "label": "Expansion",
+        "items": [
+          "Future Connected"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 228,
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Xenoblade Chronicles 2",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Torna ~ The Golden Country"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"Think you can take me?\" game",
+    "order": 229
+  },
+  {
+    "title": "Xenoblade Chronicles 3",
+    "subtitle": null,
+    "platforms": [
+      "Switch"
+    ],
+    "extras": [
+      {
+        "label": "DLC",
+        "items": [
+          "Future Redeemed"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"...and I was the MVP. You were all thinking it\" game",
+    "order": 230
+  },
+  {
+    "title": "Xenoblade Chronicles X",
+    "subtitle": null,
+    "platforms": [
+      "Wii U",
+      "Switch"
+    ],
+    "extras": [
+      {
+        "label": "Expansion",
+        "items": [
+          "Chapter 13"
+        ]
+      }
+    ],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 231
+  },
+  {
+    "title": "Xenogears",
+    "subtitle": null,
+    "platforms": [
+      "PSX"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 232
+  },
+  {
+    "title": "Xenosaga Episode I: Der Wille zur Macht",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 233
+  },
+  {
+    "title": "Xenosaga Episode II: Jenseits von Gut und Bose",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 234
+  },
+  {
+    "title": "Xenosaga Episode III: Also sprach Zarathustra",
+    "subtitle": null,
+    "platforms": [
+      "PS2"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 235
+  },
+  {
+    "title": "Zelda",
+    "subtitle": null,
+    "platforms": [
+      "Game & Watch"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 236
+  },
+  {
+    "title": "Zelda II: The Adventure of Link",
+    "subtitle": null,
+    "platforms": [
+      "NES"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": "The \"I am Error\" game",
+    "order": 237
+  },
+  {
+    "title": "Zelda's Adventure",
+    "subtitle": null,
+    "platforms": [
+      "CD-i"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 238,
+    "status": "backlog",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
+  },
+  {
+    "title": "Zelda: The Wand of Gamelon",
+    "subtitle": null,
+    "platforms": [
+      "CD-i"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 239
+  }
+]

@@ -13,8 +13,20 @@ dist-ssr
 *.local
 dist-artifact.tar.gz
 
-# Data files live on the 'data' branch, not main
-public/data/
+# Derived data lives in R2, not git: the nightly rebuilds it and the
+# bucket serves it, so committing it would be recording thousands of
+# versions of machine output. The exceptions are the hand-authored
+# source — games.json (the library itself) and overrides/ (bans, links,
+# trophy marks). Those are small, diffable, and the only part of this
+# tree a person actually writes, so git is the right home for them; R2
+# gets a copy on publish purely so the site can fetch them.
+#
+# `public/data/*` and not `public/data/`: git does not descend into an
+# ignored directory, so a trailing slash would make the negations below
+# unreachable.
+public/data/*
+!public/data/games.json
+!public/data/overrides/
 public/covers/
 
 # Pre-WebP cover originals, parked by scripts/covers-to-webp.mjs

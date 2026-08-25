@@ -1,0 +1,11 @@
+{
+  "platform": "xbox",
+  "id": "1480657170",
+  "title": "Worms 2: Armageddon",
+  "overrides": {
+    "52": {
+      "status": "earned",
+      "at": "2026-08-21T22:23:17.746Z"
+    }
+  }
+}
