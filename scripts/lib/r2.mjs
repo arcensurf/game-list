@@ -129,6 +129,20 @@ export async function putObject(key, body, contentType) {
   }
 }
 
+/**
+ * Download one object. Returns a Buffer, or null when the key is absent.
+ */
+export async function getObject(key) {
+  const objectKey = `${BUCKET}/${key}`;
+  const headers = sign({ method: 'GET', key: objectKey });
+  const res = await fetch(url(objectKey), { headers });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`GET ${key} failed: ${res.status} ${await res.text()}`);
+  }
+  return Buffer.from(await res.arrayBuffer());
+}
+
 /** Delete one object. */
 export async function deleteObject(key) {
   const objectKey = `${BUCKET}/${key}`;
