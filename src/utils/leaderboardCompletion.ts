@@ -55,7 +55,17 @@ export function buildGameScoreContext(
   const earnedWeight = earned.reduce((sum, a) => sum + weightOf(a), 0);
   const rawScoreEarned = earned.reduce((sum, a) => sum + (achievementScore(a.rarity) ?? 0), 0);
   const rawScoreAll = achievements.reduce((sum, a) => sum + (achievementScore(a.rarity) ?? 0), 0);
-  const completion = earnedWeight / totalWeight;
+
+  // A zero-weight achievement (an xbox/ra entry worth 0 points) adds
+  // nothing to either side of this ratio, so a game whose every unearned
+  // achievement is worth zero reaches exactly 1 with trophies still
+  // outstanding — and completion scales the score, so it would be ranked
+  // as a finished game. Fall back to the flat count in just that case;
+  // any game where the weights actually discriminate is untouched.
+  let completion = earnedWeight / totalWeight;
+  if (completion >= 1 && earned.length < achievements.length) {
+    completion = earned.length / achievements.length;
+  }
 
   return {
     completion,
