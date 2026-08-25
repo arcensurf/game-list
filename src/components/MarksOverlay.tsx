@@ -4,6 +4,7 @@ import type { GameOverrides, OverrideStatus } from '../types/overrides';
 import { isActive } from '../utils/achievementOverrides';
 import { loadAllOverrides, saveMark } from '../utils/overridesApi';
 import { loadAchievementList } from '../hooks/useAchievementList';
+import type { ShardPlatform } from '../hooks/useAchievementList';
 import { ACHIEVEMENT_PLATFORM_COLORS_LIGHT } from '../utils/platformColors';
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -30,7 +31,19 @@ function fmtDate(iso: string): string {
  * click into a row" shape, just with a game list, then that game's
  * marks, instead of one flat list.
  */
-export default function MarksOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+export default function MarksOverlay({
+  open,
+  onClose,
+  onMarkCleared,
+}: {
+  open: boolean;
+  onClose: () => void;
+  // Clearing a mark can put a game back in the picker's pool. The picker
+  // caches "nothing left to roll here" per game, and that verdict is
+  // stale the moment a mark comes off — without this it stays out of the
+  // pool for the rest of the session.
+  onMarkCleared?: (platform: ShardPlatform, gameId: string) => void;
+}) {
   const [query, setQuery] = useState('');
   const [games, setGames] = useState<GameOverrides[]>([]);
   const [loading, setLoading] = useState(false);
@@ -111,6 +124,7 @@ export default function MarksOverlay({ open, onClose }: { open: boolean; onClose
   async function clearMark(achievementId: string) {
     if (!picked) return;
     const updated = await saveMark(picked.platform, picked.id, picked.title, achievementId, null);
+    onMarkCleared?.(picked.platform, picked.id);
     if (updated) {
       setPicked(updated);
       setGames((prev) =>

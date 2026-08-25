@@ -206,6 +206,7 @@ export default function TrophyPickerView() {
   const {
     roll, marks, loading, rolling, error, poolSize, eligibleCount, rollTrophy, markCurrent, selectManually,
     rerollSameGame, allGames, banned, toggleBan, banCurrentGame, undo, canUndo,
+    refreshGameEligibility,
   } = useTrophyPicker(minRarity, enabledPlatforms);
 
   // Steam withholds hidden achievement descriptions from its API
@@ -302,11 +303,17 @@ export default function TrophyPickerView() {
       >
         <span className="picker-stage-label">Target</span>
 
+        {/* Stage mode is on-air (OBS) and takes its roll from the
+            broadcast, not from this hook — so the hook's own loading and
+            error states say nothing about what the stage is showing. Left
+            in, a data hiccup on the control side pasted an error string
+            over a perfectly good roll and left it there, since nothing
+            clears it while the follower keeps delivering rolls fine. */}
         {stageOnly && !shown ? (
           <p className="picker-status">Waiting for a roll...</p>
-        ) : loading ? (
+        ) : !stageOnly && loading ? (
           <p className="picker-status">Loading achievement data...</p>
-        ) : error ? (
+        ) : !stageOnly && error ? (
           <p className="picker-status picker-status--error">{error}</p>
         ) : !shown ? (
           <p className="picker-status">Rolling...</p>
@@ -553,7 +560,11 @@ export default function TrophyPickerView() {
         }}
       />
 
-      <MarksOverlay open={marksOpen} onClose={() => setMarksOpen(false)} />
+      <MarksOverlay
+        open={marksOpen}
+        onClose={() => setMarksOpen(false)}
+        onMarkCleared={refreshGameEligibility}
+      />
     </div>
   );
 }

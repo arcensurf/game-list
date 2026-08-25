@@ -121,6 +121,19 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
     exhausted.current.clear();
   }, [minRarity]);
 
+  /**
+   * Forget the "nothing left here" verdict for one game.
+   *
+   * The rarity floor above isn't the only thing that can invalidate it:
+   * a game is ruled out when every achievement is marked or filtered
+   * out, so removing a mark can make it rollable again. The marks
+   * overlay does that outside this hook, and without being told, the
+   * game stays out of the pool until the page reloads.
+   */
+  const refreshGameEligibility = useCallback((platform: ShardPlatform, gameId: string) => {
+    exhausted.current.delete(`${platform}/${gameId}`);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     Promise.all([
@@ -470,5 +483,6 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
     banCurrentGame,
     undo,
     canUndo: undoStack.length > 0,
+    refreshGameEligibility,
   };
 }
