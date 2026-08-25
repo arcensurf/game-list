@@ -6,29 +6,16 @@ A personal game completion tracker — a React app displaying a grid of beaten g
 
 ## Setup
 
-### Prerequisites
-
-- Node.js 20+
-- npm
-
-### Install
+Node.js 20+ and npm.
 
 ```bash
 git clone https://github.com/arcensurf/game-list.git
 cd game-list
 npm install
+npm run pull-data     # covers + derived data from R2 (needs the R2 keys below)
 ```
 
-### Pull the Data
-
-`public/data/` and `public/covers/` are gitignored — the real data lives on the `data` branch. A fresh clone has none of it, and the dev server reads local files, so the app comes up empty until you pull it down:
-
-```bash
-git fetch origin data
-git archive origin/data public/data public/covers | tar x
-```
-
-Re-run this whenever the nightly achievement workflow has moved ahead of your checkout. Nothing warns you that local data is stale — the app just quietly shows older achievement counts, and anything added to `achievements.json` since your last pull (cover art, for instance) won't appear at all.
+`npm run pull-data` mirrors the R2 bucket into `public/data/` and `public/covers/`. Re-run it whenever the nightly workflow has moved ahead of your checkout — nothing warns you that local data is stale, the app just quietly shows older counts.
 
 ### Environment Variables
 
@@ -36,234 +23,186 @@ Create `.env.local` in the project root:
 
 ```env
 SGDB_API_KEY=your_steamgriddb_api_key
-GITHUB_TOKEN=your_github_pat
+R2_ACCESS_KEY_ID=your_r2_access_key
+R2_SECRET_ACCESS_KEY=your_r2_secret
 ```
 
-| Variable | Purpose | Required |
-|----------|---------|----------|
-| `SGDB_API_KEY` | [SteamGridDB](https://www.steamgriddb.com/) API key for browsing and fetching cover art | For cover management |
-| `GITHUB_TOKEN` | GitHub fine-grained PAT with Pages write permission | For the dev publish button |
+| Variable | Purpose |
+|----------|---------|
+| `SGDB_API_KEY` | [SteamGridDB](https://www.steamgriddb.com/) key, for browsing and fetching cover art |
+| `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | Read/write access to the data bucket — needed by `pull-data`, `sync-data`, and the Publish button |
 
 ### GitHub Actions Secrets
 
-Achievement syncing runs automatically via a daily GitHub Actions workflow. The credentials live in **repo secrets** (Settings > Secrets and variables > Actions), not in `.env.local`:
+The nightly achievement sync runs in CI, so its credentials live in **repo secrets** (Settings → Secrets and variables → Actions), not in `.env.local`:
 
 | Secret | Purpose | How to get it |
 |--------|---------|---------------|
+| `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | Read/write the data bucket | Cloudflare dashboard → R2 → Manage API tokens |
 | `STEAM_API_KEY` | Steam Web API key | [steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey) |
 | `STEAM_USER_ID` | Your Steam64 ID | [steamid.io](https://steamid.io) |
-| `PSN_NPSSO_TOKEN` | PSN authentication token (~60-day lifetime) | Run `npm run psn-get-npsso-token` locally and follow the prompts |
-| `XBOX_REFRESH_TOKEN` | Xbox Live refresh token (auto-rotates) | Run `npm run xbox-get-refresh-token` locally and follow the prompts |
-| `XBOX_EMAIL` | Xbox/Microsoft account email | Used as fallback for Xbox auth |
-| `XBOX_PASSWORD` | Xbox/Microsoft account password | Used as fallback for Xbox auth |
-| `RA_API_KEY` | RetroAchievements Web API key | From your account's control panel on [retroachievements.org](https://retroachievements.org) |
-| `RA_USERNAME` | Your RetroAchievements username | — |
+| `PSN_NPSSO_TOKEN` | PSN auth token (~60-day lifetime) | `npm run psn-get-npsso-token` |
+| `XBOX_REFRESH_TOKEN` | Xbox Live refresh token (auto-rotates) | `npm run xbox-get-refresh-token` |
+| `RA_API_KEY` / `RA_USERNAME` | RetroAchievements Web API | Account control panel on [retroachievements.org](https://retroachievements.org) |
+| `FFXIV_LODESTONE_ID` | Lodestone character ID for the FFXIV scrape | Your character's Lodestone URL |
 
-The PSN token expires roughly every 60 days. When it does, the workflow automatically opens a GitHub issue with renewal instructions. Xbox tokens auto-rotate as long as the workflow runs at least once every 90 days.
+When the PSN token expires the workflow opens a GitHub issue with renewal instructions. Xbox tokens auto-rotate as long as the workflow runs at least once every 90 days; if one is invalidated, that raises an issue too.
 
 ## Running
 
-### Dev Server
-
 ```bash
-npm run dev
-```
-
-Starts Vite at `http://localhost:5173/game-list/` with dev-only UI: add/edit/delete games, pick covers, drag-and-drop reorder, and a publish button.
-
-### Build
-
-```bash
-npm run build
-```
-
-Runs TypeScript checking then Vite build. Output goes to `dist/`.
-
-### Lint
-
-```bash
+npm run dev      # Vite at http://localhost:5173/game-list/, with the dev UI
+npm run build    # tsc -b, then Vite build into dist/
 npm run lint
 ```
 
-## Data Scripts
-
-These scripts manage the data files that live in `public/data/`.
+## Scripts
 
 ```bash
-npm run fetch-covers             # Download cover art from SteamGridDB (requires SGDB_API_KEY in .env.local)
-npm run fetch-achievements       # Sync achievement data from Steam, PSN, Xbox, RetroAchievements
-npm run psn-get-npsso-token      # Interactive helper to get a PSN authentication token
-npm run xbox-get-refresh-token   # Interactive helper to mint an Xbox refresh token
+npm run pull-data                # Mirror the R2 bucket down to public/
+npm run sync-data                # Push public/ changes up to R2 (--dry-run, --prune)
+npm run deploy-worker            # Deploy worker/index.js to Cloudflare
+npm run fetch-covers             # Download cover art from SteamGridDB
+npm run fetch-achievements       # Sync achievements from Steam, PSN, Xbox, RetroAchievements
+npm run psn-get-npsso-token      # Interactive PSN auth helper
+npm run xbox-get-refresh-token   # Interactive Xbox auth helper
 ```
 
-Achievement syncing normally runs automatically via the daily GitHub Actions cron (`fetch-achievements.yml`). You only need to run it locally for debugging.
+The achievement sync normally runs on the daily cron (`fetch-achievements.yml`); you only need it locally for debugging. Manual runs take a **`force_refresh`** checkbox, which rebuilds every per-game shard instead of skipping games whose counts haven't moved — for when shards are stale in a way the normal checks can't see, such as a shard format change.
 
-Manual runs of that workflow take a **`force_refresh`** checkbox, which rebuilds every per-game shard instead of skipping games whose counts haven't moved. A first run doesn't need it (a missing shard is always fetched) — it's for when shards exist but are stale in a way the normal checks can't see, such as a change to the shard format or wanting rarity current before the staggered weekly cycle comes round. The token helper scripts walk you through authentication interactively and save tokens to `~/.game-list/` for local use — they also copy the token to your clipboard for pasting into GitHub secrets.
+The token helpers save to `~/.game-list/` and copy the token to your clipboard for pasting into repo secrets.
+
+## Where the data lives
+
+Two stores, split by who writes the file. **Git (`main`)** owns the hand-authored source — `public/data/games.json` and everything under `public/data/overrides/`. **R2** owns everything else: cover images, achievement shards, and the derived JSON the nightly rebuilds. (Git was a poor fit for that half: ~97% of the old `data` branch was binary blobs and machine output across 3,000 versions.)
+
+The browser can't read `main` without a deploy, so R2 also holds a serving copy of the git-owned files. Publish writes both — git keeps the history, the bucket makes it live immediately.
+
+| File | Contents |
+|------|----------|
+| `data/games.json` | Game entries (title, platforms, extras, order) |
+| `data/covers.json` | Cover art mappings (title → filename) |
+| `data/achievements.json` | Per-game summary counts, keyed by platform ID |
+| `data/achievements/<platform>/<id>.json` | Full achievement list for one game |
+| `data/overrides/<platform>/<id>.json` | Manual marks on individual achievements |
+| `data/overrides/banned.json` | Games excluded from the trophy picker |
+| `covers/` | Cover images, named by slugified title |
+
+### Serving
+
+The bucket is fronted by a small Cloudflare Worker (`worker/index.js`) at `game-list-data.arcen-17c.workers.dev`. R2's own S3 endpoint needs signed requests, and its `r2.dev` URL is development-only — the Worker is the no-custom-domain path, and `workers.dev` is supported for production use.
+
+It serves only the `covers/` and `data/` prefixes. `covers/` and `data/xbox-icons/` are cached as immutable — cover URLs carry a `?v=` stamped from the pick time, so re-picking art changes the URL — and everything else revalidates every 5 minutes. Revalidate is the default on purpose: a wrong guess costs one conditional request, where a wrong `immutable` costs a year of browsers refusing to look again.
+
+On the Workers free plan this fails closed at 100k requests/day rather than billing, and R2 egress is always free.
+
+### Nightly round trip
+
+The workflow pulls the bucket down, runs the fetch and the leaderboard/timeline builds, then syncs back. Two guards make that safe: `r2-pull.mjs` fails hard rather than producing a partial tree, and `r2-sync.mjs` refuses a `--prune` that would remove more than 20% of a prefix — otherwise a short pull would look exactly like mass deletion.
+
+The sync back is scoped with `--only` to what the nightly produces. `games.json`, `covers.json` and `overrides/` belong to Publish, so a publish landing mid-run can't be overwritten by the copy the nightly pulled before it.
 
 ## Architecture
 
-React + TypeScript + Vite. Single-page app, no router.
-
-### Project Structure
+React + TypeScript + Vite. Single-page app, no router. Game data is fetched at runtime rather than bundled, so data-only changes need no rebuild.
 
 ```
 game-list/
 ├── src/
 │   ├── components/       # React components
 │   ├── hooks/            # Custom hooks (spotlight, swipe, scroll reset, etc.)
-│   ├── styles/           # CSS modules (theme, layout, game-card, dev, etc.)
+│   ├── styles/           # CSS (tokens, layout, game-card, dev, etc.)
 │   ├── types/            # TypeScript types
 │   └── utils/            # Helpers (achievement matching, cover URLs, platform colors)
+├── scripts/              # Data pipeline (fetch, build, R2 sync/pull)
+├── worker/               # Cloudflare Worker serving the bucket
 ├── dev-api-plugin.ts     # Vite plugin — dev-only API endpoints
-├── vite.config.ts        # Base path: /game-list/
-├── .github/workflows/    # GitHub Actions deployment
-└── .env.local            # API keys (not committed)
+└── vite.config.ts        # Base path: /game-list/
 ```
 
-### Data Flow
+### Achievement data
 
-Game data is **fetched at runtime**, not bundled at build time. This means data-only changes can be deployed without rebuilding the app.
+`achievements.json` holds one summary row per game — title, earned, total — keyed by the platform's own ID (Steam appid, PSN npCommunicationId, Xbox titleId, RA GameID).
 
-| File | Contents | Location |
-|------|----------|----------|
-| `games.json` | Game entries (title, platforms, extras, order, etc.) | `public/data/` |
-| `covers.json` | Cover art mappings (title to filename) | `public/data/` |
-| `achievements.json` | Per-game summary counts, keyed by platform ID | `public/data/` |
-| `achievements/<platform>/<id>.json` | Full achievement list for one game | `public/data/` |
-| `overrides/<platform>/<id>.json` | Manual marks on individual achievements | `public/data/` |
-| `overrides/banned.json` | Games excluded from the trophy picker | `public/data/` |
-| Cover images | Actual image files, named by slugified title | `public/covers/` |
+The full lists behind those rows are far too large for that file — ~31,000 entries library-wide, about 4MB against the 83KB the app loads per page — so they're sharded one file per game and fetched on demand. That also keeps the nightly's upload proportional to what changed, which only holds while untouched games serialize byte-identically: nothing in a shard is a timestamp, and the writer skips no-op writes.
 
-Production fetches data from the `data` branch on GitHub. The dev server reads from local `public/` files.
+Definitions don't change once a game ships, so a game whose counts haven't moved isn't re-fetched. Rarity does drift, so shards are re-pulled on a day derived from the game's own ID, spreading the library across the week.
 
-### Achievement Data
+**Xbox old-gen titles** (pre-2017, mostly 360-era) need extra fallback calls beyond the v2 API, which only returns what's already earned for them. See the comment above `fetchXboxAchievementList` in `scripts/fetch-achievements.mjs` for the mechanism and how it was verified.
 
-`achievements.json` holds one summary row per game — title, earned, total — keyed by the platform's own ID (Steam appid, PSN npCommunicationId, Xbox titleId, RA GameID). Overrides on a game point straight at a row, so changing one takes effect on the next page load without re-running anything.
+### Display order
 
-The individual achievement lists behind those rows are far too large to sit in that file — roughly 31,000 entries library-wide, about 4MB against the 83KB the app loads on every page. They live one file per game under `public/data/achievements/` and are fetched on demand.
-
-Sharding also keeps the nightly commit proportional to what actually changed: a game you played is a one-file diff, not a 4MB rewrite. That only holds while untouched games serialize byte-identically, which is why nothing in a shard is a timestamp and the writer skips no-op writes.
-
-Definitions effectively never change once a game ships, so a game whose counts haven't moved isn't re-fetched. Global rarity does drift, so shards are re-pulled periodically — on a day derived from the game's own ID, spreading the library across the week so a given night refreshes about a seventh of it.
-
-**Xbox old-gen titles** (pre-2017 format — Xbox 360-era, mostly) need extra fallback calls beyond the standard v2 API, which only ever returns what's already *earned* for them. The fix joins a separate `/titleachievements` endpoint (the full catalog, but with no reliable earned state of its own) against the contract-v3 `/achievements` response (correctly-attributed earned state, sharing `/titleachievements`' id scheme — v2's ids don't overlap with either at all for these titles). See the comment above `fetchXboxAchievementList` in `scripts/fetch-achievements.mjs` for the full mechanism and how it was verified. Modern (2017+) titles also try contract v4 first, as an unverified possible upgrade over v2 — it only takes effect when it actually returns more than v2 would, so it can't make things worse.
-
-### Display Order
-
-Games are grouped by first letter (ignoring leading "The "), then sorted within each group by an `order` field. Adding a game auto-inserts it alphabetically. Drag-and-drop in dev mode updates order numbers.
+Games are grouped by first letter (ignoring leading "The "), then sorted within each group by an `order` field. Adding a game auto-inserts it alphabetically; drag-and-drop in dev mode updates the numbers.
 
 ## Features
 
-### Spotlight Effect
-
-A scroll-driven dimming effect. Cards near the viewport center (biased to the upper third) are fully lit; cards further away dim with reduced brightness, desaturation, and a static grain overlay. Controlled by the `--card-dim` CSS variable (0 = lit, 1 = dim). Toggle with the "Lights On/Off" button.
-
-### Achievement Bars
-
-Progress bars below each card showing achievement completion. Color-coded by platform (Steam = gray, PSN = blue, Xbox = green, 100% = gold). Bars animate in/out in sync with the spotlight — they load when the card is lit and unload when dimmed.
-
-### Game of Games
-
-A "best-of" designation. Games with this flag get a gold gradient border, a pulsing glow, and a banner with a custom tagline. Toggled via the edit modal.
+- **Spotlight** — scroll-driven dimming. Cards near the viewport center (biased to the upper third) are fully lit; others dim with desaturation and a grain overlay. Driven by `--card-dim`; toggle with "Lights On/Off".
+- **Achievement bars** — completion bars under each card, colored by platform (Steam gray, PSN blue, Xbox green, 100% gold). They load and unload in sync with the spotlight.
+- **Game of Games** — a best-of flag, with a gold foil border and a custom tagline.
 
 ### Views
 
-Swipe left/right (or use the bottom nav) to switch between:
+Swipe or use the bottom nav:
 
-- **All Games** — Full alphabetical grid with spotlight
-- **Games of Games** — Curated best-of subset
-- **Backlog** — Games still queued up
-- **Leaderboard** — Top games by achievement score, rarest unlocks, and a completions-only filter
-- **Stats** — Platform breakdown with bar charts
-- **Trophy Picker** — Dev only; see below
+- **All Games** — full alphabetical grid with spotlight
+- **Backlog** — games still queued up
+- **Leaderboard** — top games by achievement score, rarest unlocks, completions filter
+- **Stats** — platform breakdown with bar charts
+- **Trophy Picker** — dev only; the picker writes through the dev API, so it has no meaning on the deployed site
 
-### Masthead
+Games of Games is a *filter* on All Games rather than a view of its own — toggled from the cable-box key, lit with the foil itself.
 
-The sticky header flips between the app title and an alphabet nav. Flips after scrolling 80px or after 3 seconds of dwell time on the list view.
+The sticky masthead flips between the app title and an alphabet nav, after 80px of scroll or 3 seconds of dwell.
 
 ## Trophy Picker
 
-Dev-only view that draws a random unearned achievement and asks you to go earn it. It writes through the dev API, so it isn't rendered on the deployed site at all — the view is gated on `import.meta.env.DEV` at the point of use, not just kept out of the nav, so the whole feature tree-shakes out of the production bundle.
+Dev-only view that draws a random unearned achievement and asks you to go earn it. It writes through the dev API, so it's gated on `import.meta.env.DEV` at the point of use — the whole feature tree-shakes out of the production bundle.
 
-### How it draws
-
-The pool is every game in `achievements.json` with something left to earn — the full owned library, not just the curated game list. It picks a game weighted by unearned count, then an achievement uniformly within it. That is exactly uniform across the whole unearned pool: `P(t) = (u_g / U) × (1 / u_g) = 1 / U`. Games at 100% carry zero weight and drop out on their own.
-
-Because a game's summary counts can't tell you whether its remaining achievements are all marked or filtered out, a draw that lands on an empty game re-rolls, bounded, and remembers that game for the session.
-
-The current roll is kept in `localStorage`, so a reload doesn't cost you the achievement you were working on. In dev the last view is remembered too — otherwise a stray refresh drops you back on the full list and the picker is gone regardless of what was stored. The deployed site always opens on the list.
-
-Sampling uniformly over *achievements* means games with huge lists dominate — Halo MCC alone is 700 of ~26,000 unearned, so about 2.7% of rolls. Picking the game uniformly first instead is a one-line change to `pickWeighted`.
+The pool is every game in `achievements.json` with something left to earn — the full owned library, not just the curated list. It picks a game weighted by unearned count then an achievement uniformly within it, which works out exactly uniform across the whole pool; games at 100% carry zero weight and drop out on their own. The current roll is kept in `localStorage`, so a reload doesn't cost you the achievement you were working on.
 
 ### Marks
 
-| Action | Effect | Persisted |
-|--------|--------|-----------|
-| Earned it | Already earned, before the nightly run catches up | Yes |
-| Skip | Snoozed; returns to the pool after N days (default 14, adjustable) | Yes |
-| Can't be earned | Dead servers, delisted DLC — never offered again | Yes |
-| Ban game | Drops the whole game from the pool | Yes |
-| Undo | Reverses the last mark or ban | Session only |
+| Action | Effect |
+|--------|--------|
+| Earned it | Already earned, before the nightly catches up |
+| Skip | Snoozed; returns after N days (default 14) |
+| Can't be earned | Dead servers, delisted DLC — never offered again |
+| Ban game | Drops the whole game from the pool |
+| Undo | Steps back up to ten actions (`Cmd`/`Ctrl+Z`), session only |
 
-Marking a roll doesn't move you off it — it used to auto-advance to a fresh roll, but that made a mark and "give me something new" the same click. Now marking just marks; **Roll again** or **Same game** (below) is a deliberate next step, not a bundled one. Ban game is the exception — dropping the whole game from the pool makes staying on it meaningless, so it still rolls immediately.
+Marking a roll doesn't move you off it — **Roll again** or **Same game** is a deliberate next step. Ban game is the exception, since staying on a banned game is meaningless.
 
-**Undo** (or `Cmd`/`Ctrl+Z`) steps back up to ten actions. For a mark, that just clears the mark in place, since the mark never moved you anywhere. For a roll (Roll again, Same game, or a ban) it also returns to whatever was on screen before.
+Per-achievement marks live one file per game under `data/overrides/<platform>/`, created when a game gets its first mark and deleted when its last is cleared; expired skips are pruned on every write. Bans live in one file, because the picker has to filter its whole pool before weighting it and can't fetch hundreds of files to do so.
 
-Per-achievement marks live in `public/data/overrides/<platform>/<id>.json`, one file per marked game, created only when a game actually has a mark and deleted when its last one is cleared. Expired skips are pruned on every write, so the files don't accumulate.
+All of it is persisted data, not browser storage — committed to `main` and pushed to the bucket by **Publish**, so it survives a fresh clone.
 
-Bans live in one file, `overrides/banned.json`, because the picker has to filter its whole pool before it can weight it and can't fetch hundreds of files to find out what's excluded.
+### Other controls
 
-All of it is committed data, pushed by the **Publish** button — it has to survive a fresh clone, so none of it is in browser storage.
-
-### Rarity floor
-
-A slider excludes anything below a given global unlock percentage, applied on the next roll rather than mid-drag. Unknown rarity passes rather than fails — mainly Steam games with no public stats — so those don't vanish the moment the slider leaves zero. For scale: a 5% floor removes about a third of the pool, 10% removes about half.
-
-### Hidden descriptions
-
-PSN and Xbox supply descriptions for hidden achievements (100% of them). RA has no hidden-achievement concept at all — every description is public from the start. **Steam withholds them from the Web API by design** — both `GetPlayerAchievements` and `GetSchemaForGame` return them empty, even for achievements you've already unlocked. There is nothing to fetch.
-
-So for those, the controls offer a text box to type the description in by hand, plus a **Look it up ↗** link to `steamcommunity.com/stats/<appid>/achievements/`. The typed text is deliberately not persisted — it shows for the current roll and clears on the next one.
-
-### OBS stage mode
-
-`?stage=1` strips the page to the card alone — no masthead, nav, or controls — with a transparent page background so the panel composites over gameplay rather than sitting on a black rectangle.
-
-Point an OBS **browser source** at `http://localhost:5173/game-list/?stage=1`. At a 1920 canvas the band is **1920×139**, sized to sit under a 16:9 capture.
-
-OBS runs its own browser process, so a browser source shares no `localStorage` or `BroadcastChannel` with the window you're driving from. The current roll is relayed through the dev server instead: the control window publishes each roll, the stage polls once a second and follows. Keep the picker view open in a normal browser to drive it — `R` rolls.
-
-Both the in-app view and the band derive their height from `--picker-cover-h` and `--picker-pad-y` in `src/styles/trophy-picker.css`, so retuning the band is two numbers and the fixed stage height follows automatically.
+- **Rarity floor** — a slider excluding anything below a given global unlock percentage, applied on the next roll. Unknown rarity passes rather than fails (mostly Steam games with no public stats). A 5% floor removes about a third of the pool; 10% about half.
+- **Hidden descriptions** — PSN, Xbox and RA supply these; **Steam withholds them from the Web API entirely**, even for achievements you've unlocked. For those, the controls offer a text box plus a **Look it up ↗** link. Typed text is deliberately not persisted.
+- **OBS stage mode** — `?stage=1` strips the page to the card alone on a transparent background, so it composites over gameplay. Point an OBS browser source at it. OBS shares no `localStorage` with your browser, so the roll is relayed through the dev server — keep the picker open in a normal window to drive it (`R` rolls). The band's height derives from `--picker-cover-h` and `--picker-pad-y` in `src/styles/dev/trophy-picker.css`, so retuning it is two numbers.
 
 ## Dev UI
 
-All dev features are behind `import.meta.env.DEV` checks and only appear when running `npm run dev`.
+All dev features are behind `import.meta.env.DEV` and only appear under `npm run dev`.
 
-### Game Management
+- **Add / Edit / Delete Game** — modal with title, platforms, DLC, achievement IDs, Game of Games flag
+- **Reorder** — drag and drop within a letter group
+- **Cover picker** — click any cover to browse SteamGridDB (prefers 600×900) or upload a local file
 
-- **Add Game** — Button in bottom-right opens a modal with title, platform picker, and DLC fields
-- **Edit Game** — Click "Edit" on any card's info panel to modify all fields including achievement IDs and Game of Games status
-- **Delete Game** — Available in the edit modal with a two-click confirmation
-- **Reorder** — Drag and drop cards within their letter group
+Covers are re-encoded to WebP on the way in (600×900, `fit: inside`, quality 82 — matching `fetch-covers.mjs`), and an earlier file under the same slug is removed so a format change leaves no orphan. A 600×900 grid runs ~700KB as PNG against ~85KB as WebP.
 
-### Cover Management
-
-Click any card's cover art to open the cover picker:
-- Browse covers from SteamGridDB (prefers 600x900 grids)
-- Upload a local image file
-- Covers are saved to `public/covers/` as slugified filenames
-- Everything is re-encoded to WebP on the way in (600x900, `fit: inside`, quality 82 — the same settings `fetch-covers.mjs` uses), and an earlier file under the same slug is removed so a format change doesn't leave an orphan. A 600x900 grid runs ~700KB as PNG against ~85KB as WebP, and a page view asks for every cover at once.
-- This needs `sharp`, which is deliberately **not** in `package.json` — its per-platform native packages break `npm ci` on the Linux CI runner. Install it ad hoc with `npm install --no-save sharp`. Without it, covers still save, just unconverted, with a warning in the dev server log.
+This needs `sharp`, deliberately **not** in `package.json` — its per-platform native packages break `npm ci` on the Linux runner. Install it ad hoc with `npm install --no-save sharp`. **Without it covers still save, just unconverted**, with only a warning in the dev server log.
 
 ### Publishing
 
-The "Publish" button pushes data changes (games.json, covers.json, cover images, and everything under `public/data/overrides/`) directly to the `data` branch via the GitHub API. Only changed files are uploaded (compared by Git blob hash). No git commit to `main` is needed for data-only changes.
+The **Publish** button uploads changed data — `games.json`, `covers.json`, cover images, and everything under `data/overrides/` — straight to the R2 bucket, so a cover pick is live without a deploy. Only changed files are sent, compared by MD5 against the object's ETag.
 
-Deletions propagate for overrides only — clearing a game's last mark removes its file on the branch too, so it can't come back on the next clone. That sweep is skipped entirely when `public/data/overrides/` doesn't exist locally: `public/data` is gitignored, so a fresh clone has no overrides at all, and without the guard the first publish from one would read that emptiness as "everything was cleared" and wipe every ban and mark off the branch.
+Deletions propagate for overrides only: clearing a game's last mark removes its object too. That sweep is skipped when `public/data/overrides/` doesn't exist locally, so a fresh clone that hasn't pulled yet can't read its own emptiness as "everything was cleared".
 
-Achievement shards are **not** published from here — CI writes those straight to the `data` branch.
+Achievement shards aren't published from here — the nightly writes those to the bucket directly.
 
-### Dev API Endpoints
+### Dev API endpoints
 
 Available during `vite serve`. POST unless noted:
 
@@ -272,21 +211,23 @@ Available during `vite serve`. POST unless noted:
 | `/api/add-game` | Add a new game |
 | `/api/edit-game` | Update game metadata |
 | `/api/delete-game` | Remove a game |
+| `/api/mark-beaten` | Clear a game's `status`, moving it out of the backlog |
 | `/api/reorder-games` | Update display order |
 | `/api/add-extra` | Add DLC/extras to a game |
 | `/api/browse-covers` | Search SteamGridDB for covers |
 | `/api/select-cover` | Download and save a cover from SteamGridDB |
 | `/api/upload-cover` | Upload a local cover image |
+| `/api/art-fallback` | GET — resolve art via SteamGridDB when a platform's own icon 404s |
 | `/api/achievement-override` | Mark one achievement earned / skipped / unachievable (`status: null` clears) |
-| `/api/ban-game` | Toggle a whole game out of the trophy picker pool |
+| `/api/all-overrides` | GET — every marked achievement, for the manage-marks overlay |
+| `/api/ban-game` | Toggle a whole game out of the picker pool |
+| `/api/dupe-groups` | GET — the leaderboard's duplicate-game grouping |
+| `/api/game-links` | Manually correct that grouping (`action: null` unlinks) |
 | `/api/picker-state` | GET + POST — relays the current roll to the OBS stage view |
-| `/api/publish` | Deploy data changes to GitHub Pages |
+| `/api/publish` | Push data changes to R2 |
 
 ## Deployment
 
-Two paths:
-
-1. **Code changes** — Push to `main` triggers GitHub Actions, which builds and deploys to GitHub Pages
-2. **Data changes** — Use the dev UI "Publish" button to push data directly to the `data` branch via the GitHub API
-
-The app's base path is `/game-list/` (configured in `vite.config.ts`).
+- **Code** — push to `main`; GitHub Actions builds and deploys to Pages. Base path is `/game-list/`.
+- **Data** — the Publish button, or `npm run sync-data`. No deploy needed.
+- **Worker** — `npm run deploy-worker` after editing `worker/index.js`.
