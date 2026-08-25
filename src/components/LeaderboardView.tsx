@@ -107,6 +107,11 @@ function Thumb({
         className="leaderboard-thumb"
         src={src}
         alt=""
+        // The list renders up to 100 rows, so eager loading asked the host
+        // for 100 thumbnails to show about a dozen. Every other cover in
+        // the app already defers; this one didn't.
+        loading="lazy"
+        decoding="async"
         onError={() => {
           const fallback = steamCoverFallback(gameId);
           if (platform === 'steam' && src !== fallback) setSrc(fallback);
