@@ -169,148 +169,155 @@ export default function devApiPlugin(): Plugin {
     apply: 'serve',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        // The stage view polls this; everything else here is a POST.
-        if (req.method === 'GET' && req.url?.split('?')[0] === '/api/picker-state') {
-          res.writeHead(200, {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-store',
-          });
-          res.end(JSON.stringify({ roll: pickerState }));
-          return;
-        }
-
-        // Every marked achievement, across every game with an override
-        // file. Unlike bans there's no single index to read — the marks
-        // are sparse per-game files by design — so this walks the
-        // directory. Only the "manage marks" overlay calls it, and it's
-        // dev-only like everything else in this plugin, so a directory
-        // scan on demand is cheap enough not to need a cache.
-        if (req.method === 'GET' && req.url?.split('?')[0] === '/api/all-overrides') {
-          const games: unknown[] = [];
-          if (existsSync(overridesDir)) {
-            for (const platform of readdirSync(overridesDir)) {
-              const platformDir = resolve(overridesDir, platform);
-              if (!statSync(platformDir).isDirectory()) continue;
-              for (const file of readdirSync(platformDir)) {
-                if (!file.endsWith('.json')) continue;
-                try {
-                  games.push(readJson(resolve(platformDir, file)));
-                } catch {
-                  // A half-written or corrupt file shouldn't blank the
-                  // whole list — skip it and show the rest.
-                }
-              }
-            }
-          }
-          res.writeHead(200, {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-store',
-          });
-          res.end(JSON.stringify({ games }));
-          return;
-        }
-
-        // Full (unsliced) scored-games list with dupeKey grouping, for
-        // the "Review duplicates" overlay. leaderboard.json only ships
-        // each platform's top N (see GAMES_LIMIT_PER_PLATFORM in
-        // build-leaderboard.mjs), which is fine for the public
-        // leaderboard but would make a real duplicate whose weaker copy
-        // scores too low to make that cut invisible to this review
-        // tool — so this recomputes the same thing straight from
-        // achievements.json + the shards instead of reading the capped
-        // file. Reuses build-leaderboard.mjs's own logic rather than a
-        // third copy of the matching/scoring code.
-        if (req.method === 'GET' && req.url?.split('?')[0] === '/api/dupe-groups') {
-          // An absolute file:// URL, not a relative specifier: Vite
-          // bundles this plugin (as a vite.config.ts dependency) into
-          // node_modules/.vite-temp/ before running it, so a relative
-          // './scripts/...' path resolves against that temp file's
-          // location instead of the real project root.
-          const specifier = pathToFileURL(resolve(root, 'scripts/build-leaderboard.mjs')).href;
-          const { computeLeaderboardData } = (await import(specifier)) as {
-            computeLeaderboardData: () => { games: unknown[] };
-          };
-          const { games } = computeLeaderboardData();
-          res.writeHead(200, {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-store',
-          });
-          res.end(JSON.stringify({ games }));
-          return;
-        }
-
-        // Last-resort art for the picker: Steam's own capsule/header art
-        // is occasionally gone entirely (delisted-adjacent apps, CDN
-        // path changes the nightly fetch hasn't caught up with yet), and
-        // PSN/Xbox icons can 404 too. SGDB is already wired up for the
-        // curated list's cover picker below, so this reuses the same
-        // client and key rather than adding a second art source — it
-        // just resolves live instead of being curated by hand.
-        if (req.method === 'GET' && req.url?.split('?')[0] === '/api/art-fallback') {
-          const apiKey = process.env.SGDB_API_KEY;
-          const params = new URLSearchParams(req.url.split('?')[1] ?? '');
-          const platform = params.get('platform');
-          const id = params.get('id');
-          const title = params.get('title') ?? '';
-
-          const respond = (url: string | null) => {
+        // Every throw below has to become a 500, not an unhandled
+        // rejection. This middleware is async, so a rejection that
+        // escapes it takes the whole dev server down rather than
+        // failing one request — and the GET handlers used to sit
+        // outside the POST try/catch entirely. The commonest trigger is
+        // a fresh clone, where the gitignored public/data/ doesn't
+        // exist yet and the first /api/dupe-groups read throws ENOENT.
+        try {
+          // The stage view polls this; everything else here is a POST.
+          if (req.method === 'GET' && req.url?.split('?')[0] === '/api/picker-state') {
             res.writeHead(200, {
               'Content-Type': 'application/json',
               'Cache-Control': 'no-store',
             });
-            res.end(JSON.stringify({ url }));
-          };
-
-          if (!apiKey || !id) {
-            respond(null);
+            res.end(JSON.stringify({ roll: pickerState }));
             return;
           }
 
-          try {
-            const SGDB = (await import('steamgriddb')).default;
-            const client = new SGDB(apiKey);
-
-            // Steam appids resolve directly; PSN/Xbox have no such
-            // lookup in SGDB, so those fall through to a title search —
-            // same as the curated cover picker does further down.
-            let grids: Awaited<ReturnType<typeof client.getGrids>> = [];
-            if (platform === 'steam') {
-              try {
-                grids = await client.getGridsBySteamAppId(Number(id), undefined, ['600x900']);
-              } catch { grids = []; }
-              if (!grids || grids.length === 0) {
-                try {
-                  grids = await client.getGridsBySteamAppId(Number(id));
-                } catch { grids = []; }
-              }
-            }
-
-            if ((!grids || grids.length === 0) && title) {
-              const results = await client.searchGame(title).catch(() => []);
-              const match = results?.[0];
-              if (match) {
-                try {
-                  grids = await client.getGridsById(match.id, undefined, ['600x900']);
-                } catch { grids = []; }
-                if (!grids || grids.length === 0) {
+          // Every marked achievement, across every game with an override
+          // file. Unlike bans there's no single index to read — the marks
+          // are sparse per-game files by design — so this walks the
+          // directory. Only the "manage marks" overlay calls it, and it's
+          // dev-only like everything else in this plugin, so a directory
+          // scan on demand is cheap enough not to need a cache.
+          if (req.method === 'GET' && req.url?.split('?')[0] === '/api/all-overrides') {
+            const games: unknown[] = [];
+            if (existsSync(overridesDir)) {
+              for (const platform of readdirSync(overridesDir)) {
+                const platformDir = resolve(overridesDir, platform);
+                if (!statSync(platformDir).isDirectory()) continue;
+                for (const file of readdirSync(platformDir)) {
+                  if (!file.endsWith('.json')) continue;
                   try {
-                    grids = await client.getGridsById(match.id);
-                  } catch { grids = []; }
+                    games.push(readJson(resolve(platformDir, file)));
+                  } catch {
+                    // A half-written or corrupt file shouldn't blank the
+                    // whole list — skip it and show the rest.
+                  }
                 }
               }
             }
-
-            const best = (grids ?? []).sort((a, b) => b.score - a.score)[0];
-            respond(best ? best.url.toString() : null);
-          } catch {
-            respond(null);
+            res.writeHead(200, {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-store',
+            });
+            res.end(JSON.stringify({ games }));
+            return;
           }
-          return;
-        }
 
-        if (req.method !== 'POST') return next();
+          // Full (unsliced) scored-games list with dupeKey grouping, for
+          // the "Review duplicates" overlay. leaderboard.json only ships
+          // each platform's top N (see GAMES_LIMIT_PER_PLATFORM in
+          // build-leaderboard.mjs), which is fine for the public
+          // leaderboard but would make a real duplicate whose weaker copy
+          // scores too low to make that cut invisible to this review
+          // tool — so this recomputes the same thing straight from
+          // achievements.json + the shards instead of reading the capped
+          // file. Reuses build-leaderboard.mjs's own logic rather than a
+          // third copy of the matching/scoring code.
+          if (req.method === 'GET' && req.url?.split('?')[0] === '/api/dupe-groups') {
+            // An absolute file:// URL, not a relative specifier: Vite
+            // bundles this plugin (as a vite.config.ts dependency) into
+            // node_modules/.vite-temp/ before running it, so a relative
+            // './scripts/...' path resolves against that temp file's
+            // location instead of the real project root.
+            const specifier = pathToFileURL(resolve(root, 'scripts/build-leaderboard.mjs')).href;
+            const { computeLeaderboardData } = (await import(specifier)) as {
+              computeLeaderboardData: () => { games: unknown[] };
+            };
+            const { games } = computeLeaderboardData();
+            res.writeHead(200, {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-store',
+            });
+            res.end(JSON.stringify({ games }));
+            return;
+          }
 
-        try {
+          // Last-resort art for the picker: Steam's own capsule/header art
+          // is occasionally gone entirely (delisted-adjacent apps, CDN
+          // path changes the nightly fetch hasn't caught up with yet), and
+          // PSN/Xbox icons can 404 too. SGDB is already wired up for the
+          // curated list's cover picker below, so this reuses the same
+          // client and key rather than adding a second art source — it
+          // just resolves live instead of being curated by hand.
+          if (req.method === 'GET' && req.url?.split('?')[0] === '/api/art-fallback') {
+            const apiKey = process.env.SGDB_API_KEY;
+            const params = new URLSearchParams(req.url.split('?')[1] ?? '');
+            const platform = params.get('platform');
+            const id = params.get('id');
+            const title = params.get('title') ?? '';
+
+            const respond = (url: string | null) => {
+              res.writeHead(200, {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-store',
+              });
+              res.end(JSON.stringify({ url }));
+            };
+
+            if (!apiKey || !id) {
+              respond(null);
+              return;
+            }
+
+            try {
+              const SGDB = (await import('steamgriddb')).default;
+              const client = new SGDB(apiKey);
+
+              // Steam appids resolve directly; PSN/Xbox have no such
+              // lookup in SGDB, so those fall through to a title search —
+              // same as the curated cover picker does further down.
+              let grids: Awaited<ReturnType<typeof client.getGrids>> = [];
+              if (platform === 'steam') {
+                try {
+                  grids = await client.getGridsBySteamAppId(Number(id), undefined, ['600x900']);
+                } catch { grids = []; }
+                if (!grids || grids.length === 0) {
+                  try {
+                    grids = await client.getGridsBySteamAppId(Number(id));
+                  } catch { grids = []; }
+                }
+              }
+
+              if ((!grids || grids.length === 0) && title) {
+                const results = await client.searchGame(title).catch(() => []);
+                const match = results?.[0];
+                if (match) {
+                  try {
+                    grids = await client.getGridsById(match.id, undefined, ['600x900']);
+                  } catch { grids = []; }
+                  if (!grids || grids.length === 0) {
+                    try {
+                      grids = await client.getGridsById(match.id);
+                    } catch { grids = []; }
+                  }
+                }
+              }
+
+              const best = (grids ?? []).sort((a, b) => b.score - a.score)[0];
+              respond(best ? best.url.toString() : null);
+            } catch {
+              respond(null);
+            }
+            return;
+          }
+
+          if (req.method !== 'POST') return next();
+
           if (req.url === '/api/upload-cover') {
             const body = JSON.parse(await parseBody(req));
             const { title, imageData, filename } = body as {
@@ -1024,8 +1031,15 @@ export default function devApiPlugin(): Plugin {
           }
 
         } catch (err) {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: String(err) }));
+          // A handler that already started responding can't be given a
+          // 500 — writeHead would throw again, straight back out of the
+          // catch and into the rejection this exists to prevent.
+          if (res.headersSent) {
+            res.end();
+          } else {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: String(err) }));
+          }
           return;
         }
 
