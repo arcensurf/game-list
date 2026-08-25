@@ -97,36 +97,45 @@ async function loadSharp(): Promise<SharpFactory | null> {
  * view asks for every cover at once — which is what pushes the batch
  * past what the host will serve without throttling.
  *
- * Degrades rather than fails: with sharp unavailable the original bytes
- * are saved under their own extension, so picking a cover still works.
+ * Fails rather than degrading. This used to fall back to saving the
+ * original bytes under their own extension, which was wrong twice over:
+ * the caller reported success, so a batch of unconverted covers reached
+ * the bucket before anyone noticed; and the sharp-threw branch saved
+ * bytes sharp had just refused to read, which is how a 10-byte file
+ * ended up in covers.json described as cover art. Refusing keeps the
+ * manifest honest — a cover is either a real WebP or it isn't there.
+ *
+ * build-site-data.yml sweeps the bucket for anything that slipped
+ * through by another route, so this is the near guard, not the only one.
  */
 async function encodeCover(
   buffer: Buffer,
   slug: string,
-  sourceExt: string,
 ): Promise<{ name: string; buffer: Buffer }> {
   const sharp = await loadSharp();
   if (!sharp) {
-    console.warn(
-      `[dev-api] sharp unavailable — saving ${slug}${sourceExt} unconverted.\n` +
-        '          Install it for this checkout with: npm install --no-save sharp',
+    throw new Error(
+      'sharp is unavailable, so this cover cannot be converted to WebP. ' +
+        'Install it for this checkout with:  npm install --no-save sharp',
     );
-    return { name: `${slug}${sourceExt}`, buffer };
   }
 
+  let webp: Buffer;
   try {
-    const webp = await sharp(buffer)
+    webp = await sharp(buffer)
       // `inside` + withoutEnlargement: shrink anything oversized to fit
       // the box while keeping aspect ratio, and leave correctly-sized or
       // smaller grids alone rather than upscaling them.
       .resize(COVER_WIDTH, COVER_HEIGHT, { fit: 'inside', withoutEnlargement: true })
       .webp({ quality: WEBP_QUALITY })
       .toBuffer();
-    return { name: `${slug}.webp`, buffer: webp };
   } catch (err) {
-    console.warn(`[dev-api] WebP conversion failed for ${slug}:`, err);
-    return { name: `${slug}${sourceExt}`, buffer };
+    throw new Error(
+      `This image could not be re-encoded — ${err instanceof Error ? err.message : String(err)}. ` +
+        'It may be corrupt or in a format sharp cannot read.',
+    );
   }
+  return { name: `${slug}.webp`, buffer: webp };
 }
 
 
@@ -417,10 +426,11 @@ export default function devApiPlugin(): Plugin {
 
           if (req.url === '/api/upload-cover') {
             const body = JSON.parse(await parseBody(req));
-            const { title, imageData, filename } = body as {
+            // The uploaded filename is deliberately ignored. Output is always
+            // <slug>.webp now, so the source extension decides nothing.
+            const { title, imageData } = body as {
               title: string;
               imageData: string; // base64
-              filename: string;
             };
 
             ensureCoversDir();
@@ -429,7 +439,6 @@ export default function devApiPlugin(): Plugin {
             const { name: outName, buffer } = await encodeCover(
               Buffer.from(imageData, 'base64'),
               slug,
-              extname(filename) || '.png',
             );
             writeFileSync(resolve(coversDir, outName), buffer);
             dropStaleCovers(coversDir, slug, outName, coversPath, title);
@@ -587,7 +596,6 @@ export default function devApiPlugin(): Plugin {
             const { name: outName, buffer } = await encodeCover(
               Buffer.from(await response.arrayBuffer()),
               slug,
-              extname(new URL(imageUrl).pathname) || '.png',
             );
             writeFileSync(resolve(coversDir, outName), buffer);
             dropStaleCovers(coversDir, slug, outName, coversPath, title);

@@ -808,6 +808,19 @@
   padding: 2rem 0;
 }
 
+/* Sits above the grid rather than replacing it, so the failed pick is
+   still on screen to retry once the cause is fixed. */
+.cover-picker-error {
+  color: var(--danger, #cf3d3d);
+  background: color-mix(in srgb, var(--danger, #cf3d3d) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger, #cf3d3d) 35%, transparent);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
 .cover-picker-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

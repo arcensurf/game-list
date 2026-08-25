@@ -18,6 +18,11 @@ export default function CoverPicker({
   onClose: (newCoverUrl?: string) => void;
 }) {
   const [images, setImages] = useState<SgdbImage[]>([]);
+  // A save can fail for reasons worth reading — most usefully sharp being
+  // unavailable, which is the difference between a WebP cover and a PNG
+  // eight times the size. Swallowing it was how a batch of unconverted
+  // covers reached the bucket unnoticed.
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [gameName, setGameName] = useState(title);
   const [selecting, setSelecting] = useState<number | null>(null);
@@ -41,8 +46,16 @@ export default function CoverPicker({
     return () => { cancelled = true; };
   }, [title, sgdbId]);
 
+  // The endpoints answer with { error } on failure; fall back to the
+  // status when the body isn't JSON (a crash before the handler responds).
+  const errorFrom = async (res: Response): Promise<string> => {
+    const data = (await res.json().catch(() => null)) as { error?: string } | null;
+    return data?.error ?? `Request failed (${res.status})`;
+  };
+
   const handleSelect = async (img: SgdbImage) => {
     setSelecting(img.id);
+    setSaveError(null);
     const res = await fetch('/api/select-cover', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -57,6 +70,7 @@ export default function CoverPicker({
       window.dispatchEvent(new Event('games-updated'));
       onClose(data.coverUrl);
     } else {
+      setSaveError(await errorFrom(res));
       setSelecting(null);
     }
   };
@@ -67,6 +81,7 @@ export default function CoverPicker({
 
     const reader = new FileReader();
     reader.onload = async () => {
+      setSaveError(null);
       const base64 = (reader.result as string).split(',')[1];
       const res = await fetch('/api/upload-cover', {
         method: 'POST',
@@ -81,6 +96,8 @@ export default function CoverPicker({
         const data = await res.json();
         window.dispatchEvent(new Event('games-updated'));
         onClose(data.coverUrl);
+      } else {
+        setSaveError(await errorFrom(res));
       }
     };
     reader.readAsDataURL(file);
@@ -108,6 +125,8 @@ export default function CoverPicker({
             style={{ display: 'none' }}
           />
         </div>
+
+        {saveError && <p className="cover-picker-error">{saveError}</p>}
 
         {loading ? (
           <p className="cover-picker-status">Searching SteamGridDB...</p>
