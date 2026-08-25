@@ -417,14 +417,12 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
 
     try {
       if (entry.mark) {
-        setMarks(
-          await saveMark(
-            entry.mark.platform,
-            entry.mark.gameId,
-            entry.roll.gameTitle,
-            entry.mark.achievementId,
-            null,
-          ),
+        await saveMark(
+          entry.mark.platform,
+          entry.mark.gameId,
+          entry.roll.gameTitle,
+          entry.mark.achievementId,
+          null,
         );
       }
       if (entry.ban) {
@@ -433,6 +431,16 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
         );
         exhausted.current.delete(banKey(entry.ban.platform, entry.ban.gameId));
       }
+
+      // Always reload the restored game's marks, not just when this step
+      // had a mark to reverse. `marks` is keyed to whatever game is on
+      // screen, so stepping back to an earlier game while it still held
+      // the later game's overrides made the view read mark status off
+      // the wrong game — and PSN achievement ids are per-game ordinals
+      // ("0", "1", "2"...), so the ids collide almost every time rather
+      // than rarely. That surfaced as a phantom "Skipped" on a trophy
+      // never marked, and a real mark going invisible.
+      setMarks(await loadGameOverrides(entry.roll.platform, entry.roll.gameId));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to undo');
     }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PLATFORMS, useTrophyPicker } from '../hooks/useTrophyPicker';
 import type { ShardPlatform } from '../hooks/useAchievementList';
 import { useStageMode } from '../hooks/useStageMode';
@@ -87,8 +87,10 @@ function Cover({
 }) {
   const [src, setSrc] = useState(url);
   // Guards the SGDB round trip to one attempt — if that image is itself
-  // broken there's nowhere left to fall back to.
-  const [triedFallback, setTriedFallback] = useState(false);
+  // broken there's nowhere left to fall back to. A ref rather than
+  // state: nothing renders from it, and it has to be readable by the
+  // effect below without adding a render pass.
+  const triedFallback = useRef(false);
 
   useEffect(() => {
     onResolved(src);
@@ -96,6 +98,19 @@ function Cover({
     // resolved src itself should retrigger this.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src]);
+
+  // With no candidate URL there is no <img>, so onError never fires and
+  // the SGDB lookup below is unreachable — for precisely the games it
+  // exists to rescue. On non-Steam platforms pickerCoverUrl is just
+  // `icon ?? null`, so anything without an icon starts here, and the
+  // stage would otherwise sit with no art having asked nobody. The ref
+  // guard is what stops the give-up path (which also ends at src null)
+  // from restarting this.
+  useEffect(() => {
+    if (src || triedFallback.current) return;
+    triedFallback.current = true;
+    void loadArtFallback(platform, gameId, gameTitle).then(setSrc);
+  }, [src, platform, gameId, gameTitle]);
 
   if (!src) return null;
   return (
@@ -119,8 +134,8 @@ function Cover({
           setSrc(fallback);
         } else if (iconUrl && src !== iconUrl) {
           setSrc(iconUrl);
-        } else if (!triedFallback) {
-          setTriedFallback(true);
+        } else if (!triedFallback.current) {
+          triedFallback.current = true;
           void loadArtFallback(platform, gameId, gameTitle).then(setSrc);
         } else {
           setSrc(null);
