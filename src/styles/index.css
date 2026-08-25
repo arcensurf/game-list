@@ -28,6 +28,7 @@
 @import './components/platform-badge.css';
 @import './components/lamp-toggle.css';
 @import './components/modal.css';
+@import './components/data-load-failure.css';
 
 @import './views/layout.css';
 @import './views/stats.css';

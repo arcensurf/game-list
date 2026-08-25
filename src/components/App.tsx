@@ -17,6 +17,7 @@ import PublishButton from './PublishButton';
 import TrophyPickerView from './TrophyPickerView';
 import LeaderboardView from './LeaderboardView';
 import StatsView from './StatsView';
+import DataLoadFailure from './DataLoadFailure';
 import BottomNav from './BottomNav';
 import { getInitialView, rememberView } from '../types/view';
 import type { View } from '../types/view';
@@ -40,7 +41,7 @@ export default function App() {
   // only they need covers.json + achievements.json merged in — Stats
   // reads just platformStats, which comes straight off games.json. See
   // the `detailed` param on useGames.
-  const { groups, totalCount, platformStats, loading } = useGames(
+  const { groups, totalCount, platformStats, loading, failed, retry } = useGames(
     undefined,
     gogOnly,
     backlogView ? 'backlog' : 'beaten',
@@ -129,6 +130,8 @@ export default function App() {
           <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '4rem 0' }}>
             Loading...
           </p>
+        ) : failed ? (
+          <DataLoadFailure onRetry={retry} />
         ) : backlogView ? (
           <BacklogList games={groups.flatMap((g) => g.games)} />
         ) : (

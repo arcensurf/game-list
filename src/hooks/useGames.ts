@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import type { Game, GameStatus, CoverMap, AchievementData, GameWithCover, LetterGroup } from '../types/game';
 import { getCoverUrl } from '../utils/coverUrl';
 import { buildTitleIndex, resolveGameAchievements } from '../utils/achievementMatch';
@@ -31,21 +31,43 @@ export function useGames(
   totalCount: number;
   platformStats: PlatformStat[];
   loading: boolean;
+  failed: boolean;
+  retry: () => void;
 } {
   const [games, setGames] = useState<Game[]>([]);
   const [covers, setCovers] = useState<CoverMap>({});
   const [achievementData, setAchievementData] = useState<AchievementData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // games.json gates the whole list, so a failure here has to clear
+  // `loading` — otherwise the view sits on "Loading..." forever. In
+  // production DATA_BASE is raw.githubusercontent.com, which rate-limits
+  // and answers 403 with HTML, so this is a live path, not a theoretical
+  // one: without the res.ok check that HTML reaches r.json() and rejects.
   useEffect(() => {
+    let cancelled = false;
     const bust = refreshKey ? `?t=${Date.now()}` : '';
     fetch(`${DATA_BASE}data/games.json${bust}`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`games.json ${r.status}`);
+        return r.json();
+      })
       .then((g) => {
+        if (cancelled) return;
         setGames(g as Game[]);
+        setFailed(false);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setFailed(true);
         setLoading(false);
       });
+    return () => {
+      cancelled = true;
+    };
   }, [refreshKey]);
 
   // Fetched once the first time a `detailed` view actually needs it,
@@ -57,14 +79,31 @@ export function useGames(
   useEffect(() => {
     if (!detailed || detailFetchedFor.current === refreshKey) return;
     detailFetchedFor.current = refreshKey;
+    let cancelled = false;
     const bust = refreshKey ? `?t=${Date.now()}` : '';
-    Promise.all([
-      fetch(`${DATA_BASE}data/covers.json${bust}`).then((r) => r.json()),
-      fetch(`${DATA_BASE}data/achievements.json${bust}`).then((r) => r.json()).catch(() => null),
-    ]).then(([c, a]) => {
-      setCovers(c as CoverMap);
-      setAchievementData(a as AchievementData | null);
-    });
+    // Each file settles on its own. Sharing one rejection meant a covers
+    // failure also threw away achievements data that had arrived intact,
+    // and since the ref above is already claimed for this refreshKey,
+    // nothing would ever retry either of them — every card spent the
+    // rest of the session with no art and no achievement bar.
+    const load = <T,>(file: string): Promise<T | null> =>
+      fetch(`${DATA_BASE}data/${file}${bust}`)
+        .then((r) => (r.ok ? (r.json() as Promise<T>) : null))
+        .catch(() => null);
+
+    Promise.all([load<CoverMap>('covers.json'), load<AchievementData>('achievements.json')]).then(
+      ([c, a]) => {
+        if (cancelled) return;
+        if (c) setCovers(c);
+        setAchievementData(a);
+        // Release the claim if covers never arrived, so a later refresh
+        // (or a dev edit) gets another go rather than being skipped.
+        if (!c) detailFetchedFor.current = null;
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
   }, [detailed, refreshKey]);
 
   // Re-fetch when dev API calls signal a data change.
@@ -153,5 +192,15 @@ export function useGames(
     return { groups, totalCount: filtered.length, platformStats };
   }, [games, covers, achievementData, titleIndex, filter, gogOnly, status, detailed]);
 
-  return { ...result, loading };
+  // Shares the refreshKey the dev `games-updated` listener already bumps,
+  // so a retry re-runs both fetches through exactly the same path. The
+  // spinner has to come back with it, otherwise a second failure never
+  // re-renders anything and the button looks dead.
+  const retry = useCallback(() => {
+    setFailed(false);
+    setLoading(true);
+    setRefreshKey((k) => k + 1);
+  }, []);
+
+  return { ...result, loading, failed, retry };
 }
