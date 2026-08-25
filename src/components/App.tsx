@@ -6,6 +6,7 @@ import { useLeaderboardFilters } from '../hooks/useLeaderboardFilters';
 import { useCardSpotlight } from '../hooks/useCardSpotlight';
 import { useViewSwipe } from '../hooks/useViewSwipe';
 import { useScrollReset } from '../hooks/useScrollReset';
+import { useScrollInputMode } from '../hooks/useScrollInputMode';
 import { useMastheadFlip } from '../hooks/useMastheadFlip';
 import AlphabetNav from './AlphabetNav';
 import GogFilterToggle from './GogFilterToggle';
@@ -68,6 +69,7 @@ export default function App() {
 
   useCardSpotlight(!effectiveLightsOn);
   useScrollReset(`${view}${gogOnly ? ':gog' : ''}`);
+  useScrollInputMode();
   const mastheadFlipped = useMastheadFlip(view);
   const { onTouchStart, onTouchEnd } = useViewSwipe(view, changeView);
 

@@ -35,8 +35,20 @@ html {
   scroll-padding-bottom: 30vh;
 }
 
+/* Relaxed to proximity for a notched mouse wheel, which resolves the snap
+   after every ~100px click and so spends most of a row's 300-420px pitch
+   being pulled back to the row it started on. Proximity still parks a rest
+   on a row, but only once you are close, so it never fights the input to
+   get there. See useScrollInputMode for how the mode is detected. */
+html[data-scroll-input='wheel'] {
+  scroll-snap-type: y proximity;
+}
+
+/* Both selectors, because the attribute rule above would otherwise outrank
+   a bare `html` here on specificity. */
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-snap-type: none; }
+  html,
+  html[data-scroll-input='wheel'] { scroll-snap-type: none; }
 }
 
 /* Per-card spotlight — a scroll listener in App.tsx sets --card-dim on
