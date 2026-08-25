@@ -20,26 +20,26 @@
 // keeps the surface to exactly what the app asks for.
 const ALLOWED_PREFIXES = ['covers/', 'data/'];
 
-// Covers and shards are content-addressed in practice: a cover's filename
-// changes when its art does, and a shard is rewritten only when its
-// counts move. So they can be cached hard. The small top-level JSON files
-// are rewritten nightly in place under stable names, so they get a short
-// TTL and revalidate instead.
+// Two paths are genuinely versioned and can be cached hard. Covers are
+// requested with a `?v=` stamped from the pick time (see getCoverUrl), so
+// re-picking art changes the URL rather than the bytes behind a stable
+// one. xbox-icons is append-only — one file per affected title, fetched
+// once and never rewritten.
+//
+// Everything else under data/ has a stable name and mutable content: the
+// nightly JSON, the per-game achievement shards and the override files
+// are all rewritten in place. Revalidate is also the right *default*
+// here, because the two errors are not symmetric — guessing revalidate
+// on something static costs one conditional request, while guessing
+// immutable on something that moves costs a year of browsers refusing to
+// look again, with no way to invalidate.
+const IMMUTABLE_PREFIXES = ['covers/', 'data/xbox-icons/'];
+
 const IMMUTABLE = 'public, max-age=31536000, immutable';
 const REVALIDATE = 'public, max-age=300, stale-while-revalidate=86400';
 
-const NIGHTLY_FILES = new Set([
-  'data/games.json',
-  'data/covers.json',
-  'data/achievements.json',
-  'data/leaderboard.json',
-  'data/timeline.json',
-  'data/cover-tints.json',
-  'data/platform-libraries.json',
-]);
-
 function cachePolicy(key) {
-  return NIGHTLY_FILES.has(key) ? REVALIDATE : IMMUTABLE;
+  return IMMUTABLE_PREFIXES.some((p) => key.startsWith(p)) ? IMMUTABLE : REVALIDATE;
 }
 
 export default {
