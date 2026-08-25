@@ -80,6 +80,7 @@ export function useGames(
     if (!detailed || detailFetchedFor.current === refreshKey) return;
     detailFetchedFor.current = refreshKey;
     let cancelled = false;
+    let settled = false;
     const bust = refreshKey ? `?t=${Date.now()}` : '';
     // Each file settles on its own. Sharing one rejection meant a covers
     // failure also threw away achievements data that had arrived intact,
@@ -93,6 +94,7 @@ export function useGames(
 
     Promise.all([load<CoverMap>('covers.json'), load<AchievementData>('achievements.json')]).then(
       ([c, a]) => {
+        settled = true;
         if (cancelled) return;
         if (c) setCovers(c);
         setAchievementData(a);
@@ -103,6 +105,12 @@ export function useGames(
     );
     return () => {
       cancelled = true;
+      // The claim above is taken before the fetch resolves, so a teardown
+      // mid-flight has to give it back. StrictMode makes that the normal
+      // case in dev — mount, tear down, remount — and without this the
+      // first request is cancelled while the remount skips as "already
+      // fetched", leaving covers and achievements permanently unset.
+      if (!settled) detailFetchedFor.current = null;
     };
   }, [detailed, refreshKey]);
 
