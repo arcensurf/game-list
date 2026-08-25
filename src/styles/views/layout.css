@@ -172,6 +172,26 @@
   color: var(--text-muted);
 }
 
+/* The letter headings paint outside their own boxes: a 10rem glyph
+   rotated 12deg about its top-left swings its bottom 10rem * sin(12deg)
+   ~= 2.1rem to the LEFT of the box it belongs to, out through the page
+   gutter. <main> is the box a view swap invalidates, so anything the
+   grid painted to the left of it was the one region nothing repainted —
+   leaving All Games left a slice of the letter sitting in the gutter
+   until a scroll dirtied it.
+
+   Widening <main> to the left gives that lean somewhere to land that is
+   still inside <main>. Padding puts the content box back where it was,
+   so every view inside measures exactly as before, and only the left
+   edge moves — extending right instead would add horizontal scroll,
+   while overflow to the left of the scroll origin adds none.
+
+   Keep this comfortably above 2.1rem if the heading ever grows. */
+main {
+  margin-left: -2.5rem;
+  padding-left: 2.5rem;
+}
+
 /* Letter sections */
 .letter-section {
   position: relative;
@@ -189,18 +209,11 @@
   opacity: 0.15;
   pointer-events: none;
   user-select: none;
+  /* Leans off the left edge on purpose — rotating about the top-left
+     swings the bottom of the glyph out through the gutter. See the note
+     on <main> below for why that needs room to land in. */
   transform: rotate(12deg);
-  /* Bottom, not top. Rotating a full-width h2 about its top-left swings
-     the bottom of the glyph 33px to the LEFT of the box it belongs to —
-     out through the page gutter and, on a phone, off the screen. That
-     strip is outside <main>, which is the box a view swap invalidates,
-     so nothing repainted it: leaving All Games left a slice of the
-     letter sitting in the gutter until a scroll dirtied the region.
-     Anchoring the rotation at the bottom-left keeps the whole glyph
-     inside the box. Transforms don't affect layout, so the tilt, the
-     size and the vertical placement are all unchanged — only the paint
-     moves, off the gutter and behind the first card. */
-  transform-origin: left bottom;
+  transform-origin: left top;
   margin-bottom: -5rem;
 }
 
