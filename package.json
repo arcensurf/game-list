@@ -12,7 +12,6 @@
     "preview": "vite preview",
     "fetch-covers": "node scripts/fetch-covers.mjs",
     "fetch-achievements": "node scripts/fetch-achievements.mjs",
-    "fetch-ffxiv": "node scripts/fetch-ffxiv.mjs",
     "fetch-ffxiv-lodestone": "node scripts/fetch-ffxiv-lodestone.mjs",
     "build-leaderboard": "node scripts/build-leaderboard.mjs",
     "build-timeline": "node scripts/build-timeline.mjs",
