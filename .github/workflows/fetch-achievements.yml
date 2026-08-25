@@ -71,7 +71,17 @@ jobs:
       # for parity with the other env vars). The script merges its
       # `ffxiv` slice into the same achievements.json the previous
       # step just wrote, preserving the steam/psn/xbox slices.
+      # Non-fatal on purpose. The script now exits non-zero rather than
+      # writing an undercounted total when a category fails to scrape, and
+      # without this that would take the whole run down with it — skipping
+      # the leaderboard, the timeline and the commit, so a Lodestone hiccup
+      # would throw away the Steam/PSN/Xbox data the previous step just
+      # fetched. Safe to skip because fetch-achievements.mjs carries the
+      # existing `ffxiv` slice forward instead of rebuilding without it, so
+      # a failed scrape leaves yesterday's FFXIV numbers in place rather
+      # than deleting them. The step still shows as failed on the run.
       - name: Fetch FFXIV achievements (Lodestone)
+        continue-on-error: true
         run: node scripts/fetch-ffxiv-lodestone.mjs
         env:
           DATA_DIR: ${{ github.workspace }}/data-branch/public/data
