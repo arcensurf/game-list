@@ -869,7 +869,18 @@ async function syncShards(platform, lib, fetchList, throttleMs) {
         // before turning this on — every one of them already satisfies
         // it, so this only ever fires on a genuinely broken fetch.
         const listEarned = list.filter((a) => a.earned).length;
-        if (list.length !== e.total || listEarned !== e.earned) {
+        // An xbox entry flagged totalUnreliable carries a total titleHub
+        // never supplied — a bootstrap guess (see fetchXboxLibrary), which
+        // the correction pass after this call trues up from the shard it
+        // expects to find on disk. Holding those to the total would reject
+        // the very write that pass reads back, and the title would never
+        // get corrected. Its earned count is real either way, so that half
+        // of the check still applies.
+        const totalIsGuess = Boolean(e.totalUnreliable);
+        const disagrees = totalIsGuess
+          ? listEarned !== e.earned
+          : list.length !== e.total || listEarned !== e.earned;
+        if (disagrees) {
           short.push(
             `${e.platformTitle} (list ${listEarned}/${list.length} vs library ${e.earned}/${e.total})`,
           );
