@@ -185,8 +185,19 @@ function weightedCompletion(platform, all) {
     // fall back to a flat count rather than divide by zero.
     return all.length > 0 ? all.filter((a) => a.earned).length / all.length : 0;
   }
+  const earnedCount = all.filter((a) => a.earned).length;
   const earned = all.filter((a) => a.earned).reduce((sum, a) => sum + weight(a), 0);
-  return earned / total;
+  const completion = earned / total;
+  // A zero-weight achievement adds nothing to either side of this ratio,
+  // so a game whose every unearned achievement is worth 0 points reaches
+  // exactly 1 with trophies still outstanding — and completion scales
+  // the score, so it would rank as a finished game. Fall back to the
+  // flat count in just that case. Mirrors buildGameScoreContext in
+  // src/utils/leaderboardCompletion.ts.
+  if (completion >= 1 && earnedCount < all.length) {
+    return earnedCount / all.length;
+  }
+  return completion;
 }
 
 // The full, unsliced game list (every earned game with a positive score,
@@ -299,38 +310,74 @@ async function attachTints(games, dataDir) {
     return;
   }
 
-  let fetched = 0;
-  let failed = 0;
+  // Counted per game, not per candidate — a Steam game has two URLs to
+  // try, so a per-candidate tally could exceed games.length and stopped
+  // meaning anything next to the hit/total it prints beside.
+  let resolved = 0;
+  let missing = 0;
+  let deferred = 0;
   for (const game of games) {
     const key = `${game.platform}/${game.id}`;
     if (!(key in cache)) {
       let tint = null;
+      // Distinguishes "the host answered and had nothing" from "the
+      // request never completed". Only the first is a fact about the
+      // cover; the second is a fact about today's network.
+      let unreachable = false;
       for (const url of coverUrlsFor(game)) {
         try {
           const res = await fetch(url);
           if (!res.ok) continue;
           tint = await dominantColor(Buffer.from(await res.arrayBuffer()), sharp);
-          fetched++;
           if (tint) break;
         } catch {
-          failed++;
+          unreachable = true;
         }
       }
-      // A null is cached deliberately: a cover that 404s today will
-      // 404 tomorrow, and re-fetching it every build is the whole
-      // cost this cache exists to avoid.
-      cache[key] = tint;
+
+      if (tint) {
+        resolved++;
+        cache[key] = tint;
+      } else if (unreachable) {
+        // Leave the key absent so the next run tries again. Caching a
+        // null here would make a DNS blip or a timeout permanent, and a
+        // version bump refetches every cover back-to-back against one
+        // host — exactly the burst most likely to produce one.
+        deferred++;
+      } else {
+        // Every candidate answered with a status and none yielded a
+        // tint. A cover that 404s today will 404 tomorrow, and not
+        // re-fetching it is the whole point of this cache.
+        missing++;
+        cache[key] = null;
+      }
     }
     if (cache[key]) game.tint = cache[key];
   }
 
   writeFileSync(cachePath, JSON.stringify({ version: TINT_ALGO_VERSION, tints: cache }, null, 2));
   const hit = games.filter((g) => g.tint).length;
-  console.log(`[leaderboard] tints: ${hit}/${games.length} (${fetched} fetched, ${failed} failed)`);
+  console.log(
+    `[leaderboard] tints: ${hit}/${games.length}` +
+      ` (${resolved} resolved, ${missing} no cover, ${deferred} deferred)`,
+  );
+  if (deferred > 0) {
+    console.warn(
+      `[leaderboard] ⚠ ${deferred} cover(s) unreachable this run; left uncached to retry next build`,
+    );
+  }
 }
 
-// Mirrors src/utils/pickerCover.ts — Steam art is derived from the appid,
-// every other platform ships an icon URL with the achievement data.
+// Same idea as src/utils/pickerCover.ts — Steam art is derived from the
+// appid, every other platform ships an icon URL with the achievement
+// data — but deliberately not the same list, and NOT kept in sync:
+// pickerCoverUrl() returns a single URL and leaves falling back to the
+// <img> onError chain, which this has no equivalent of. The two also
+// reach header.jpg by different hosts (the app uses cdn.cloudflare…
+// /steam/apps/<id>/header.jpg, this uses shared.cloudflare…
+// /store_item_assets/…). Both resolve today, so this is a note rather
+// than a bug — but a fix to either one will not reach the other, so
+// check both when Steam moves its art around again.
 //
 // Steam gets two candidates, tried in order. The portrait library capsule
 // is the better source and what the app itself shows, but Steam only ever
