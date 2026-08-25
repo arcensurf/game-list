@@ -1,6 +1,6 @@
 .leaderboard-view {
   padding: 2rem 0;
-  max-width: 720px;
+  max-width: var(--view-narrow);
   margin: 0 auto;
 }
 

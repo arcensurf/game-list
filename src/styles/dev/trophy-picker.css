@@ -21,7 +21,7 @@
   overflow: hidden;
   --picker-cover-h: 12rem;
   --picker-pad-y: 2rem;
-  width: min(56rem, 100%);
+  width: min(var(--view-narrow), 100%);
   min-height: calc(var(--picker-cover-h) + var(--picker-pad-y) * 2);
   display: flex;
   flex-direction: column;
@@ -295,7 +295,7 @@
    Deliberately outside the stage so the capture region contains no
    buttons. */
 .picker-controls {
-  width: min(56rem, 100%);
+  width: min(var(--view-narrow), 100%);
   display: flex;
   flex-direction: column;
   gap: 0.9rem;

@@ -1,6 +1,8 @@
 /* App layout */
 .app {
-  max-width: 1200px;
+  /* The wide measure. Views that want the narrow one re-constrain
+     inside this — see --view-narrow in tokens.css. */
+  max-width: var(--view-wide);
   margin: 0 auto;
   /* Tall bottom padding so the last row can still scroll up to the
      35% snap target, plus extra clearance for the fixed bottom nav. */

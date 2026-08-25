@@ -48,6 +48,23 @@
     transparent 100%
   );
 
+  /* ── View width ──
+     Two, not one per view. Which one a view takes is a question about
+     its content, and there are only two answers here.
+
+     Wide is for views whose unit is small and tiles: the All Games grid
+     and the Stats figures both get more useful the more of them fit on a
+     row, and both were built against this measure.
+
+     Narrow is for views whose unit is a full-width line — a leaderboard
+     row, a backlog band, the picker's single card. Those gain nothing
+     from a wider page: the line just gets longer, the eye has further to
+     travel from title to score, and a stack of them starts to read as a
+     spreadsheet. The value is the Leaderboard's, which is the view that
+     had already been tuned to this shape. */
+  --view-wide: 1200px;
+  --view-narrow: 720px;
+
   /* Gold (Game of Games — independent of theme) */
   --gold: #d4a017;
   --gold-bright: #f5d060;

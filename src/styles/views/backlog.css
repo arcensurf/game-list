@@ -5,7 +5,12 @@
    Bands are deliberately not interactive in the public build — no
    hover highlight, since there's nothing to click. */
 .backlog-manifest {
-  margin: 1.5rem 0 0;
+  /* A band is a full-width line, not a tile, so it takes the narrow
+     measure — this view had been inheriting the wide one from .app by
+     omission rather than by choice, which left the title and its count
+     at opposite ends of a 1200px band. */
+  max-width: var(--view-narrow);
+  margin: 1.5rem auto 0;
 }
 
 .backlog-system {
