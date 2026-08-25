@@ -5,6 +5,19 @@ import { buildTitleIndex, normalizeTitle, PLATFORM_FAMILIES } from '../utils/ach
 import { DATA_BASE } from '../utils/dataBase';
 import PlatformPicker from './PlatformPicker';
 
+// A failing endpoint doesn't reliably answer in JSON — Vite's own 500
+// page is HTML, so res.json() rejects and takes the handler's error
+// path down with it, which is how a failed save used to leave the form
+// stuck on "Saving…" with both buttons disabled.
+async function errorFrom(res: Response): Promise<string> {
+  try {
+    const data = (await res.json()) as { error?: string };
+    return data.error ?? '';
+  } catch {
+    return `Request failed (${res.status})`;
+  }
+}
+
 function serializeExtras(extras: ExtraContent[]): string {
   return extras
     .map((g) => `${g.label}: ${g.items.join(', ')}`)
@@ -129,20 +142,23 @@ export default function EditGameModal({
       return;
     }
     setSaving(true);
-    const res = await fetch('/api/delete-game', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: game.title }),
-    });
-    if (res.ok) {
-      window.dispatchEvent(new Event('games-updated'));
-      onClose();
-    } else {
-      const data = await res.json();
-      setError(data.error || 'Failed to delete');
-      setSaving(false);
-      setConfirmDelete(false);
+    try {
+      const res = await fetch('/api/delete-game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: game.title }),
+      });
+      if (res.ok) {
+        window.dispatchEvent(new Event('games-updated'));
+        onClose();
+        return;
+      }
+      setError((await errorFrom(res)) || 'Failed to delete');
+    } catch {
+      setError("Couldn't reach the dev server.");
     }
+    setSaving(false);
+    setConfirmDelete(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,31 +166,34 @@ export default function EditGameModal({
     setError('');
     setSaving(true);
 
-    const res = await fetch('/api/edit-game', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        originalTitle: game.title,
-        title: title.trim(),
-        subtitle: game.subtitle ?? null,
-        platforms,
-        extras: parseExtras(extras),
-        gameOfGames: isGameOfGames ? gameOfGamesTagline.trim() || null : null,
-        steamAppId: steamAppId ? Number(steamAppId) : null,
-        psnNpCommId: psnNpCommId.trim() || null,
-        xboxTitleId: xboxTitleId.trim() || null,
-        ffxivLodestoneId: ffxivLodestoneId.trim() || null,
-      }),
-    });
+    try {
+      const res = await fetch('/api/edit-game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          originalTitle: game.title,
+          title: title.trim(),
+          subtitle: game.subtitle ?? null,
+          platforms,
+          extras: parseExtras(extras),
+          gameOfGames: isGameOfGames ? gameOfGamesTagline.trim() || null : null,
+          steamAppId: steamAppId ? Number(steamAppId) : null,
+          psnNpCommId: psnNpCommId.trim() || null,
+          xboxTitleId: xboxTitleId.trim() || null,
+          ffxivLodestoneId: ffxivLodestoneId.trim() || null,
+        }),
+      });
 
-    if (res.ok) {
-      window.dispatchEvent(new Event('games-updated'));
-      onClose();
-    } else {
-      const data = await res.json();
-      setError(data.error || 'Failed to save');
-      setSaving(false);
+      if (res.ok) {
+        window.dispatchEvent(new Event('games-updated'));
+        onClose();
+        return;
+      }
+      setError((await errorFrom(res)) || 'Failed to save');
+    } catch {
+      setError("Couldn't reach the dev server.");
     }
+    setSaving(false);
   };
 
   return createPortal(

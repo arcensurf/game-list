@@ -177,6 +177,46 @@ export default function devApiPlugin(): Plugin {
         // a fresh clone, where the gitignored public/data/ doesn't
         // exist yet and the first /api/dupe-groups read throws ENOENT.
         try {
+          // ── Cross-origin guard ──
+          //
+          // This server writes to the real repo — games.json, covers,
+          // overrides, and /api/publish pushes to the data branch. It
+          // listens on localhost with no auth, so *any* page open in the
+          // same browser can address it. Nothing here checked where a
+          // request came from, and an attacker never needs to read the
+          // response for a delete to have happened.
+          //
+          // Two complementary checks. An Origin that isn't ours is
+          // refused outright, which covers every cross-site fetch and
+          // form post, since browsers always attach Origin to those.
+          // Requiring a JSON content-type on writes closes the rest:
+          // a cross-site form can only send urlencoded, multipart or
+          // text/plain, so anything else forces a preflight the browser
+          // won't pass. Requests with no Origin at all (curl, the
+          // scripts) still work.
+          const apiPath = req.url?.split('?')[0] ?? '';
+          if (apiPath.startsWith('/api/')) {
+            const origin = req.headers.origin;
+            if (origin) {
+              let sameOrigin = false;
+              try {
+                sameOrigin = new URL(origin).host === req.headers.host;
+              } catch {
+                sameOrigin = false;
+              }
+              if (!sameOrigin) {
+                res.writeHead(403, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Cross-origin request refused' }));
+                return;
+              }
+            }
+            if (req.method === 'POST' && !(req.headers['content-type'] ?? '').includes('application/json')) {
+              res.writeHead(415, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Expected Content-Type: application/json' }));
+              return;
+            }
+          }
+
           // The stage view polls this; everything else here is a POST.
           if (req.method === 'GET' && req.url?.split('?')[0] === '/api/picker-state') {
             res.writeHead(200, {
@@ -517,6 +557,27 @@ export default function devApiPlugin(): Plugin {
               xboxTitleId: string | null;
               ffxivLodestoneId: string | null;
             };
+
+            // The assignments below copy these straight onto the entry,
+            // and JSON.stringify drops whatever is undefined — so a body
+            // missing `platforms` doesn't write an empty list, it writes
+            // the key out of games.json entirely. The app then throws on
+            // g.platforms.some(...) at its next load and renders nothing,
+            // having reported the save as successful. Cheap to check, and
+            // the failure it prevents costs a hand-edit of the data file.
+            const invalid =
+              typeof title !== 'string' || title.trim() === ''
+                ? 'title must be a non-empty string'
+                : !Array.isArray(platforms) || platforms.some((p) => typeof p !== 'string')
+                  ? 'platforms must be an array of strings'
+                  : !Array.isArray(extras)
+                    ? 'extras must be an array'
+                    : null;
+            if (invalid) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: invalid }));
+              return;
+            }
 
             const games = readJson(gamesPath) as GameEntry[];
             const game = games.find((g: { title: string }) => g.title === originalTitle);

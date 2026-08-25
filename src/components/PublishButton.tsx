@@ -21,7 +21,13 @@ export default function PublishButton() {
     setState('publishing');
 
     try {
-      const res = await fetch('/api/publish', { method: 'POST' });
+      // No body to send, but the dev API requires a JSON content-type on
+      // every POST — it's what stops an unrelated page in the same
+      // browser from driving these endpoints with a simple form post.
+      const res = await fetch('/api/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
       const data = await res.json();
 
       if (res.ok) {
