@@ -599,9 +599,16 @@ async function fetchXboxLibrary(existingXbox) {
         },
       });
 
+      // Throw rather than break with what we have. A partial title
+      // history is indistinguishable downstream from a library that
+      // genuinely shrank: it still marks xbox as fetched, replaces the
+      // whole slice, and then pruneShards() deletes a shard for every
+      // title on the pages we never got — which the workflow commits.
+      // Failing here keeps the previous run's data intact instead.
       if (!res.ok) {
-        console.error('Xbox: failed to fetch title history', res.status, await res.text());
-        break;
+        throw new Error(
+          `Xbox title history page ${page + 1} failed: ${res.status} ${await res.text()}`,
+        );
       }
 
       const data = await res.json();
@@ -611,6 +618,17 @@ async function fetchXboxLibrary(existingXbox) {
       // Guard against an API that always echoes a token back — this
       // account's full history shouldn't run past a handful of pages.
     } while (continuationToken && page < 20);
+
+    // Hitting the cap with a token still in hand means the walk stopped
+    // early, which is the same silent truncation as a failed page — and
+    // reaches the same prune. Either the account outgrew the guard or
+    // the API is echoing a token forever; both need a look rather than a
+    // quietly shortened library.
+    if (continuationToken) {
+      throw new Error(
+        `Xbox title history did not finish within ${page} pages (continuation token still set)`,
+      );
+    }
 
     console.log(`Xbox: title history spanned ${page} page(s), ${allTitles.length} titles total`);
 
@@ -1221,6 +1239,13 @@ async function main() {
     psn: fetchedPlatforms.has('psn') ? psnMap : (existing.psn ?? {}),
     xbox: fetchedPlatforms.has('xbox') ? xboxMap : (existing.xbox ?? {}),
     ra: fetchedPlatforms.has('ra') ? raMap : (existing.ra ?? {}),
+    // This script never fetches FFXIV — fetch-ffxiv-lodestone.mjs owns
+    // that slice and runs as a separate step. Carrying it forward is
+    // what keeps it: rebuilding the object without this key silently
+    // deletes the character's whole achievement set, and it only looks
+    // harmless in CI because the Lodestone step happens to run straight
+    // after and put it back. Running this script on its own dropped it.
+    ffxiv: existing.ffxiv ?? {},
     updatedAt: new Date().toISOString(),
   };
 
