@@ -290,7 +290,9 @@ async function attachTints(games, dataDir) {
   // move for a source change too, not just an algorithm one — the cached
   // nulls are "no cover found", and without a bump the games the new
   // fallback exists to rescue would keep serving their stored null.
-  const TINT_ALGO_VERSION = 6;
+  // 7: coverUrlsFor gained game.icon as the final Steam candidate, which
+  // is the only thing that resolves for titles on the hashed-path CDN.
+  const TINT_ALGO_VERSION = 7;
   const stored = existsSync(cachePath)
     ? JSON.parse(readFileSync(cachePath, 'utf8'))
     : {};
@@ -390,7 +392,15 @@ async function attachTints(games, dataDir) {
 function coverUrlsFor(game) {
   if (game.platform === 'steam') {
     const base = `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${game.id}`;
-    return [`${base}/library_600x900.jpg`, `${base}/header.jpg`];
+    // game.icon last: it's the real header image resolved server-side by
+    // fetch-achievements.mjs, so unlike the two guesses above it doesn't
+    // depend on the appid mapping to a predictable path. That matters for
+    // titles Valve has moved onto the hashed-path CDN scheme, which has no
+    // flat-path alias at all — both guesses 301 to a 404 and only the
+    // stored icon resolves. TrophyPickerView's Cover already falls through
+    // to it for exactly this reason; the tint builder was the one place
+    // still ignoring it.
+    return [`${base}/library_600x900.jpg`, `${base}/header.jpg`, game.icon].filter(Boolean);
   }
   return game.icon ? [game.icon] : [];
 }
