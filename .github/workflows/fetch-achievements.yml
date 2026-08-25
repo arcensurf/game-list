@@ -70,8 +70,6 @@ jobs:
           STEAM_USER_ID: ${{ secrets.STEAM_USER_ID }}
           PSN_NPSSO_TOKEN: ${{ secrets.PSN_NPSSO_TOKEN }}
           XBOX_REFRESH_TOKEN: ${{ secrets.XBOX_REFRESH_TOKEN }}
-          XBOX_EMAIL: ${{ secrets.XBOX_EMAIL }}
-          XBOX_PASSWORD: ${{ secrets.XBOX_PASSWORD }}
           RA_API_KEY: ${{ secrets.RA_API_KEY }}
           RA_USERNAME: ${{ secrets.RA_USERNAME }}
           FORCE_REFRESH: ${{ inputs.force_refresh && '1' || '0' }}
