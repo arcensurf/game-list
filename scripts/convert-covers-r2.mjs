@@ -16,7 +16,7 @@
  * Normally a no-op: one listing call, nothing to do, done.
  */
 import { loadSharp } from './lib/load-sharp.mjs';
-import { writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
 import { config } from 'dotenv';
 import {
@@ -40,8 +40,11 @@ const WEBP_QUALITY = 82;
 const COVERS_KEY = 'data/covers.json';
 const dryRun = process.argv.includes('--dry-run');
 
-// Where the workflow looks to decide whether to raise an issue.
+// Where the workflow looks to decide whether to raise an issue. Created
+// here rather than assumed: unlike the fetch workflow, this job has no
+// token-cache step to make the directory first.
 const tokenDir = process.env.TOKEN_DIR || resolve(process.env.HOME || '.', '.game-list');
+mkdirSync(tokenDir, { recursive: true });
 const FAILURE_FILE = resolve(tokenDir, 'cover-convert-failed');
 
 const remote = await listObjects('covers/');
