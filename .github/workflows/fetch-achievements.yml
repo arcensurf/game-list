@@ -98,39 +98,16 @@ jobs:
       # Reads achievements.json + every shard (not just what this run
       # touched) to (re)build the score/rarity leaderboard, so a stale
       # shard from an earlier run still counts.
-      # sharp is deliberately not a tracked dependency and the postinstall
-      # hook opts out on CI entirely, because its per-platform native
-      # packages break `npm ci` on the Linux runner (see
-      # scripts/lib/load-sharp.mjs). The leaderboard's cover tints need it,
-      # though, and without it every nightly run published a leaderboard
-      # with no tints at all while degrading silently.
-      #
-      # --no-save keeps the lockfile untouched, so `npm ci` above is
-      # unaffected and the deploy workflow's install stays platform-neutral.
-      # Non-fatal on purpose: if this ever fails, the build still produces a
-      # correct leaderboard, just without tints.
-      - name: Install sharp for cover tints
-        continue-on-error: true
-        run: npm install --no-save sharp
-
-      - name: Build leaderboard
-        run: node scripts/build-leaderboard.mjs
-        env:
-          DATA_DIR: ${{ github.workspace }}/public/data
-
-      - name: Build timeline
-        run: node scripts/build-timeline.mjs
-        env:
-          DATA_DIR: ${{ github.workspace }}/public/data
-
       # Push the run's output back to the bucket the site reads from.
       #
-      # Scoped with --only to exactly what this workflow produces. The
-      # tree also holds games.json, covers.json and overrides/, which the
-      # app's publish path writes directly to R2 — syncing those back
-      # would overwrite a publish that landed after the pull, which is
-      # the race the old data-branch step needed pull --rebase to
-      # survive. Not touching them removes it instead.
+      # Scoped with --only to exactly what this workflow produces —
+      # which is now the fetched data alone. The leaderboard, timeline
+      # and tint cache are built by build-site-data.yml and synced
+      # there; games.json, covers.json and overrides/ belong to the
+      # app's publish path. Syncing anything this job merely *read*
+      # would overwrite whatever wrote it after the pull, which is the
+      # race the old data-branch step needed pull --rebase to survive.
+      # Not touching them removes it instead.
       #
       # --prune so a delisted game's shard is deleted rather than left
       # behind. r2-sync refuses a prune that would remove an
@@ -139,7 +116,7 @@ jobs:
       - name: Sync data to R2
         run: |
           node scripts/r2-sync.mjs data --prune \
-            --only=achievements.json,platform-libraries.json,leaderboard.json,timeline.json,cover-tints.json,achievements,xbox-icons
+            --only=achievements.json,platform-libraries.json,achievements,xbox-icons
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}

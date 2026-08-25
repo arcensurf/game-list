@@ -1,0 +1,175 @@
+name: Build Site Data
+
+# Everything derived from data that already exists — no platform APIs, no
+# platform credentials. Split out of Fetch Achievements because the two
+# jobs fail for unrelated reasons: an expired PSN token has nothing to do
+# with whether the leaderboard can be rebuilt, and used to take it down
+# anyway. This job needs the R2 keys and nothing else.
+on:
+  # Deliberately not gated on the fetch succeeding. If the fetch failed,
+  # rebuilding from the data already in the bucket is still the right
+  # thing to do — that's the whole point of separating them.
+  workflow_run:
+    workflows: ['Fetch Achievements']
+    types: [completed]
+  # For running the cover sweep on demand after a publish, rather than
+  # waiting for the nightly.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main (scripts)
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Pull data from R2
+        run: node scripts/r2-pull.mjs data
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+
+      # sharp is deliberately not a tracked dependency: its ~26 per-platform
+      # native packages have transitive deps that npm resolves differently
+      # per host, so a lockfile written on macOS is missing entries `npm ci`
+      # on the Linux runner demands. Installing it here with --no-save keeps
+      # the lockfile untouched, so `npm ci` above and the Pages deploy both
+      # stay platform-neutral.
+      #
+      # Unlike the old setup this is NOT continue-on-error. Both things this
+      # job exists to do need sharp, so failing to install it should fail the
+      # job rather than quietly produce a leaderboard with no tints and skip
+      # the cover sweep entirely.
+      - name: Install sharp
+        run: npm install --no-save sharp
+
+      # Backstop for covers picked on a checkout without sharp, which
+      # dev-api-plugin.ts saves unconverted rather than failing the pick.
+      # Normally a no-op — one listing call and done.
+      #
+      # Writes covers.json itself, conditionally on its ETag, rather than
+      # letting the sync below carry it: covers.json belongs to the app's
+      # publish path, so it has to be re-read and patched at the moment of
+      # writing or a publish landing mid-run would be reverted.
+      - name: Convert any covers that aren't WebP
+        run: node scripts/convert-covers-r2.mjs
+        env:
+          TOKEN_DIR: /home/runner/.game-list
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+
+      # Reads achievements.json + every shard (not just what the fetch
+      # touched) so a stale shard from an earlier run still counts.
+      - name: Build leaderboard
+        run: node scripts/build-leaderboard.mjs
+        env:
+          DATA_DIR: ${{ github.workspace }}/public/data
+
+      - name: Build timeline
+        run: node scripts/build-timeline.mjs
+        env:
+          DATA_DIR: ${{ github.workspace }}/public/data
+
+      # Scoped to what this job produces. covers.json is excluded on
+      # purpose — the sweep above already wrote it conditionally, and
+      # syncing the copy pulled at the start of the run would undo that.
+      - name: Sync built data to R2
+        run: |
+          node scripts/r2-sync.mjs data --prune \
+            --only=leaderboard.json,timeline.json,cover-tints.json
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+
+      # ── Cover conversion failures ──
+      # A cover that won't convert stays in the bucket as PNG/JPG and gets
+      # picked up again tomorrow, so this isn't urgent — but a file that
+      # fails every night is a file that will never be fixed by waiting.
+      - name: Check for cover conversion failures
+        id: cover-convert
+        if: always()
+        run: |
+          if [ -s ~/.game-list/cover-convert-failed ]; then
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+            {
+              echo 'covers<<COVERS_EOF'
+              cat ~/.game-list/cover-convert-failed
+              echo 'COVERS_EOF'
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open issue if covers failed to convert
+        if: steps.cover-convert.outputs.failed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERS: ${{ steps.cover-convert.outputs.covers }}
+        run: |
+          gh label create cover-convert-failed \
+            --color FBCA04 \
+            --description "A cover could not be re-encoded to WebP" \
+            2>/dev/null || true
+
+          existing=$(gh issue list \
+            --label cover-convert-failed \
+            --state open \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$existing" ]; then
+            echo "Issue #$existing already open, skipping"
+            exit 0
+          fi
+
+          # Heredoc straight to a file, then --body-file: a heredoc nested
+          # inside command substitution mis-parses on any apostrophe, so a
+          # single "can't" would silently break the step.
+          cat > /tmp/cover-issue.md <<'EOF'
+          One or more covers in the bucket are not WebP and could not be
+          converted.
+
+          ```
+          {{COVERS}}
+          ```
+
+          ## What this means
+
+          The dev cover picker re-encodes to WebP on the way in, but falls
+          back to saving the original bytes when `sharp` is unavailable —
+          a 600x900 grid runs ~700KB as PNG against ~85KB as WebP. This job
+          sweeps up anything that slipped through, and these files failed
+          that sweep.
+
+          They still display correctly; they are just far larger than they
+          should be.
+
+          ## How to investigate
+
+          1. Check the run log for the underlying error — a corrupt or
+             truncated upload is the usual cause.
+          2. Re-picking the cover in the dev UI (with sharp installed
+             locally: `npm install --no-save sharp`) replaces the file
+             outright and is usually faster than debugging the original.
+          3. Re-run **Build Site Data** from the Actions tab to retry.
+          EOF
+
+          COVERS="$COVERS" python3 - <<'PY'
+          import os, pathlib
+          p = pathlib.Path('/tmp/cover-issue.md')
+          p.write_text(p.read_text().replace('{{COVERS}}', os.environ['COVERS']))
+          PY
+
+          gh issue create \
+            --label cover-convert-failed \
+            --title "Covers could not be converted to WebP" \
+            --body-file /tmp/cover-issue.md
