@@ -61,6 +61,7 @@ npm run lint
 ```bash
 npm run pull-data                # Mirror the R2 bucket down to public/
 npm run sync-data                # Push public/ changes up to R2 (--dry-run, --prune)
+npm run convert-covers           # Convert any covers in the bucket that aren't WebP
 npm run deploy-worker            # Deploy worker/index.js to Cloudflare
 npm run fetch-covers             # Download cover art from SteamGridDB
 npm run fetch-achievements       # Sync achievements from Steam, PSN, Xbox, RetroAchievements
@@ -98,9 +99,13 @@ On the Workers free plan this fails closed at 100k requests/day rather than bill
 
 ### Nightly round trip
 
-The workflow pulls the bucket down, runs the fetch and the leaderboard/timeline builds, then syncs back. Two guards make that safe: `r2-pull.mjs` fails hard rather than producing a partial tree, and `r2-sync.mjs` refuses a `--prune` that would remove more than 20% of a prefix — otherwise a short pull would look exactly like mass deletion.
+Two workflows, split by what they talk to. **Fetch Achievements** (cron) hits the platform APIs and writes `achievements.json`, the shards, `platform-libraries.json` and `xbox-icons/`. **Build Site Data** (`workflow_run`, after it) derives the leaderboard, timeline and tints from whatever is already in the bucket, and sweeps up any cover that isn't WebP.
 
-The sync back is scoped with `--only` to what the nightly produces. `games.json`, `covers.json` and `overrides/` belong to Publish, so a publish landing mid-run can't be overwritten by the copy the nightly pulled before it.
+They're separate because they fail for unrelated reasons: an expired PSN token has nothing to do with whether the leaderboard can be rebuilt, and used to take it down anyway. Build Site Data is deliberately not gated on the fetch succeeding, and never sees a platform credential — it needs the R2 keys and nothing else.
+
+Both pull, work, and sync back. Two guards make that safe: `r2-pull.mjs` fails hard rather than producing a partial tree, and `r2-sync.mjs` refuses a `--prune` that would remove more than 20% of a prefix — otherwise a short pull would look exactly like mass deletion.
+
+Each sync is scoped with `--only` to what that job produces, so the three writers partition the bucket exactly: fetch owns 791 objects, build owns 3, Publish owns 5. `covers.json` is the one file two jobs touch — the cover sweep re-reads it and writes conditionally on its ETag, so a publish landing mid-run is retried on top rather than reverted.
 
 ## Architecture
 
@@ -192,7 +197,9 @@ All dev features are behind `import.meta.env.DEV` and only appear under `npm run
 
 Covers are re-encoded to WebP on the way in (600×900, `fit: inside`, quality 82 — matching `fetch-covers.mjs`), and an earlier file under the same slug is removed so a format change leaves no orphan. A 600×900 grid runs ~700KB as PNG against ~85KB as WebP.
 
-This needs `sharp`, deliberately **not** in `package.json` — its per-platform native packages break `npm ci` on the Linux runner. Install it ad hoc with `npm install --no-save sharp`. **Without it covers still save, just unconverted**, with only a warning in the dev server log.
+This needs `sharp`, deliberately **not** in `package.json` — its ~26 per-platform native packages have transitive deps npm resolves differently per host, so a lockfile written on macOS is missing entries `npm ci` on the Linux runner demands. A postinstall hook installs it locally with `--no-save`, leaving the lockfile untouched; if that ever fails, install it by hand the same way.
+
+**Without it a cover pick fails rather than saving unconverted**, and says why. It used to fall back to writing the original bytes, which reported success and put PNGs eight times the size into the data — and on a corrupt upload wrote whatever arrived, once landing a 10-byte file in `covers.json` described as cover art. Build Site Data also sweeps the bucket nightly for anything that gets through by another route.
 
 ### Publishing
 

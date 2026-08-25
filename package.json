@@ -16,6 +16,7 @@
     "build-leaderboard": "node scripts/build-leaderboard.mjs",
     "build-timeline": "node scripts/build-timeline.mjs",
     "sync-data": "node scripts/r2-sync.mjs",
+    "convert-covers": "node scripts/convert-covers-r2.mjs",
     "deploy-worker": "npx wrangler deploy --config worker/wrangler.toml",
     "xbox-get-refresh-token": "node scripts/xbox-get-refresh-token.mjs",
     "psn-get-npsso-token": "node scripts/psn-get-npsso-token.mjs"
