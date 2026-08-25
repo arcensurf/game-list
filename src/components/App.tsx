@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { flushSync } from 'react-dom';
 import { useGames } from '../hooks/useGames';
 import { useGogFilter } from '../hooks/useGogFilter';
 import { useLeaderboardFilters } from '../hooks/useLeaderboardFilters';
@@ -25,7 +24,6 @@ import type { View } from '../types/view';
 export default function App() {
   const [view, setView] = useState<View>(getInitialView);
   const lightsOn = false;
-  const [inTransition, setInTransition] = useState(false);
 
   const { gogOnly, toggleGog } = useGogFilter(view);
   const leaderboardFilters = useLeaderboardFilters(view);
@@ -52,14 +50,16 @@ export default function App() {
 
   const changeView = useCallback((next: View) => {
     rememberView(next);
-    flushSync(() => {
-      setInTransition(true);
-      setView(next);
-    });
-    requestAnimationFrame(() => {
-      window.scrollTo(0, 0);
-      setInTransition(false);
-    });
+    // Scroll to the top while the outgoing view is still mounted, then
+    // swap. This used to blank <main> for a frame and scroll on the next
+    // one, which is two paints with the document collapsing from
+    // thousands of pixels tall to a few hundred in between. iOS Safari
+    // did not always repaint everything the outgoing view had drawn
+    // across that collapse — a letter heading from the grid could still
+    // be sitting behind the backlog until a scroll dirtied the region.
+    // One paint, already at the top, with no collapse in the middle.
+    window.scrollTo(0, 0);
+    setView(next);
   }, []);
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function App() {
       )}
 
       <main>
-        {inTransition ? null : pickerView ? (
+        {pickerView ? (
           <TrophyPickerView />
         ) : leaderboardView ? (
           <LeaderboardView

@@ -410,11 +410,29 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2);
+  /* The resting value lives here, on the element, and not on the
+     animation. It used to fill `both`, which leaves the animation
+     supplying opacity after the run is over — and the value a *stepped*
+     fill lands on is the last step, 2/3, rather than the 1 the final
+     jump would have reached. Rows that took that fill painted at 0.67
+     for good, which is indistinguishable from the unearned dim below:
+     an earned achievement showing as one you hadn't got. Measured off a
+     screenshot at 0.678 across all three text tiers of the row.
+     `backwards` fills the delay only, so the row falls back to this. */
+  opacity: 1;
   /* steps(3) rather than a smooth ramp — three frames is enough to read
      as arriving without becoming a strobe over text. Capped at 14 so a
      200-achievement list doesn't stagger for four seconds. */
-  animation: modal-row-in 0.22s steps(3, end) both;
+  animation: modal-row-in 0.22s steps(3, end) backwards;
   animation-delay: calc(min(var(--row-index, 0), 14) * 22ms);
+}
+
+/* Past the delay cap the stagger is over, so every remaining row would
+   fire at the same 308ms — on a long list that is a couple of hundred
+   simultaneous animations for an arrival that happens far below the fold
+   with nobody watching it. The ones you can see keep the effect. */
+.leaderboard-modal-row:nth-child(n + 16) {
+  animation: none;
 }
 
 /* Tuned out. Gentler than the card grid's 0.25/0.40 — a cover survives
