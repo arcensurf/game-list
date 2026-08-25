@@ -175,12 +175,20 @@ async function fetchSteamLibrary() {
 // response from bare API names into display names + descriptions — the
 // counts this used to reduce to are just the array length and the
 // achieved filter, so the list costs nothing extra to keep.
+// Two failure modes that used to look identical here, and must not:
+// a game that genuinely publishes no achievements (Steam answers 400,
+// "Requested app has no stats") is a real, cacheable 0/0, whereas a 429
+// or a 5xx is a temporary outage. Returning null for both meant a rate
+// limit silently rewrote a game's counts to 0/0 and dropped it off the
+// leaderboard. The no-stats case still returns an empty list; anything
+// else throws so the caller can keep the numbers it already has.
 async function fetchSteamAchievements(appId) {
   const url = `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=${STEAM_API_KEY}&steamid=${STEAM_USER_ID}&appid=${appId}&l=english`;
   const res = await fetch(url);
-  if (!res.ok) return null;
+  if (res.status === 400) return [];
+  if (!res.ok) throw new Error(`Steam ${res.status} ${res.statusText} for appid ${appId}`);
   const data = await res.json();
-  return data.playerstats?.achievements ?? null;
+  return data.playerstats?.achievements ?? [];
 }
 
 // Global unlock percentages, so the picker can weight or filter by how
@@ -826,27 +834,44 @@ async function syncShards(platform, lib, fetchList, throttleMs) {
       const list = await fetchList(e);
       fetched++;
       if (list) {
-        // A list shorter than the platform's own count means we didn't
-        // get the whole set — worth surfacing, since it's silent
-        // corruption otherwise: the shard looks fine, it's just missing
-        // the achievements the picker most wants to offer.
-        if (list.length < e.total) {
-          short.push(`${e.platformTitle} (${list.length}/${e.total})`);
+        // The shard header takes its counts from the library response
+        // (see the comment on `earned` below), so the list has to agree
+        // with them or the file contradicts itself. It goes wrong when
+        // one of the two upstream calls half-fails: `get()` swallows
+        // errors into [], so a title can come back with all its
+        // definitions but no unlock state (every entry earned:false
+        // under a header claiming earned: 19) or the mirror — a short
+        // all-earned list under a full total, which the app's weighted
+        // completion then reads as 100%.
+        //
+        // Neither shape is self-healing: the header still matches what
+        // currentShard() compares against, so the bad shard is treated
+        // as fresh on every later run. Skip the write and keep the last
+        // good shard instead. Verified against all 705 committed shards
+        // before turning this on — every one of them already satisfies
+        // it, so this only ever fires on a genuinely broken fetch.
+        const listEarned = list.filter((a) => a.earned).length;
+        if (list.length !== e.total || listEarned !== e.earned) {
+          short.push(
+            `${e.platformTitle} (list ${listEarned}/${list.length} vs library ${e.earned}/${e.total})`,
+          );
+          failed++;
+        } else {
+          const payload = {
+            platform,
+            id,
+            title: e.platformTitle,
+            // Counts mirror achievements.json (i.e. the library response)
+            // rather than list.length, so the currentShard check always
+            // compares like with like — otherwise a one-off disagreement
+            // between the two endpoints would wedge a game into being
+            // refetched every single night.
+            earned: e.earned,
+            total: e.total,
+            achievements: list,
+          };
+          if (writeShard(platform, id, payload)) written++;
         }
-        const payload = {
-          platform,
-          id,
-          title: e.platformTitle,
-          // Counts mirror achievements.json (i.e. the library response)
-          // rather than list.length, so the currentShard check always
-          // compares like with like — otherwise a one-off disagreement
-          // between the two endpoints would wedge a game into being
-          // refetched every single night.
-          earned: e.earned,
-          total: e.total,
-          achievements: list,
-        };
-        if (writeShard(platform, id, payload)) written++;
       } else {
         failed++;
       }
@@ -860,7 +885,7 @@ async function syncShards(platform, lib, fetchList, throttleMs) {
   const pruned = pruneShards(platform, lib.map((e) => String(e.platformId)));
   console.log(`  ${platform} shards: ${written} written, ${fetched} fetched, ${unchanged} unchanged, ${failed} failed, ${pruned} pruned`);
   if (short.length > 0) {
-    console.log(`  ${platform}: ${short.length} incomplete list(s) — ${short.slice(0, 10).join(', ')}${short.length > 10 ? ', ...' : ''}`);
+    console.warn(`  ⚠ ${platform}: ${short.length} list(s) disagreed with the library counts and were not written (previous shard kept) — ${short.slice(0, 10).join(', ')}${short.length > 10 ? ', ...' : ''}`);
   }
 }
 
@@ -1053,9 +1078,27 @@ async function main() {
     console.log(`\nFetching Steam achievements for ${steamLib.length} games...`);
     let done = 0;
     let iconCalls = 0;
+    let statFailures = 0;
     for (const e of steamLib) {
       const id = String(e.platformId);
-      const rows = (await fetchSteamAchievements(e.platformId)) ?? [];
+
+      // A transient failure must not be allowed to overwrite good counts
+      // with 0/0. Carry the previous entry forward instead — that keeps
+      // the game on the leaderboard and keeps its id in steamMap, so the
+      // prune below doesn't delete a shard we still want.
+      let rows;
+      try {
+        rows = await fetchSteamAchievements(e.platformId);
+      } catch (err) {
+        statFailures++;
+        console.warn(`  ⚠ ${e.platformTitle}: ${err.message} — keeping previous counts`);
+        const prev = existing.steam?.[id];
+        if (prev) steamMap[id] = prev;
+        done++;
+        await delay(300);
+        continue;
+      }
+
       const earned = rows.filter((a) => a.achieved === 1).length;
 
       // Resolved once and kept forever — box art doesn't change, so a
@@ -1098,6 +1141,9 @@ async function main() {
     }
     const pruned = pruneShards('steam', Object.keys(steamMap));
     console.log(`  Steam shards: ${steamShards.written} written, ${steamShards.rarityCalls} rarity calls, ${iconCalls} icon calls, ${pruned} pruned`);
+    if (statFailures > 0) {
+      console.warn(`  ⚠ Steam: ${statFailures} game(s) kept previous counts after a fetch failure`);
+    }
   }
 
   const psnMap = {};
