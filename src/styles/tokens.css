@@ -31,6 +31,23 @@
      against the element it is DECLARED on, so defining them at :root
      would bake in the accent and silently ignore any --trace-color set
      further down the tree. */
+  --trace-falloff: linear-gradient(
+    90deg,
+    #000 0%,
+    rgba(0, 0, 0, 0.92) 16%,
+    rgba(0, 0, 0, 0.55) 46%,
+    rgba(0, 0, 0, 0.18) 78%,
+    transparent 100%
+  );
+  --trace-falloff-v: linear-gradient(
+    180deg,
+    #000 0%,
+    rgba(0, 0, 0, 0.92) 16%,
+    rgba(0, 0, 0, 0.55) 46%,
+    rgba(0, 0, 0, 0.18) 78%,
+    transparent 100%
+  );
+
   /* Gold (Game of Games — independent of theme) */
   --gold: #d4a017;
   --gold-bright: #f5d060;
