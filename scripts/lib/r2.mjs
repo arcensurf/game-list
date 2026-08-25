@@ -114,16 +114,59 @@ function url(key = '', query = '') {
   return `https://${HOST}/${key ? encodeKey(key) : ''}${query ? `?${query}` : ''}`;
 }
 
-/** Upload one object. `body` is a Buffer. */
-export async function putObject(key, body, contentType) {
+/**
+ * Thrown when a conditional write loses the race — the object changed
+ * between the read and the write. Distinguishable so a caller can retry
+ * the read-modify-write instead of treating it as a hard failure.
+ */
+export class PreconditionFailed extends Error {
+  constructor(key) {
+    super(`PUT ${key} failed the If-Match precondition — the object changed underneath us`);
+    this.name = 'PreconditionFailed';
+  }
+}
+
+/**
+ * Download one object along with its ETag, for a read-modify-write.
+ * Returns { body, etag }, or null when the key is absent — in which case
+ * a following putObject should pass `ifNoneMatch: true` to claim it only
+ * if it is still absent.
+ */
+export async function getObjectWithEtag(key) {
   const objectKey = `${BUCKET}/${key}`;
+  const headers = sign({ method: 'GET', key: objectKey });
+  const res = await fetch(url(objectKey), { headers });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`GET ${key} failed: ${res.status} ${await res.text()}`);
+  return {
+    body: Buffer.from(await res.arrayBuffer()),
+    // Quotes are kept — If-Match compares the quoted form literally — but
+    // the W/ prefix has to go. R2 answers a GET with a *weak* validator,
+    // and If-Match requires a strong one, so passing it back verbatim gets
+    // every conditional write rejected with a 412 that looks exactly like
+    // a lost race. Same hash underneath; only the marker differs.
+    etag: (res.headers.get('etag') || '').replace(/^W\//, ''),
+  };
+}
+
+/** Upload one object. `body` is a Buffer. */
+export async function putObject(key, body, contentType, opts = {}) {
+  const objectKey = `${BUCKET}/${key}`;
+  // Conditional write. `ifMatch` makes the PUT land only if the object
+  // still has that ETag; `ifNoneMatch: true` only if it does not exist.
+  // Either way R2 answers 412 rather than overwriting, which is what
+  // turns a lost race into a retry instead of silent data loss.
+  const conditional = {};
+  if (opts.ifMatch) conditional['if-match'] = opts.ifMatch;
+  if (opts.ifNoneMatch) conditional['if-none-match'] = '*';
   const headers = sign({
     method: 'PUT',
     key: objectKey,
     body,
-    headers: { 'content-type': contentType },
+    headers: { 'content-type': contentType, ...conditional },
   });
   const res = await fetch(url(objectKey), { method: 'PUT', headers, body });
+  if (res.status === 412) throw new PreconditionFailed(key);
   if (!res.ok) {
     throw new Error(`PUT ${key} failed: ${res.status} ${await res.text()}`);
   }
