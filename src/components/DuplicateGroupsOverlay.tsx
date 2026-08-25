@@ -89,7 +89,13 @@ export default function DuplicateGroupsOverlay({
     setQuery('');
     setStatus(null);
     setLoading(true);
-    void refreshGames().then(() => setLoading(false));
+    // `loading` gates the whole overlay, so the settle has to happen on
+    // both paths — refreshGames awaits loadGameLinks() alongside the
+    // guarded dupe-groups fetch, and a rejection there used to leave the
+    // overlay on "Loading..." with no way out but closing it.
+    void refreshGames()
+      .catch(() => setStatus('Could not load duplicate groups.'))
+      .finally(() => setLoading(false));
   }, [open, refreshGames]);
 
   useEffect(() => {

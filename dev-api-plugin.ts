@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, statSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, statSync, renameSync } from 'fs';
 import { resolve, extname, basename } from 'path';
 import { readdirSync } from 'fs';
 import { createHash } from 'crypto';
@@ -22,8 +22,15 @@ function readJson(path: string) {
   return JSON.parse(readFileSync(path, 'utf-8'));
 }
 
+// Written to a sibling temp file and renamed into place. writeFileSync
+// truncates first, so a crash or a full disk mid-write leaves games.json
+// half-written and unparseable — and it's the file the whole app loads
+// from. rename is atomic on the same filesystem, so a reader sees either
+// the old file or the new one, never a partial.
 function writeJson(path: string, data: unknown) {
-  writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
+  const tmp = `${path}.tmp`;
+  writeFileSync(tmp, JSON.stringify(data, null, 2) + '\n');
+  renameSync(tmp, path);
 }
 
 
@@ -96,11 +103,34 @@ async function encodeCover(
 }
 
 
-/** Remove an earlier cover for this slug when the extension changed. */
-function dropStaleCovers(coversDir: string, slug: string, keep: string) {
+/**
+ * Remove an earlier cover for this slug when the extension changed.
+ *
+ * Matching on the slug alone is not enough to prove a file belongs to
+ * this game: slugify() is not injective ("Foo: Bar" and "Foo Bar" both
+ * give "foo-bar"), so on a collision this would delete the other game's
+ * cover as a supposedly stale copy of this one. Anything the manifest
+ * still lists under a different title is therefore left alone — no
+ * titles collide today, and this keeps it that way if two ever do.
+ */
+function dropStaleCovers(
+  coversDir: string,
+  slug: string,
+  keep: string,
+  coversPath: string,
+  title: string,
+) {
   if (!existsSync(coversDir)) return;
+  const covers = existsSync(coversPath)
+    ? (readJson(coversPath) as Record<string, { file?: string }>)
+    : {};
+  const claimedByOthers = new Set(
+    Object.entries(covers)
+      .filter(([t, entry]) => t !== title && entry?.file)
+      .map(([, entry]) => entry.file as string),
+  );
   for (const file of readdirSync(coversDir)) {
-    if (file === keep) continue;
+    if (file === keep || claimedByOthers.has(file)) continue;
     if (basename(file, extname(file)) === slug) unlinkSync(resolve(coversDir, file));
   }
 }
@@ -375,7 +405,7 @@ export default function devApiPlugin(): Plugin {
               extname(filename) || '.png',
             );
             writeFileSync(resolve(coversDir, outName), buffer);
-            dropStaleCovers(coversDir, slug, outName);
+            dropStaleCovers(coversDir, slug, outName, coversPath, title);
 
             const existingCovers = existsSync(coversPath) ? readJson(coversPath) : {};
             updateCoverEntry(title, existingCovers[title]?.sgdbId ?? null, outName);
@@ -533,7 +563,7 @@ export default function devApiPlugin(): Plugin {
               extname(new URL(imageUrl).pathname) || '.png',
             );
             writeFileSync(resolve(coversDir, outName), buffer);
-            dropStaleCovers(coversDir, slug, outName);
+            dropStaleCovers(coversDir, slug, outName, coversPath, title);
 
             updateCoverEntry(title, sgdbId, outName);
 

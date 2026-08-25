@@ -16,19 +16,36 @@ export default function AddGameForm() {
       return;
     }
 
-    const res = await fetch('/api/add-game', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: trimmed,
-        platforms: [],
-        status,
-      }),
-    });
+    let res: Response;
+    try {
+      res = await fetch('/api/add-game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: trimmed,
+          platforms: [],
+          status,
+        }),
+      });
+    } catch {
+      // Without this the whole handler rejected and the form simply did
+      // nothing — no game added, no message, the typed title still
+      // sitting there as though the button had never been pressed.
+      setError("Couldn't reach the dev server.");
+      return;
+    }
 
     if (!res.ok) {
-      const data = await res.json();
-      setError(data.error || 'Failed to add game');
+      // A failing endpoint doesn't reliably answer in JSON; Vite's own
+      // 500 page is HTML, and letting res.json() reject here would put
+      // us right back in the silent-failure case above.
+      let message = '';
+      try {
+        message = ((await res.json()) as { error?: string }).error ?? '';
+      } catch {
+        message = `Request failed (${res.status})`;
+      }
+      setError(message || 'Failed to add game');
       return;
     }
 
