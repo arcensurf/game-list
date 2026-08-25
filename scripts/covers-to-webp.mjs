@@ -187,7 +187,7 @@ if (!dryRun) {
 const pct = bytesFrom > 0 ? Math.round((1 - bytesTo / bytesFrom) * 100) : 0;
 console.log(
   `\n${dryRun ? '[dry run] ' : ''}Converted ${converted}, retired ${retired},` +
-    ` failed ${failed}, orphans ${orphans}`,
+    ` failed ${failed}, orphans ${orphans}, repaired ${repaired}`,
 );
 console.log(`Size: ${(bytesFrom / 1048576).toFixed(1)} MB -> ${(bytesTo / 1048576).toFixed(1)} MB (-${pct}%)`);
 if (!dryRun) {
