@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Manual trigger, so a run can be started without inventing a commit —
+  # a run that gets stranded (a GitHub incident mid-queue leaves one that
+  # can be neither cancelled nor rerun) otherwise needs a push to replace.
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
