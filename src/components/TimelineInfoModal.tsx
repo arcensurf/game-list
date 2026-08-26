@@ -49,9 +49,10 @@ export default function TimelineInfoModal({
           <section className="scoring-info-section">
             <h3>Totals Are Unfiltered</h3>
             <p>
-              Every bar and split counts every copy you own. Two stores stamping one race
-              looks exactly like a second run years later, and nothing in the data tells
-              them apart — so the totals don't try.
+              Every bar and split counts every copy you own, so a game played on two
+              platforms lands twice. Sometimes that's a real second playthrough, sometimes
+              one platform just mirrored the other — and they look identical here, so the
+              totals don't guess.
             </p>
           </section>
 
