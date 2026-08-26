@@ -185,6 +185,42 @@
   gap: 0.4rem 0.75rem;
 }
 
+/* The manifest's date stamp: how long the entry has been sitting there.
+   Set in the figure mono, small, hard right — marginalia against the
+   band's display type, not a readout. The Leaderboard is the view where
+   a number is the subject; here it's the annotation the huge title
+   hangs off. */
+.backlog-band-age {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1;
+  /* Muted while the entry is new and ramping to accent across its
+     first year, so the shelf-warmers pull the eye on their own without
+     a threshold badge calling them out. */
+  color: color-mix(
+    in oklab,
+    var(--text-muted),
+    var(--accent) calc(var(--age-heat, 0) * 100%)
+  );
+}
+
+.backlog-band-age-count {
+  font-family: var(--font-figure);
+  font-size: var(--type-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+.backlog-band-age-label {
+  margin-top: var(--space-tight);
+  font-family: var(--font-display);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
 .backlog-band-actions {
   flex-shrink: 0;
   display: flex;
@@ -258,6 +294,9 @@
   }
   .backlog-band-platforms {
     justify-content: flex-start;
+  }
+  .backlog-band-age {
+    margin-left: auto;
   }
   .system-heading {
     gap: 0.7rem;

@@ -15,6 +15,13 @@ export interface Game {
   gameOfGames: string | null;
   order: number;
   status?: GameStatus;
+  /**
+   * ISO date (YYYY-MM-DD) the game entered the backlog, stamped by
+   * /api/add-game. Only backlog entries carry it — it's what the
+   * Backlog view ages each band against. Absent on anything added
+   * before the field existed, which the view leaves unstamped.
+   */
+  addedAt?: string | null;
   steamAppId?: number | null;
   psnNpCommId?: string | null;
   xboxTitleId?: string | null;

@@ -511,7 +511,12 @@ export default function devApiPlugin(): Plugin {
               coverOverride: null,
               gameOfGames: null,
               order: insertOrder,
-              ...(status === 'backlog' ? { status: 'backlog' } : {}),
+              // The backlog ages each entry off this, so it has to be
+              // stamped on the way in — there's no recovering the date
+              // later (git only knows when games.json last churned).
+              ...(status === 'backlog'
+                ? { status: 'backlog', addedAt: new Date().toISOString().slice(0, 10) }
+                : {}),
             });
 
             renumberOrders(games);

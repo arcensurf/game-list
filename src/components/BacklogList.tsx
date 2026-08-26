@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type React from 'react';
 import type { GameWithCover } from '../types/game';
 import PlatformBadge from './PlatformBadge';
+import BacklogAge from './BacklogAge';
 import SystemHeading from './SystemHeading';
 import { getLightColor } from '../utils/platformColors';
 import DevEditControls from './DevEditControls';
@@ -118,6 +119,7 @@ function BacklogBand({ game, index }: { game: GameWithCover; index: number }) {
           ))}
         </div>
       )}
+      <BacklogAge addedAt={game.addedAt} />
       {isDev && (
         <div className="backlog-band-actions">
           <button
