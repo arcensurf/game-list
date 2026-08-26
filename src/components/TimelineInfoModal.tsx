@@ -49,32 +49,27 @@ export default function TimelineInfoModal({
           <section className="scoring-info-section">
             <h3>Totals Are Unfiltered</h3>
             <p>
-              The year bars, the month bars and the platform splits count every copy of
-              every game. Own something twice and both copies land in the total — whether
-              that's one race stamped by two stores at the same instant, or a genuine
-              second run on another platform years later. Nothing in the data reliably
-              tells those two apart, so the totals don't guess at it.
+              Every bar and split counts every copy you own. Two stores stamping one race
+              looks exactly like a second run years later, and nothing in the data tells
+              them apart — so the totals don't try.
             </p>
           </section>
 
           <section className="scoring-info-section">
-            <h3>Rankings Don't Repeat Themselves</h3>
+            <h3>Rankings Don't Repeat</h3>
             <p>
-              <strong>Top Games</strong> and the year's <strong>rarest achievements</strong>{' '}
-              are a different question — they're a shortlist of what stood out, and a
-              shortlist shouldn't spend two of its slots saying the same thing. Each game
-              appears once there, kept at whichever platform copy went furthest.
+              <strong>Top Games</strong> and <strong>rarest pulls</strong> are a shortlist,
+              and a shortlist shouldn't spend two slots on one game. Each appears once, at
+              whichever copy went furthest.
             </p>
           </section>
 
           <section className="scoring-info-section">
             <h3>Bulk Imports</h3>
             <p>
-              A few games hand back trophies you already earned somewhere else — a save
-              carried into a re-release, a store syncing a library it didn't watch you
-              play. Those arrive dozens at a time, seconds apart, dated the day of the
-              import rather than the day you earned them. They're listed by hand and left
-              out, because a hundred unlocks in a minute is a timestamp, not an evening.
+              A save carried into a re-release hands back trophies you already earned —
+              dozens at once, seconds apart, dated the import. Those are listed by hand and
+              left out: a hundred unlocks in a minute is a timestamp, not an evening.
             </p>
           </section>
         </div>
