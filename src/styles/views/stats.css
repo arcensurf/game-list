@@ -143,6 +143,15 @@
   margin-bottom: var(--space-4);
 }
 
+/* The title and its info button travel as one unit, so the heading still
+   has exactly two children and space-between keeps pushing the metric
+   toggle to the far edge. */
+.stats-years-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 /* Peer of the "Games Per Platform" heading above it, not a level below —
    these are the two sections of one page, so they are titled identically
    and the tag matches. The recap year beneath is what sits a level down. */

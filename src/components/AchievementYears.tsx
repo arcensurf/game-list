@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { TimelineMonth, TimelineYear, TimelineYearTopGame } from '../types/game';
 import { ACHIEVEMENT_PLATFORM_COLORS } from '../utils/platformColors';
+import TimelineInfoModal from './TimelineInfoModal';
 
 const PLATFORM_ORDER = ['steam', 'psn', 'xbox', 'ra'] as const;
 const YEAR_BAR_HEIGHT = 90;
@@ -213,6 +214,7 @@ export default function AchievementYears({
     () => years[years.length - 1]?.year ?? null,
   );
   const [metric, setMetric] = useState<Metric>('points');
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const selected = useMemo(
     () => years.find((y) => y.year === selectedYear) ?? null,
@@ -233,7 +235,18 @@ export default function AchievementYears({
   return (
     <div className="stats-years trace-t">
       <div className="stats-years-heading">
-        <h2>{metric === 'points' ? 'Rarity Points' : 'Achievements'} By Year</h2>
+        <div className="stats-years-title-row">
+          <h2>{metric === 'points' ? 'Rarity Points' : 'Achievements'} By Year</h2>
+          <button
+            type="button"
+            className="leaderboard-info-btn"
+            onClick={() => setInfoOpen(true)}
+            aria-label="How these numbers work"
+            title="How these numbers work"
+          >
+            ?
+          </button>
+        </div>
         <div className="stats-metric-toggle" role="group" aria-label="Show by">
           <button
             type="button"
@@ -253,6 +266,7 @@ export default function AchievementYears({
       </div>
       <YearBars years={years} selectedYear={selectedYear} metric={metric} onSelect={setSelectedYear} />
       {selected && <YearRecap year={selected} months={selectedMonths} metric={metric} />}
+      <TimelineInfoModal open={infoOpen} onClose={() => setInfoOpen(false)} />
     </div>
   );
 }

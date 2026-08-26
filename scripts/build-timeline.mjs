@@ -66,11 +66,16 @@ function roundPlatforms(platforms) {
   return out;
 }
 
-// Two stores selling the same achievement list (Play Anywhere titles,
-// mainly) each report the full set as earned, and that isn't twice the
-// achievements earned. Collapses a bucket's per-copy tallies to the
-// single best copy of each dupeKey group — the same grouping the
-// leaderboard's "Hide duplicates" toggle uses.
+// Collapses a year's per-copy tallies to the single best copy of each
+// dupeKey group — the same grouping the leaderboard's "Hide duplicates"
+// toggle uses. Only the two rankings and the rarest picks use this; the
+// running totals stay unfiltered. A game's achievements can show up
+// twice for two unrelated reasons — two stores stamping one action
+// (Play Anywhere) or a genuine second playthrough on another platform —
+// and nothing in the data reliably tells them apart, so the totals
+// don't try. A ranking is a different question: a list of the year's
+// standout games and rarest pulls shouldn't spend two of its slots
+// saying the same thing.
 function bestCopies(games, dupeKeyByGame) {
   const best = new Map();
   for (const g of games) {
@@ -175,9 +180,9 @@ export function computeTimelineData() {
   }
 
   // Same title-normalized + game-links.json grouping the leaderboard's
-  // "Hide duplicates" toggle uses. Applied to every tally here — month
-  // bars, year totals, the platform splits, top games, and the rarest
-  // picks — so a game owned twice contributes once wherever it lands.
+  // "Hide duplicates" toggle uses, applied to the per-year rankings —
+  // top games and rarest achievements — but not to the totals. See
+  // bestCopies for why the two are treated differently.
   const dupeKeyByGame = new Map();
   for (const g of computeLeaderboardData().games) {
     if (g.dupeKey) dupeKeyByGame.set(`${g.platform}/${g.id}`, g.dupeKey);
@@ -228,10 +233,10 @@ export function computeTimelineData() {
 
         const gameKey = `${platform}/${id}`;
 
-        // Every bucket tallies per copy of the game first and collapses
-        // duplicates at rollup, rather than summing as it reads — which
-        // copy wins depends on totals that aren't known until the shard
-        // is fully read.
+        // Tallied per copy of the game rather than summed as it reads:
+        // the rankings need to pick one copy per game, and which copy
+        // wins depends on totals that aren't known until every shard is
+        // read. The totals then sum every copy back up.
         let month = monthMap.get(monthKey);
         if (!month) {
           month = { month: monthKey, games: new Map() };
@@ -283,7 +288,7 @@ export function computeTimelineData() {
 
   const months = Array.from(monthMap.values())
     .map((m) => {
-      const totals = rollup(bestCopies(m.games.values(), dupeKeyByGame));
+      const totals = rollup(m.games.values());
       return {
         month: m.month,
         count: totals.count,
@@ -298,8 +303,8 @@ export function computeTimelineData() {
   // fewer, rarer achievements landed for the same count.
   const years = Array.from(yearMap.values())
     .map((y) => {
+      const totals = rollup(y.games.values());
       const games = bestCopies(y.games.values(), dupeKeyByGame);
-      const totals = rollup(games);
       const toEntry = (g) => ({
         platform: g.platform,
         id: g.id,
