@@ -282,21 +282,48 @@
 }
 
 @media (max-width: 700px) {
+  /* The band keeps its desktop shape here — title left, age hard right,
+     centred against each other. It used to give the title its own
+     full-width line, which pushed the age onto a second row and left a
+     band-wide gap between the two, so every entry stood ~80px tall with
+     nothing in the middle of it. The two belong on one line: the age is
+     marginalia hanging off the title, and that reads only when it sits
+     beside the thing it annotates. */
   .backlog-band {
-    align-items: flex-start;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 0.6rem 1rem;
+    gap: 0.5rem 0.9rem;
     min-height: 0;
-    padding: 0.8rem 0.9rem;
+    padding: 0.75rem 0.9rem;
   }
+  /* Multi-platform entries are the rare case (see groupBySystem), so the
+     badges yield the first line rather than squeezing the title: ordered
+     after the age, they wrap to their own row underneath. Every child is
+     numbered, including the dev-only controls — an unset `order` counts
+     as 0 and would jump that block ahead of the title. */
   .backlog-band-name {
-    flex-basis: 100%;
-  }
-  .backlog-band-platforms {
-    justify-content: flex-start;
+    order: 1;
   }
   .backlog-band-age {
+    order: 2;
     margin-left: auto;
+  }
+  .backlog-band-platforms {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: flex-start;
+  }
+  .backlog-band-actions {
+    order: 4;
+  }
+  /* Sharing the line makes the figure the tallest thing in the band, so
+     it comes down to sit under the title rather than over it. */
+  .backlog-band-age-count {
+    font-size: 1rem;
+  }
+  .backlog-band-age-label {
+    margin-top: 0;
+    font-size: 0.6rem;
   }
   .system-heading {
     gap: 0.7rem;
