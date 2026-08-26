@@ -28,15 +28,28 @@ const RAREST_PER_YEAR = 3;
 // dates are known to be wrong for timeline purposes — not a general
 // cross-platform dedup rule (the dupeKey best-single-copy-per-year
 // logic below already handles the normal "same game earned twice"
-// case). Vampire Survivors: the PSN copy is the real 2024 playthrough;
-// the Steam copy was bulk-imported from it in 2025, so Steam's earned
-// dates reflect the import, not when the achievement was actually
-// unlocked. An achievement only counts on the "imported" side if its
-// name wasn't already earned (at or before that date) on the source.
+// case). An achievement only counts on the "imported" side if its name
+// wasn't already earned (at or before that date) on the source.
+//
+// Vampire Survivors: the PSN copy is the real 2024 playthrough; the
+// Steam copy was bulk-imported from it in 2025, so Steam's earned dates
+// reflect the import, not when the achievement was actually unlocked.
+//
+// Final Fantasy VII Remake: two PSN copies of the same game — the 2020
+// PS4 original and the 2021 Intergrade re-release, which re-grants every
+// trophy already earned when you carry the save over. The Intergrade
+// copy's June 2021 opener is 46 trophies in 46 seconds, all of them
+// already earned on the PS4 copy in 2020, and the same echo repeats
+// after the 2023 PS4 session. Intergrade-only trophies (the Yuffie DLC,
+// the later hard-mode grind) have no PS4 counterpart and still count.
 const IMPORT_OVERRIDES = [
   {
     imported: { platform: 'steam', id: '1794680' },
     source: { platform: 'psn', id: 'NPWR42963_00' },
+  },
+  {
+    imported: { platform: 'psn', id: 'NPWR22029_00' },
+    source: { platform: 'psn', id: 'NPWR18853_00' },
   },
 ];
 
