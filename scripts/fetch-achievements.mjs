@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, unlinkSync } from 'fs';
 import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { homedir } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -59,11 +59,11 @@ const listsDir = resolve(dataDir, 'achievements');
 // Platform IDs are alphanumeric in practice (Steam appids, PSN
 // NPWR....., Xbox titleIds), but they come from upstream APIs and get
 // used as a path, so don't take that on trust.
-const safeId = (id) => String(id).replace(/[^A-Za-z0-9_-]/g, '_');
+export const safeId = (id) => String(id).replace(/[^A-Za-z0-9_-]/g, '_');
 
 const shardPath = (platform, id) => resolve(listsDir, platform, `${safeId(id)}.json`);
 
-function writeShard(platform, id, payload) {
+export function writeShard(platform, id, payload) {
   const file = shardPath(platform, id);
   mkdirSync(dirname(file), { recursive: true });
   const json = JSON.stringify(payload, null, 2) + '\n';
@@ -72,7 +72,7 @@ function writeShard(platform, id, payload) {
   return true;
 }
 
-function readShard(platform, id) {
+export function readShard(platform, id) {
   const file = shardPath(platform, id);
   if (!existsSync(file)) return null;
   try {
@@ -85,7 +85,7 @@ function readShard(platform, id) {
 // Drop shards for games that have left the platform library (delisted,
 // refunded, region-swapped). Only ever called for a platform that
 // actually returned data this run, so a failed fetch can't wipe a slice.
-function pruneShards(platform, keepIds) {
+export function pruneShards(platform, keepIds) {
   const dir = resolve(listsDir, platform);
   if (!existsSync(dir)) return 0;
   const keep = new Set([...keepIds].map((id) => `${safeId(id)}.json`));
@@ -101,7 +101,7 @@ function pruneShards(platform, keepIds) {
 // Global unlock rates are stored to one decimal place. At full float
 // precision they drift a little every single night, which would rewrite
 // every shard on every run and undo the whole point of sharding.
-const roundRarity = (pct) => {
+export const roundRarity = (pct) => {
   const n = typeof pct === 'string' ? Number.parseFloat(pct) : pct;
   return Number.isFinite(n) ? Math.round(n * 10) / 10 : null;
 };
@@ -116,22 +116,26 @@ const roundRarity = (pct) => {
 const FORCE_REFRESH = process.env.FORCE_REFRESH === '1';
 const REFRESH_CYCLE_DAYS = 7;
 
-function idHash(id) {
+export function idHash(id) {
   let h = 0;
   for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   return h;
 }
 
+// Pinned at module load, not read per call: a run that happens to
+// straddle midnight should refresh one consistent slice of the library,
+// not two different ones. `day` is a parameter only so tests can sweep
+// the cycle without moving the clock.
 const dayIndex = Math.floor(Date.now() / 86_400_000);
-const isRefreshDay = (id) =>
-  idHash(id) % REFRESH_CYCLE_DAYS === dayIndex % REFRESH_CYCLE_DAYS;
+export const isRefreshDay = (id, day = dayIndex) =>
+  idHash(id) % REFRESH_CYCLE_DAYS === day % REFRESH_CYCLE_DAYS;
 
 // PSN and Xbox get earned/total free with the library call, so a
 // skipped game costs no request at all. Steam has to call
 // GetPlayerAchievements per game regardless (that IS where its counts
 // come from), so there the check only gates the extra rarity call.
 // Returns the existing shard when it's still good, otherwise null.
-function currentShard(platform, id, earned, total) {
+export function currentShard(platform, id, earned, total) {
   if (FORCE_REFRESH) return null;
   const shard = readShard(platform, id);
   if (!shard || !Array.isArray(shard.achievements)) return null;
@@ -234,7 +238,7 @@ async function fetchSteamHeaderImage(appId) {
   }
 }
 
-function buildSteamShard(entry, rows, rarity) {
+export function buildSteamShard(entry, rows, rarity) {
   return {
     platform: 'steam',
     id: String(entry.platformId),
@@ -339,15 +343,12 @@ async function fetchPsnLibrary() {
       offset = page.nextOffset;
     }
 
-    const sumCounts = (c) =>
-      (c?.bronze ?? 0) + (c?.silver ?? 0) + (c?.gold ?? 0) + (c?.platinum ?? 0);
-
     return all.map((t) => ({
       platformTitle: t.trophyTitleName,
       platformId: t.npCommunicationId,
       platform: 'psn',
-      earned: sumCounts(t.earnedTrophies),
-      total: sumCounts(t.definedTrophies),
+      earned: sumPsnTrophyCounts(t.earnedTrophies),
+      total: sumPsnTrophyCounts(t.definedTrophies),
       // Required by the per-title trophy endpoints below ('trophy' for
       // PS3/PS4/Vita, 'trophy2' for PS5) — they 404 without the right
       // one. Carried on the in-memory entry only; it never reaches
@@ -363,6 +364,37 @@ async function fetchPsnLibrary() {
     console.error('PSN: failed to fetch library', err.message);
     return [];
   }
+}
+
+/**
+ * A PSN trophy count block ({ bronze, silver, gold, platinum }) summed to
+ * a single number. Both the earned and the defined block have this shape,
+ * and either can be missing entirely on a title with no trophies.
+ */
+export const sumPsnTrophyCounts = (counts) =>
+  (counts?.bronze ?? 0) + (counts?.silver ?? 0) + (counts?.gold ?? 0) + (counts?.platinum ?? 0);
+
+/**
+ * Join PSN's trophy definitions against the player's earned rows on
+ * trophyId. The definitions carry names and types; the earned rows carry
+ * unlock state and rarity. A definition with no matching earned row is
+ * simply unearned.
+ */
+export function mergePsnTrophies(defs, earnedRows) {
+  const earnedById = new Map(earnedRows.map((t) => [t.trophyId, t]));
+  return defs.map((d) => {
+    const e = earnedById.get(d.trophyId);
+    return {
+      id: String(d.trophyId),
+      name: d.trophyName ?? '',
+      description: d.trophyDetail ?? '',
+      hidden: d.trophyHidden === true,
+      type: d.trophyType ?? null,
+      earned: e?.earned === true,
+      earnedAt: e?.earnedDateTime ?? null,
+      rarity: roundRarity(e?.trophyEarnedRate),
+    };
+  });
 }
 
 // The library response carries counts but no trophy names, so a shard
@@ -400,20 +432,7 @@ async function fetchPsnTrophyList(entry) {
       psn.getUserTrophiesEarnedForTitle(auth, 'me', entry.platformId, 'all', { ...base, offset }),
     );
 
-    const earnedById = new Map(earnedRows.map((t) => [t.trophyId, t]));
-    return defs.map((d) => {
-      const e = earnedById.get(d.trophyId);
-      return {
-        id: String(d.trophyId),
-        name: d.trophyName ?? '',
-        description: d.trophyDetail ?? '',
-        hidden: d.trophyHidden === true,
-        type: d.trophyType ?? null,
-        earned: e?.earned === true,
-        earnedAt: e?.earnedDateTime ?? null,
-        rarity: roundRarity(e?.trophyEarnedRate),
-      };
-    });
+    return mergePsnTrophies(defs, earnedRows);
   } catch (err) {
     console.error(`  PSN: trophy list failed for ${entry.platformId}`, err.message);
     return null;
@@ -572,6 +591,37 @@ async function resolveXboxIcon(titleId, rawUrl) {
   return parsed.toString();
 }
 
+/**
+ * Is this a real game with achievement progress, rather than an app or
+ * system tile? `totalAchievements` is 0 for every current-gen title on
+ * this account regardless of progress, so `currentAchievements` has to be
+ * able to carry the decision on its own.
+ */
+export const xboxTitleHasProgress = (title) =>
+  Boolean(title?.achievement) &&
+  ((title.achievement.totalAchievements ?? 0) > 0 ||
+    (title.achievement.currentAchievements ?? 0) > 0);
+
+/**
+ * Pick a title's achievement total, and say whether it's trustworthy.
+ *
+ * titleHub reports `totalAchievements: 0` for every sourceVersion:2
+ * (2017+/current-gen) title on this account no matter the real progress.
+ * When that happens, prefer whatever main()'s correction pass last wrote
+ * — a real count that only moves if the title itself does, so
+ * currentShard() can compare like with like and skip the refetch. A title
+ * seen for the very first time has no prior, and falls back to the earned
+ * count purely as a bootstrap: nonzero is all that's needed to get past
+ * syncShards' fetch gate, and the correction pass trues it up from the
+ * shard once that first fetch lands.
+ */
+export function resolveXboxTotal(achievement, priorTotal) {
+  const totalUnreliable = !(achievement.totalAchievements > 0);
+  if (!totalUnreliable) return { total: achievement.totalAchievements, totalUnreliable };
+  if (priorTotal > 0) return { total: priorTotal, totalUnreliable };
+  return { total: achievement.currentAchievements ?? 0, totalUnreliable };
+}
+
 async function fetchXboxLibrary(existingXbox) {
   if (!xboxAuth) return [];
 
@@ -657,19 +707,11 @@ async function fetchXboxLibrary(existingXbox) {
     // the real count (marked via totalUnreliable) once that first fetch
     // returns the actual achievement list.
     // Drop apps/system tiles and anything with zero real progress.
-    const live = allTitles.filter(
-      (t) => t.achievement && ((t.achievement.totalAchievements ?? 0) > 0 || (t.achievement.currentAchievements ?? 0) > 0),
-    );
+    const live = allTitles.filter(xboxTitleHasProgress);
     const results = [];
     for (const t of live) {
       const a = t.achievement;
-      const totalUnreliable = !(a.totalAchievements > 0);
-      const priorTotal = existingXbox?.[t.titleId]?.total;
-      const total = !totalUnreliable
-        ? a.totalAchievements
-        : priorTotal > 0
-          ? priorTotal
-          : (a.currentAchievements ?? 0);
+      const { total, totalUnreliable } = resolveXboxTotal(a, existingXbox?.[t.titleId]?.total);
       results.push({
         platformTitle: t.name,
         platformId: t.titleId,
@@ -731,6 +773,73 @@ async function fetchXboxLibrary(existingXbox) {
 //     v2 path otherwise. Revisit once there's a real title to check
 //     it against; if v4 turns out to always win, the v2 fallback
 //     below can go.
+/**
+ * An Xbox unlock timestamp, or null when it's an unset-date sentinel.
+ *
+ * Unearned achievements come back with a placeholder unlock date — .NET's
+ * DateTime.MinValue serialized as "0001-01-01...", except the legacy
+ * (old-gen) contract uses SQL Server's own minimum, "1753-01-01...",
+ * instead. Checking the resulting year rather than a string prefix
+ * catches both, plus any other sentinel that turns up.
+ */
+export const xboxUnlockedAt = (value) => {
+  if (!value) return null;
+  const year = new Date(value).getFullYear();
+  return Number.isFinite(year) && year >= 2000 ? value : null;
+};
+
+/** An achievement row in the modern (2017+) contract shape. */
+export const mapXboxModern = (a) => ({
+  id: String(a.id),
+  name: a.name ?? '',
+  // `description` is the post-unlock text; `lockedDescription` is the
+  // "how do I get this" hint, which is the useful one for something
+  // the picker is asking you to go earn.
+  description: a.lockedDescription || a.description || '',
+  hidden: a.isSecret === true,
+  points: Number(a.rewards?.find((r) => r.type === 'Gamerscore')?.value) || null,
+  earned: a.progressState === 'Achieved',
+  earnedAt: xboxUnlockedAt(a.progression?.timeUnlocked),
+  rarity: roundRarity(a.rarity?.currentPercentage),
+});
+
+/** An achievement row in the legacy (pre-2017/Xbox 360) contract shape. */
+export const mapXboxLegacy = (a) => ({
+  id: String(a.id),
+  name: a.name ?? '',
+  description: a.description || a.lockedDescription || '',
+  hidden: a.isSecret === true,
+  points: Number(a.gamerscore) || null,
+  earned: a.unlocked === true,
+  earnedAt: xboxUnlockedAt(a.timeUnlocked),
+  rarity: roundRarity(a.rarity?.currentPercentage), // v1 lacked this; v3 has it
+});
+
+/**
+ * Combine Xbox's two half-answers into one list.
+ *
+ * Whichever call knew about more of the title supplies the entries;
+ * unlock state comes from whichever earned-only source shares that
+ * source's id scheme — `player` (v4 or its v2 fallback) for modern
+ * titles, `unlockedSource` (the legacy earned list) for old-gen ones.
+ * Joining across id schemes is the bug this shape exists to prevent: the
+ * legacy and modern contracts number the same achievements differently,
+ * so a mismatched join silently marks every entry unearned.
+ *
+ * Returns null for an empty result, which the caller treats as a failed
+ * fetch and keeps the previous shard for.
+ */
+export function mergeXboxAchievements(defs, player, unlockedSource) {
+  const source = defs.length >= player.length ? defs : player;
+  const finalUnlockedSource = source === player ? player : unlockedSource;
+  const unlocked = new Map(finalUnlockedSource.filter((a) => a.earned).map((a) => [a.id, a]));
+  const merged = source.map((a) => {
+    const hit = unlocked.get(a.id);
+    return hit ? { ...a, earned: true, earnedAt: hit.earnedAt, rarity: a.rarity ?? hit.rarity } : a;
+  });
+  return merged.length > 0 ? merged : null;
+}
+
 async function fetchXboxAchievementList(titleId, expectedTotal) {
   if (!xboxAuth) return null;
   const get = async (path, contractVersion, query = '') => {
@@ -752,55 +861,18 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
     }
   };
 
-  // Unearned achievements come back with a placeholder unlock date —
-  // .NET's DateTime.MinValue serialized as "0001-01-01...", except the
-  // legacy (old-gen) contract uses a different placeholder instead:
-  // "1753-01-01T00:00:00.0000000Z" (SQL Server's own minimum date).
-  // Checking the resulting year rather than a specific string prefix
-  // catches both, plus any other unset-date sentinel that shows up.
-  const unlockedAt = (value) => {
-    if (!value) return null;
-    const year = new Date(value).getFullYear();
-    return Number.isFinite(year) && year >= 2000 ? value : null;
-  };
-
-  const mapModern = (a) => ({
-    id: String(a.id),
-    name: a.name ?? '',
-    // `description` is the post-unlock text; `lockedDescription` is the
-    // "how do I get this" hint, which is the useful one for something
-    // the picker is asking you to go earn.
-    description: a.lockedDescription || a.description || '',
-    hidden: a.isSecret === true,
-    points: Number(a.rewards?.find((r) => r.type === 'Gamerscore')?.value) || null,
-    earned: a.progressState === 'Achieved',
-    earnedAt: unlockedAt(a.progression?.timeUnlocked),
-    rarity: roundRarity(a.rarity?.currentPercentage),
-  });
-
-  const mapLegacy = (a) => ({
-    id: String(a.id),
-    name: a.name ?? '',
-    description: a.description || a.lockedDescription || '',
-    hidden: a.isSecret === true,
-    points: Number(a.gamerscore) || null,
-    earned: a.unlocked === true,
-    earnedAt: unlockedAt(a.timeUnlocked),
-    rarity: roundRarity(a.rarity?.currentPercentage), // v1 lacked this; v3 has it
-  });
-
-  let player = (await get('achievements', '4')).map(mapModern);
+  let player = (await get('achievements', '4')).map(mapXboxModern);
   await delay(120);
-  let defs = (await get('achievements', '4', '&possibleOnly=true')).map(mapModern);
+  let defs = (await get('achievements', '4', '&possibleOnly=true')).map(mapXboxModern);
   let unlockedSource = player;
 
   // v4 unverified (see the block comment) — if it didn't beat v2's own
   // count, trust v2 instead rather than whatever v4 came back with.
   if (expectedTotal > 0 && defs.length < expectedTotal) {
     await delay(120);
-    const v2Player = (await get('achievements', '2')).map(mapModern);
+    const v2Player = (await get('achievements', '2')).map(mapXboxModern);
     await delay(120);
-    const v2Defs = (await get('achievements', '2', '&possibleOnly=true')).map(mapModern);
+    const v2Defs = (await get('achievements', '2', '&possibleOnly=true')).map(mapXboxModern);
     if (v2Defs.length > defs.length) {
       player = v2Player;
       defs = v2Defs;
@@ -810,7 +882,7 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
 
   if (expectedTotal > 0 && defs.length < expectedTotal) {
     await delay(120);
-    const legacyEarned = (await get('achievements', '3')).map(mapLegacy);
+    const legacyEarned = (await get('achievements', '3')).map(mapXboxLegacy);
 
     if (legacyEarned.length > defs.length) {
       defs = legacyEarned;
@@ -822,7 +894,7 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
     // (see the block comment above for why it has to be this one).
     if (defs.length < expectedTotal) {
       await delay(120);
-      const legacyDefs = (await get('titleachievements', '3')).map(mapLegacy);
+      const legacyDefs = (await get('titleachievements', '3')).map(mapXboxLegacy);
       if (legacyDefs.length > defs.length) {
         defs = legacyDefs;
         unlockedSource = legacyEarned;
@@ -830,18 +902,36 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
     }
   }
 
-  // Whichever call knew about more of the title supplies the entries;
-  // unlock state comes from whichever earned-only source shares that
-  // source's id scheme ("player" — v4 or its v2 fallback — for modern
-  // titles, the legacy earned list for old-gen ones).
-  const source = defs.length >= player.length ? defs : player;
-  const finalUnlockedSource = source === player ? player : unlockedSource;
-  const unlocked = new Map(finalUnlockedSource.filter((a) => a.earned).map((a) => [a.id, a]));
-  const merged = source.map((a) => {
-    const hit = unlocked.get(a.id);
-    return hit ? { ...a, earned: true, earnedAt: hit.earnedAt, rarity: a.rarity ?? hit.rarity } : a;
-  });
-  return merged.length > 0 ? merged : null;
+  return mergeXboxAchievements(defs, player, unlockedSource);
+}
+
+/**
+ * Does a freshly fetched achievement list contradict the counts the
+ * library call already gave us?
+ *
+ * It goes wrong when one of the two upstream calls half-fails: `get()`
+ * swallows errors into [], so a title can come back with all its
+ * definitions but no unlock state (every entry earned:false under a
+ * header claiming earned: 19) or the mirror — a short all-earned list
+ * under a full total, which the app's weighted completion then reads as
+ * 100%.
+ *
+ * Neither shape is self-healing: the header still matches what
+ * currentShard() compares against, so the bad shard is treated as fresh
+ * on every later run. The caller skips the write and keeps the last good
+ * shard instead.
+ *
+ * An xbox entry flagged `totalUnreliable` carries a total titleHub never
+ * supplied — a bootstrap guess (see resolveXboxTotal) that main()'s
+ * correction pass trues up from the shard it expects to find on disk.
+ * Holding those to the total would reject the very write that pass reads
+ * back, and the title would never get corrected. Its earned count is real
+ * either way, so that half of the check still applies.
+ */
+export function listDisagreesWithLibrary(list, entry) {
+  const listEarned = list.filter((a) => a.earned).length;
+  if (entry.totalUnreliable) return listEarned !== entry.earned;
+  return list.length !== entry.total || listEarned !== entry.earned;
 }
 
 // Shared PSN/Xbox shard pass. Both platforms get earned/total free from
@@ -860,33 +950,12 @@ async function syncShards(platform, lib, fetchList, throttleMs) {
       if (list) {
         // The shard header takes its counts from the library response
         // (see the comment on `earned` below), so the list has to agree
-        // with them or the file contradicts itself. It goes wrong when
-        // one of the two upstream calls half-fails: `get()` swallows
-        // errors into [], so a title can come back with all its
-        // definitions but no unlock state (every entry earned:false
-        // under a header claiming earned: 19) or the mirror — a short
-        // all-earned list under a full total, which the app's weighted
-        // completion then reads as 100%.
-        //
-        // Neither shape is self-healing: the header still matches what
-        // currentShard() compares against, so the bad shard is treated
-        // as fresh on every later run. Skip the write and keep the last
-        // good shard instead. Verified against all 705 committed shards
-        // before turning this on — every one of them already satisfies
-        // it, so this only ever fires on a genuinely broken fetch.
+        // with them or the file contradicts itself — see
+        // listDisagreesWithLibrary. Verified against all 705 committed
+        // shards before turning this on: every one already satisfies it,
+        // so this only ever fires on a genuinely broken fetch.
         const listEarned = list.filter((a) => a.earned).length;
-        // An xbox entry flagged totalUnreliable carries a total titleHub
-        // never supplied — a bootstrap guess (see fetchXboxLibrary), which
-        // the correction pass after this call trues up from the shard it
-        // expects to find on disk. Holding those to the total would reject
-        // the very write that pass reads back, and the title would never
-        // get corrected. Its earned count is real either way, so that half
-        // of the check still applies.
-        const totalIsGuess = Boolean(e.totalUnreliable);
-        const disagrees = totalIsGuess
-          ? listEarned !== e.earned
-          : list.length !== e.total || listEarned !== e.earned;
-        if (disagrees) {
+        if (listDisagreesWithLibrary(list, e)) {
           short.push(
             `${e.platformTitle} (list ${listEarned}/${list.length} vs library ${e.earned}/${e.total})`,
           );
@@ -993,13 +1062,13 @@ async function fetchRaLibrary() {
 
 // RA timestamps are "2022-08-23 22:56:38" — space-separated, always
 // UTC, no offset given.
-function raTimestampToIso(value) {
+export function raTimestampToIso(value) {
   if (!value) return null;
   const d = new Date(`${value.replace(' ', 'T')}Z`);
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 
-function buildRaShard(entry, rows, playersCasual) {
+export function buildRaShard(entry, rows, playersCasual) {
   return {
     platform: 'ra',
     id: String(entry.platformId),
@@ -1338,7 +1407,15 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error('Fatal error:', err);
-  process.exit(1);
-});
+// Only run when executed directly (`node fetch-achievements.mjs` / npm
+// script), matching build-leaderboard.mjs and build-timeline.mjs — so
+// importing this module for its pure helpers doesn't kick off a full
+// library fetch as a side effect. process.argv[1] is unset in some
+// invocation shapes (e.g. `node -e`), so guard rather than let
+// pathToFileURL throw on undefined.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    console.error('Fatal error:', err);
+    process.exit(1);
+  });
+}
