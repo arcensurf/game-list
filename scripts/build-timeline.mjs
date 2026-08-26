@@ -66,12 +66,33 @@ function roundPlatforms(platforms) {
   return out;
 }
 
-function bump(bucket, platform, pts) {
-  bucket.count++;
-  bucket.score += pts;
-  const p = (bucket.platforms[platform] ??= { count: 0, score: 0 });
-  p.count++;
-  p.score += pts;
+// Two stores selling the same achievement list (Play Anywhere titles,
+// mainly) each report the full set as earned, and that isn't twice the
+// achievements earned. Collapses a bucket's per-copy tallies to the
+// single best copy of each dupeKey group — the same grouping the
+// leaderboard's "Hide duplicates" toggle uses.
+function bestCopies(games, dupeKeyByGame) {
+  const best = new Map();
+  for (const g of games) {
+    const key = dupeKeyByGame.get(`${g.platform}/${g.id}`) ?? `${g.platform}/${g.id}`;
+    const existing = best.get(key);
+    if (!existing || g.count > existing.count || (g.count === existing.count && g.score > existing.score)) {
+      best.set(key, g);
+    }
+  }
+  return Array.from(best.values());
+}
+
+function rollup(games) {
+  const totals = { count: 0, score: 0, platforms: {} };
+  for (const g of games) {
+    totals.count += g.count;
+    totals.score += g.score;
+    const p = (totals.platforms[g.platform] ??= { count: 0, score: 0 });
+    p.count += g.count;
+    p.score += g.score;
+  }
+  return totals;
 }
 
 // Rarity always wins — this never promotes a worse rarity over a
@@ -154,9 +175,9 @@ export function computeTimelineData() {
   }
 
   // Same title-normalized + game-links.json grouping the leaderboard's
-  // "Hide duplicates" toggle uses, so a game earned on two platforms in
-  // the same year collapses to one entry in that year's top-games
-  // ranking instead of splitting its achievements across two rows.
+  // "Hide duplicates" toggle uses. Applied to every tally here — month
+  // bars, year totals, the platform splits, top games, and the rarest
+  // picks — so a game owned twice contributes once wherever it lands.
   const dupeKeyByGame = new Map();
   for (const g of computeLeaderboardData().games) {
     if (g.dupeKey) dupeKeyByGame.set(`${g.platform}/${g.id}`, g.dupeKey);
@@ -205,24 +226,33 @@ export function computeTimelineData() {
         const monthKey = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
         const year = date.getUTCFullYear();
 
+        const gameKey = `${platform}/${id}`;
+
+        // Every bucket tallies per copy of the game first and collapses
+        // duplicates at rollup, rather than summing as it reads — which
+        // copy wins depends on totals that aren't known until the shard
+        // is fully read.
         let month = monthMap.get(monthKey);
         if (!month) {
-          month = { month: monthKey, count: 0, score: 0, platforms: {} };
+          month = { month: monthKey, games: new Map() };
           monthMap.set(monthKey, month);
         }
-        bump(month, platform, pts);
+        let monthGame = month.games.get(gameKey);
+        if (!monthGame) {
+          monthGame = { platform, id, count: 0, score: 0 };
+          month.games.set(gameKey, monthGame);
+        }
+        monthGame.count++;
+        monthGame.score += pts;
 
         let yearBucket = yearMap.get(year);
         if (!yearBucket) {
-          yearBucket = { year, count: 0, score: 0, platforms: {}, games: new Map(), rarestCandidates: [] };
+          yearBucket = { year, games: new Map() };
           yearMap.set(year, yearBucket);
         }
-        bump(yearBucket, platform, pts);
-
-        const gameKey = `${platform}/${id}`;
         let game = yearBucket.games.get(gameKey);
         if (!game) {
-          game = { platform, id, title, icon, count: 0, score: 0 };
+          game = { platform, id, title, icon, count: 0, score: 0, rarestCandidates: [] };
           yearBucket.games.set(gameKey, game);
         }
         game.count++;
@@ -233,8 +263,11 @@ export function computeTimelineData() {
         // candidates and trimmed to the top N at the end, rather than
         // tracking just the single rarest — a year with several
         // sub-1%-rarity pulls otherwise buries all but one of them.
+        // Held per copy so a duplicate's candidates drop out with it:
+        // the same trophy carries a different rarity% on each store, so
+        // an un-collapsed pair can otherwise take two of the three slots.
         if (typeof a.rarity === 'number') {
-          yearBucket.rarestCandidates.push({
+          game.rarestCandidates.push({
             platform,
             gameId: id,
             gameTitle: title,
@@ -249,12 +282,15 @@ export function computeTimelineData() {
   }
 
   const months = Array.from(monthMap.values())
-    .map((m) => ({
-      month: m.month,
-      count: m.count,
-      score: Math.round(m.score * 10) / 10,
-      platforms: roundPlatforms(m.platforms),
-    }))
+    .map((m) => {
+      const totals = rollup(bestCopies(m.games.values(), dupeKeyByGame));
+      return {
+        month: m.month,
+        count: totals.count,
+        score: Math.round(totals.score * 10) / 10,
+        platforms: roundPlatforms(totals.platforms),
+      };
+    })
     .sort((a, b) => a.month.localeCompare(b.month));
 
   // Ties broken by score, not just count — a year where the top game by
@@ -262,18 +298,8 @@ export function computeTimelineData() {
   // fewer, rarer achievements landed for the same count.
   const years = Array.from(yearMap.values())
     .map((y) => {
-      // A game earned on two platforms in the same year keeps only its
-      // best single-platform copy here, not the sum of both — plenty
-      // of games now ship the same achievement list on Steam and a
-      // console, and that isn't twice the achievements earned.
-      const bestByGame = new Map();
-      for (const g of y.games.values()) {
-        const key = dupeKeyByGame.get(`${g.platform}/${g.id}`) ?? `${g.platform}/${g.id}`;
-        const existing = bestByGame.get(key);
-        if (!existing || g.count > existing.count || (g.count === existing.count && g.score > existing.score)) {
-          bestByGame.set(key, g);
-        }
-      }
+      const games = bestCopies(y.games.values(), dupeKeyByGame);
+      const totals = rollup(games);
       const toEntry = (g) => ({
         platform: g.platform,
         id: g.id,
@@ -287,7 +313,6 @@ export function computeTimelineData() {
       // that out-counts it, and re-sorting an already-sliced
       // top-N-by-count list would miss it entirely if it fell outside
       // that cut.
-      const games = Array.from(bestByGame.values());
       const topGamesByCount = [...games]
         .sort((a, b) => b.count - a.count || b.score - a.score)
         .slice(0, TOP_GAMES_PER_YEAR)
@@ -298,12 +323,15 @@ export function computeTimelineData() {
         .map(toEntry);
       return {
         year: y.year,
-        count: y.count,
-        score: Math.round(y.score * 10) / 10,
-        platforms: roundPlatforms(y.platforms),
+        count: totals.count,
+        score: Math.round(totals.score * 10) / 10,
+        platforms: roundPlatforms(totals.platforms),
         topGamesByCount,
         topGamesByScore,
-        rarestAchievements: pickRarestDiverse(y.rarestCandidates, RAREST_PER_YEAR),
+        rarestAchievements: pickRarestDiverse(
+          games.flatMap((g) => g.rarestCandidates),
+          RAREST_PER_YEAR,
+        ),
       };
     })
     .sort((a, b) => a.year - b.year);
