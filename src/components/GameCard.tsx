@@ -74,9 +74,18 @@ export default function GameCard({
   // where `complete` is also true but there's nothing to show.
   //
   // Keyed on coverUrl so a retry (or a dev cover swap) re-arms the animation
-  // rather than leaving the card stuck in its already-loaded state.
-  useEffect(() => {
+  // rather than leaving the card stuck in its already-loaded state. Done
+  // during render rather than in the effect below because it's derived
+  // state, not a DOM read: a new URL means "not loaded yet" immediately,
+  // with no intermediate frame showing the previous cover as locked on.
+  const [loadedCoverUrl, setLoadedCoverUrl] = useState(coverUrl);
+
+  if (coverUrl !== loadedCoverUrl) {
+    setLoadedCoverUrl(coverUrl);
     setCoverLoaded(false);
+  }
+
+  useEffect(() => {
     const el = imgRef.current;
     if (el?.complete && el.naturalWidth > 0) setCoverLoaded(true);
   }, [coverUrl]);

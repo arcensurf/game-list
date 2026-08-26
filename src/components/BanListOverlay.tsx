@@ -38,11 +38,12 @@ export default function BanListOverlay({
   // partway down yanks it (and everything around it) to the top mid-scroll.
   // Re-sorting only on open still surfaces freshly-banned games next visit.
   const [sortSnapshot, setSortSnapshot] = useState(banned);
+  const [wasOpen, setWasOpen] = useState(open);
 
-  useEffect(() => {
+  if (open !== wasOpen) {
+    setWasOpen(open);
     if (open) setSortSnapshot(banned);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }
 
   useEffect(() => {
     if (!open) return;

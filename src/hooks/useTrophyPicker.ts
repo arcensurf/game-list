@@ -112,7 +112,10 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
   // the callback changes identity on every roll and everything built on
   // top of it churns with it.
   const rollRef = useRef<Roll | null>(null);
-  rollRef.current = roll;
+
+  useEffect(() => {
+    rollRef.current = roll;
+  }, [roll]);
 
   // "Empty" is relative to the rarity floor, so moving the slider makes
   // every previous verdict stale — a game with nothing above 20% may
@@ -202,11 +205,18 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
   // Every shard/override lookup here is the same cached call the roll
   // path already makes, so a game already seen this session costs
   // nothing extra to re-scan.
-  const [poolRarities, setPoolRarities] = useState<(number | null)[] | null>(null);
+  // Tagged with the pool it was computed for, so "still loading" is a
+  // derived comparison during render rather than a reset written back in
+  // the effect — a new pool reads as null on the very render that
+  // produces it, instead of one frame later.
+  const [rarityScan, setRarityScan] = useState<{
+    pool: PoolGame[];
+    rarities: (number | null)[];
+  } | null>(null);
+  const poolRarities = rarityScan?.pool === pool ? rarityScan.rarities : null;
 
   useEffect(() => {
     let cancelled = false;
-    setPoolRarities(null);
     Promise.all(
       pool.map(async (g) => {
         const [list, marks] = await Promise.all([
@@ -222,7 +232,7 @@ export function useTrophyPicker(minRarity: number = 0, enabledPlatforms: ShardPl
         );
       }),
     ).then((lists) => {
-      if (!cancelled) setPoolRarities(lists.flat());
+      if (!cancelled) setRarityScan({ pool, rarities: lists.flat() });
     });
     return () => {
       cancelled = true;

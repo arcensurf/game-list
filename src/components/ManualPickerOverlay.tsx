@@ -62,13 +62,20 @@ export default function ManualPickerOverlay({
   const [pickError, setPickError] = useState<string | null>(null);
 
   // Always reopen on the game list rather than wherever it was left.
-  useEffect(() => {
-    if (!open) return;
-    setPicked(null);
-    setQuery('');
-    setAchQuery('');
-    setPickError(null);
-  }, [open]);
+  // Adjusted on the open transition during render rather than in an
+  // effect, so the overlay's first paint is already the reset state
+  // instead of one frame of whatever was left from last time.
+  const [wasOpen, setWasOpen] = useState(open);
+
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setPicked(null);
+      setQuery('');
+      setAchQuery('');
+      setPickError(null);
+    }
+  }
 
   useEffect(() => {
     if (!open) return;

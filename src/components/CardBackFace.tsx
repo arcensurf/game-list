@@ -115,7 +115,6 @@ function CategoryCell({ cat, mode }: { cat: FfxivCategoryData; mode: Mode }) {
       // Overflow is only knowable after layout, so this has to run in
       // an effect rather than during render — a legitimate DOM-read
       // case, not derived state.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setScrolling(true);
     }
   }, []);
