@@ -100,10 +100,14 @@ to reach every line. Three shapes of test:
   app would keep rendering and the build would keep succeeding, and the leaderboard
   would just quietly disagree with the bars on the cards.
 
-`test/setup.ts` replaces `localStorage` and `sessionStorage` with an in-memory
-implementation. Node 22+ ships its own experimental Web Storage global that wins
-over jsdom's and is inert without `--localstorage-file`, which would otherwise
-break any test touching a persisted setting.
+`test/setup.ts` fills three gaps in the test environment. It replaces
+`localStorage` and `sessionStorage` with an in-memory implementation — Node 22+
+ships its own experimental Web Storage global that wins over jsdom's and is inert
+without `--localstorage-file`, which would otherwise break any test touching a
+persisted setting. It also stubs `IntersectionObserver` and `ResizeObserver`,
+neither of which jsdom implements and both of which are reached on mount (the
+card grid and leaderboard via `useInView`, the card HUD via its own size
+observer), so a component that uses them can be rendered at all.
 
 ## Scripts
 
