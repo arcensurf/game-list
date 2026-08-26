@@ -41,7 +41,7 @@ const DIGIT_GLYPHS = {
   '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
 };
 
-function normalizeTitle(title) {
+export function normalizeTitle(title) {
   return title
     .toLowerCase()
     .replace(/^the\s+/, '')
@@ -80,7 +80,7 @@ function makeUnionFind(keys) {
 // public/data/overrides/game-links.json, written through the dev-only
 // /api/game-links route (see dev-api-plugin.ts) and published the same
 // way as banned.json.
-function assignDupeKeys(games) {
+export function assignDupeKeys(games) {
   const keyOf = (g) => `${g.platform}/${g.id}`;
   const byKey = new Map(games.map((g) => [keyOf(g), g]));
   const keys = games.map(keyOf);
@@ -151,7 +151,7 @@ const GAMES_LIMIT_PER_PLATFORM = 100;
 // that order within each platform's slice, it doesn't re-sort. `keep`
 // marks rows that ride along past the limit without counting against
 // it; see the games call below.
-function topPerPlatform(rows, limit, keep) {
+export function topPerPlatform(rows, limit, keep) {
   const byPlatform = new Map();
   const counts = new Map();
   for (const row of rows) {
@@ -165,7 +165,7 @@ function topPerPlatform(rows, limit, keep) {
   return PLATFORMS.flatMap((p) => byPlatform.get(p) ?? []);
 }
 
-function achievementScore(rarity) {
+export function achievementScore(rarity) {
   if (typeof rarity !== 'number' || rarity <= 0) return null;
   return Math.min(BASE_POINTS * Math.sqrt(100 / rarity), SCORE_CAP);
 }
@@ -174,7 +174,7 @@ function psnTierWeight(achievement) {
   return PSN_TIER_XP[(achievement.type ?? '').toLowerCase()] ?? PSN_TIER_XP.bronze;
 }
 
-function weightedCompletion(platform, all) {
+export function weightedCompletion(platform, all) {
   if (platform === 'steam') {
     return all.length > 0 ? all.filter((a) => a.earned).length / all.length : 0;
   }

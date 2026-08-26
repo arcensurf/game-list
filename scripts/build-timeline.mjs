@@ -53,12 +53,12 @@ const IMPORT_OVERRIDES = [
   },
 ];
 
-function achievementScore(rarity) {
+export function achievementScore(rarity) {
   if (typeof rarity !== 'number' || rarity <= 0) return null;
   return Math.min(BASE_POINTS * Math.sqrt(100 / rarity), SCORE_CAP);
 }
 
-function roundPlatforms(platforms) {
+export function roundPlatforms(platforms) {
   const out = {};
   for (const [platform, v] of Object.entries(platforms)) {
     out[platform] = { count: v.count, score: Math.round(v.score * 10) / 10 };
@@ -76,7 +76,7 @@ function roundPlatforms(platforms) {
 // don't try. A ranking is a different question: a list of the year's
 // standout games and rarest pulls shouldn't spend two of its slots
 // saying the same thing.
-function bestCopies(games, dupeKeyByGame) {
+export function bestCopies(games, dupeKeyByGame) {
   const best = new Map();
   for (const g of games) {
     const key = dupeKeyByGame.get(`${g.platform}/${g.id}`) ?? `${g.platform}/${g.id}`;
@@ -88,7 +88,7 @@ function bestCopies(games, dupeKeyByGame) {
   return Array.from(best.values());
 }
 
-function rollup(games) {
+export function rollup(games) {
   const totals = { count: 0, score: 0, platforms: {} };
   for (const g of games) {
     totals.count += g.count;
@@ -107,7 +107,7 @@ function rollup(games) {
 // landed in the same rounded bucket, not one game's DLC sweep. Within
 // a tie, one game goes before any game repeats; across tiers, rarity
 // order is absolute regardless of which games are already represented.
-function pickRarestDiverse(candidates, limit) {
+export function pickRarestDiverse(candidates, limit) {
   const sorted = [...candidates].sort((a, b) => a.rarity - b.rarity);
 
   // Group consecutive equal-rarity entries — sorted, so ties are
