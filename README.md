@@ -54,7 +54,56 @@ When the PSN token expires the workflow opens a GitHub issue with renewal instru
 npm run dev      # Vite at http://localhost:5173/game-list/, with the dev UI
 npm run build    # tsc -b, then Vite build into dist/
 npm run lint
+npm test         # Vitest, one pass
+npm run check    # tsc -b, then lint, then the test suite — what CI runs
 ```
+
+## Tests
+
+Vitest, run with `npm test` (or `npm run test:watch` while working). `ci.yml` runs
+typecheck, lint and the suite on every push and pull request, and `deploy.yml` runs
+the suite before it builds, so a red `main` doesn't ship.
+
+The suite covers the logic that encodes an actual rule — scoring, completion
+weighting, title matching, duplicate grouping, backlog aging — rather than trying
+to reach every line. Three shapes of test:
+
+- **Unit tests** next to the code, in `src/utils/*.test.ts`, `src/hooks/*.test.ts`
+  and `src/components/*.test.tsx`. Anything without a DOM opts down to the node
+  environment with a `// @vitest-environment node` pragma at the top of the file.
+- **Build-script tests** in `scripts/*.test.mjs`, over the pieces of
+  `build-leaderboard.mjs`, `build-timeline.mjs` and `fetch-achievements.mjs` that
+  decide what the nightly writes. All three guard their `main()` behind an
+  `import.meta.url` check, so importing one for a test doesn't kick off a build or
+  a library fetch; `scripts/*.d.mts` carries hand-written types for the exports the
+  TypeScript-side tests reach for.
+
+  `fetch-achievements.mjs` is mostly API-shape adaptation, and the tests go after
+  the parts of it that can be wrong without anything failing loudly: the shard
+  cache (`writeShard` skipping a byte-identical rewrite, `currentShard`'s
+  earned/total comparison, `isRefreshDay` spreading the library across the week),
+  the sanitiser that turns an upstream ID into a path, `roundRarity` — one decimal,
+  because full float precision would rewrite every shard nightly — and the two
+  joins that carry the most risk: Xbox's, which has to combine a definition list
+  and an earned-only list *without* crossing the legacy and modern id schemes, and
+  the guard that refuses to write a shard contradicting the library counts it was
+  fetched against. Its `DATA_DIR` and `TOKEN_DIR` are pointed at scratch
+  directories before the import — the latter matters, since its default is the real
+  `~/.game-list` where the live PSN and Xbox refresh tokens sit.
+- **The parity suite**, `test/parity.test.ts`. `normalizeTitle`, `achievementScore`
+  and the weighted-completion formula each exist twice on purpose — once in
+  `src/utils/` for the browser bundle, once in `scripts/` for the Node build,
+  because neither side can import the other. Each copy carries a comment saying it
+  must be kept in sync by hand; this suite is what actually enforces it, comparing
+  the two implementations across a fixed corpus and a seeded random sweep. Editing
+  one copy and not the other is the most likely silent regression in the repo — the
+  app would keep rendering and the build would keep succeeding, and the leaderboard
+  would just quietly disagree with the bars on the cards.
+
+`test/setup.ts` replaces `localStorage` and `sessionStorage` with an in-memory
+implementation. Node 22+ ships its own experimental Web Storage global that wins
+over jsdom's and is inert without `--localstorage-file`, which would otherwise
+break any test touching a persisted setting.
 
 ## Scripts
 
@@ -67,6 +116,8 @@ npm run fetch-covers             # Download cover art from SteamGridDB
 npm run fetch-achievements       # Sync achievements from Steam, PSN, Xbox, RetroAchievements
 npm run psn-get-npsso-token      # Interactive PSN auth helper
 npm run xbox-get-refresh-token   # Interactive Xbox auth helper
+npm run build-leaderboard        # Rebuild leaderboard.json from the fetched data
+npm run build-timeline           # Rebuild timeline.json from the fetched data
 ```
 
 The achievement sync normally runs on the daily cron (`fetch-achievements.yml`); you only need it locally for debugging. Manual runs take a **`force_refresh`** checkbox, which rebuilds every per-game shard instead of skipping games whose counts haven't moved — for when shards are stale in a way the normal checks can't see, such as a shard format change.
