@@ -53,15 +53,162 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* No rule between this and the bracketed top-5 above — the brackets
+   already close that region off, and a divider under them just has
+   the frame stating its edge twice. Space does the separating, so it
+   carries the whole 2.5rem the rule used to sit inside of. */
 .stats-rest {
+  margin-top: var(--space-6);
+}
+
+/* Names the row as a remainder, not a total — without it "62 Nintendo"
+   reads as every Nintendo game ever beaten, when it's only the consoles
+   that missed the top 5 above. */
+.stats-rest-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* One row, fixed at up to four families (PlayStation / Microsoft /
+   Nintendo / Other) — flex:1 per item so it always fits a single line
+   down to phone width rather than wrapping like the old flat platform
+   list did. Everything below top-5 is stated once here as a total,
+   with the individual consoles a click away (see .stats-rest-popover)
+   instead of always on screen. */
+.stats-rest-families {
+  position: relative;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.stats-rest-family {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-tight);
+  padding: var(--space-2) var(--space-1);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+
+.stats-rest-family:hover {
+  color: var(--text);
+}
+
+.stats-rest-family--active {
+  color: var(--accent-light);
+}
+
+.stats-rest-family-count {
+  font-family: var(--font-figure);
+  font-size: var(--type-meta);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-rest-family-name {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Disclosure triangle rather than an icon asset — same "state lives in
+   the label" idiom as .stats-metric-tab above. */
+.stats-rest-family-name::after {
+  content: '▸';
+  flex-shrink: 0;
+  font-size: 0.6em;
+  transition: transform var(--transition);
+}
+
+.stats-rest-family--active .stats-rest-family-name::after {
+  transform: rotate(90deg);
+}
+
+/* Covers the family row it opened from, the way the card flip covers
+   the card rather than adding a panel beside it — anchored to
+   .stats-rest-families (top: 0, not below it) so it starts exactly on
+   the row instead of appearing as new content past it. Free to grow
+   taller than the row and spill over the chart beneath, same as
+   before: a family can hold well over a dozen consoles (Nintendo), and
+   there's no width that fits inline without either wrapping (shift) or
+   scrolling (hidden consoles) — out of flow sidesteps both.
+
+   Textured and corner-bracketed rather than a flat card, on purpose:
+   this app frames a called-out region with Brackets and a scanned
+   dark surface (see .leaderboard-modal-panel) instead of a bordered
+   box, and a plain rgba rectangle floating over the chart read as
+   generic-SaaS-dropdown, not as this app. Same bracket recipe as
+   .stats-platform-top right above it, at a smaller scale to match a
+   secondary panel rather than the hero stat row. */
+.stats-rest-popover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
   display: flex;
   flex-wrap: wrap;
-  /* No rule between this and the bracketed top-5 above — the brackets
-     already close that region off, and a divider under them just has
-     the frame stating its edge twice. Space does the separating, so it
-     carries the whole 2.5rem the rule used to sit inside of. */
+  align-items: center;
   gap: var(--space-2) var(--space-5);
-  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-6) var(--space-4) var(--space-5);
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(to bottom, rgba(22, 16, 8, 0.97) 0%, rgba(14, 10, 4, 0.99) 100%);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  --bracket-size: 16px;
+  --bracket-inset: 5px;
+  --bracket-opacity: 0.8;
+  --bracket-bloom: drop-shadow(0 0 4px rgba(var(--accent-glow), 0.4));
+  animation: stats-rest-popover-in 0.15s ease-out both;
+}
+
+@keyframes stats-rest-popover-in {
+  from { opacity: 0; transform: translateY(-0.3rem); }
+  to { opacity: 1; transform: none; }
+}
+
+.stats-rest-popover-close {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  padding: var(--space-1);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: var(--type-heading);
+  line-height: 1;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+
+.stats-rest-popover-close:hover {
+  color: var(--text);
 }
 
 .stats-rest-item {
@@ -85,6 +232,16 @@
 
   .stats-platform-top-item {
     flex: 1 1 33%;
+  }
+
+  /* Below ~600px "Rarity Points By Year" wraps to two or three lines at
+     --type-title size. Side-by-side with the metric toggle, that wrap
+     leaves the toggle floating next to whichever line happens to fall
+     at mid-height — stack them instead so the title can wrap freely
+     with the toggle as its own row underneath. */
+  .stats-years-heading {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
@@ -124,7 +281,8 @@
 
   .stats-year-bar-col,
   .stats-year-bar,
-  .stats-year-recap {
+  .stats-year-recap,
+  .stats-rest-popover {
     animation: none;
   }
 }

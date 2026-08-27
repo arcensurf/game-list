@@ -72,3 +72,21 @@ export const PLATFORM_COLORS_LIGHT: Record<string, string> = {
 export function getLightColor(platform: string): string {
   return PLATFORM_COLORS_LIGHT[platform] ?? '#a1a8b4';
 }
+
+// Manufacturer families, derived from the console-color grouping above
+// rather than a second hand-maintained platform list — a platform's
+// family is just whichever brand its badge is already tinted for. Any
+// platform outside the three brand colors (grey group, or an unknown/
+// custom platform with no color at all) falls to Other.
+export const PLATFORM_FAMILIES = ['PlayStation', 'Microsoft', 'Nintendo', 'Other'] as const;
+
+const FAMILY_BY_COLOR: Record<string, (typeof PLATFORM_FAMILIES)[number]> = {
+  '#003087': 'PlayStation',
+  '#107c10': 'Microsoft',
+  '#e4000f': 'Nintendo',
+};
+
+export function getPlatformFamily(platform: string): (typeof PLATFORM_FAMILIES)[number] {
+  const color = PLATFORM_COLORS[platform];
+  return (color && FAMILY_BY_COLOR[color]) ?? 'Other';
+}
