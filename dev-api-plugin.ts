@@ -511,12 +511,14 @@ export default function devApiPlugin(): Plugin {
               coverOverride: null,
               gameOfGames: null,
               order: insertOrder,
-              // The backlog ages each entry off this, so it has to be
-              // stamped on the way in — there's no recovering the date
-              // later (git only knows when games.json last churned).
+              // The backlog ages each entry off this, and the Stats tab's
+              // by-year groupings age off the beaten-date equivalent, so
+              // both have to be stamped on the way in — there's no
+              // recovering either later (git only knows when games.json
+              // last churned).
               ...(status === 'backlog'
                 ? { status: 'backlog', addedAt: new Date().toISOString().slice(0, 10) }
-                : {}),
+                : { beatenAt: new Date().toISOString().slice(0, 10) }),
             });
 
             renumberOrders(games);
@@ -703,6 +705,9 @@ export default function devApiPlugin(): Plugin {
             }
 
             delete game.status;
+            // Stamped here rather than left for the caller to backfill —
+            // same reasoning as addedAt on the way into the backlog.
+            game.beatenAt = new Date().toISOString().slice(0, 10);
             writeJson(gamesPath, games);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });

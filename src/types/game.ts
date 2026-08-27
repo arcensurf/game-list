@@ -22,6 +22,15 @@ export interface Game {
    * before the field existed, which the view leaves unstamped.
    */
   addedAt?: string | null;
+  /**
+   * ISO date (YYYY-MM-DD) the game was marked beaten, stamped by
+   * /api/mark-beaten (backlog -> beaten) and by /api/add-game when
+   * added directly as beaten. Only stamped going forward — like
+   * addedAt, there's no recovering it for a game already beaten
+   * before the field existed, which the Stats tab leaves out of any
+   * by-year grouping rather than guessing.
+   */
+  beatenAt?: string | null;
   steamAppId?: number | null;
   psnNpCommId?: string | null;
   xboxTitleId?: string | null;

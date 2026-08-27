@@ -169,7 +169,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 12
+    "order": 12,
+    "beatenAt": "2020-01-01"
   },
   {
     "title": "Astro Bot",
@@ -395,7 +396,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 27
+    "order": 27,
+    "beatenAt": "2019-01-01"
   },
   {
     "title": "Castle Crashers",
@@ -467,7 +469,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 33
+    "order": 33,
+    "beatenAt": "2025-01-01"
   },
   {
     "title": "Colin McRae Rally 05",
@@ -920,7 +923,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 63
+    "order": 63,
+    "beatenAt": "2019-01-01"
   },
   {
     "title": "Final Fantasy IX",
@@ -932,7 +936,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 64
+    "order": 64,
+    "beatenAt": "2020-01-01"
   },
   {
     "title": "Final Fantasy X HD Remaster",
@@ -944,7 +949,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 65
+    "order": 65,
+    "beatenAt": "2020-01-01"
   },
   {
     "title": "Final Fantasy XII",
@@ -1114,7 +1120,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 76
+    "order": 76,
+    "beatenAt": "2023-01-01"
   },
   {
     "title": "Fire Emblem Warriors",
@@ -1126,7 +1133,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 77
+    "order": 77,
+    "beatenAt": "2023-01-01"
   },
   {
     "title": "Fire Emblem Warriors: Three Hopes",
@@ -1138,7 +1146,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 78
+    "order": 78,
+    "beatenAt": "2022-01-01"
   },
   {
     "title": "Fire Emblem: Shadow Dragon and the Blade of Light",
@@ -1169,7 +1178,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"So what, we're all supposed to take turns saying we'll do our best till the very end?\" game",
-    "order": 80
+    "order": 80,
+    "beatenAt": "2022-01-01"
   },
   {
     "title": "Forza Horizon",
@@ -1282,7 +1292,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"You think I won't be able to get you off\" game",
-    "order": 88
+    "order": 88,
+    "beatenAt": "2021-01-01"
   },
   {
     "title": "The Great Ace Attorney 2: Resolve",
@@ -1294,7 +1305,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Why can't we have a normal, straightforward killing once in a while\" game",
-    "order": 89
+    "order": 89,
+    "beatenAt": "2021-01-01"
   },
   {
     "title": "Grid",
@@ -1481,7 +1493,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 101
+    "order": 101,
+    "beatenAt": "2020-01-01"
   },
   {
     "title": "Hyper Light Drifter",
@@ -1493,7 +1506,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 102
+    "order": 102,
+    "beatenAt": "2021-01-01"
   },
   {
     "title": "Hypnospace Outlaw",
@@ -1542,7 +1556,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 105
+    "order": 105,
+    "beatenAt": "2020-01-01"
   },
   {
     "title": "Hyrule Warriors: Age of Imprisonment",
@@ -1554,7 +1569,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 106
+    "order": 106,
+    "beatenAt": "2026-01-01"
   },
   {
     "title": "Infamous Second Son",
@@ -1662,7 +1678,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 113
+    "order": 113,
+    "beatenAt": "2020-01-01"
   },
   {
     "title": "Kamiko",
@@ -1674,7 +1691,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 114
+    "order": 114,
+    "beatenAt": "2022-01-01"
   },
   {
     "title": "Kirby Air Riders",
@@ -1686,7 +1704,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 115
+    "order": 115,
+    "beatenAt": "2026-01-01"
   },
   {
     "title": "Kirby Super Star",
@@ -1782,7 +1801,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 123
+    "order": 123,
+    "beatenAt": "2017-01-01"
   },
   {
     "title": "The Legend of Zelda: Echoes of Wisdom",
@@ -1794,7 +1814,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 124
+    "order": 124,
+    "beatenAt": "2024-01-01"
   },
   {
     "title": "The Legend of Zelda: Four Swords Adventures",
@@ -1832,7 +1853,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 127
+    "order": 127,
+    "beatenAt": "2019-01-01"
   },
   {
     "title": "The Legend of Zelda: Majora's Mask",
@@ -1928,7 +1950,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 135
+    "order": 135,
+    "beatenAt": "2023-01-01"
   },
   {
     "title": "The Legend of Zelda: The Minish Cap",
@@ -2153,7 +2176,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Accept your helplessness\" game",
-    "order": 151
+    "order": 151,
+    "beatenAt": "2021-01-01"
   },
   {
     "title": "Metroid Fusion",
@@ -2203,7 +2227,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Science Team wisely decided to move on afterward\" game",
-    "order": 155
+    "order": 155,
+    "beatenAt": "2023-01-01"
   },
   {
     "title": "Metroid Prime 2: Echoes",
@@ -2239,7 +2264,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 158
+    "order": 158,
+    "beatenAt": "2026-01-01"
   },
   {
     "title": "Metroid: Zero Mission",
@@ -2506,7 +2532,8 @@
     "steamAppId": null,
     "psnNpCommId": null,
     "xboxTitleId": null,
-    "ffxivLodestoneId": null
+    "ffxivLodestoneId": null,
+    "beatenAt": "2026-01-01"
   },
   {
     "title": "Pokemon: Blue Version",
@@ -2530,7 +2557,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 180
+    "order": 180,
+    "beatenAt": "2025-01-01"
   },
   {
     "title": "Portal 2",
@@ -2843,7 +2871,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 201
+    "order": 201,
+    "beatenAt": "2022-01-01"
   },
   {
     "title": "Super Mario Bros. 3",
@@ -2891,7 +2920,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 205
+    "order": 205,
+    "beatenAt": "2019-01-01"
   },
   {
     "title": "Super Mario Odyssey",
@@ -2903,7 +2933,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 206
+    "order": 206,
+    "beatenAt": "2017-01-01"
   },
   {
     "title": "Super Mario RPG",
@@ -2939,7 +2970,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 209
+    "order": 209,
+    "beatenAt": "2024-01-01"
   },
   {
     "title": "Super Mario World",
@@ -2975,7 +3007,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 212
+    "order": 212,
+    "beatenAt": "2022-01-01"
   },
   {
     "title": "Super Woden: Rally Edge",
@@ -3023,7 +3056,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 216
+    "order": 216,
+    "beatenAt": "2022-01-01"
   },
   {
     "title": "Terranigma",
@@ -3059,7 +3093,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 219
+    "order": 219,
+    "beatenAt": "2023-01-01"
   },
   {
     "title": "Thomas was Alone",
@@ -3095,7 +3130,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 222
+    "order": 222,
+    "beatenAt": "2022-01-01"
   },
   {
     "title": "Uncharted: Drake's Fortune",
@@ -3180,7 +3216,8 @@
     "steamAppId": null,
     "psnNpCommId": null,
     "xboxTitleId": null,
-    "ffxivLodestoneId": null
+    "ffxivLodestoneId": null,
+    "beatenAt": "2020-01-01"
   },
   {
     "title": "Xenoblade Chronicles 2",
@@ -3199,7 +3236,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"Think you can take me?\" game",
-    "order": 229
+    "order": 229,
+    "beatenAt": "2017-01-01"
   },
   {
     "title": "Xenoblade Chronicles 3",
@@ -3218,7 +3256,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": "The \"...and I was the MVP. You were all thinking it\" game",
-    "order": 230
+    "order": 230,
+    "beatenAt": "2022-01-01"
   },
   {
     "title": "Xenoblade Chronicles X",
@@ -3238,7 +3277,8 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 231
+    "order": 231,
+    "beatenAt": "2025-01-01"
   },
   {
     "title": "Xenogears",

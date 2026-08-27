@@ -1,13 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type React from 'react';
 import type { TimelineMonth, TimelineYear, TimelineYearTopGame } from '../types/game';
 import { ACHIEVEMENT_PLATFORM_COLORS, PLATFORM_TINT_FALLBACK } from '../utils/platformColors';
 import { formatDate } from '../utils/leaderboardFormat';
 import TimelineInfoModal from './TimelineInfoModal';
+import SwitchInfoModal from './SwitchInfoModal';
 import LeaderboardGameModal from './LeaderboardGameModal';
 import type { LeaderboardModalTarget } from './LeaderboardGameModal';
 import PlatformPill from './PlatformPill';
 import Thumb from './Thumb';
+import { useSwitchBeatenByYear } from '../hooks/useSwitchBeatenByYear';
+import type { SwitchBeatenGame } from '../hooks/useSwitchBeatenByYear';
 
 const PLATFORM_ORDER = ['steam', 'psn', 'xbox', 'ra'] as const;
 const YEAR_BAR_HEIGHT = 90;
@@ -125,14 +128,48 @@ function MonthSparkline({
   );
 }
 
+// Own component so the loaded/not-loaded state is per-image, not shared
+// across the grid. Same reasoning as GameCard's coverLoaded: checking
+// `complete` after mount catches an image served from the memory cache
+// finishing before React commits onLoad, which onLoad alone would miss.
+function SwitchCover({ src }: { src: string }) {
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const el = imgRef.current;
+    if (el?.complete && el.naturalWidth > 0) setLoaded(true);
+  }, [src]);
+
+  return (
+    <>
+      <span
+        className={`stats-year-switch-grain${loaded ? ' stats-year-switch-grain--off' : ''}`}
+        aria-hidden="true"
+      />
+      <img
+        ref={imgRef}
+        className={`stats-year-switch-img${loaded ? ' stats-year-switch-img--loaded' : ''}`}
+        src={src}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+      />
+    </>
+  );
+}
+
 function YearRecap({
   year,
   months,
   metric,
+  switchGames,
 }: {
   year: TimelineYear;
   months: TimelineMonth[];
   metric: Metric;
+  switchGames: SwitchBeatenGame[];
 }) {
   const topGames: TimelineYearTopGame[] =
     metric === 'points' ? year.topGamesByScore : year.topGamesByCount;
@@ -140,6 +177,7 @@ function YearRecap({
   const { rarestAchievements, completions } = year;
   const gameValue = (g: TimelineYearTopGame) => (metric === 'points' ? fmtScore(g.score) : g.count);
   const [modalTarget, setModalTarget] = useState<LeaderboardModalTarget | null>(null);
+  const [switchInfoOpen, setSwitchInfoOpen] = useState(false);
 
   // Matches the build script's UTC bucketing (see build-timeline.mjs)
   // so the cutoff lands on the same month boundary the data uses. Past
@@ -257,6 +295,50 @@ function YearRecap({
           <LeaderboardGameModal target={modalTarget} onClose={() => setModalTarget(null)} />
         </div>
       )}
+
+      {/* Switch/Switch 2 have no achievements at all, so a year of
+          clears there is otherwise invisible on this entire page — see
+          useSwitchBeatenByYear. Weighted as a major section (h2 +
+          trace-t divider, same recipe as "Rarity Points By Year" and
+          "Beaten Games Per Platform" above it), not a footnote under
+          the achievement recap — it's telling you about a console this
+          whole page is otherwise blind to, which earns more than an
+          eyebrow label. Plain cover art rather than the leaderboard row
+          format the sections above use: there's no platform pill,
+          completion %, or score to show, since none of that exists for
+          these. Last, same reasoning as completions above it — its
+          count is exactly as unpredictable year to year. */}
+      {switchGames.length > 0 && (
+        <div className="stats-year-switch trace-t">
+          <div className="stats-years-title-row">
+            <h2>Nintendon&rsquo;t</h2>
+            <button
+              type="button"
+              className="leaderboard-info-btn"
+              onClick={() => setSwitchInfoOpen(true)}
+              aria-label="What this section is"
+              title="What this section is"
+            >
+              ?
+            </button>
+          </div>
+          <SwitchInfoModal open={switchInfoOpen} onClose={() => setSwitchInfoOpen(false)} />
+          <div className="stats-year-switch-grid">
+            {switchGames.map((g) => (
+              <div key={g.title} className="stats-year-switch-item" title={g.title}>
+                <div className="stats-year-switch-cover">
+                  {g.coverUrl ? (
+                    <SwitchCover src={g.coverUrl} />
+                  ) : (
+                    <span className="stats-year-switch-cover-placeholder">{g.title}</span>
+                  )}
+                </div>
+                <span className="stats-year-switch-title">{g.title}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -273,10 +355,16 @@ export default function AchievementYears({
   );
   const [metric, setMetric] = useState<Metric>('points');
   const [infoOpen, setInfoOpen] = useState(false);
+  const { data: switchByYear } = useSwitchBeatenByYear();
 
   const selected = useMemo(
     () => years.find((y) => y.year === selectedYear) ?? null,
     [years, selectedYear],
+  );
+
+  const selectedSwitchGames = useMemo(
+    () => switchByYear?.find((y) => y.year === selectedYear)?.games ?? [],
+    [switchByYear, selectedYear],
   );
 
   const selectedMonths = useMemo(() => {
@@ -323,7 +411,9 @@ export default function AchievementYears({
         </div>
       </div>
       <YearBars years={years} selectedYear={selectedYear} metric={metric} onSelect={setSelectedYear} />
-      {selected && <YearRecap year={selected} months={selectedMonths} metric={metric} />}
+      {selected && (
+        <YearRecap year={selected} months={selectedMonths} metric={metric} switchGames={selectedSwitchGames} />
+      )}
       <TimelineInfoModal open={infoOpen} onClose={() => setInfoOpen(false)} />
     </div>
   );

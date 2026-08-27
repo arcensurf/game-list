@@ -727,6 +727,132 @@
   white-space: nowrap;
 }
 
+/* Nintendon't — a major section (see the comment in AchievementYears.tsx),
+   so it takes the same heading recipe as .stats-header h2 and
+   .stats-years h2: font-display, --type-title, tracked, uppercase. The
+   divider is trace-t on the section itself, same device "Rarity Points
+   By Year" uses to announce its own start.
+
+   The grid below stays plain cover art, not a leaderboard row:
+   Switch/Switch 2 have no achievement data at all, so there's no
+   platform pill, completion %, or score to show. Same small-poster-grid
+   language the card grid's own covers use (aspect-ratio 2/3, --radius)
+   at a fraction of the size — a major heading, but still a supporting
+   grid rather than the main event. */
+.stats-year-switch {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+}
+
+.stats-year-switch .stats-years-title-row {
+  margin-bottom: var(--space-4);
+}
+
+.stats-year-switch h2 {
+  font-family: var(--font-display);
+  font-size: var(--type-title);
+  letter-spacing: var(--track-title);
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.stats-year-switch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-2);
+}
+
+.stats-year-switch-item {
+  width: 4.5rem;
+}
+
+.stats-year-switch-cover {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+/* Loading treatment, not just an absent one. This grid sits at the
+   bottom of the page (see the ordering note above) and its images are
+   loading="lazy" on top of that, so by the time one scrolls into view
+   it's often still waiting on the network — same static-then-fade
+   language the card grid and leaderboard thumbnails already use for
+   "no signal yet", rather than a blank box that just pops a picture in
+   whenever it happens to land. */
+.stats-year-switch-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image: var(--grain-tile);
+  animation: grain-static 0.6s steps(5) infinite;
+  transition: opacity 0.2s linear;
+}
+
+.stats-year-switch-grain--off {
+  opacity: 0;
+}
+
+.stats-year-switch-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Held at 0 until decode, same as the card grid's cover — see
+     .game-card-cover img for why onLoad alone can't be trusted. */
+  opacity: 0;
+}
+
+.stats-year-switch-img--loaded {
+  animation: cover-fade-in 0.3s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stats-year-switch-grain {
+    animation: none;
+  }
+  .stats-year-switch-img--loaded {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+.stats-year-switch-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  text-align: center;
+  font-size: 0.6rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-muted);
+  background: linear-gradient(135deg, var(--bg-surface), var(--bg-card));
+}
+
+/* Two lines, not one — at a 4.5rem-wide cover, most titles here
+   ("Fire Emblem Warriors: Three Hopes") don't survive to a recognisable
+   word on a single truncated line. A second line is cheap (this is
+   already the shortest text in the section) and buys enough width to
+   actually read the title, with the clamp as a backstop for the rare
+   one that still overruns. */
+.stats-year-switch-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  margin-top: var(--space-1);
+  font-size: var(--type-micro);
+  line-height: 1.25;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Rarest pulls — three of the earlier single-pull callout, side by
    side rather than stacked. */
 .stats-year-rarest-group {
