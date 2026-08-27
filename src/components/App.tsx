@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { flushSync } from 'react-dom';
+import { useEffect } from 'react';
+import { useView } from '../hooks/useView';
 import { useGames } from '../hooks/useGames';
 import { useGogFilter } from '../hooks/useGogFilter';
 import { useLeaderboardFilters } from '../hooks/useLeaderboardFilters';
@@ -20,13 +20,10 @@ import LeaderboardView from './LeaderboardView';
 import StatsView from './StatsView';
 import DataLoadFailure from './DataLoadFailure';
 import BottomNav from './BottomNav';
-import { getInitialView, rememberView } from '../types/view';
-import type { View } from '../types/view';
 
 export default function App() {
-  const [view, setView] = useState<View>(getInitialView);
+  const { view, changeView, inTransition } = useView();
   const lightsOn = false;
-  const [inTransition, setInTransition] = useState(false);
 
   const { gogOnly, toggleGog } = useGogFilter(view);
   const leaderboardFilters = useLeaderboardFilters(view);
@@ -50,18 +47,6 @@ export default function App() {
   );
   const activeLetters = new Set(groups.map((g) => g.letter));
   const effectiveLightsOn = lightsOn || gogOnly || statsView || backlogView || pickerView || leaderboardView;
-
-  const changeView = useCallback((next: View) => {
-    rememberView(next);
-    flushSync(() => {
-      setInTransition(true);
-      setView(next);
-    });
-    requestAnimationFrame(() => {
-      window.scrollTo(0, 0);
-      setInTransition(false);
-    });
-  }, []);
 
   useEffect(() => {
     document.body.classList.toggle('lights-on', effectiveLightsOn);
