@@ -698,6 +698,35 @@
   font-weight: 700;
 }
 
+/* 100% Completions — reuses the leaderboard's own row markup
+   (.leaderboard-row / .leaderboard-thumb-frame / .leaderboard-main /
+   PlatformPill) wholesale rather than a parallel set of row styles,
+   since this is exactly a leaderboard row: a game, its cover, its
+   platform. Score is the one field that doesn't apply — nothing here
+   is ranked — so the date it was finished takes that slot instead. */
+.stats-year-completions {
+  margin-top: var(--space-6);
+}
+
+.stats-year-completions-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--type-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.stats-year-completion-date {
+  font-family: var(--font-figure);
+  font-size: var(--type-meta);
+  color: var(--gold-bright);
+  flex-shrink: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+
 /* Rarest pulls — three of the earlier single-pull callout, side by
    side rather than stacked. */
 .stats-year-rarest-group {

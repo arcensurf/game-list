@@ -181,12 +181,34 @@ export function computeTimelineData() {
 
   // Same title-normalized + game-links.json grouping the leaderboard's
   // "Hide duplicates" toggle uses, applied to the per-year rankings —
-  // top games and rarest achievements — but not to the totals. See
-  // bestCopies for why the two are treated differently.
+  // top games, rarest achievements, and 100% completions — but not to
+  // the totals. See bestCopies for why the two are treated differently.
   const dupeKeyByGame = new Map();
   for (const g of computeLeaderboardData().games) {
     if (g.dupeKey) dupeKeyByGame.set(`${g.platform}/${g.id}`, g.dupeKey);
   }
+
+  // Read straight from the leaderboard's own tint cache rather than
+  // computeLeaderboardData() — that function returns every game
+  // un-tinted; build-leaderboard.mjs only calls attachTints() on the
+  // capped list it actually ships, after this function returns. The
+  // cache file is the tint work already done, keyed the same way
+  // (`${platform}/${id}`), so a completion row can wash the same
+  // colour the leaderboard row for that same copy would without
+  // re-resolving anything.
+  const tintCachePath = resolve(dataDir, 'cover-tints.json');
+  const tintByGame = existsSync(tintCachePath)
+    ? new Map(Object.entries(JSON.parse(readFileSync(tintCachePath, 'utf8')).tints ?? {}))
+    : new Map();
+
+  // One entry per fully-completed game (earned === total, and total > 0
+  // so a game with no achievements at all doesn't count), keyed by
+  // completion date — the latest earnedAt among its achievements, i.e.
+  // the moment the last one landed. Built alongside the month/year
+  // achievement loop below rather than as a separate pass over the
+  // shards, since it needs the exact same per-achievement dates
+  // (import-override exclusions included) to find that moment.
+  const completionsByGameKey = new Map();
 
   for (const platform of PLATFORMS) {
     const dir = resolve(dataDir, 'achievements', platform);
@@ -207,6 +229,9 @@ export function computeTimelineData() {
       const title = entry?.title ?? shard.title ?? id;
       const icon = entry?.icon ?? null;
       const sourceDates = importSourceDates.get(`${platform}/${id}`);
+      const gameKey = `${platform}/${id}`;
+      const isFullyComplete = entry != null && entry.total > 0 && entry.earned === entry.total;
+      let completionMs = -Infinity;
 
       for (const a of shard.achievements ?? []) {
         // Not every earned achievement carries a date — some platforms
@@ -231,7 +256,7 @@ export function computeTimelineData() {
         const monthKey = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
         const year = date.getUTCFullYear();
 
-        const gameKey = `${platform}/${id}`;
+        if (isFullyComplete && date.getTime() > completionMs) completionMs = date.getTime();
 
         // Tallied per copy of the game rather than summed as it reads:
         // the rankings need to pick one copy per game, and which copy
@@ -283,7 +308,42 @@ export function computeTimelineData() {
           });
         }
       }
+
+      if (isFullyComplete && completionMs > -Infinity) {
+        completionsByGameKey.set(gameKey, { platform, id, title, icon, completedAtMs: completionMs });
+      }
     }
+  }
+
+  // Collapse to one completion per dupeKey group, same grouping the
+  // rankings above use — a game 100%'d on two platforms shouldn't take
+  // two slots in the year it happened. Earliest date wins: that's the
+  // actual first time it was finished, even if a second copy (an import,
+  // a replay) crossed the line again later.
+  const bestCompletionByDupeKey = new Map();
+  for (const [gameKey, c] of completionsByGameKey) {
+    const dupeKey = dupeKeyByGame.get(gameKey) ?? gameKey;
+    const existing = bestCompletionByDupeKey.get(dupeKey);
+    if (!existing || c.completedAtMs < existing.completedAtMs) {
+      bestCompletionByDupeKey.set(dupeKey, { ...c, tint: tintByGame.get(gameKey) });
+    }
+  }
+
+  const completionsByYear = new Map();
+  for (const c of bestCompletionByDupeKey.values()) {
+    const year = new Date(c.completedAtMs).getUTCFullYear();
+    if (!completionsByYear.has(year)) completionsByYear.set(year, []);
+    completionsByYear.get(year).push({
+      platform: c.platform,
+      id: c.id,
+      title: c.title,
+      icon: c.icon,
+      tint: c.tint ?? null,
+      completedAt: new Date(c.completedAtMs).toISOString(),
+    });
+  }
+  for (const list of completionsByYear.values()) {
+    list.sort((a, b) => a.completedAt.localeCompare(b.completedAt));
   }
 
   const months = Array.from(monthMap.values())
@@ -337,6 +397,7 @@ export function computeTimelineData() {
           games.flatMap((g) => g.rarestCandidates),
           RAREST_PER_YEAR,
         ),
+        completions: completionsByYear.get(y.year) ?? [],
       };
     })
     .sort((a, b) => a.year - b.year);

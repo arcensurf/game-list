@@ -233,6 +233,20 @@ export interface TimelineYearRarestAchievement {
   earnedAt: string;
 }
 
+// A game that reached earned === total (100%) during this year, keyed
+// to the moment its last achievement landed. One entry per dupeKey
+// group, same collapsing the top-games rankings use — see
+// build-timeline.mjs.
+export interface TimelineYearCompletion {
+  platform: 'steam' | 'psn' | 'xbox' | 'ra';
+  id: string;
+  title: string;
+  icon: string | null;
+  /** Leaderboard's precomputed cover tint, from cover-tints.json — null where unresolved (falls back to a per-platform tint client-side, same as the leaderboard). */
+  tint: string | null;
+  completedAt: string;
+}
+
 export interface TimelineYear {
   year: number;
   count: number;
@@ -244,6 +258,8 @@ export interface TimelineYear {
   topGamesByScore: TimelineYearTopGame[];
   /** Up to 3 rarest achievements earned that year, sorted rarest first. Empty if none had a published rarity. */
   rarestAchievements: TimelineYearRarestAchievement[];
+  /** Games that hit 100% this year, sorted by completion date ascending. */
+  completions: TimelineYearCompletion[];
 }
 
 export interface TimelineData {

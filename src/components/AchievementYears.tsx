@@ -1,7 +1,13 @@
 import { useMemo, useState } from 'react';
+import type React from 'react';
 import type { TimelineMonth, TimelineYear, TimelineYearTopGame } from '../types/game';
-import { ACHIEVEMENT_PLATFORM_COLORS } from '../utils/platformColors';
+import { ACHIEVEMENT_PLATFORM_COLORS, PLATFORM_TINT_FALLBACK } from '../utils/platformColors';
+import { formatDate } from '../utils/leaderboardFormat';
 import TimelineInfoModal from './TimelineInfoModal';
+import LeaderboardGameModal from './LeaderboardGameModal';
+import type { LeaderboardModalTarget } from './LeaderboardGameModal';
+import PlatformPill from './PlatformPill';
+import Thumb from './Thumb';
 
 const PLATFORM_ORDER = ['steam', 'psn', 'xbox', 'ra'] as const;
 const YEAR_BAR_HEIGHT = 90;
@@ -131,8 +137,9 @@ function YearRecap({
   const topGames: TimelineYearTopGame[] =
     metric === 'points' ? year.topGamesByScore : year.topGamesByCount;
   const [hero, ...rest] = topGames;
-  const { rarestAchievements } = year;
+  const { rarestAchievements, completions } = year;
   const gameValue = (g: TimelineYearTopGame) => (metric === 'points' ? fmtScore(g.score) : g.count);
+  const [modalTarget, setModalTarget] = useState<LeaderboardModalTarget | null>(null);
 
   // Matches the build script's UTC bucketing (see build-timeline.mjs)
   // so the cutoff lands on the same month boundary the data uses. Past
@@ -197,6 +204,57 @@ function YearRecap({
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Last in the recap, on purpose — its row count varies year to
+          year (zero completions some years, several others) more than
+          anything above it, so it's the block whose height changing is
+          least likely to shift something else. Above the rarest pulls,
+          every switch between a heavy and a light completions year
+          would've bounced that group up and down with it; here only
+          the bottom of the page moves. */}
+      {completions.length > 0 && (
+        <div className="stats-year-completions">
+          <span className="stats-year-completions-label">100% Completions</span>
+          <ol className="leaderboard-list">
+            {completions.map((c, i) => (
+              <li
+                key={`${c.platform}/${c.id}`}
+                className="leaderboard-row leaderboard-row--complete"
+                style={{ ['--row-index' as string]: i } as React.CSSProperties}
+                role="button"
+                tabIndex={0}
+                onClick={() => setModalTarget({ platform: c.platform, id: c.id, title: c.title })}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setModalTarget({ platform: c.platform, id: c.id, title: c.title });
+                  }
+                }}
+              >
+                <span
+                  className="leaderboard-row-art leaderboard-row-art--tint"
+                  style={
+                    {
+                      ['--row-tint' as string]: c.tint ?? PLATFORM_TINT_FALLBACK[c.platform] ?? '#6f7684',
+                    } as React.CSSProperties
+                  }
+                  aria-hidden="true"
+                />
+                <Thumb platform={c.platform} gameId={c.id} icon={c.icon} />
+                <div className="leaderboard-main">
+                  <div className="leaderboard-title">{c.title}</div>
+                  <div className="leaderboard-meta">
+                    <PlatformPill platform={c.platform} />
+                    <span className="leaderboard-completion leaderboard-completion--complete">✓ 100%</span>
+                  </div>
+                </div>
+                <span className="stats-year-completion-date">{formatDate(c.completedAt)}</span>
+              </li>
+            ))}
+          </ol>
+          <LeaderboardGameModal target={modalTarget} onClose={() => setModalTarget(null)} />
         </div>
       )}
     </div>
