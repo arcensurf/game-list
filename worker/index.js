@@ -36,7 +36,21 @@ const ALLOWED_PREFIXES = ['covers/', 'data/'];
 const IMMUTABLE_PREFIXES = ['covers/', 'data/xbox-icons/'];
 
 const IMMUTABLE = 'public, max-age=31536000, immutable';
-const REVALIDATE = 'public, max-age=300, stale-while-revalidate=86400';
+
+// No stale-while-revalidate here, deliberately. It used to carry
+// `stale-while-revalidate=86400`, which is the same 24 hours as the gap
+// between two nightly builds — so a browser that last loaded the site
+// yesterday held an entry inside the stale window, got served the
+// previous build's numbers on first paint, and only showed the new ones
+// after a second load. Checking the site the morning after a run meant
+// always reading yesterday's data.
+//
+// A stale-while-revalidate window only makes sense when it's well short
+// of the update interval. Without it, a day-old entry is simply stale
+// and revalidates before painting: one conditional request, answered
+// with a 304 and no body whenever nothing changed. The 5-minute
+// max-age still absorbs rapid reloads.
+const REVALIDATE = 'public, max-age=300';
 
 function cachePolicy(key) {
   return IMMUTABLE_PREFIXES.some((p) => key.startsWith(p)) ? IMMUTABLE : REVALIDATE;
