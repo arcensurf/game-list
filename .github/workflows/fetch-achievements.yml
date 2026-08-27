@@ -2,7 +2,10 @@ name: Fetch Achievements
 
 on:
   schedule:
-    - cron: '0 6 * * *' # Daily at 6am UTC
+    # Deliberately off the hour: GitHub dispatches `schedule` on best
+    # effort and drops events under load, and on-the-hour slots are the
+    # most contended. The 2026-08-27 run went missing at '0 6'.
+    - cron: '37 6 * * *' # Daily at 6:37am UTC
   workflow_dispatch: # Manual trigger
     inputs:
       # Only needed when shards exist but are stale in a way the
