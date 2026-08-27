@@ -139,14 +139,43 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  /* Grows rather than sitting at a fixed 20rem pushed right by an auto
-     margin. That margin was fine while the prompt shared the title's
-     line, but once the row wraps — which it does by about 500px — the
-     prompt is alone on its line and the margin still pushes it right,
-     stranding a 25px gutter to its left that lines up with nothing. A
-     terminal prompt should run the width of the frame it is in. */
+  /* Narrow default: grow to fill the line. Once the row wraps the prompt
+     is alone on its line, and a terminal prompt should run the width of
+     the frame it is in — an auto margin here would keep shoving it right
+     with nothing above to line up against, stranding a gutter to its
+     left. See the min-width query below for the unwrapped case.
+
+     The two cases genuinely disagree: sharing the title's line wants a
+     fixed box pushed right, having its own line wants a full-width one.
+     Flex alone can't tell those apart, which is why this is the one
+     width query in the file. */
   flex: 1 1 20rem;
   min-width: 8rem;
+}
+
+/* Above this the title row can't wrap, so the auto margin is safe and
+   the prompt returns to a fixed box on the right edge — stretching it
+   across the whole gap left of the edge reads as a stray rule rather
+   than a control. The bound is the row's own content, not a device: the
+   title, the info key and a 20rem prompt need ~515px of the 720px
+   measure (~587px in dev, which parks a lamp there too), and .app pads
+   1.5rem a side, so 40em of viewport leaves 592px to play with. */
+@media (min-width: 40em) {
+  .leaderboard-search-wrap {
+    /* Sized to land its left edge on the platform keys' left edge, so the
+       header reads as two columns: title over tabs, prompt over keys. The
+       trace under the prompt ignites at that edge and fades out before the
+       right one — that falloff is the device working as intended, but it
+       only reads as deliberate if the bright end starts on a rail. At
+       20rem the prompt began 67px left of the keys, lining up with
+       nothing, and the fade just looked like a rule running out of steam.
+
+       Tuned, not derived: the keys are intrinsically ~253px and CSS can't
+       read that width. Adding or removing a platform is what would drift
+       it, and the fix is to re-measure here. */
+    flex: 0 1 16rem;
+    margin-left: auto;
+  }
 }
 
 .leaderboard-search-wrap::before {
@@ -217,6 +246,24 @@
   padding: var(--space-1);
   max-height: 320px;
   overflow-y: auto;
+}
+
+/* Keeps the width the panel had before the prompt narrowed to line up
+   with the platform keys. Right-anchored and extending left instead of
+   tracking the wrap: the list is the one part of this control that wants
+   room — titles like "Mass Effect™: Andromeda Deluxe Edition" already
+   ellipsize at 20rem — and a panel need not match the width of the thing
+   that opened it. Below the query the prompt is full-width already, so
+   the base left/right rule is the right behaviour there.
+
+   Must sit after the base rule: a media query adds no specificity, so
+   with both at one class it is source order that decides. */
+@media (min-width: 40em) {
+  .leaderboard-search-dropdown {
+    left: auto;
+    right: 0;
+    width: 20rem;
+  }
 }
 
 .leaderboard-search-option {
