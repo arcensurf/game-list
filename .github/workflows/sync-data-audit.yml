@@ -1,0 +1,76 @@
+name: Sync Data Audit Trail
+
+# R2 is the only place games.json / overrides get written (the dev UI's
+# Publish button, or `npm run sync-data` for a scripted edit) — git never
+# does. This job's only job is to notice when R2 has moved and mirror it
+# into a commit, so there's a diffable history of the one thing in this
+# tree a person actually authors, without git ever being a write path
+# itself. See scripts/r2-pull.mjs / scripts/r2-sync.mjs for the publish
+# side of this.
+#
+# Split out from Build Site Data on purpose, same reasoning that split
+# predates it: "does git match R2" fails for none of the reasons a
+# leaderboard rebuild does, and shouldn't be able to block one.
+on:
+  workflow_run:
+    workflows: ['Fetch Achievements']
+    types: [completed]
+  workflow_dispatch: # Snapshot a Publish into the audit trail on demand
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Full data/ prefix, same as every other job that pulls — .gitignore
+      # is what keeps this safe. Only games.json and overrides/ are
+      # tracked; everything else (covers.json, achievements.json,
+      # leaderboard.json, timeline.json, cover-tints.json, shards) is
+      # git-ignored machine output, exactly the churn this repo already
+      # moved off git for. No --only needed: it can't be staged either way.
+      - name: Pull data from R2
+        run: node scripts/r2-pull.mjs data
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+
+      # Explicit paths, not `git add -A` — belt-and-suspenders on top of
+      # .gitignore rather than trusting it alone to keep derived data out
+      # of the commit.
+      - name: Check for changes
+        id: diff
+        run: |
+          if git status --porcelain -- public/data/games.json public/data/overrides | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "R2 matches git — nothing to audit"
+          fi
+
+      # [skip ci] so this commit doesn't trigger CI/Deploy, which both
+      # listen on an unconditioned push to main — this is an audit record,
+      # not a change that needs building or testing.
+      #
+      # Rebase-then-push rather than force: a push losing the race to a
+      # concurrent human commit is not an emergency. This is a rolling
+      # log, not a source of truth — R2 is unaffected either way, and the
+      # next run's diff just covers more ground.
+      - name: Commit and push
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/games.json public/data/overrides
+          git commit -m "Sync games.json/overrides from R2 [skip ci]"
+          git pull --rebase origin main
+          git push || echo "Push failed — will catch up on the next run"
