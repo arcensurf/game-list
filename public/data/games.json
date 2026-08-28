@@ -2077,7 +2077,8 @@
     "title": "Mass Effect",
     "subtitle": null,
     "platforms": [
-      "Xbox 360"
+      "Xbox 360",
+      "PC"
     ],
     "extras": [
       {
@@ -2091,7 +2092,11 @@
     "sgdbId": null,
     "coverOverride": null,
     "gameOfGames": null,
-    "order": 146
+    "order": 146,
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": "1297287144",
+    "ffxivLodestoneId": null
   },
   {
     "title": "Mass Effect 2",
