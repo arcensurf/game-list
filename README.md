@@ -79,15 +79,16 @@ to reach every line. Three shapes of test:
   TypeScript-side tests reach for.
 
   `fetch-achievements.mjs` is mostly API-shape adaptation, and the tests go after
-  the parts of it that can be wrong without anything failing loudly: the shard
-  cache (`writeShard` skipping a byte-identical rewrite, `currentShard`'s
-  earned/total comparison, `isRefreshDay` spreading the library across the week),
-  the sanitiser that turns an upstream ID into a path, `parseRarity` — normalizes
-  an upstream rarity value to a number or null, no rounding, since shards are
-  R2-only and never git-diffed — and the two joins that carry the most risk: Xbox's, which has to combine a definition list
+  the parts of it that can be wrong without anything failing loudly: `writeShard`
+  skipping a byte-identical rewrite, the sanitiser that turns an upstream ID into
+  a path, `parseRarity` — normalizes an upstream rarity value to a number or
+  null, no rounding, since shards are R2-only and never git-diffed — and the two
+  joins that carry the most risk: Xbox's, which has to combine a definition list
   and an earned-only list *without* crossing the legacy and modern id schemes, and
   the guard that refuses to write a shard contradicting the library counts it was
-  fetched against. Its `DATA_DIR` and `TOKEN_DIR` are pointed at scratch
+  fetched against. Every game's list is refetched every run now — no staleness
+  cache — since neither PSN's nor Xbox's real request budget is known to be a
+  problem. Its `DATA_DIR` and `TOKEN_DIR` are pointed at scratch
   directories before the import — the latter matters, since its default is the real
   `~/.game-list` where the live PSN and Xbox refresh tokens sit.
 - **The parity suite**, `test/parity.test.ts`. `normalizeTitle`, `achievementScore`
@@ -124,7 +125,7 @@ npm run build-leaderboard        # Rebuild leaderboard.json from the fetched dat
 npm run build-timeline           # Rebuild timeline.json from the fetched data
 ```
 
-The achievement sync normally runs on the daily cron (`fetch-achievements.yml`); you only need it locally for debugging. Manual runs take a **`force_refresh`** checkbox, which rebuilds every per-game shard instead of skipping games whose counts haven't moved — for when shards are stale in a way the normal checks can't see, such as a shard format change.
+The achievement sync normally runs on the daily cron (`fetch-achievements.yml`); you only need it locally for debugging. Every run refetches every game's list — there's no staleness cache to bypass.
 
 The token helpers save to `~/.game-list/` and copy the token to your clipboard for pasting into repo secrets.
 

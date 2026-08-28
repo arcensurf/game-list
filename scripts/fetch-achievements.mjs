@@ -111,49 +111,6 @@ export const parseRarity = (pct) => {
   return Number.isFinite(n) ? n : null;
 };
 
-// Trophy definitions effectively never change once a game ships, so a
-// game whose earned/total counts haven't moved doesn't need its list
-// pulled again — that's a real API call saved for PSN/Xbox/RA, where
-// the list call is the only way to get anything at all. Re-pulled
-// periodically anyway (not just on a real earned/total change) so a
-// game that's gone quiet still gets its rarity refreshed sometimes —
-// on a day derived from the game's own ID, so the library spreads
-// across the week instead of every stale game landing on the same
-// night. Pure function of ID and date, so it needs no persisted "last
-// checked" state. (Steam doesn't use this for rarity — see below.)
-const FORCE_REFRESH = process.env.FORCE_REFRESH === '1';
-const REFRESH_CYCLE_DAYS = 7;
-
-export function idHash(id) {
-  let h = 0;
-  for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return h;
-}
-
-// Pinned at module load, not read per call: a run that happens to
-// straddle midnight should refresh one consistent slice of the library,
-// not two different ones. `day` is a parameter only so tests can sweep
-// the cycle without moving the clock.
-const dayIndex = Math.floor(Date.now() / 86_400_000);
-export const isRefreshDay = (id, day = dayIndex) =>
-  idHash(id) % REFRESH_CYCLE_DAYS === day % REFRESH_CYCLE_DAYS;
-
-// PSN, Xbox and RA get earned/total free with the library/list call, so
-// a skipped game costs no request at all — that's what this guards.
-// Steam has to call GetPlayerAchievements per game regardless (that IS
-// where its counts come from) and no longer consults this at all for
-// rarity: Steam's rarity limit is 100k calls/day, far more than a
-// ~670-game library needs even fetched every run, so it just always
-// fetches fresh instead of reusing a stale cached value.
-// Returns the existing shard when it's still good, otherwise null.
-export function currentShard(platform, id, earned, total) {
-  if (FORCE_REFRESH) return null;
-  const shard = readShard(platform, id);
-  if (!shard || !Array.isArray(shard.achievements)) return null;
-  if (shard.earned !== earned || shard.total !== total) return null;
-  return isRefreshDay(id) ? null : shard;
-}
-
 // This script no longer does any game-list matching. It dumps each
 // platform's library (keyed by the platform's own ID) into
 // achievements.json, and the app resolves game → entry at render time
@@ -619,12 +576,11 @@ export const xboxTitleHasProgress = (title) =>
  * titleHub reports `totalAchievements: 0` for every sourceVersion:2
  * (2017+/current-gen) title on this account no matter the real progress.
  * When that happens, prefer whatever main()'s correction pass last wrote
- * — a real count that only moves if the title itself does, so
- * currentShard() can compare like with like and skip the refetch. A title
- * seen for the very first time has no prior, and falls back to the earned
+ * — a real count that only moves if the title itself does. A title seen
+ * for the very first time has no prior, and falls back to the earned
  * count purely as a bootstrap: nonzero is all that's needed to get past
- * syncShards' fetch gate, and the correction pass trues it up from the
- * shard once that first fetch lands.
+ * syncShards' `e.total > 0` fetch gate, and the correction pass trues it
+ * up from the shard once that first fetch lands.
  */
 export function resolveXboxTotal(achievement, priorTotal) {
   const totalUnreliable = !(achievement.totalAchievements > 0);
@@ -709,14 +665,12 @@ async function fetchXboxLibrary(existingXbox) {
     //
     // For the total, prefer whatever main() last corrected it to (see the
     // post-sync correction pass) — a real, stable achievement count that
-    // only changes if the title itself changes, so passing the same value
-    // back in lets currentShard() compare like with like and skip the
-    // refetch when nothing was actually earned. Only titles seen for the
+    // only changes if the title itself changes. Only titles seen for the
     // first time (nothing in last run's achievements.json yet) fall back
     // to currentAchievements as a bootstrap — nonzero is all that's
-    // needed to get past syncShards' fetch gate; main() corrects it to
-    // the real count (marked via totalUnreliable) once that first fetch
-    // returns the actual achievement list.
+    // needed to get past syncShards' `e.total > 0` fetch gate; main()
+    // corrects it to the real count (marked via totalUnreliable) once
+    // that first fetch returns the actual achievement list.
     // Drop apps/system tiles and anything with zero real progress.
     const live = allTitles.filter(xboxTitleHasProgress);
     const results = [];
@@ -927,10 +881,10 @@ async function fetchXboxAchievementList(titleId, expectedTotal) {
  * under a full total, which the app's weighted completion then reads as
  * 100%.
  *
- * Neither shape is self-healing: the header still matches what
- * currentShard() compares against, so the bad shard is treated as fresh
- * on every later run. The caller skips the write and keeps the last good
- * shard instead.
+ * The caller skips the write and keeps the last good shard instead — and
+ * since every game is refetched every run now (no staleness cache), a
+ * transient half-failure like this gets a real retry on the very next
+ * run rather than being stuck behind an unrelated progress change.
  *
  * An xbox entry flagged `totalUnreliable` carries a total titleHub never
  * supplied — a bootstrap guess (see resolveXboxTotal) that main()'s
@@ -945,17 +899,18 @@ export function listDisagreesWithLibrary(list, entry) {
   return list.length !== entry.total || listEarned !== entry.earned;
 }
 
-// Shared PSN/Xbox shard pass. Both platforms get earned/total free from
-// their library call, so a game whose counts haven't moved costs zero
-// requests here — the opposite of Steam, where the per-game call is the
-// only source of counts and can't be skipped.
+// Shared PSN/Xbox shard pass. Fetches every game with achievements every
+// run — no staleness cache. Neither platform's real request budget is
+// known, but there's no evidence either is anywhere near a problem, and
+// the old skip-when-unchanged behavior meant a game's own progress could
+// go up to a week stale for no confirmed reason.
 async function syncShards(platform, lib, fetchList, throttleMs) {
   console.log(`\nSyncing ${platform} achievement lists for ${lib.length} games...`);
-  let written = 0, fetched = 0, unchanged = 0, failed = 0, done = 0;
+  let written = 0, fetched = 0, failed = 0, done = 0;
   const short = [];
   for (const e of lib) {
     const id = String(e.platformId);
-    if (e.total > 0 && !currentShard(platform, id, e.earned, e.total)) {
+    if (e.total > 0) {
       const list = await fetchList(e);
       fetched++;
       if (list) {
@@ -977,10 +932,9 @@ async function syncShards(platform, lib, fetchList, throttleMs) {
             id,
             title: e.platformTitle,
             // Counts mirror achievements.json (i.e. the library response)
-            // rather than list.length, so the currentShard check always
-            // compares like with like — otherwise a one-off disagreement
-            // between the two endpoints would wedge a game into being
-            // refetched every single night.
+            // rather than list.length, so a one-off disagreement between
+            // the two endpoints is caught by listDisagreesWithLibrary
+            // above instead of silently writing a self-contradicting shard.
             earned: e.earned,
             total: e.total,
             achievements: list,
@@ -991,14 +945,12 @@ async function syncShards(platform, lib, fetchList, throttleMs) {
         failed++;
       }
       await delay(throttleMs);
-    } else if (e.total > 0) {
-      unchanged++;
     }
     done++;
     if (done % 50 === 0) console.log(`  ${platform}: ${done}/${lib.length}`);
   }
   const pruned = pruneShards(platform, lib.map((e) => String(e.platformId)));
-  console.log(`  ${platform} shards: ${written} written, ${fetched} fetched, ${unchanged} unchanged, ${failed} failed, ${pruned} pruned`);
+  console.log(`  ${platform} shards: ${written} written, ${fetched} fetched, ${failed} failed, ${pruned} pruned`);
   if (short.length > 0) {
     console.warn(`  ⚠ ${platform}: ${short.length} list(s) disagreed with the library counts and were not written (previous shard kept) — ${short.slice(0, 10).join(', ')}${short.length > 10 ? ', ...' : ''}`);
   }
@@ -1235,10 +1187,9 @@ async function main() {
       };
       await delay(300);
 
-      // Fetched every run, not gated behind currentShard — Steam's
-      // rarity limit is 100k calls/day, far more than this library
-      // costs even every night, so there's no reason to reuse a stale
-      // cached value here.
+      // Fetched every run, no staleness cache — Steam's rarity limit is
+      // 100k calls/day, far more than this library costs even every
+      // night, so there's no reason to reuse a stale cached value here.
       if (rows.length > 0) {
         const rarity = await fetchSteamGlobalRarity(e.platformId);
         steamShards.rarityCalls++;
@@ -1286,44 +1237,37 @@ async function main() {
   const raMap = {};
   if (fetchedPlatforms.has('ra')) {
     console.log(`\nSyncing RetroAchievements lists for ${raLib.length} games...`);
-    let written = 0, fetched = 0, unchanged = 0, failed = 0, iconCalls = 0, done = 0;
+    let written = 0, fetched = 0, failed = 0, iconCalls = 0, done = 0;
     for (const e of raLib) {
       const id = String(e.platformId);
       let icon = existing.ra?.[id]?.icon ?? null;
       const needsIcon = !icon;
-      const needsRefresh = !currentShard('ra', id, e.earned, e.total);
 
-      if (needsIcon || needsRefresh) {
-        try {
-          const game = await raCall('API_GetGameInfoAndUserProgress', { g: e.platformId });
-          if (game.ImageBoxArt) icon = `${RA_MEDIA_BASE}${game.ImageBoxArt}`;
-          if (needsIcon) iconCalls++;
+      try {
+        const game = await raCall('API_GetGameInfoAndUserProgress', { g: e.platformId });
+        if (game.ImageBoxArt) icon = `${RA_MEDIA_BASE}${game.ImageBoxArt}`;
+        if (needsIcon) iconCalls++;
 
-          if (needsRefresh) {
-            fetched++;
-            const rows = Object.values(game.Achievements ?? {});
-            if (rows.length > 0) {
-              const playersCasual = game.NumDistinctPlayersCasual ?? 0;
-              if (writeShard('ra', id, buildRaShard(e, rows, playersCasual))) written++;
-            } else {
-              failed++;
-            }
-          }
-        } catch (err) {
-          console.error(`  RetroAchievements: fetch failed for ${e.platformTitle} (${id})`, err.message);
-          if (needsRefresh) failed++;
+        fetched++;
+        const rows = Object.values(game.Achievements ?? {});
+        if (rows.length > 0) {
+          const playersCasual = game.NumDistinctPlayersCasual ?? 0;
+          if (writeShard('ra', id, buildRaShard(e, rows, playersCasual))) written++;
+        } else {
+          failed++;
         }
-        await delay(350);
-      } else {
-        unchanged++;
+      } catch (err) {
+        console.error(`  RetroAchievements: fetch failed for ${e.platformTitle} (${id})`, err.message);
+        failed++;
       }
+      await delay(350);
 
       raMap[id] = { title: e.platformTitle, earned: e.earned, total: e.total, icon };
       done++;
       if (done % 50 === 0) console.log(`  RetroAchievements: ${done}/${raLib.length}`);
     }
     const pruned = pruneShards('ra', raLib.map((e) => String(e.platformId)));
-    console.log(`  RetroAchievements shards: ${written} written, ${fetched} fetched, ${unchanged} unchanged, ${failed} failed, ${iconCalls} icon calls, ${pruned} pruned`);
+    console.log(`  RetroAchievements shards: ${written} written, ${fetched} fetched, ${failed} failed, ${iconCalls} icon calls, ${pruned} pruned`);
   }
 
   const achievements = {
@@ -1356,10 +1300,9 @@ async function main() {
     // above with a total titleHub didn't actually supply — carried
     // forward from last run's corrected value where we had one, or a
     // currentAchievements bootstrap the first time a title's seen — see
-    // the comment in fetchXboxLibrary. Now that syncShards has pulled
-    // the real achievement list (only for titles where earned count
-    // moved, thanks to that carried-forward total keeping the cache
-    // check honest), true the summary up and rewrite. A second small
+    // the comment in fetchXboxLibrary. syncShards just pulled every
+    // title's real achievement list (every run now, not just changed
+    // ones), so true the summary up from it and rewrite. A second small
     // write rather than reordering the pipeline, so a shard-fetch
     // failure still leaves the prior-known-good values on disk rather
     // than nothing.
@@ -1384,8 +1327,8 @@ async function main() {
         const earnedCount = shard.achievements.filter((a) => a.earned).length;
         achievements.xbox[id] = { ...achievements.xbox[id], earned: earnedCount, total };
         // Keep the shard's own counts in step with the corrected summary —
-        // syncShards wrote them as the bootstrap values, and currentShard()
-        // compares against achievements.json's total on the next run.
+        // syncShards wrote them as the bootstrap values, and the corrected
+        // total here becomes next run's `priorTotal` via achievements.json.
         writeShard('xbox', id, { ...shard, earned: earnedCount, total });
         corrected++;
       }

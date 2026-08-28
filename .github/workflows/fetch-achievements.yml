@@ -7,14 +7,6 @@ on:
     # most contended. The 2026-08-27 run went missing at '0 6'.
     - cron: '37 6 * * *' # Daily at 6:37am UTC
   workflow_dispatch: # Manual trigger
-    inputs:
-      # Only needed when shards exist but are stale in a way the
-      # unchanged/staggered-refresh checks won't catch — a shard format
-      # change, or wanting rarity current before the 7-day cycle.
-      force_refresh:
-        description: 'Re-pull every trophy list (slow)'
-        type: boolean
-        default: false
 
 permissions:
   # Read-only now: the run's output goes to R2, not to a branch. The
@@ -75,7 +67,6 @@ jobs:
           XBOX_REFRESH_TOKEN: ${{ secrets.XBOX_REFRESH_TOKEN }}
           RA_API_KEY: ${{ secrets.RA_API_KEY }}
           RA_USERNAME: ${{ secrets.RA_USERNAME }}
-          FORCE_REFRESH: ${{ inputs.force_refresh && '1' || '0' }}
 
       # FFXIV scrapes the Lodestone directly — no auth, just the
       # character ID (which is public anyway, but kept as a secret
@@ -374,11 +365,12 @@ jobs:
              `xbox: N list(s) disagreed with the library counts and were not written`
              — that means the shard write was refused.
           2. Look for the title's shard under
-             `public/data/achievements/xbox/<titleId>.json` on the `data`
-             branch. If it's absent, the fetch never produced a usable list.
-          3. Re-running the workflow with **force_refresh** re-pulls every
-             list and will repair the title if the underlying fetch now
-             succeeds.
+             `public/data/achievements/xbox/<titleId>.json` in the R2
+             bucket (`node scripts/r2-pull.mjs data` locally to inspect
+             it). If it's absent, the fetch never produced a usable list.
+          3. Every title's list is re-pulled every run now, so simply
+             re-running the workflow will repair the title if the
+             underlying fetch now succeeds.
           4. Close this issue once the next run reports the title corrected.
           EOF
 

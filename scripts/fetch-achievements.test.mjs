@@ -12,14 +12,10 @@ const DATA_DIR = mkdtempSync(join(tmpdir(), 'fetch-ach-data-'));
 const TOKEN_DIR = mkdtempSync(join(tmpdir(), 'fetch-ach-token-'));
 process.env.DATA_DIR = DATA_DIR;
 process.env.TOKEN_DIR = TOKEN_DIR;
-delete process.env.FORCE_REFRESH;
 
 const {
   buildRaShard,
   buildSteamShard,
-  currentShard,
-  idHash,
-  isRefreshDay,
   listDisagreesWithLibrary,
   mapXboxLegacy,
   mapXboxModern,
@@ -113,56 +109,6 @@ describe('parseRarity', () => {
   });
 });
 
-describe('idHash / isRefreshDay', () => {
-  it('hashes deterministically to a non-negative integer', () => {
-    expect(idHash('620')).toBe(idHash('620'));
-    expect(idHash('620')).toBeGreaterThanOrEqual(0);
-    expect(Number.isInteger(idHash('NPWR24281_00'))).toBe(true);
-  });
-
-  it('treats a number and its string form as the same ID', () => {
-    expect(idHash(620)).toBe(idHash('620'));
-  });
-
-  it('separates different IDs', () => {
-    expect(idHash('620')).not.toBe(idHash('621'));
-  });
-
-  it('puts every ID on exactly one day of the cycle', () => {
-    const id = 'NPWR24281_00';
-    const days = [0, 1, 2, 3, 4, 5, 6].filter((day) => isRefreshDay(id, day));
-    expect(days).toHaveLength(1);
-  });
-
-  it('repeats on a 7-day cycle', () => {
-    const id = '620';
-    for (let day = 0; day < 21; day++) {
-      expect(isRefreshDay(id, day)).toBe(isRefreshDay(id, day + 7));
-    }
-  });
-
-  // The point of hashing the ID is that a given night re-pulls ~1/7 of
-  // the library rather than landing all 670 games in one commit. Both
-  // shapes below are dense and sequential, the way a real Steam or PSN
-  // library is — the hash is linear in the ID's characters, so a sample
-  // strided by a multiple of 7 would land in one bucket by construction
-  // and prove nothing about a real library.
-  it.each([
-    ['steam appids', Array.from({ length: 700 }, (_, i) => String(10 + i))],
-    ['psn ids', Array.from({ length: 700 }, (_, i) => `NPWR${(10000 + i).toString().padStart(5, '0')}_00`)],
-  ])('spreads a realistic library of %s evenly across the week', (_label, ids) => {
-    const perDay = [0, 1, 2, 3, 4, 5, 6].map(
-      (day) => ids.filter((id) => isRefreshDay(id, day)).length,
-    );
-    expect(perDay.reduce((a, b) => a + b, 0)).toBe(ids.length);
-    const ideal = ids.length / 7;
-    for (const count of perDay) {
-      expect(count).toBeGreaterThan(ideal * 0.75);
-      expect(count).toBeLessThan(ideal * 1.25);
-    }
-  });
-});
-
 describe('writeShard / readShard', () => {
   const payload = { platform: 'steam', id: '620', title: 'Portal 2', earned: 1, total: 2, achievements: [] };
 
@@ -172,8 +118,8 @@ describe('writeShard / readShard', () => {
   });
 
   it('skips a rewrite when the bytes would be identical', () => {
-    // One played game must be a one-file diff, not 670 — the nightly
-    // commit is only proportional to what changed while this holds.
+    // One played game must be a one-file upload, not 670 — the nightly
+    // R2 sync is only proportional to what changed while this holds.
     writeShard('steam', '620', payload);
     expect(writeShard('steam', '620', { ...payload })).toBe(false);
   });
@@ -265,53 +211,6 @@ describe('pruneShards', () => {
     writeFileSync(resolve(shardsDir, 'steam', 'README.txt'), 'notes');
     pruneShards('steam', []);
     expect(existsSync(resolve(shardsDir, 'steam', 'README.txt'))).toBe(true);
-  });
-});
-
-describe('currentShard', () => {
-  // isRefreshDay is pinned to the day the module loaded, so pick IDs by
-  // what it actually reports rather than hardcoding one — otherwise these
-  // would pass six days a week and fail on the seventh.
-  const stableId = ['1', '2', '3', '4', '5', '6', '7', '8'].find((id) => !isRefreshDay(id));
-  const refreshId = ['1', '2', '3', '4', '5', '6', '7', '8'].find((id) => isRefreshDay(id));
-
-  const seed = (id, earned, total) =>
-    writeShard('steam', id, {
-      platform: 'steam',
-      id,
-      title: 'Test',
-      earned,
-      total,
-      achievements: [{ id: 'a', earned: earned > 0 }],
-    });
-
-  it('reuses a shard whose counts still match', () => {
-    seed(stableId, 1, 2);
-    expect(currentShard('steam', stableId, 1, 2)).not.toBeNull();
-  });
-
-  it('rejects a shard once the earned count has moved', () => {
-    seed(stableId, 1, 2);
-    expect(currentShard('steam', stableId, 2, 2)).toBeNull();
-  });
-
-  it('rejects a shard once the total has moved — new DLC', () => {
-    seed(stableId, 1, 2);
-    expect(currentShard('steam', stableId, 1, 5)).toBeNull();
-  });
-
-  it('rejects a shard on its scheduled refresh day, so rarity stays current', () => {
-    seed(refreshId, 1, 2);
-    expect(currentShard('steam', refreshId, 1, 2)).toBeNull();
-  });
-
-  it('rejects a missing shard', () => {
-    expect(currentShard('steam', stableId, 1, 2)).toBeNull();
-  });
-
-  it('rejects a shard with no achievements array', () => {
-    writeShard('steam', stableId, { platform: 'steam', id: stableId, earned: 1, total: 2 });
-    expect(currentShard('steam', stableId, 1, 2)).toBeNull();
   });
 });
 
@@ -553,8 +452,6 @@ describe('resolveXboxTotal', () => {
   });
 
   it('prefers last run\'s corrected total when titleHub reports zero', () => {
-    // Carrying the corrected value back in is what lets currentShard()
-    // compare like with like and skip a refetch when nothing was earned.
     expect(resolveXboxTotal({ totalAchievements: 0, currentAchievements: 19 }, 42)).toEqual({
       total: 42,
       totalUnreliable: true,
