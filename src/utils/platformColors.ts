@@ -88,5 +88,5 @@ const FAMILY_BY_COLOR: Record<string, (typeof PLATFORM_FAMILIES)[number]> = {
 
 export function getPlatformFamily(platform: string): (typeof PLATFORM_FAMILIES)[number] {
   const color = PLATFORM_COLORS[platform];
-  return (color && FAMILY_BY_COLOR[color]) ?? 'Other';
+  return FAMILY_BY_COLOR[color] ?? 'Other';
 }
