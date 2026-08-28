@@ -50,10 +50,11 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 //   public/data/achievements/psn/NPWR24281_00.json
 //   public/data/achievements/xbox/1234567890.json
 //
-// Sharding also keeps the nightly commit proportional to what actually
-// changed, but only while untouched games serialize byte-identically.
-// That's why nothing in a shard is a timestamp and writeShard skips
-// no-op writes — one played game should be a one-file diff, not 670.
+// Sharding also keeps the nightly R2 upload proportional to what
+// actually changed, but only while untouched games serialize
+// byte-identically. That's why nothing in a shard is a timestamp and
+// writeShard skips no-op writes — one played game should be a one-file
+// upload, not 670.
 const listsDir = resolve(dataDir, 'achievements');
 
 // Platform IDs are alphanumeric in practice (Steam appids, PSN
@@ -98,21 +99,28 @@ export function pruneShards(platform, keepIds) {
   return removed;
 }
 
-// Global unlock rates are stored to one decimal place. At full float
-// precision they drift a little every single night, which would rewrite
-// every shard on every run and undo the whole point of sharding.
-export const roundRarity = (pct) => {
+// Upstream rarity values come back as floats (or numeric strings, from
+// Steam) and occasionally as non-finite garbage — this just normalizes
+// to a real number or null, no rounding. Nothing downstream needs
+// coarser precision: shards are R2-only (never git-diffed) and R2's
+// sync already skips a shard whose bytes didn't change, so rounding
+// bought nothing but a wrong score for anything under ~0.05% rarity
+// (it used to floor to 0, which achievementScore treats as invalid).
+export const parseRarity = (pct) => {
   const n = typeof pct === 'string' ? Number.parseFloat(pct) : pct;
-  return Number.isFinite(n) ? Math.round(n * 10) / 10 : null;
+  return Number.isFinite(n) ? n : null;
 };
 
 // Trophy definitions effectively never change once a game ships, so a
 // game whose earned/total counts haven't moved doesn't need its list
-// pulled again. Rarity *does* drift, so shards still get re-pulled
-// periodically — on a day derived from the game's own ID, so the
-// library spreads across the week and a given night refreshes ~1/7 of
-// it rather than landing all 670 in one commit. Pure function of ID and
-// date, so it needs no persisted "last checked" state.
+// pulled again — that's a real API call saved for PSN/Xbox/RA, where
+// the list call is the only way to get anything at all. Re-pulled
+// periodically anyway (not just on a real earned/total change) so a
+// game that's gone quiet still gets its rarity refreshed sometimes —
+// on a day derived from the game's own ID, so the library spreads
+// across the week instead of every stale game landing on the same
+// night. Pure function of ID and date, so it needs no persisted "last
+// checked" state. (Steam doesn't use this for rarity — see below.)
 const FORCE_REFRESH = process.env.FORCE_REFRESH === '1';
 const REFRESH_CYCLE_DAYS = 7;
 
@@ -130,10 +138,13 @@ const dayIndex = Math.floor(Date.now() / 86_400_000);
 export const isRefreshDay = (id, day = dayIndex) =>
   idHash(id) % REFRESH_CYCLE_DAYS === day % REFRESH_CYCLE_DAYS;
 
-// PSN and Xbox get earned/total free with the library call, so a
-// skipped game costs no request at all. Steam has to call
-// GetPlayerAchievements per game regardless (that IS where its counts
-// come from), so there the check only gates the extra rarity call.
+// PSN, Xbox and RA get earned/total free with the library/list call, so
+// a skipped game costs no request at all — that's what this guards.
+// Steam has to call GetPlayerAchievements per game regardless (that IS
+// where its counts come from) and no longer consults this at all for
+// rarity: Steam's rarity limit is 100k calls/day, far more than a
+// ~670-game library needs even fetched every run, so it just always
+// fetches fresh instead of reusing a stale cached value.
 // Returns the existing shard when it's still good, otherwise null.
 export function currentShard(platform, id, earned, total) {
   if (FORCE_REFRESH) return null;
@@ -206,7 +217,7 @@ async function fetchSteamGlobalRarity(appId) {
     if (!res.ok) return new Map();
     const data = await res.json();
     const rows = data.achievementpercentages?.achievements ?? [];
-    return new Map(rows.map((r) => [r.name, roundRarity(r.percent)]));
+    return new Map(rows.map((r) => [r.name, parseRarity(r.percent)]));
   } catch {
     return new Map();
   }
@@ -392,7 +403,7 @@ export function mergePsnTrophies(defs, earnedRows) {
       type: d.trophyType ?? null,
       earned: e?.earned === true,
       earnedAt: e?.earnedDateTime ?? null,
-      rarity: roundRarity(e?.trophyEarnedRate),
+      rarity: parseRarity(e?.trophyEarnedRate),
     };
   });
 }
@@ -800,7 +811,7 @@ export const mapXboxModern = (a) => ({
   points: Number(a.rewards?.find((r) => r.type === 'Gamerscore')?.value) || null,
   earned: a.progressState === 'Achieved',
   earnedAt: xboxUnlockedAt(a.progression?.timeUnlocked),
-  rarity: roundRarity(a.rarity?.currentPercentage),
+  rarity: parseRarity(a.rarity?.currentPercentage),
 });
 
 /** An achievement row in the legacy (pre-2017/Xbox 360) contract shape. */
@@ -812,7 +823,7 @@ export const mapXboxLegacy = (a) => ({
   points: Number(a.gamerscore) || null,
   earned: a.unlocked === true,
   earnedAt: xboxUnlockedAt(a.timeUnlocked),
-  rarity: roundRarity(a.rarity?.currentPercentage), // v1 lacked this; v3 has it
+  rarity: parseRarity(a.rarity?.currentPercentage), // v1 lacked this; v3 has it
 });
 
 /**
@@ -1090,7 +1101,7 @@ export function buildRaShard(entry, rows, playersCasual) {
       // specific achievement — the same "Earned by X% of players"
       // semantic Steam's rarity carries, just computed from fields RA
       // already returns instead of a separate call.
-      rarity: playersCasual > 0 ? roundRarity((a.NumAwarded / playersCasual) * 100) : null,
+      rarity: playersCasual > 0 ? parseRarity((a.NumAwarded / playersCasual) * 100) : null,
     })),
   };
 }
@@ -1224,19 +1235,14 @@ async function main() {
       };
       await delay(300);
 
-      // The list itself came free with the call above, so the only
-      // thing worth skipping here is the extra rarity request — reuse
-      // the percentages already in the shard when nothing has moved.
+      // Fetched every run, not gated behind currentShard — Steam's
+      // rarity limit is 100k calls/day, far more than this library
+      // costs even every night, so there's no reason to reuse a stale
+      // cached value here.
       if (rows.length > 0) {
-        const reusable = currentShard('steam', id, earned, rows.length);
-        let rarity;
-        if (reusable) {
-          rarity = new Map(reusable.achievements.map((a) => [a.id, a.rarity ?? null]));
-        } else {
-          rarity = await fetchSteamGlobalRarity(e.platformId);
-          steamShards.rarityCalls++;
-          await delay(300);
-        }
+        const rarity = await fetchSteamGlobalRarity(e.platformId);
+        steamShards.rarityCalls++;
+        await delay(300);
         if (writeShard('steam', id, buildSteamShard(e, rows, rarity))) steamShards.written++;
       }
 

@@ -234,7 +234,7 @@ function YearRecap({
         <div className="stats-year-rarest-group">
           {rarestAchievements.map((r, i) => (
             <div key={i} className="stats-year-rarest">
-              <span className="stats-year-rarest-rarity">{r.rarity}%</span>
+              <span className="stats-year-rarest-rarity">{r.rarity.toFixed(1)}%</span>
               <div className="stats-year-rarest-body">
                 <span className="stats-year-rarest-label">{RAREST_LABELS[i] ?? 'Rarest Pull'}</span>
                 <span className="stats-year-rarest-name">{r.name}</span>

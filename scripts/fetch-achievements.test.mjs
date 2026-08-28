@@ -25,11 +25,11 @@ const {
   mapXboxModern,
   mergePsnTrophies,
   mergeXboxAchievements,
+  parseRarity,
   pruneShards,
   raTimestampToIso,
   readShard,
   resolveXboxTotal,
-  roundRarity,
   safeId,
   sumPsnTrophyCounts,
   writeShard,
@@ -77,38 +77,39 @@ describe('safeId', () => {
   });
 });
 
-describe('roundRarity', () => {
-  it('rounds to one decimal place', () => {
-    // Full float precision would drift nightly and rewrite every shard,
-    // which is the whole thing sharding exists to avoid.
-    expect(roundRarity(12.34567)).toBe(12.3);
-    expect(roundRarity(12.35)).toBe(12.4);
-    expect(roundRarity(0.04)).toBe(0);
+describe('parseRarity', () => {
+  it('keeps full float precision — no rounding', () => {
+    // Shards are R2-only (never git-diffed) and R2's sync already skips
+    // a shard whose bytes didn't change, so there's nothing left for
+    // rounding to protect — and it used to floor a genuine 0.04% rarity
+    // down to 0, which achievementScore treats as invalid.
+    expect(parseRarity(12.34567)).toBe(12.34567);
+    expect(parseRarity(0.04)).toBe(0.04);
   });
 
   it('parses the string percentages Steam returns', () => {
-    expect(roundRarity('45.6789')).toBe(45.7);
-    expect(roundRarity('100')).toBe(100);
+    expect(parseRarity('45.6789')).toBe(45.6789);
+    expect(parseRarity('100')).toBe(100);
   });
 
-  it('is idempotent — a rounded value survives another pass unchanged', () => {
-    for (const v of [0, 0.1, 12.3, 45.7, 99.9, 100]) {
-      expect(roundRarity(roundRarity(v))).toBe(roundRarity(v));
+  it('is idempotent', () => {
+    for (const v of [0, 0.1, 12.34567, 45.7, 99.9, 100]) {
+      expect(parseRarity(parseRarity(v))).toBe(parseRarity(v));
     }
   });
 
   it('returns null for anything unusable rather than NaN', () => {
-    expect(roundRarity(null)).toBeNull();
-    expect(roundRarity(undefined)).toBeNull();
-    expect(roundRarity('')).toBeNull();
-    expect(roundRarity('not a number')).toBeNull();
-    expect(roundRarity(Infinity)).toBeNull();
-    expect(roundRarity(NaN)).toBeNull();
+    expect(parseRarity(null)).toBeNull();
+    expect(parseRarity(undefined)).toBeNull();
+    expect(parseRarity('')).toBeNull();
+    expect(parseRarity('not a number')).toBeNull();
+    expect(parseRarity(Infinity)).toBeNull();
+    expect(parseRarity(NaN)).toBeNull();
   });
 
   it('keeps zero as zero, not null', () => {
-    expect(roundRarity(0)).toBe(0);
-    expect(roundRarity('0')).toBe(0);
+    expect(parseRarity(0)).toBe(0);
+    expect(parseRarity('0')).toBe(0);
   });
 });
 
@@ -427,7 +428,7 @@ describe('buildRaShard', () => {
 
   it('computes rarity as the share of players holding the achievement', () => {
     expect(buildRaShard(entry, [row({ NumAwarded: 25 })], 100).achievements[0].rarity).toBe(25);
-    expect(buildRaShard(entry, [row({ NumAwarded: 1 })], 3).achievements[0].rarity).toBe(33.3);
+    expect(buildRaShard(entry, [row({ NumAwarded: 1 })], 3).achievements[0].rarity).toBeCloseTo(33.333, 3);
   });
 
   it('nulls rarity when the player count is unknown, rather than dividing by zero', () => {
@@ -482,7 +483,7 @@ describe('mergePsnTrophies', () => {
       [{ trophyId: 2, earned: true, earnedDateTime: '2024-01-01T00:00:00Z', trophyEarnedRate: '3.4567' }],
     );
     expect(got[0]).toMatchObject({ id: '1', name: 'First Blood', earned: false, earnedAt: null, rarity: null });
-    expect(got[1]).toMatchObject({ id: '2', earned: true, earnedAt: '2024-01-01T00:00:00Z', rarity: 3.5 });
+    expect(got[1]).toMatchObject({ id: '2', earned: true, earnedAt: '2024-01-01T00:00:00Z', rarity: 3.4567 });
   });
 
   it('keeps every definition, in definition order', () => {
@@ -665,8 +666,8 @@ describe('mapXboxModern', () => {
     expect(mapXboxModern(row({ rewards: [{ type: 'Gamerscore', value: '0' }] })).points).toBeNull();
   });
 
-  it('rounds rarity and nulls it when absent', () => {
-    expect(mapXboxModern(row()).rarity).toBe(41.2);
+  it('carries rarity through and nulls it when absent', () => {
+    expect(mapXboxModern(row()).rarity).toBe(41.2345);
     expect(mapXboxModern(row({ rarity: undefined })).rarity).toBeNull();
   });
 
@@ -719,7 +720,7 @@ describe('mapXboxLegacy', () => {
   });
 
   it('carries the rarity that contract v3 added over v1', () => {
-    expect(mapXboxLegacy(row()).rarity).toBe(8.9);
+    expect(mapXboxLegacy(row()).rarity).toBe(8.88);
     expect(mapXboxLegacy(row({ rarity: undefined })).rarity).toBeNull();
   });
 });

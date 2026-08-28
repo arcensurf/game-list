@@ -210,7 +210,7 @@ export default function LeaderboardGameModal({
                     {/* Always present, so every row is the same height
                         whether or not it's been earned. */}
                     <div className="leaderboard-modal-meta">
-                      {a.rarity != null ? `${a.rarity}% of players` : 'rarity unknown'}
+                      {a.rarity != null ? `${a.rarity.toFixed(1)}% of players` : 'rarity unknown'}
                       {a.earned && a.earnedAt ? ` · earned ${formatDate(a.earnedAt)}` : ''}
                     </div>
                   </div>

@@ -481,7 +481,7 @@ export default function LeaderboardView({
                   </span>
                 </div>
               </div>
-              <span className="leaderboard-score">{a.rarity}%</span>
+              <span className="leaderboard-score">{a.rarity.toFixed(1)}%</span>
             </li>
           ))}
         </ol>

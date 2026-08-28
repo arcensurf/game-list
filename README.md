@@ -82,9 +82,9 @@ to reach every line. Three shapes of test:
   the parts of it that can be wrong without anything failing loudly: the shard
   cache (`writeShard` skipping a byte-identical rewrite, `currentShard`'s
   earned/total comparison, `isRefreshDay` spreading the library across the week),
-  the sanitiser that turns an upstream ID into a path, `roundRarity` — one decimal,
-  because full float precision would rewrite every shard nightly — and the two
-  joins that carry the most risk: Xbox's, which has to combine a definition list
+  the sanitiser that turns an upstream ID into a path, `parseRarity` — normalizes
+  an upstream rarity value to a number or null, no rounding, since shards are
+  R2-only and never git-diffed — and the two joins that carry the most risk: Xbox's, which has to combine a definition list
   and an earned-only list *without* crossing the legacy and modern id schemes, and
   the guard that refuses to write a shard contradicting the library counts it was
   fetched against. Its `DATA_DIR` and `TOKEN_DIR` are pointed at scratch

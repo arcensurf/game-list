@@ -155,7 +155,7 @@ function RarityNote({ rarity }: { rarity: number | null }) {
   const tier = rarity < 5 ? 'ultra' : rarity < 20 ? 'rare' : 'common';
   return (
     <span className={`picker-rarity picker-rarity--${tier}`}>
-      Earned by {rarity}% of players
+      Earned by {rarity.toFixed(1)}% of players
     </span>
   );
 }
