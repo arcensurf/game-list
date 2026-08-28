@@ -174,7 +174,7 @@ function YearRecap({
   const topGames: TimelineYearTopGame[] =
     metric === 'points' ? year.topGamesByScore : year.topGamesByCount;
   const [hero, ...rest] = topGames;
-  const { rarestAchievements, completions } = year;
+  const { rarestAchievements = [], completions = [] } = year;
   const gameValue = (g: TimelineYearTopGame) => (metric === 'points' ? fmtScore(g.score) : g.count);
   const [modalTarget, setModalTarget] = useState<LeaderboardModalTarget | null>(null);
   const [switchInfoOpen, setSwitchInfoOpen] = useState(false);
