@@ -1,0 +1,11 @@
+{
+  "platform": "steam",
+  "id": "3178350",
+  "title": "WARRIORS: Abyss",
+  "overrides": {
+    "ACHIEVEMENT_017": {
+      "status": "earned",
+      "at": "2026-09-12T19:00:54.334Z"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "platform": "steam",
+  "id": "389140",
+  "title": "Horizon Chase Turbo",
+  "overrides": {
+    "WinBySmallDifference": {
+      "status": "earned",
+      "at": "2026-09-12T19:15:07.852Z"
+    }
+  }
+}

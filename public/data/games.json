@@ -3386,5 +3386,22 @@
     "coverOverride": null,
     "gameOfGames": null,
     "order": 239
+  },
+  {
+    "title": "20 Small Mazes",
+    "subtitle": null,
+    "platforms": [
+      "PC"
+    ],
+    "extras": [],
+    "sgdbId": null,
+    "coverOverride": null,
+    "gameOfGames": null,
+    "order": 240,
+    "beatenAt": "2026-10-03",
+    "steamAppId": null,
+    "psnNpCommId": null,
+    "xboxTitleId": null,
+    "ffxivLodestoneId": null
   }
 ]
